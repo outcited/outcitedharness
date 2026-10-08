@@ -41,8 +41,8 @@
       ],
       "unsupported_claims": 0,
       "refusal_correct": null,
-      "latency_a_ms": 0.041,
-      "latency_b_ms": 0.795
+      "latency_a_ms": 0.021,
+      "latency_b_ms": 0.478
     },
     {
       "id": "Q2-high-current-30A",
@@ -148,8 +148,8 @@
       ],
       "unsupported_claims": 0,
       "refusal_correct": null,
-      "latency_a_ms": 0.007,
-      "latency_b_ms": 2.505
+      "latency_a_ms": 0.005,
+      "latency_b_ms": 1.74
     },
     {
       "id": "Q3-24to5-tradeoff",
@@ -171,8 +171,8 @@
       ],
       "unsupported_claims": 0,
       "refusal_correct": true,
-      "latency_a_ms": 0.01,
-      "latency_b_ms": 0.42
+      "latency_a_ms": 0.005,
+      "latency_b_ms": 0.399
     },
     {
       "id": "Q4-mode-and-fsw-differences",
@@ -249,8 +249,8 @@
       ],
       "unsupported_claims": 0,
       "refusal_correct": null,
-      "latency_a_ms": 0.006,
-      "latency_b_ms": 1.604
+      "latency_a_ms": 0.021,
+      "latency_b_ms": 1.636
     },
     {
       "id": "Q5-no-defensible-comparison",
@@ -275,8 +275,8 @@
       ],
       "unsupported_claims": 0,
       "refusal_correct": true,
-      "latency_a_ms": 0.01,
-      "latency_b_ms": 0.289
+      "latency_a_ms": 0.007,
+      "latency_b_ms": 0.254
     },
     {
       "id": "Q6-missing-evidence",
@@ -298,8 +298,8 @@
       "B_refusal_reasons": [],
       "unsupported_claims": 0,
       "refusal_correct": true,
-      "latency_a_ms": 0.029,
-      "latency_b_ms": 0.106
+      "latency_a_ms": 0.005,
+      "latency_b_ms": 0.098
     }
   ],
   "metrics": {
@@ -308,8 +308,8 @@
     "unsupported_claims_total": 0,
     "refusal_correct_on_no_comparison_cases": true,
     "traceability": "every comparable value carries provenance (asserted by gates)",
-    "latency_a_ms_total": 0.103,
-    "latency_b_ms_total": 5.719,
+    "latency_a_ms_total": 0.064,
+    "latency_b_ms_total": 4.605,
     "expert_shortlist_relevance": "PENDING independent review — not self-graded"
   },
   "denominators": {

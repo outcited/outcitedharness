@@ -168,7 +168,7 @@ def _find_frames(gray: np.ndarray) -> list[tuple[int, int, int, int]]:
         ):
             continue
         deduped.append(f)
-    return sorted(deduped, key=lambda f: (f[1], f[0]))[:60]
+    return sorted(deduped, key=lambda f: (f[1], f[0]))[:240]
 
 
 def _fit_axis(pairs: list[tuple[float, float]]) -> tuple[str, float, float,

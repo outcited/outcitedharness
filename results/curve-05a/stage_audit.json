@@ -1,0 +1,658 @@
+{
+  "schema": "harness.electronics-raster-stage-audit.v1",
+  "ground_truth": "frozen vector references, same page",
+  "runs": [
+    {
+      "dpi": 200,
+      "elapsed_s": 1.628,
+      "stage_yields": {
+        "1_detect": "6/6",
+        "2_axis": "4/6",
+        "3_series": "4/6",
+        "4_points": "4/6",
+        "5_condition_grounding": "text-layer only (raster lane)",
+        "6_qualification": "4/6"
+      },
+      "plots": [
+        {
+          "plot": "fig6-1",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": true,
+              "y_fit": true,
+              "ocr_words_x": 7,
+              "ocr_words_y": 9
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.893,
+            "p95": 38.464,
+            "max": 51.777,
+            "n": 1080
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-2",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 1
+            },
+            {
+              "x_fit": true,
+              "y_fit": true,
+              "ocr_words_x": 7,
+              "ocr_words_y": 3
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 4.656,
+            "p95": 18.374,
+            "max": 27.917,
+            "n": 1120
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-3",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": true,
+              "y_fit": true,
+              "ocr_words_x": 7,
+              "ocr_words_y": 9
+            },
+            {
+              "x_fit": true,
+              "y_fit": true,
+              "ocr_words_x": 7,
+              "ocr_words_y": 9
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.159,
+            "p95": 44.596,
+            "max": 62.899,
+            "n": 1077
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-4",
+          "1_detect": true,
+          "2_axis": false,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 2
+            },
+            {
+              "x_fit": true,
+              "y_fit": false,
+              "ocr_words_x": 7,
+              "ocr_words_y": 2
+            },
+            {
+              "x_fit": true,
+              "y_fit": false,
+              "ocr_words_x": 7,
+              "ocr_words_y": 1
+            }
+          ],
+          "3_series": null,
+          "4_points_error_pct": null,
+          "5_condition_grounding": "unsupported",
+          "6_qualification": "failed"
+        },
+        {
+          "plot": "fig6-5",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": true,
+              "y_fit": true,
+              "ocr_words_x": 7,
+              "ocr_words_y": 9
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 6.372,
+            "p95": 88.232,
+            "max": 115.519,
+            "n": 1082
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-6",
+          "1_detect": true,
+          "2_axis": false,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 2
+            },
+            {
+              "x_fit": true,
+              "y_fit": false,
+              "ocr_words_x": 7,
+              "ocr_words_y": 1
+            }
+          ],
+          "3_series": null,
+          "4_points_error_pct": null,
+          "5_condition_grounding": "unsupported",
+          "6_qualification": "failed"
+        }
+      ],
+      "finding": "200 DPI: frame+tick glyphs too small for stable OCR; 2 plots lost at the axis stage"
+    },
+    {
+      "dpi": 300,
+      "elapsed_s": 7.882,
+      "stage_yields": {
+        "1_detect": "6/6",
+        "2_axis": "5/6",
+        "3_series": "5/6",
+        "4_points": "5/6",
+        "5_condition_grounding": "text-layer only (raster lane)",
+        "6_qualification": "5/6"
+      },
+      "plots": [
+        {
+          "plot": "fig6-1",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.91,
+            "p95": 43.092,
+            "max": 50.679,
+            "n": 1624
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-2",
+          "1_detect": true,
+          "2_axis": false,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 2
+            }
+          ],
+          "3_series": null,
+          "4_points_error_pct": null,
+          "5_condition_grounding": "unsupported",
+          "6_qualification": "failed"
+        },
+        {
+          "plot": "fig6-3",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.11,
+            "p95": 49.94,
+            "max": 57.21,
+            "n": 1619
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-4",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.552,
+            "p95": 18.032,
+            "max": 22.423,
+            "n": 1678
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-5",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 6.062,
+            "p95": 98.364,
+            "max": 119.464,
+            "n": 1624
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-6",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 2
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 4.258,
+            "p95": 17.017,
+            "max": 19.63,
+            "n": 1681
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        }
+      ],
+      "finding": "300 DPI: operating point \u2014 5/6 through all stages; the missing plot fails on single-digit y tick labels (OCR), not detection"
+    },
+    {
+      "dpi": 600,
+      "elapsed_s": 34.924,
+      "stage_yields": {
+        "1_detect": "6/6",
+        "2_axis": "5/6",
+        "3_series": "5/6",
+        "4_points": "5/6",
+        "5_condition_grounding": "text-layer only (raster lane)",
+        "6_qualification": "5/6"
+      },
+      "plots": [
+        {
+          "plot": "fig6-1",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.752,
+            "p95": 41.006,
+            "max": 49.136,
+            "n": 3246
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-2",
+          "1_detect": true,
+          "2_axis": false,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": null,
+          "4_points_error_pct": null,
+          "5_condition_grounding": "unsupported",
+          "6_qualification": "failed"
+        },
+        {
+          "plot": "fig6-3",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.072,
+            "p95": 47.525,
+            "max": 55.589,
+            "n": 3238
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-4",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 1,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 3.485,
+            "p95": 17.721,
+            "max": 21.391,
+            "n": 3351
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-5",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 6.104,
+            "p95": 93.751,
+            "max": 109.336,
+            "n": 3242
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        },
+        {
+          "plot": "fig6-6",
+          "1_detect": true,
+          "2_axis": true,
+          "axis_detail": [
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            },
+            {
+              "x_fit": false,
+              "y_fit": false,
+              "ocr_words_x": 0,
+              "ocr_words_y": 0
+            }
+          ],
+          "3_series": {
+            "traces_clustered": 2,
+            "reference_series": 4,
+            "note": "saturation-based clustering recovers colored traces only; black traces are a known gap"
+          },
+          "4_points_error_pct": {
+            "median": 4.046,
+            "p95": 16.866,
+            "max": 19.276,
+            "n": 3359
+          },
+          "5_condition_grounding": "text_layer_only",
+          "6_qualification": "packet_buildable"
+        }
+      ],
+      "finding": "600 DPI: after the CURVE-05A frame-cap fix, recovery equals 300 DPI (the CURVE-04 '600 loses plots' result was a detector artifact: the [:60] candidate cap cut bottom-of-page frames); accuracy parity at 4.6x compute \u2014 300 DPI stays the operating point, 600 DPI crops reserved for disputed figures"
+    }
+  ],
+  "hybrid_note": "300-DPI whole-page detection + selective 600-DPI crops of disputed figures is the recommended pipeline; stage yields above justify it"
+}

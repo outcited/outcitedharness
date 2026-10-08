@@ -1,0 +1,76 @@
+{
+  "schema": "harness.electronics-cold-review-summary.v1",
+  "vector_series_packets": 81,
+  "infineon_raster": {
+    "status": "partial_raster_recovery",
+    "document_sha256": "14cc7b1af8ba7af289f7bf24d7fda16449a743f3eb611c2502899e36f32e7478",
+    "page_1based": 18,
+    "manufacturer": "infineon",
+    "device_family": "TLS4125D0EPV50",
+    "conditions_page_verbatim": [
+      "FREQ: 2.2 MHz; VVS = 13.5 V; Tj = 25°C (if not otherwise specified). The shown performance characteristics was",
+      "FREQ: 440 kHz; Tj = 25°C",
+      "FREQ: 440 kHz; Tj = 25°C",
+      "FREQ: 2.2 MHz; Tj = 25°C"
+    ],
+    "plots": [
+      {
+        "figure_index": 1,
+        "bbox_page_px": [
+          1442,
+          922,
+          2134,
+          1786
+        ],
+        "series_count": 1,
+        "raster_quality": {
+          "dpi": 300,
+          "x_fit_residual_fraction": 0.000921,
+          "y_fit_residual_fraction": 0.001198,
+          "traces": 1,
+          "y_uncertainty_px": 1.5,
+          "render": {
+            "path": "/Users/samkim/Harnessv1-curve04/results/curve-05a/cold-review/renders/14cc7b1af8ba7af2-p18-300.png",
+            "sha256": "9754e7d18d5acbe06c01e7510c49d204d79ec9fb313b7313d2aea32fec6bfe25"
+          }
+        }
+      },
+      {
+        "figure_index": 2,
+        "bbox_page_px": [
+          1442,
+          2172,
+          2134,
+          3036
+        ],
+        "series_count": 1,
+        "raster_quality": {
+          "dpi": 300,
+          "x_fit_residual_fraction": 0.000921,
+          "y_fit_residual_fraction": 0.001198,
+          "traces": 1,
+          "y_uncertainty_px": 1.5,
+          "render": {
+            "path": "/Users/samkim/Harnessv1-curve04/results/curve-05a/cold-review/renders/14cc7b1af8ba7af2-p18-300.png",
+            "sha256": "9754e7d18d5acbe06c01e7510c49d204d79ec9fb313b7313d2aea32fec6bfe25"
+          }
+        }
+      }
+    ],
+    "note": "raster lane output; series names unbound (legend OCR pending); machine reference only"
+  },
+  "coverage": {
+    "independent_power_plots": 42,
+    "device_families": 12,
+    "manufacturers": [
+      "texas_instruments",
+      "vishay",
+      "infineon"
+    ],
+    "independent_review_status": "pending — no simulated approval"
+  },
+  "laws": [
+    "reviewer sees render + printed conditions before the sealed extraction",
+    "approval only through the adjudication ledger by a named reviewer"
+  ]
+}

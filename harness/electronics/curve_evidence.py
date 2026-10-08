@@ -1030,6 +1030,15 @@ def compare_at_operating_point(
                 unpinned.setdefault(f"categorical.{key}", [])
                 if value not in unpinned[f"categorical.{key}"]:
                     unpinned[f"categorical.{key}"].append(value)
+        # legend-split numeric dimensions (e.g. "600 kHz" series names)
+        # are printed conditions the engineer did not pin
+        name = str(curve.series.get("name") or "")
+        m = re.match(r"^\s*(\d+(?:\.\d+)?)\s*(kHz|MHz|Hz)\b", name, re.I)
+        if m and "f_hz" not in dict(required_conditions or {}):
+            value = f"{m.group(1)} {m.group(2)}"
+            unpinned.setdefault("legend_frequency", [])
+            if value not in unpinned["legend_frequency"]:
+                unpinned["legend_frequency"].append(value)
     return {
         "schema": CURVE_EVIDENCE_SCHEMA,
         "kind": "comparison_at_operating_point",
