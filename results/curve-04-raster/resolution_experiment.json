@@ -1,0 +1,438 @@
+{
+  "schema": "harness.electronics-raster-resolution-experiment.v1",
+  "ground_truth": "vector references (tps548c26_p10.json); tick-fit residual ~0.01% of span; same-page comparison",
+  "dpi_runs": [
+    {
+      "dpi": 200,
+      "elapsed_s": 1.83,
+      "extract_elapsed_s": 1.828,
+      "reference_plots": 6,
+      "plots_recovered": 4,
+      "plots_paired_by_bbox": 4,
+      "series_paired": 8,
+      "reference_series": 24,
+      "points_compared": 474,
+      "y_error_pct_median": 2.3479,
+      "y_error_pct_p95": 34.5205,
+      "y_error_pct_max": 112.0593,
+      "refusals": [
+        {
+          "figure_index": 5,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 0,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 6,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 7,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 8,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 7,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 10,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 7,
+          "ocr_words_y": 1
+        }
+      ]
+    },
+    {
+      "dpi": 300,
+      "elapsed_s": 8.24,
+      "extract_elapsed_s": 8.238,
+      "reference_plots": 6,
+      "plots_recovered": 5,
+      "plots_paired_by_bbox": 5,
+      "series_paired": 10,
+      "reference_series": 24,
+      "points_compared": 593,
+      "y_error_pct_median": 1.9082,
+      "y_error_pct_p95": 18.4218,
+      "y_error_pct_max": 116.0694,
+      "refusals": [
+        {
+          "figure_index": 5,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 4,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 21,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 7,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 26,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 1,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 19,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 6,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 25,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 41,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 0,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 18,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 36,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        }
+      ]
+    },
+    {
+      "dpi": 600,
+      "elapsed_s": 13.73,
+      "extract_elapsed_s": 13.726,
+      "reference_plots": 6,
+      "plots_recovered": 2,
+      "plots_paired_by_bbox": 2,
+      "series_paired": 4,
+      "reference_series": 24,
+      "points_compared": 237,
+      "y_error_pct_median": 1.4476,
+      "y_error_pct_p95": 44.1402,
+      "y_error_pct_max": 51.9682,
+      "refusals": [
+        {
+          "figure_index": 5,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 4,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 51,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 7,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 1,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 49,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 6,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 0,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 48,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 1,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 24,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 35,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 28,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 43,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 38,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 23,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 3,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 29,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 45,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 22,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 34,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 3,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 39,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 27,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 3,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 21,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 2,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 30,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 4,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 33,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 20,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 42,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 3,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 46,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 5,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 26,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 19,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 2
+        },
+        {
+          "figure_index": 37,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 3,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 32,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 2,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 40,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 4,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 36,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 31,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 25,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 0
+        },
+        {
+          "figure_index": 18,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 0,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 44,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 3,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 41,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 2,
+          "ocr_words_y": 1
+        },
+        {
+          "figure_index": 47,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 4,
+          "ocr_words_y": 1
+        }
+      ]
+    }
+  ],
+  "tls4125d0epv_p18": [
+    {
+      "dpi": 300,
+      "status": "extracted",
+      "plots": 2,
+      "refusals": [
+        {
+          "figure_index": 0,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 4,
+          "ocr_words_y": 9
+        }
+      ],
+      "elapsed_s": 0.705,
+      "document_sha256": "14cc7b1af8ba7af289f7bf24d7fda16449a743f3eb611c2502899e36f32e7478"
+    },
+    {
+      "dpi": 600,
+      "status": "extracted",
+      "plots": 2,
+      "refusals": [
+        {
+          "figure_index": 1,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 4,
+          "ocr_words_y": 8
+        },
+        {
+          "figure_index": 3,
+          "reason": "tick_labels_low_confidence_or_unreadable",
+          "ocr_words_x": 4,
+          "ocr_words_y": 7
+        }
+      ],
+      "elapsed_s": 1.709,
+      "document_sha256": "14cc7b1af8ba7af289f7bf24d7fda16449a743f3eb611c2502899e36f32e7478"
+    }
+  ],
+  "laws": [
+    "higher DPI is not assumed better; the table is the verdict",
+    "raster outputs are machine references only \u2014 adjudication gates apply identically to vector outputs"
+  ]
+}

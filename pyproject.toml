@@ -28,6 +28,12 @@ dev = [
 vision = [
     "pymupdf>=1.26",
 ]
+raster = [
+    "pymupdf>=1.26",
+    "numpy>=2.0",
+    "pillow>=10.0",
+    "pytesseract>=0.3",
+]
 
 [project.scripts]
 harness = "harness.cli:app"

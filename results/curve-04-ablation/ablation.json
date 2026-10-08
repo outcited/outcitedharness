@@ -1,0 +1,322 @@
+{
+  "schema": "harness.electronics-curve-ablation.v1",
+  "configurations": {
+    "A": "parametric-only (frozen cohort, quoted title facts)",
+    "B": "A + flag-gated curve retrieval under CURVE-02 laws"
+  },
+  "index_stats": {
+    "indexed": 59,
+    "provenance_refused": 0,
+    "no_relevance": 22
+  },
+  "questions": [
+    {
+      "id": "Q1-light-load-efficiency",
+      "description": "light-load buck efficiency at 12 V in, 3.3 V out",
+      "A_eligible": {
+        "TPS548C26": "PASS",
+        "LMR33610": "PASS",
+        "LMR36502": "PASS",
+        "TPS563203": "PASS",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "PASS",
+        "SiC461-464": "UNKNOWN"
+      },
+      "A_eligible_count": 5,
+      "A_unknown_count": 2,
+      "B_comparable": 1,
+      "B_values": [
+        {
+          "part": "LMR36502",
+          "value": 84.77356601260028,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-af915a30a3152c0dd49141e9b192285c"
+        }
+      ],
+      "B_refusals": 19,
+      "B_refusal_reasons": [
+        "condition_conflict",
+        "condition_mismatch"
+      ],
+      "unsupported_claims": 0,
+      "refusal_correct": null,
+      "latency_a_ms": 0.041,
+      "latency_b_ms": 0.795
+    },
+    {
+      "id": "Q2-high-current-30A",
+      "description": "high-current buck performance around 30 A (12 V -> 1.1 V)",
+      "A_eligible": {
+        "TPS548C26": "PASS",
+        "TPS542941": "UNKNOWN",
+        "SiC461-464": "UNKNOWN"
+      },
+      "A_eligible_count": 1,
+      "A_unknown_count": 2,
+      "B_comparable": 12,
+      "B_values": [
+        {
+          "part": "TPS548C26",
+          "value": 85.66070192400292,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-8ff87c61e3c2aaefec5f02feb5aac6dc"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 82.25763179053226,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-5d4987051e5f1d3fe0b57209e195629a"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 83.95534654418941,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-3a1453f3a76cb747f0eda8c55cd6dae1"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 85.28311065739831,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-45dfa68a3b1ebbd560db11027d6a7d0b"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 87.85654754766931,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-b620887713e5dd87d43186b0d6ce6f2d"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 85.91376142424336,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-0140731a6d181c4e874b932de4f91e6f"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 87.2257326616507,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-6ed828ea26cf5364aec942dfd4b7821c"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 88.17496542713593,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-01a67edb2cd36f1a75d7c9f5df0a5e43"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 87.87823460822554,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-6245945fec4898d725d049ca2a64e2e2"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 85.91279942713592,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-0b92caee20cfe848390ec2e17b2b1b21"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 87.24754842424336,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-86af295dd7cab8ac16970f9bf6c2cf18"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 88.19680512030689,
+          "unit": "%",
+          "match": "interpolated",
+          "curve_id": "curve-e88e7d739df90930bcf9c2501e12d956"
+        }
+      ],
+      "B_refusals": 8,
+      "B_refusal_reasons": [
+        "condition_conflict",
+        "condition_mismatch"
+      ],
+      "unsupported_claims": 0,
+      "refusal_correct": null,
+      "latency_a_ms": 0.007,
+      "latency_b_ms": 2.505
+    },
+    {
+      "id": "Q3-24to5-tradeoff",
+      "description": "24 V to 5 V conversion at 1 A",
+      "A_eligible": {
+        "LMR33610": "PASS",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "PASS",
+        "SiC461-464": "UNKNOWN"
+      },
+      "A_eligible_count": 2,
+      "A_unknown_count": 2,
+      "B_comparable": 0,
+      "B_values": [],
+      "B_refusals": 20,
+      "B_refusal_reasons": [
+        "condition_conflict",
+        "condition_mismatch"
+      ],
+      "unsupported_claims": 0,
+      "refusal_correct": true,
+      "latency_a_ms": 0.01,
+      "latency_b_ms": 0.42
+    },
+    {
+      "id": "Q4-mode-and-fsw-differences",
+      "description": "switching-frequency and operating-mode differences at 30 A (FCCM vs DCM, 600 kHz vs 1.2 MHz)",
+      "A_eligible": {
+        "TPS548C26": "PASS",
+        "TPS542941": "UNKNOWN",
+        "SiC461-464": "UNKNOWN"
+      },
+      "A_eligible_count": 1,
+      "A_unknown_count": 2,
+      "B_comparable": 8,
+      "B_values": [
+        {
+          "part": "TPS548C26",
+          "value": 5.385951616059444,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-863312be3ffacb7e8647bac94410d574"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 6.9444619559429785,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-b5688c27e31a85b457f38dcb699e8b3f"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 6.149398116795321,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-186cc4bf177a85556df222e65848bffb"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 5.5515155181380225,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-693de5b989eb820ce55115eb2b0c1648"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 4.437840187737243,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-680405535416cb818ea172e13dd0b73a"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 5.280763701027838,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-1af3f5ed2db8fa1f5dee509a9b233577"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 4.702040985964566,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-74f91e3fa6ea1dfd391cde6310a306c3"
+        },
+        {
+          "part": "TPS548C26",
+          "value": 4.303914389391423,
+          "unit": "W",
+          "match": "interpolated",
+          "curve_id": "curve-ff774947a3b1c41459b87063d4d42f52"
+        }
+      ],
+      "B_refusals": 4,
+      "B_refusal_reasons": [
+        "condition_mismatch"
+      ],
+      "unsupported_claims": 0,
+      "refusal_correct": null,
+      "latency_a_ms": 0.006,
+      "latency_b_ms": 1.604
+    },
+    {
+      "id": "Q5-no-defensible-comparison",
+      "description": "efficiency at 85 C ambient on the supply-current corpus — no curve measured there; refusal is the correct answer",
+      "A_eligible": {
+        "TPS548C26": "PASS",
+        "LMR33610": "PASS",
+        "LMR36502": "PASS",
+        "TPS563203": "PASS",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "PASS",
+        "SiC461-464": "UNKNOWN"
+      },
+      "A_eligible_count": 5,
+      "A_unknown_count": 2,
+      "B_comparable": 0,
+      "B_values": [],
+      "B_refusals": 14,
+      "B_refusal_reasons": [
+        "condition_conflict",
+        "condition_mismatch"
+      ],
+      "unsupported_claims": 0,
+      "refusal_correct": true,
+      "latency_a_ms": 0.01,
+      "latency_b_ms": 0.289
+    },
+    {
+      "id": "Q6-missing-evidence",
+      "description": "TPS542941 efficiency — family with curves in the corpus but none for this quantity; eligibility must stay UNKNOWN/PASS, evidence 'missing'",
+      "A_eligible": {
+        "TPS548C26": "PASS",
+        "LMR33610": "PASS",
+        "LMR36502": "PASS",
+        "TPS563203": "PASS",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "PASS",
+        "SiC461-464": "UNKNOWN"
+      },
+      "A_eligible_count": 5,
+      "A_unknown_count": 2,
+      "B_comparable": 0,
+      "B_values": [],
+      "B_refusals": 0,
+      "B_refusal_reasons": [],
+      "unsupported_claims": 0,
+      "refusal_correct": true,
+      "latency_a_ms": 0.029,
+      "latency_b_ms": 0.106
+    }
+  ],
+  "metrics": {
+    "candidate_recall_A_equals_B": true,
+    "false_eliminations_curve": 0,
+    "unsupported_claims_total": 0,
+    "refusal_correct_on_no_comparison_cases": true,
+    "traceability": "every comparable value carries provenance (asserted by gates)",
+    "latency_a_ms_total": 0.103,
+    "latency_b_ms_total": 5.719,
+    "expert_shortlist_relevance": "PENDING independent review — not self-graded"
+  },
+  "denominators": {
+    "questions": 6,
+    "cohort_families": 8,
+    "indexed_curves": 59,
+    "refusal_cases": 3,
+    "note": "coverage failures stay visible: Q3/Q6 count 0 comparable in the numerator with the full eligible cohort in the denominator"
+  }
+}

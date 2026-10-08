@@ -1,0 +1,76 @@
+{
+  "schema": "harness.electronics-curve-challenge-manifest.v2",
+  "source": "CURVE-04 R2 challenge acquisition. Vault inspected first (all corpus-delivery manifests, datasheet_cache, datasheet_text_cache); network acquisition attempted with recorded timestamps. Failed acquisitions are coverage gaps, not extractions.",
+  "acquisition_attempts": [
+    {
+      "device": "LT8292",
+      "manufacturer": "analog_devices",
+      "priority": 1,
+      "reason_wanted": "logarithmic-axis validation (buck/buck-boost/boost, three modes)",
+      "attempted_url": "https://www.analog.com/media/en/technical-documentation/data-sheets/LT8292.pdf",
+      "attempted_at": "2026-10-08T20:00:00Z",
+      "outcome": "acquisition_failed",
+      "failure_reason": "network egress filtered: analog.com unreachable from this environment (curl 000, no bytes); tesseract/network available for retry elsewhere",
+      "document_sha256": null,
+      "status": "coverage_gap"
+    },
+    {
+      "device": "IR3883",
+      "manufacturer": "infineon",
+      "priority": 2,
+      "reason_wanted": "FCCM vs diode-emulation efficiency + power loss, multi-VOUT",
+      "attempted_url": "https://www.infineon.com/dgdl/ir3883.pdf",
+      "attempted_at": "2026-10-08T20:00:00Z",
+      "outcome": "acquisition_failed",
+      "failure_reason": "infineon.com returns CloudFront bot challenge (HTTP 202, zero bytes) for non-browser agents; document not in vault",
+      "document_sha256": null,
+      "status": "coverage_gap"
+    },
+    {
+      "device": "IR3447",
+      "manufacturer": "infineon",
+      "priority": 3,
+      "reason_wanted": "efficiency and power loss over 0-25 A",
+      "attempted_url": "https://www.infineon.com/dgdl/ir3447.pdf",
+      "attempted_at": "2026-10-08T20:00:00Z",
+      "outcome": "acquisition_failed",
+      "failure_reason": "same CloudFront 202 bot challenge; not in vault",
+      "document_sha256": null,
+      "status": "coverage_gap"
+    },
+    {
+      "device": "ADP5003",
+      "manufacturer": "analog_devices",
+      "priority": 4,
+      "reason_wanted": "buck + adaptive-mode efficiency, VIN/VOUT/fsw variations",
+      "attempted_url": "https://www.analog.com/media/en/technical-documentation/data-sheets/ADP5003.pdf",
+      "attempted_at": "2026-10-08T20:00:00Z",
+      "outcome": "acquisition_failed",
+      "failure_reason": "analog.com unreachable (curl 000); not in vault",
+      "document_sha256": null,
+      "status": "coverage_gap"
+    },
+    {
+      "device": "TLS4125D0EPV",
+      "manufacturer": "infineon",
+      "priority": 5,
+      "reason_wanted": "raster-specific recovery (log + linear axes, 440 kHz vs 2.2 MHz, 12 V/18 V legends)",
+      "held": true,
+      "document_sha256": "14cc7b1af8ba7af289f7bf24d7fda16449a743f3eb611c2502899e36f32e7478",
+      "vault_ref": "datasheet-tail-20261007/blobs/14/cc/14cc7b1af8ba7af289f7bf24d7fda16449a743f3eb611c2502899e36f32e7478.pdf",
+      "revision": "Rev 1.03, 2024-12-27 (v50 variant sha c660412244f6accec05ed566c4764acb3ef15d1d54f8a3f85f2f7d7793aad30e also held)",
+      "page": 18,
+      "vector_extraction": {
+        "outcome": "refused",
+        "reason": "raster_plots: 3 drawings on the page; curves and ticks are images; titles/conditions in the text layer"
+      },
+      "raster_extraction": {
+        "dpi_300": {"plots_recovered": 2, "status": "partial_recovery"},
+        "dpi_600": {"plots_recovered": 2, "status": "partial_recovery"},
+        "note": "page prints four efficiency plots; two recover with coherent ticks, the rest refuse on tick-label confidence"
+      },
+      "status": "partial_raster_recovery_machine_reference_only"
+    }
+  ],
+  "refusal_ledger_note": "Every refusal carries a machine-checkable reason; raster outputs enter the same adjudication workflow as vector references and start at machine_verified — never human gold."
+}
