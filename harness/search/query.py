@@ -29,6 +29,13 @@ from harness.search.expand import axis_queries, expand_intent
 
 RESPONSE_SCHEMA = "harness.search-response.v1"
 
+# Ranking-policy identity: part of the retrieval release fingerprint. Change
+# the policy -> change this string -> the release id changes. A changed
+# ranking system must never silently keep the same retrieval identity.
+RANKING_POLICY = ("hybrid-v1(sem=0.50,text=0.35,ident=0.35,"
+                  "boosts=coverage/state/family,aux=expand4,"
+                  "vector=brutefloat32-numpy-v1)")
+
 # Fusion weights (documented contract; benchmark may tune but never silently)
 W_SEMANTIC = 0.5
 W_TEXT = 0.35
@@ -99,17 +106,34 @@ def _fts_scores(con: sqlite3.Connection, match: str, table: str,
 
 def _vector_scores(con: sqlite3.Connection, query_vector: Sequence[float],
                    limit: int) -> dict[str, float]:
+    """Cosine over ALL indexed vectors — never restricted to FTS candidates
+    (vocabulary mismatch is precisely what this path solves). numpy matrix
+    path when available; pure-Python fallback otherwise."""
     rows = con.execute(
         "SELECT v.unit_id, v.vec FROM vectors v JOIN units u ON"
         " u.unit_id = v.unit_id AND u.retired=0").fetchall()
-    scored = []
-    for row in rows:
-        cos = units_store.cosine(query_vector,
-                                 units_store.unpack_vector(row["vec"]))
-        if cos > 0.0:
-            scored.append((row["unit_id"], cos))
-    scored.sort(key=lambda x: (-x[1], x[0]))
-    return dict(scored[:limit])
+    if not rows:
+        return {}
+    try:
+        import numpy as np
+        q = np.asarray(query_vector, dtype=np.float32)
+        matrix = np.vstack([np.frombuffer(row["vec"], dtype=np.float32)
+                            for row in rows])
+        norms = np.linalg.norm(matrix, axis=1) * np.linalg.norm(q)
+        norms[norms == 0] = 1.0
+        sims = (matrix @ q) / norms
+        order = np.argsort(-sims)[:limit]
+        return {rows[i]["unit_id"]: float(sims[i]) for i in order
+                if sims[i] > 0.0}
+    except ImportError:
+        scored = []
+        for row in rows:
+            cos = units_store.cosine(query_vector,
+                                     units_store.unpack_vector(row["vec"]))
+            if cos > 0.0:
+                scored.append((row["unit_id"], cos))
+        scored.sort(key=lambda x: (-x[1], x[0]))
+        return dict(scored[:limit])
 
 
 def _candidate_ids(con: sqlite3.Connection, query: str, aux: list[str],
@@ -269,7 +293,8 @@ def _slim_structured(structured: dict | None) -> dict | None:
 def _envelope(query: str, expansion: dict, hits: list[dict],
               started: float, con: sqlite3.Connection,
               with_interpretations: bool) -> dict:
-    release = units_store.index_release(con)
+    release = units_store.index_release(con,
+                                        policy_identity=RANKING_POLICY)
     return {
         "schema": RESPONSE_SCHEMA,
         "query": {

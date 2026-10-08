@@ -153,6 +153,80 @@ def test_envelope_marks_discovery_only_and_gates_verified(tmp_path):
                for u in strict["units"])
 
 
+def test_corroboration_is_a_separate_signal(tmp_path):
+    """source_count/conflict_class surface as corroboration metadata —
+    never as verification (review policy 2026-10-08)."""
+    catalog = indexer.catalog_from_corpus_jsonl(CORPUS)
+    claims = list(indexer.claim_units(catalog))
+    vds = [u for u in claims if "VDS = 80 V" in u["text_repr"]][0]
+    corrob = vds["structured"]["corroboration"]
+    assert corrob["source_count"] == 2
+    assert corrob["conflict_class"] is None
+    assert "not verification" in corrob["note"]
+    assert vds["verification_state"] == "unverified"
+
+    conflicted = [u for u in claims if "VDSS = 750 V" in u["text_repr"]][0]
+    corrob2 = conflicted["structured"]["corroboration"]
+    assert corrob2["conflict_class"] == "unresolved"
+    assert corrob2["source_count"] == 1
+
+    # a claim without consensus rows carries no corroboration at all
+    plain = [u for u in claims if "QG = 54 nC" in u["text_repr"]][0]
+    assert plain.get("structured") is None
+
+    con = units.connect(str(tmp_path / "s.db"))
+    units.replace_document(con, [vds])
+    r = query.search(con, "VDS 80 V", limit=3, with_interpretations=False)
+    hit = [u for u in r["units"] if u["text_repr"].startswith("IPF039")][0]
+    assert hit["structured"]["corroboration"]["source_count"] == 2
+    assert hit["verification_state"] == "unverified"
+
+
+def test_vector_scores_numpy_and_python_agree(tmp_path):
+    import numpy as np
+    con = units.connect(str(tmp_path / "s.db"))
+    base = units.make_unit(
+        doc_sha256="d" * 64, grain="claim",
+        locator={"kind": "text_span", "quote": "x"},
+        text_repr="target unit", extraction_version="v1")
+    other = units.make_unit(
+        doc_sha256="d" * 63 + "e", grain="claim",
+        locator={"kind": "text_span", "quote": "y"},
+        text_repr="other unit", extraction_version="v1")
+    units.replace_document(con, [base])
+    units.replace_document(con, [other])
+    units.attach_vector(con, base["unit_id"], "t", [1.0, 0.0])
+    units.attach_vector(con, other["unit_id"], "t", [0.0, 1.0])
+    from harness.search import query as q
+    numpy_scores = q._vector_scores(con, [0.9, 0.1], 10)
+    assert numpy_scores[base["unit_id"]] > numpy_scores[other["unit_id"]]
+    # parity with the pure-python fallback
+    rows = con.execute(
+        "SELECT v.unit_id, v.vec FROM vectors v JOIN units u ON"
+        " u.unit_id = v.unit_id AND u.retired=0").fetchall()
+    py = {r["unit_id"]: units.cosine([0.9, 0.1],
+                                     units.unpack_vector(r["vec"]))
+          for r in rows}
+    for uid, score in numpy_scores.items():
+        assert abs(score - py[uid]) < 1e-5
+
+
+def test_release_identity_tracks_policy(tmp_path):
+    con = units.connect(str(tmp_path / "s.db"))
+    unit = units.make_unit(
+        doc_sha256="c" * 64, grain="claim",
+        locator={"kind": "text_span", "quote": "z"},
+        text_repr="policy probe", extraction_version="v1")
+    units.replace_document(con, [unit])
+    a = units.index_release(con, policy_identity="policy-A")
+    b = units.index_release(con, policy_identity="policy-A")  # cached
+    assert b["release"] == a["release"]
+    assert b["policy_identity"] == "policy-A"
+    c = units.index_release(con, policy_identity="policy-B")
+    assert c["release"] != a["release"]  # changed system, changed identity
+    assert c["vector_identity"].startswith("brutefloat32-v1;models=none")
+
+
 def test_make_embedder_wire_format():
     import json as _json
     import threading

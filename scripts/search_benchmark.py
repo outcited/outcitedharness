@@ -92,7 +92,8 @@ def index_has_anchor(con, anchor: str) -> bool:
     return row is not None
 
 
-def decomposed(entries: list[dict], con, limit: int = 10) -> dict:
+def decomposed(entries: list[dict], con, limit: int = 10,
+               embed=None) -> dict:
     """P0 directive 2026-10-08: three independent evaluations.
 
     1. corpus coverage  — does the expected evidence exist in the index?
@@ -111,13 +112,25 @@ def decomposed(entries: list[dict], con, limit: int = 10) -> dict:
         else:
             uncovered_entries.append(entry)
 
-    conditional = run(covered_entries, con, limit=limit)
+    conditional = run(covered_entries, con, limit=limit, embed=embed)
+    per_aisle_conditional = {}
+    for aisle in ("mcu", "power", "connectors"):
+        aisle_covered = [e for e in covered_entries if e["aisle"] == aisle]
+        if aisle_covered:
+            r = run(aisle_covered, con, limit=limit, embed=embed)
+            per_aisle_conditional[aisle] = {
+                "entries": r["scored"],
+                "recall_at_10": r["recall_at_10"],
+                "ndcg_at_10": r["ndcg_at_10"],
+                "latency_p95_ms": r["latency_p95_ms"],
+            }
 
     located = traceable = evidence_grade_hits = 0
     for entry in covered_entries:
         anchors = entry["expected"]["anchors"]
         response = query_service.search(
-            con, entry["query"], limit=limit, with_interpretations=False)
+            con, entry["query"], limit=limit, embed=embed,
+            with_interpretations=False)
         for hit in response["units"]:
             if not any(_matches(hit, a) for a in anchors):
                 continue
@@ -165,6 +178,7 @@ def decomposed(entries: list[dict], con, limit: int = 10) -> dict:
             "must_not_violations": conditional["must_not_violations"],
             "latency_p50_ms": conditional["latency_p50_ms"],
             "latency_p95_ms": conditional["latency_p95_ms"],
+            "per_aisle": per_aisle_conditional,
         },
         "3_locator_validity": {
             "matched_hits": located,
@@ -178,7 +192,7 @@ def decomposed(entries: list[dict], con, limit: int = 10) -> dict:
     }
 
 
-def run(entries: list[dict], con, limit: int = 10) -> dict:
+def run(entries: list[dict], con, limit: int = 10, embed=None) -> dict:
     per_entry = []
     recalls, ndcgs = [], []
     locator_hits, locator_total = 0, 0
@@ -188,7 +202,8 @@ def run(entries: list[dict], con, limit: int = 10) -> dict:
     for entry in entries:
         started = time.time()
         response = query_service.search(
-            con, entry["query"], limit=limit, with_interpretations=False)
+            con, entry["query"], limit=limit, embed=embed,
+            with_interpretations=False)
         latencies.append((time.time() - started) * 1000.0)
         hits = response["units"]
         anchors = entry.get("expected", {}).get("anchors") or []
@@ -292,6 +307,13 @@ def main() -> int:
                         help="score against SEARCH_DB (all entries)")
     parser.add_argument("--catalog",
                         default="/Volumes/M5_4TB/extract-results/catalog.db")
+    parser.add_argument("--mode", choices=("fts", "hybrid"),
+                        default="fts",
+                        help="fts-only vs hybrid (vectors + FTS); identical "
+                             "queries, anchors, and eval rules")
+    parser.add_argument("--embed", default=None,
+                        help="embeddings endpoint for --mode hybrid")
+    parser.add_argument("--embed-model", default="bge-m3-cr-tapes-v1")
     parser.add_argument("--decomposed", action="store_true",
                         help="P0 eval split: coverage vs conditional "
                              "retrieval vs locator validity")
@@ -331,10 +353,33 @@ def main() -> int:
         con.close()
         con = units_store.connect()
 
-    report = decomposed(entries, con, limit=args.limit) \
-        if args.decomposed else run(entries, con, limit=args.limit)
+    embed = None
+    mode_note = None
+    if args.mode == "hybrid":
+        if not units_store.vectors_available(con):
+            mode_note = ("hybrid requested but no vectors attached; "
+                         "fell back to fts — attach first (runbook)")
+            args.mode = "fts"
+        elif args.embed:
+            from harness.search.query import make_embedder
+            embed = make_embedder(args.embed, args.embed_model)
+        else:
+            mode_note = ("hybrid without --embed: vector scores only where "
+                         "an embedder is configured; queries ran fts-only")
+            args.mode = "fts"
+    report = decomposed(entries, con, limit=args.limit, embed=embed) \
+        if args.decomposed else run(entries, con, limit=args.limit, embed=embed)
     output = {k: v for k, v in report.items()
               if k != "per_entry" or args.verbose}
+    output["mode"] = args.mode
+    if mode_note:
+        output["mode_note"] = mode_note
+    output["retrieval_identity"] = {
+        "release": units_store.index_release(
+            con, policy_identity=query_service.RANKING_POLICY)["release"],
+        "policy": query_service.RANKING_POLICY,
+        "vector_index": units_store.vector_identity(con),
+    }
     if not args.no_quote_audit and not args.fixture:
         output["quote_audit"] = audit_quotes(entries, con, args.catalog,
                                              limit=args.limit)

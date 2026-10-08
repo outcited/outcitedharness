@@ -75,7 +75,96 @@ same encoder family as the claim sidecars). NOT yet run: fleet endpoints
 were unreachable from this box at session time. Re-run the decomposed eval
 after attaching; conditional recall is the number to watch.
 
+## Appendix A — JOB_FAILED audit (P1 directive 2026-10-08)
+
+Question: are the 49,111 `adjudication_ledger` JOB_FAILED events historical
+artifacts or a current bleed? Read-only audit of pipeline.db.
+
+**Findings:**
+
+1. **Historical mass**: 49,105 of 49,111 events sit on Oct 3–4, 2026 — the
+   storage-death window (16 TB vault died Oct 4; failures begin Oct 3
+   01:46, consistent with the CAS degrading before death). Oct 5: 5.
+   Oct 6–7: zero. Oct 8: 1.
+2. **Current bleed, one cause**: all heavy-retry jobs (attempts 48–122)
+   point at `/Volumes/macbookM4-4TB/datasheet-corpus/mcu/...` — a
+   PRE-migration corpus generation on M4's laptop disk, which is NOT
+   mounted. 4,070 jobs total point at that dead generation; 4 were claimed
+   on Oct 8 alone (last at 19:57). "worker could not open file" is literal:
+   the volume is gone. Rate ≈ 1–5/day and self-limiting (max_attempts).
+3. **Corpus-delivery generations visible in the queue**:
+   `/Volumes/M5_4TB/vault/landing` 61,316 jobs (current),
+   `/Volumes/M5_4TB/exports/power` 8,201, `vault/cas/*` 11,648,
+   `macbookM4-4TB` 4,070 (dead generation).
+4. **Data-quality anomalies observed (extraction lane's call, not search's)**:
+   all 85,235 job rows carry `created_at` = 2029-12-03 11:32:56–57 (a
+   two-second bulk window with a future clock — organic dispatch never
+   produced these; `claimed_at` spans Oct 3–8 for real), and the `results`
+   table is empty (output flows through burn waves/catalog instead).
+
+**Recommendation (NOT executed — extraction lane owns this):** dead-letter
+the 4,070 dead-generation substrate jobs (`state=dead`,
+`retired_reason=dead_corpus_generation`) or remap their `source_path` to
+the M5 vault CAS; do NOT blind-retry the 49K historical events (they are
+events, not pending work). Fix the `created_at` writer bug so visibility
+math stays honest.
+
+**Search policy (locked this session):** `verification_state` stays
+`unverified` absent M4 authority. Catalog consensus now surfaces on claim
+units as `structured.corroboration` (`source_count`, `confidence`,
+`conflict_class`, explicit "corroboration, not verification" note) — a
+separate signal from relevance, deterministic verification, and gold.
+
+## Appendix B — measurement modes and baseline (P0 directive)
+
+`scripts/search_benchmark.py --mode fts|hybrid [--embed URL]` — identical
+frozen queries, anchors, release stamping, and eval rules; hybrid requires
+attached vectors plus an embedder endpoint and loudly falls back otherwise.
+Every report carries `retrieval_identity` = release id + ranking-policy
+identity + vector index identity (a changed ranking system changes the
+release id — it cannot silently keep the same retrieval identity).
+
+**FTS-only live baseline, 2026-10-08** (91 covered entries, release
+`search-release-v1-763fbb27f217`, policy
+`hybrid-v1(...vector=brutefloat32-numpy-v1)`, vectors: none):
+
+| Aisle | conditional Recall@10 | nDCG@10 | p95 |
+|---|---|---|---|
+| mcu | 0.118 | 0.100 | 76 ms |
+| power | 0.243 | 0.211 | 46 ms |
+| connectors | 0.000 | 0.000 | 91 ms |
+| **all** | **0.143** | 0.123 | 84 ms |
+
+Coverage: mcu 1.00 / power 1.00 / connectors 0.667. Locator precision 0.80
+(72/90; the 18 imprecise are unhashed burn-wave units, marked
+discovery_only). must_not violations 0.
+
+**Vector scan cost (measured, synthetic 91,758 × 1024):** numpy matrix
+path **25.6 ms/query**; pure-Python fallback is seconds at this scale —
+numpy is required at corpus scale (fallback retained for small indexes
+only). Semantic candidates are never restricted to FTS matches — the scan
+covers every active vector. At pilot scale brute-force is within budget;
+revisit an ANN index (with its own version identity) only if corpus growth
+or p95 demands it.
+
+**Hybrid experiment: staged, blocked on spark-e10b.** dgx1 (100.81.201.24)
+hosts both embedders (:8800/:8804) and is offline (last seen 14h before
+this audit; ping 100% loss, all ports closed; also the node with the Oct
+6–7 userspace freezes). Tailscale itself is healthy. When the node returns:
+
+```
+scripts/search_index.py --embed http://100.81.201.24:8800/v1/embeddings
+scripts/search_benchmark.py --live --decomposed --mode hybrid \
+  --embed http://100.81.201.24:8800/v1/embeddings
+```
+
+No cloud embedder deployed or paid for (per directive).
+
 ## Curve lane integration (P2)
+
+```
+scripts/search_index.py --curves /Volumes/M5_4TB/extract-results/curves-pilot-v1
+```
 
 ```
 scripts/search_index.py --curves /Volumes/M5_4TB/extract-results/curves-pilot-v1
@@ -188,11 +277,15 @@ eval.
 
 ## Adjudication annotation (verification states)
 
-The indexer accepts `adjudications={(doc_sha, quote): state}` copied from
-pipeline.db `adjudication_ledger` verdicts. Wiring (extract → annotate →
-re-index) is planned but NOT yet automated; until then every live unit
-reports `unverified` honestly. Never wire `verified` from anywhere but M4's
-cell_verifier output.
+Policy locked 2026-10-08 (Sam): `verification_state` stays `unverified`
+absent M4 authority. The indexer's `adjudications` annotation hook exists
+but the production ledger carries zero claim verdicts (49,111 rows are all
+JOB_FAILED/COST job events — see Appendix A), and we will NOT run
+adjudication jobs to manufacture a different label. Catalog consensus
+surfaces as `structured.corroboration` on claim units — a separate signal
+from relevance, deterministic verification, and gold approval. TRUTH_PLAN
+Phase 3 proceeds (if approved) as an independent verification-quality
+project, never as a search prerequisite.
 
 ## Fleet / ownership notes
 

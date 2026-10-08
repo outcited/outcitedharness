@@ -487,10 +487,26 @@ def unit_count(con: sqlite3.Connection, active_only: bool = True) -> int:
 
 # --- release pinning (R4/R5: reproducible index release and rollback) -----
 
-def _fingerprint(con: sqlite3.Connection) -> tuple[str, int, int]:
-    """Content-addressed: same release id <=> same index content. Text and
-    verification state are hashed, so a rewritten extraction cannot hide
-    behind an unchanged unit id."""
+VECTOR_INDEX_VERSION = "brutefloat32-v1"
+
+
+def vector_identity(con: sqlite3.Connection) -> str:
+    """Which embedding models and how many vectors the index carries."""
+    rows = con.execute(
+        "SELECT model, COUNT(*) AS n FROM vectors GROUP BY model"
+        " ORDER BY model").fetchall()
+    if not rows:
+        return f"{VECTOR_INDEX_VERSION};models=none"
+    return f"{VECTOR_INDEX_VERSION};models=" + ",".join(
+        f"{r['model']}:{r['n']}" for r in rows)
+
+
+def _fingerprint(con: sqlite3.Connection, policy_identity: str = "") \
+        -> tuple[str, int, int]:
+    """Content-addressed: same release id <=> same index content AND the
+    same retrieval policy. Text, verification state, ranking-policy
+    identity, and vector identity are hashed, so neither a rewritten
+    extraction nor a changed ranking system can hide behind a stable id."""
     digest = hashlib.sha256()
     count = 0
     active = 0
@@ -506,40 +522,55 @@ def _fingerprint(con: sqlite3.Connection) -> tuple[str, int, int]:
         digest.update(b"1" if retired else b"0")
         count += 1
         active += 0 if retired else 1
+    digest.update(b"policy|" + policy_identity.encode("utf-8"))
+    digest.update(b"vectors|" + vector_identity(con).encode("ascii"))
     return digest.hexdigest(), count, active
 
 
-def index_release(con: sqlite3.Connection, force: bool = False) -> dict:
+def index_release(con: sqlite3.Connection, force: bool = False,
+                  policy_identity: str = "") -> dict:
     """Content fingerprint of the index; cached until the next write.
 
-    Rollback = restore the previous database file (runbook); this fingerprint
-    is what lets two restores be told apart.
+    A different policy_identity (ranking policy changed upstream) forces a
+    recompute so the release id never lies about the retrieval system.
+    Rollback = restore the previous database file (runbook); this
+    fingerprint is what lets two restores be told apart.
     """
+    stored_policy = con.execute(
+        "SELECT value FROM meta WHERE key='policy_identity'").fetchone()
+    policy_changed = policy_identity and \
+        (stored_policy is None or stored_policy[0] != policy_identity)
     dirty_row = con.execute(
         "SELECT value FROM meta WHERE key='release_dirty'").fetchone()
     dirty = dirty_row is not None and dirty_row[0] == "1"
     cached = con.execute(
         "SELECT value FROM meta WHERE key='release'").fetchone()
-    if cached and not dirty and not force:
+    if cached and not dirty and not force and not policy_changed:
         count = int(con.execute(
             "SELECT value FROM meta WHERE key='release_unit_count'"
         ).fetchone()[0])
         active = int(con.execute(
             "SELECT value FROM meta WHERE key='release_active_count'"
         ).fetchone()[0])
-        return {"release": cached[0], "schema": SEARCH_SCHEMA,
-                "unit_count": count, "active_count": active}
-    fp, count, active = _fingerprint(con)
-    release = f"search-release-v1-{fp[:12]}"
-    ts = now()
-    for key, value in (("release", release), ("release_dirty", "0"),
-                       ("release_unit_count", str(count)),
-                       ("release_active_count", str(active))):
-        con.execute("INSERT INTO meta (key, value) VALUES (?,?)"
-                    " ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-                    (key, value))
-    con.execute("INSERT INTO releases (release, built_at, unit_count,"
-                " fingerprint) VALUES (?,?,?,?)", (release, ts, count, fp))
-    con.commit()
+        release = cached[0]
+    else:
+        fp, count, active = _fingerprint(con, policy_identity)
+        release = f"search-release-v1-{fp[:12]}"
+        ts = now()
+        for key, value in (("release", release), ("release_dirty", "0"),
+                           ("release_unit_count", str(count)),
+                           ("release_active_count", str(active)),
+                           ("policy_identity", policy_identity)):
+            con.execute(
+                "INSERT INTO meta (key, value) VALUES (?,?)"
+                " ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                (key, value))
+        con.execute("INSERT INTO releases (release, built_at, unit_count,"
+                    " fingerprint) VALUES (?,?,?,?)", (release, ts, count,
+                                                       fp))
+        con.commit()
     return {"release": release, "schema": SEARCH_SCHEMA, "unit_count": count,
-            "active_count": active}
+            "active_count": active,
+            "policy_identity": policy_identity or
+            (stored_policy[0] if stored_policy else ""),
+            "vector_identity": vector_identity(con)}

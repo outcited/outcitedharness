@@ -93,6 +93,13 @@ def catalog_from_corpus_jsonl(jsonl_path: str | Path) -> sqlite3.Connection:
         CREATE TABLE doc_revisions (doc_sha256 TEXT PRIMARY KEY,
                                     rev_code TEXT, rev_date TEXT,
                                     doc_kind TEXT, supersedes_sha TEXT);
+        CREATE TABLE consensus (opn TEXT, symbol TEXT, qualifier TEXT,
+                                condition_norm TEXT, resolved_value REAL,
+                                resolved_unit TEXT, confidence REAL,
+                                source_count INTEGER, conflict_class TEXT,
+                                resolution_trail TEXT, updated_at REAL,
+                                UNIQUE (opn, symbol, qualifier,
+                                        condition_norm));
         CREATE TABLE claims_canonical (id INTEGER PRIMARY KEY, opn TEXT,
             symbol TEXT, qualifier TEXT, condition_norm TEXT, value REAL,
             unit TEXT, value_text TEXT, provenance TEXT, extractor TEXT,
@@ -113,6 +120,19 @@ def catalog_from_corpus_jsonl(jsonl_path: str | Path) -> sqlite3.Connection:
                     (record["opn"], record.get("doc_sha256"),
                      record.get("coverage_kind", "primary"),
                      record.get("evidence")))
+            elif record.get("_kind") == "consensus":
+                con.execute(
+                    "INSERT OR REPLACE INTO consensus VALUES"
+                    " (?,?,?,?,?,?,?,?,?,?,?)",
+                    (record["opn"], record["symbol"],
+                     record.get("qualifier"),
+                     record.get("condition_norm") or "",
+                     record.get("resolved_value"),
+                     record.get("resolved_unit"),
+                     record.get("confidence", 0.0),
+                     record.get("source_count", 1),
+                     record.get("conflict_class"),
+                     record.get("resolution_trail"), 1.0))
             else:
                 con.execute(
                     "INSERT INTO claims_canonical (opn, symbol, qualifier,"
@@ -159,6 +179,22 @@ def claim_units(catalog_con: sqlite3.Connection, *,
         "SELECT opn, vendor, family, package FROM parts")}
     revisions = {r["doc_sha256"]: r for r in catalog_con.execute(
         "SELECT doc_sha256, rev_code, rev_date FROM doc_revisions")}
+    # Catalog corroboration (consensus across documents). SEPARATE SIGNAL:
+    # source_count/conflict_class say how many independent documents agree;
+    # they are not verification and never imply `verified`.
+    consensus_map: dict[tuple, dict] = {}
+    try:
+        for r in catalog_con.execute(
+                "SELECT opn, symbol, qualifier, condition_norm, confidence,"
+                " source_count, conflict_class FROM consensus"):
+            consensus_map[(r["opn"], r["symbol"], r["qualifier"] or "",
+                           r["condition_norm"] or "")] = {
+                "confidence": r["confidence"],
+                "source_count": r["source_count"],
+                "conflict_class": r["conflict_class"],
+            }
+    except sqlite3.OperationalError:
+        consensus_map = {}
 
     claims_by_doc: dict[str, list[sqlite3.Row]] = defaultdict(list)
     for claim in catalog_con.execute("SELECT * FROM claims_canonical"):
@@ -190,11 +226,16 @@ def claim_units(catalog_con: sqlite3.Connection, *,
             if quote:
                 locator["quote"] = quote
             lines = []
+            corroborates = []
             for claim in group:
                 lines.append(_claim_text(
                     claim["symbol"], claim["qualifier"],
                     str(claim["value_text"]), claim["unit"],
                     claim["condition_norm"] or ""))
+                key = (claim["opn"], claim["symbol"],
+                       claim["qualifier"] or "", claim["condition_norm"] or "")
+                if key in consensus_map:
+                    corroborates.append(consensus_map[key])
             prov_line = " ".join(
                 f'{k}="{v}"' for k, v in
                 (("row", row_header), ("col", column_header)) if v)
@@ -209,6 +250,20 @@ def claim_units(catalog_con: sqlite3.Connection, *,
             kind = coverage.get((opn, doc_sha), "mention")
             state = adjudications.get((doc_sha, quote), "unverified")
             rev = revisions.get(doc_sha)
+            structured = None
+            if corroborates:
+                worst = next((c for c in sorted(
+                    corroborates, key=lambda c: _conflict_rank(
+                        c["conflict_class"]), reverse=True)
+                    if c["conflict_class"]), None)
+                best = max(corroborates, key=lambda c: c["source_count"])
+                structured = {"corroboration": {
+                    "source_count": best["source_count"],
+                    "confidence": best["confidence"],
+                    "conflict_class": (worst or {}).get("conflict_class"),
+                    "note": "catalog consensus across documents; a "
+                            "corroboration signal, not verification",
+                }}
             yield units_store.make_unit(
                 doc_sha256=doc_sha, grain="claim",
                 locator=locator, text_repr=text_repr,
@@ -223,7 +278,16 @@ def claim_units(catalog_con: sqlite3.Connection, *,
                 rev_date=rev["rev_date"] if rev else None,
                 verification_state=state,
                 verification_source=("adjudication_ledger"
-                                     if state != "unverified" else None))
+                                     if state != "unverified" else None),
+                structured=structured)
+
+
+_CONFLICT_RANK = {"unresolved": 4, "vendor_inconsistency": 3,
+                  "extraction_error": 2, "revision_diff": 1, None: 0}
+
+
+def _conflict_rank(conflict_class) -> int:
+    return _CONFLICT_RANK.get(conflict_class, 0)
 
 
 def family_units(catalog_con: sqlite3.Connection) -> Iterator[dict]:
