@@ -119,6 +119,18 @@ def query_curve_evidence(
     x_value = float((operating_point or {}).get("x")) if (
         operating_point or {}
     ).get("x") is not None else None
+    x_unit = (operating_point or {}).get("unit")
+    if x_unit is None and phenomena:
+        # canonical SI per the phenomenon's x quantity — the engineer's
+        # question is in SI; the layer converts to the printed axis unit
+        kinds = {
+            PHENOMENA[p]["x_kind"] for p in phenomena if p in PHENOMENA
+        }
+        si = {"load_current": "A", "input_voltage": "V",
+              "output_voltage": "V", "temperature": "°C",
+              "frequency": "Hz", "time": "s", "gate_voltage": "V"}
+        if len(kinds) == 1:
+            x_unit = si.get(next(iter(kinds)))
     for curve in applicable:
         missing = condition_sufficiency(curve, conditions)
         if missing:
@@ -157,6 +169,7 @@ def query_curve_evidence(
         query = query_operating_point(
             curve, x_value if x_value is not None else 0.0,
             required_conditions=conditions,
+            x_unit=x_unit,
         ) if x_value is not None else None
         if query is not None:
             if query["status"] == "ok":

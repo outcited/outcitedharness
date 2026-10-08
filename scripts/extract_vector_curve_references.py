@@ -174,15 +174,17 @@ def _fit_linear(pairs) -> tuple[float, float, float] | None:
 
 
 def _fit_axis(pairs):
-    """Linear first; log10 when tick values are decades on a linear grid."""
+    """Linear first; log10 when tick values are decades on a linear grid.
+    Returns (kind, slope, intercept, residual-as-fraction-of-value-span)."""
+
     lin = _fit_linear(pairs)
     if lin and lin[2] < 1e-3:
-        return ("linear", lin[0], lin[1])
+        return ("linear", lin[0], lin[1], lin[2])
     log_pairs = [(p, (v if v > 0 else None)) for p, v in pairs]
     if all(v is not None for _, v in log_pairs):
         logv = _fit_linear([(p, math.log10(v)) for p, v in log_pairs])
         if logv and logv[2] < 1e-3:
-            return ("log10", logv[0], logv[1])
+            return ("log10", logv[0], logv[1], logv[2])
     return None
 
 
@@ -347,6 +349,43 @@ def _page_lines(words) -> list[tuple[str, tuple[float, float, float, float]]]:
     return out
 
 
+_TITLE_VS = re.compile(
+    r"^\s*(?:Fig(?:ure)?\.?\s*\d+\s*[-.:]?\s*)?(.+?)\s+vs\.?\s+(.+?)"
+    r"(?:\s*[,.]\s*)?$",
+    re.I,
+)
+
+
+def _label_tokens(text: str) -> set[str]:
+    return {
+        t for t in re.findall(r"[a-z]+", str(text or "").lower())
+        if t not in ("the", "and", "of", "a")
+    }
+
+
+def _title_axes_note(caption: str, x_label: str, y_label: str) -> str | None:
+    """Vendor titles can contradict the printed axes ("Load Current vs.
+    Case Temperature" with current on x). The printed labels are
+    authoritative; the mismatch is flagged for the human review packet,
+    never silently corrected."""
+
+    m = _TITLE_VS.match(str(caption or "").strip())
+    if not m:
+        return None
+    head, tail = _label_tokens(m.group(1)), _label_tokens(m.group(2))
+    x_tok, y_tok = _label_tokens(x_label), _label_tokens(y_label)
+    if not x_tok or not y_tok:
+        return None
+    swapped = len(x_tok & head) + len(y_tok & tail)
+    direct = len(x_tok & tail) + len(y_tok & head)
+    if swapped > direct and swapped >= 1:
+        return (
+            "title says A vs B but printed axes put A on x — labels kept "
+            "as printed; human review should confirm orientation"
+        )
+    return None
+
+
 def _section_title(page_lines, boxes) -> str:
     for text, wbox in page_lines:
         if boxes and wbox[3] < boxes[0][1] and len(text) < 60 and re.search(
@@ -374,7 +413,7 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                 continue
 
             def to_value(fit, pos):
-                kind, a, b = fit
+                kind, a, b, _resid = fit
                 v = a * pos + b
                 return float(10 ** v) if kind == "log10" else float(v)
 
@@ -446,21 +485,42 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                     page_conditions.append(text)
 
             caption = ""
-            for text, wbox in page_lines:
-                if wbox[1] > box[3] and re.match(
-                    r"^\s*(?:figure|fig\.?)\s+\d", text, re.I
-                ) and not caption:
-                    overlap = min(wbox[2], box[2]) - max(wbox[0], box[0])
+            for row in _rows_between(
+                words, box[3] + 2.0, box[3] + _TICK_BAND + 60,
+                box[0] - 40, box[2] + 40,
+            ):
+                row_words = sorted(row, key=lambda w: w[0])
+                # fine split: a condition text and a caption can share one
+                # y-band across columns; runs break at word gaps
+                runs: list[list[tuple]] = [[row_words[0]]]
+                for w in row_words[1:]:
+                    if w[0] - runs[-1][-1][2] > 12.0:
+                        runs.append([w])
+                    else:
+                        runs[-1].append(w)
+                for run in runs:
+                    text = " ".join(w[4] for w in run)
+                    if not re.match(r"^\s*(?:figure|fig\.?)\s+\d", text, re.I):
+                        continue
+                    rx0 = run[0][0]
+                    rx1 = run[-1][2]
+                    overlap = min(rx1, box[2]) - max(rx0, box[0])
                     if overlap > 0.3 * (box[2] - box[0]):
                         caption = text
+                        break
+                if caption:
+                    break
 
             series = []
+            raw_total = kept_total = 0
             for color, pts in sorted(usable.items()):
                 mapped = []
                 for px, py in pts:
                     if not (box[0] - 1 <= px <= box[2] + 1 and box[1] - 1 <= py <= box[3] + 1):
                         continue
                     mapped.append((to_value(x_fit, px), to_value(y_fit, py)))
+                raw_total += len(pts)
+                kept_total += len(mapped)
                 mapped.sort(key=lambda p: p[0])
                 dedup = []
                 for p in mapped:
@@ -476,6 +536,31 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                     "points": [[round(x, 6), round(y, 6)] for x, y in dedup],
                     "_x_range": [round(min(xs), 6), round(max(xs), 6)],
                 })
+            retained = (kept_total / raw_total) if raw_total else 0.0
+            if retained < 0.5:
+                skips.append({"figure_index": fig,
+                              "reason": "curve_points_outside_frame",
+                              "retained": round(retained, 3)})
+                continue
+            total_pts = sum(len(s["points"]) for s in series)
+            out_of_axis = 0
+            x_lo, x_hi = min(v for _, v in x_pairs), max(v for _, v in x_pairs)
+            y_lo, y_hi = min(v for _, v in y_pairs), max(v for _, v in y_pairs)
+            x_slop = max(0.01 * abs(x_hi - x_lo), 1e-6)
+            y_slop = max(0.01 * abs(y_hi - y_lo), 1e-6)
+            for s in series:
+                for x, y in s["points"]:
+                    if not (x_lo - x_slop <= x <= x_hi + x_slop
+                            and y_lo - y_slop <= y <= y_hi + y_slop):
+                        out_of_axis += 1
+            outside_pct = (
+                100.0 * out_of_axis / total_pts if total_pts else 0.0
+            )
+            if outside_pct > 10.0:
+                skips.append({"figure_index": fig,
+                              "reason": "points_outside_axis",
+                              "pct": round(outside_pct, 2)})
+                continue
 
             tick_x_min = None
             y_tick_words = [
@@ -490,6 +575,8 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
             y_label = _axis_label(words, box, "y", tick_x_min)
             x_ticks = [v for _, v in x_pairs]
             y_ticks = [v for _, v in y_pairs]
+            # numeric quality: tick-fit residuals and point retention ride
+            # every reference so error is measurable, not assumed zero
             plots.append({
                 "_figure_index": fig,
                 "title": caption or None,
@@ -508,6 +595,15 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                 "series": series,
                 "conditions_plot": cond_rows,
                 "conditions_page": page_conditions,
+                "_numeric_quality": {
+                    "x_fit_residual_pct_of_span": round(x_fit[3] * 100.0, 6),
+                    "y_fit_residual_pct_of_span": round(y_fit[3] * 100.0, 6),
+                    "retained_point_fraction": round(retained, 4),
+                    "points_outside_axis_pct": round(outside_pct, 4),
+                },
+                "_title_axes_note": _title_axes_note(
+                    caption, x_label, y_label
+                ),
                 "source": "vector-reference extraction (deterministic); "
                           "pending human sign-off per the pilot labeling law",
             })

@@ -173,8 +173,29 @@ def typed_conditions(condition_texts: Sequence[str | None]) -> dict[str, Any]:
         out["categorical"] = categorical
     if verbatim:
         out["verbatim"] = verbatim
-    if conflicts:
-        out["conflict"] = conflicts
+    resolved: list[dict[str, Any]] = []
+    still_conflict: list[dict[str, Any]] = []
+    for conflict in conflicts:
+        key = conflict["key"]
+        values = conflict["values"]
+        ranges = [v for v in values if isinstance(v, list)]
+        points = [v for v in values if not isinstance(v, list)]
+        if len(ranges) == 1 and points and all(
+            min(ranges[0]) - 1e-9 <= float(p) <= max(ranges[0]) + 1e-9
+            for p in points
+        ):
+            # printed envelope ("2.25 V to 5.5 V") + stated default
+            # ("Typical values at VIN = 5 V"): the point is the condition,
+            # the range is the envelope — resolved, never silently
+            keys[key] = points[-1]
+            resolved.append({"key": key, "condition": points[-1],
+                             "envelope": ranges[0]})
+        else:
+            still_conflict.append(conflict)
+    if resolved:
+        out["resolved_envelopes"] = resolved
+    if still_conflict:
+        out["conflict"] = still_conflict
     return out
 
 
@@ -211,6 +232,9 @@ def _values_agree(a: Any, b: Any) -> bool:
 def condition_compatibility(
     curve_conditions: Mapping[str, Any] | None,
     required: Mapping[str, Any] | None,
+    *,
+    x_kind: str | None = None,
+    x_value: float | None = None,
 ) -> dict[str, Any]:
     """R2 — comparable only when every required numeric condition is stated
     by the curve and agrees; missing or disagreeing conditions are
@@ -218,6 +242,10 @@ def condition_compatibility(
 
     required: typed keys ({vin_v: 12.0, ...}) plus optional
     ``categorical`` map ({mode: 'fccm'}).
+
+    Sweep law: a required key that names the curve's own x quantity is
+    satisfied by the operating point itself (x_value), never by a fixed
+    printed condition; disagreeing with x_value is a mismatch.
     """
 
     req_keys = dict(required or {})
@@ -227,6 +255,12 @@ def condition_compatibility(
     cond = dict(curve_conditions or {})
     keys = dict(cond.get("keys") or {})
     cat = dict(cond.get("categorical") or {})
+    sweep = _SWEEP_KEYS.get(x_kind or "", set())
+    if sweep and x_value is not None:
+        swept = {k: v for k, v in req_keys.items() if k in sweep}
+        req_keys = {k: v for k, v in req_keys.items() if k not in sweep}
+    else:
+        swept = {}
     if cond.get("conflict"):
         return {
             "status": "not_comparable",
@@ -234,8 +268,22 @@ def condition_compatibility(
             "detail": cond["conflict"],
         }
     if not req_keys and not req_categorical:
-        return {"status": "comparable", "matched": {}, "missing": [],
-                "mismatched": []}
+        matched = {}
+        mismatched = []
+        for key, value in swept.items():
+            if _values_agree(x_value, value):
+                matched[key] = {"swept_at": x_value}
+            else:
+                mismatched.append(
+                    {"key": key, "curve": {"swept_at": x_value},
+                     "required": value}
+                )
+        if mismatched:
+            return {"status": "not_comparable",
+                    "reason": "condition_mismatch",
+                    "missing": [], "mismatched": mismatched}
+        return {"status": "comparable", "matched": matched,
+                "missing": [], "mismatched": []}
     missing: list[str] = []
     mismatched: list[dict[str, Any]] = []
     matched: dict[str, Any] = {}
@@ -248,6 +296,14 @@ def condition_compatibility(
             )
         else:
             matched[key] = keys[key]
+    for key, value in swept.items():
+        if _values_agree(x_value, value):
+            matched[key] = {"swept_at": x_value}
+        else:
+            mismatched.append(
+                {"key": key, "curve": {"swept_at": x_value},
+                 "required": value}
+            )
     for key, value in req_categorical.items():
         want = " ".join(str(value).lower().split())
         if key not in cat:
@@ -364,6 +420,40 @@ PHENOMENA: dict[str, dict[str, Any]] = {
         "required_condition_keys": [],
         "engineer_params": ["ambient temperature"],
         "constraints": ["per printed hysteresis direction (up/dn series)"],
+        "limitations": ["typical, not guaranteed"],
+    },
+    "case_temperature_limit_vs_load": {
+        "y_kind": "temperature", "x_kind": "load_current",
+        "categories": ["power.dcdc"],
+        "phenomenon": "maximum case temperature the part sustains at a "
+                      "given load (printed derating envelope orientation)",
+        "use_cases": ["thermal_derating", "warm_enclosure_operation",
+                      "thermal_budget"],
+        "required_condition_keys": [],
+        "engineer_params": ["load current", "case cooling assumption"],
+        "constraints": ["per printed input/output/fsw page conditions"],
+        "limitations": ["typical, not guaranteed",
+                        "case temperature, not junction",
+                        "no heat-sink or airflow model attached"],
+    },
+    "output_voltage_regulation_vs_load": {
+        "y_kind": "voltage", "x_kind": "load_current",
+        "categories": ["power.dcdc"],
+        "phenomenon": "output voltage regulation over load",
+        "use_cases": ["load_regulation", "output_accuracy"],
+        "required_condition_keys": [],
+        "engineer_params": ["load current", "input voltage"],
+        "constraints": ["per printed output rail"],
+        "limitations": ["typical, not guaranteed"],
+    },
+    "output_voltage_regulation_vs_input_voltage": {
+        "y_kind": "voltage", "x_kind": "input_voltage",
+        "categories": ["power.dcdc"],
+        "phenomenon": "output voltage regulation over input voltage",
+        "use_cases": ["line_regulation", "output_accuracy"],
+        "required_condition_keys": [],
+        "engineer_params": ["input voltage", "load current"],
+        "constraints": ["per printed output rail"],
         "limitations": ["typical, not guaranteed"],
     },
 }
@@ -500,16 +590,32 @@ class CurveEvidence:
             {"min": xs[0], "max": xs[-1]} if xs else None
         )
         self.x_scale = str((self.axes.get("x") or {}).get("scale") or "linear")
+        name_text = str(series.get("name") or "")
         self.conditions = _drop_sweep(
             typed_conditions(
-                list(conditions_verbatim)
-                + [series.get("condition"), series.get("name")]
+                list(conditions_verbatim) + [series.get("condition")]
             ),
             self.x_kind,
         )
-        legend_temp = _LEGEND_TEMP.match(str(series.get("name") or ""))
+        # legend conditions override page/plot defaults (challenge #1:
+        # "VIN = 12 V" legend vs "VIN = 13.5 V unless otherwise specified")
+        name_parsed = _drop_sweep(
+            typed_conditions([name_text]), self.x_kind
+        )
+        overrides: dict[str, Any] = {}
+        keys = dict(self.conditions.get("keys") or {})
+        for key, value in dict(name_parsed.get("keys") or {}).items():
+            if key in keys and keys[key] != value:
+                overrides[key] = {"page_default": keys[key],
+                                  "series_legend": value}
+            keys[key] = value
+        self.conditions["keys"] = keys
+        if overrides:
+            self.conditions["legend_override"] = {
+                **dict(self.conditions.get("legend_override") or {}), **overrides,
+            }
+        legend_temp = _LEGEND_TEMP.match(name_text)
         if legend_temp:
-            keys = dict(self.conditions.get("keys") or {})
             value = float(legend_temp.group(1))
             # legend temperatures on these plots are ambient (TA); the
             # series-specific value overrides the page-level default
@@ -520,8 +626,9 @@ class CurveEvidence:
                 self.conditions["legend_temperature"] = True
                 if overridden is not None:
                     self.conditions["legend_override"] = {
-                        "page_default": overridden,
-                        "series_legend": value,
+                        **dict(self.conditions.get("legend_override") or {}),
+                        "ta_c": {"page_default": overridden,
+                                 "series_legend": value},
                     }
         self.curve_id = "curve-" + hashlib.sha256(
             f"{document_sha256}:{page_1based}:{figure_index}:{series_index}"
@@ -547,15 +654,27 @@ class CurveEvidence:
         axes = plot.get("axes") or {}
         apply = dict(applies_to or {})
         if not apply.get("part"):
+            part_match = re.search(
+                r"\b(SiC\d{3}|TPS\d+[A-Z0-9]*|LM[RFQ]\d+[A-Z0-9\-]*|"
+                r"NCP\d+[A-Z0-9]*|MCP\d+[A-Z0-9]*)\b",
+                str(plot.get("title") or ""),
+            )
+            if part_match:
+                apply.setdefault("part", part_match.group(1))
+        if not apply.get("part"):
             stem = str(record.get("source_artifact") or "")
             part = re.sub(r"\.(pdf|json)$", "", stem, flags=re.I)
             part = re.sub(r"^(dcdc|battery|gate|isolation|ldo|mosfet)_", "", part)
             apply.setdefault("part", part or None)
+        if not apply.get("manufacturer"):
+            apply.setdefault(
+                "manufacturer", record.get("manufacturer") or None
+            )
         if not apply.get("category"):
             stem = str(record.get("source_artifact") or "")
             m = re.match(r"(dcdc|battery|gate|isolation|ldo|mosfet)_", stem, re.I)
             apply.setdefault(
-                "category", f"power.{m.group(1).lower()}" if m else None
+                "category", f"power.{m.group(1).lower()}" if m else "power.dcdc"
             )
         conds = list(plot.get("conditions_plot") or [])
         conds += list(plot.get("conditions_page") or [])
@@ -581,6 +700,8 @@ class CurveEvidence:
                 "point_error_pct": None,
                 "note": "deterministic geometry from the vector PDF; "
                         "human sign-off pending",
+                "numeric_quality": plot.get("_numeric_quality"),
+                "human_signed": bool(record.get("_human_signed")),
             },
             verification={"status": "reference", "grounding": None,
                           "anchor_agreement": None},
@@ -749,16 +870,31 @@ def _interp(points: Sequence[Mapping[str, float]], x: float,
     return None
 
 
+def convert_value(value: float, from_unit: str | None,
+                  to_unit: str | None) -> float | None:
+    """Unit-family-aware conversion (A<->mA, V<->mV, ...). None when the
+    families differ — incompatible units never silently convert."""
+
+    a = unit_base(from_unit)
+    b = unit_base(to_unit)
+    if a is None or b is None or a[0] != b[0]:
+        return None
+    return value * a[1] / b[1]
+
+
 def query_operating_point(
     curve: CurveEvidence,
     x: float,
     *,
     required_conditions: Mapping[str, Any] | None = None,
+    x_unit: str | None = None,
 ) -> dict[str, Any]:
     """Evaluate one curve at an operating point, bounded and cited.
 
     Statuses: ok | out_of_range | not_comparable | not_usable.
     Extrapolation never happens: x must sit inside the sampled support.
+    x_unit states the engineer's unit; it converts to the curve's printed
+    axis unit when the families match, and refuses when they do not.
     The evidence class rides the result — a typical curve yields a typical
     value, never a guaranteed limit.
     """
@@ -775,8 +911,25 @@ def query_operating_point(
             "status": "not_usable",
             "reason": f"verification:{curve.verification.get('status')}",
         }
+    curve_unit = (curve.axes.get("x") or {}).get("unit")
+    unit_note = None
+    if x_unit is not None and normalize_unit(x_unit) != normalize_unit(curve_unit):
+        if not curve_unit:
+            # axis label names the quantity but prints no unit; the query
+            # proceeds in the printed numbers and says so — never silently
+            unit_note = "curve_axis_unit_unstated"
+        else:
+            converted = convert_value(float(x), x_unit, curve_unit)
+            if converted is None:
+                return {
+                    **base,
+                    "status": "not_usable",
+                    "reason": f"unit_incompatible:{x_unit}->{curve_unit}",
+                }
+            x = converted
     compat = condition_compatibility(
-        curve.conditions, required_conditions
+        curve.conditions, required_conditions,
+        x_kind=curve.x_kind, x_value=float(x),
     )
     if compat["status"] != "comparable":
         return {**base, "status": "not_comparable", "reason": compat["reason"],
@@ -806,6 +959,7 @@ def query_operating_point(
         **base,
         "status": "ok",
         "x": x,
+        "unit_note": unit_note,
         "value": value,
         "unit": (curve.axes.get("y") or {}).get("unit"),
         "guarantee": False,

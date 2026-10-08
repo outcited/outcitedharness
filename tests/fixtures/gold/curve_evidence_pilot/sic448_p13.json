@@ -1,0 +1,275 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1.pdf",
+  "document_sha256": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1",
+  "page_1based": 13,
+  "manufacturer": "vishay",
+  "section_title": "ELECTRICAL CHARACTERISTICS",
+  "plots": [
+    {
+      "_figure_index": 1,
+      "title": "Fig. 14 - Input Current vs. Input Voltage",
+      "axes": {
+        "x": {
+          "label": "VCIN/VIN - Input Voltage (V)",
+          "unit": "V",
+          "min": 0.0,
+          "max": 40.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "IVCIN IVIN Input Current (µA)",
+          "unit": "µA",
+          "min": 0.0,
+          "max": 350.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              4.992936,
+              277.881417
+            ],
+            [
+              9.995217,
+              280.542012
+            ],
+            [
+              11.996244,
+              279.882754
+            ],
+            [
+              14.997507,
+              284.886177
+            ],
+            [
+              19.999789,
+              286.884869
+            ],
+            [
+              24.001297,
+              289.886915
+            ],
+            [
+              30.00436,
+              294.890298
+            ],
+            [
+              36.00797,
+              298.890367
+            ],
+            [
+              40.009478,
+              301.892413
+            ]
+          ],
+          "_x_range": [
+            4.992936,
+            40.009478
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.00865,
+        "y_fit_residual_pct_of_span": 7e-06,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 3,
+      "title": "Fig. 15 - Input Current vs. Input Voltage",
+      "axes": {
+        "x": {
+          "label": "VCIN/VIN - Input Voltage (V)",
+          "unit": "V",
+          "min": 0.0,
+          "max": 40.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "IVCIN_SHDN IVIN_SHDN Shutdown Currrent (µA)",
+          "unit": "µA",
+          "min": 0.0,
+          "max": 8.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              0.021543,
+              0.320051
+            ],
+            [
+              5.733636,
+              1.120371
+            ],
+            [
+              8.018316,
+              1.320467
+            ],
+            [
+              11.445464,
+              2.02077
+            ],
+            [
+              17.157566,
+              2.320883
+            ],
+            [
+              21.727182,
+              3.021186
+            ],
+            [
+              28.582024,
+              3.821567
+            ],
+            [
+              35.436329,
+              4.721964
+            ],
+            [
+              40.006772,
+              6.022553
+            ]
+          ],
+          "_x_range": [
+            0.021543,
+            40.006772
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.00865,
+        "y_fit_residual_pct_of_span": 0.003346,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 4,
+      "title": "Fig. 13 - Load Regulation",
+      "axes": {
+        "x": {
+          "label": "IOUT - Output Current (A)",
+          "unit": "A",
+          "min": 0.0,
+          "max": 6.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Load Regulation (%)",
+          "unit": "%",
+          "min": -0.2,
+          "max": 0.2,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              0.010145,
+              0.001068
+            ],
+            [
+              1.320867,
+              0.011074
+            ],
+            [
+              2.324621,
+              0.011074
+            ],
+            [
+              3.325448,
+              0.001068
+            ],
+            [
+              4.319086,
+              0.011074
+            ],
+            [
+              5.319426,
+              0.021079
+            ],
+            [
+              6.000404,
+              0.021544
+            ]
+          ],
+          "_x_range": [
+            0.010145,
+            6.000404
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 1e-06,
+        "y_fit_residual_pct_of_span": 0.000344,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    }
+  ],
+  "skips": [
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.078,0.500,0.767"
+    },
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.940,0.423,0.133"
+    },
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.292,0.719,0.295"
+    },
+    {
+      "figure_index": 2,
+      "reason": "legend_unresolved",
+      "color": "0.078,0.500,0.767"
+    },
+    {
+      "figure_index": 2,
+      "reason": "legend_unresolved",
+      "color": "0.940,0.423,0.133"
+    },
+    {
+      "figure_index": 2,
+      "reason": "legend_unresolved",
+      "color": "0.292,0.720,0.305"
+    }
+  ],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
+}

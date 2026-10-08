@@ -1,0 +1,185 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+  "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+  "page_1based": 19,
+  "manufacturer": "vishay",
+  "section_title": null,
+  "plots": [
+    {
+      "_figure_index": 0,
+      "title": "Fig. 44 - Load Regulation",
+      "axes": {
+        "x": {
+          "label": "Output Current (A)",
+          "unit": "A",
+          "min": 0.0,
+          "max": 6.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Load Regulation (%)",
+          "unit": "%",
+          "min": -0.8,
+          "max": 0.8,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              -0.00047,
+              -0.045357
+            ],
+            [
+              0.999612,
+              -0.070353
+            ],
+            [
+              1.999657,
+              -0.070353
+            ],
+            [
+              2.999775,
+              -0.070353
+            ],
+            [
+              3.999711,
+              -0.070353
+            ],
+            [
+              4.999939,
+              -0.020361
+            ],
+            [
+              5.999801,
+              -0.010365
+            ]
+          ],
+          "_x_range": [
+            -0.00047,
+            5.999801
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.00027,
+        "y_fit_residual_pct_of_span": 0.000253,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 1,
+      "title": "Fig. 41 - Line Regulation",
+      "axes": {
+        "x": {
+          "label": "Input Voltage (V)",
+          "unit": "V",
+          "min": 0.0,
+          "max": 60.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Line Regulation (%)",
+          "unit": "%",
+          "min": -0.8,
+          "max": 0.8,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              6.008611,
+              -0.015325
+            ],
+            [
+              20.012192,
+              -0.025322
+            ],
+            [
+              25.013259,
+              -0.015325
+            ],
+            [
+              30.014332,
+              -0.020318
+            ],
+            [
+              35.015762,
+              -0.015325
+            ],
+            [
+              40.017203,
+              0.014676
+            ],
+            [
+              45.01754,
+              0.024673
+            ],
+            [
+              50.019338,
+              0.014676
+            ],
+            [
+              55.021142,
+              0.034669
+            ],
+            [
+              60.02294,
+              0.044677
+            ]
+          ],
+          "_x_range": [
+            6.008611,
+            60.02294
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.004981,
+        "y_fit_residual_pct_of_span": 0.007591,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    }
+  ],
+  "skips": [
+    {
+      "figure_index": 2,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 3,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 4,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 5,
+      "reason": "no_vector_curves"
+    }
+  ],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
+}

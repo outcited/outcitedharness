@@ -1,0 +1,232 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+  "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+  "page_1based": 17,
+  "manufacturer": "vishay",
+  "section_title": null,
+  "plots": [
+    {
+      "_figure_index": 3,
+      "title": "Fig. 32 - SiC464 Efficiency vs. Output Current - Light Load,",
+      "axes": {
+        "x": {
+          "label": "Output Current, IOUT (A)",
+          "unit": "A",
+          "min": 0.01,
+          "max": 1.0,
+          "scale": "log10"
+        },
+        "y": {
+          "label": "Efficiency (%)",
+          "unit": "%",
+          "min": 70.0,
+          "max": 91.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              0.010081,
+              70.815889
+            ],
+            [
+              0.010308,
+              71.099698
+            ],
+            [
+              0.020073,
+              77.834188
+            ],
+            [
+              0.028959,
+              79.01916
+            ],
+            [
+              0.039199,
+              80.38909
+            ],
+            [
+              0.049057,
+              81.306345
+            ],
+            [
+              0.058877,
+              81.946689
+            ],
+            [
+              0.06925,
+              82.358192
+            ],
+            [
+              0.078993,
+              82.622772
+            ],
+            [
+              0.089002,
+              82.890489
+            ],
+            [
+              0.13908,
+              83.568871
+            ],
+            [
+              0.189299,
+              84.921035
+            ],
+            [
+              0.239136,
+              85.125427
+            ],
+            [
+              0.289319,
+              85.380395
+            ],
+            [
+              0.339682,
+              85.696597
+            ],
+            [
+              0.389522,
+              86.112277
+            ],
+            [
+              0.43996,
+              86.350315
+            ],
+            [
+              0.490143,
+              85.045592
+            ],
+            [
+              0.539957,
+              86.035577
+            ],
+            [
+              0.590179,
+              86.900377
+            ],
+            [
+              0.640205,
+              87.654206
+            ],
+            [
+              0.690197,
+              88.26592
+            ],
+            [
+              0.740553,
+              88.865299
+            ],
+            [
+              0.790802,
+              89.375655
+            ],
+            [
+              0.84115,
+              89.789662
+            ],
+            [
+              0.891447,
+              90.167308
+            ],
+            [
+              0.941311,
+              90.556447
+            ],
+            [
+              0.991736,
+              90.852794
+            ]
+          ],
+          "_x_range": [
+            0.010081,
+            0.991736
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)",
+        "VIN = 12 V, L = 10 μH",
+        "VIN = 12 V, L = 10 μH",
+        "98 VIN = 24 V, L = 15 μH",
+        "VIN = 24 V, L = 15 μH"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010068,
+        "y_fit_residual_pct_of_span": 0.00028,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    }
+  ],
+  "skips": [
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.074,0.509,0.774"
+    },
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.955,0.452,0.160"
+    },
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.567,0.733,0.385"
+    },
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.934,0.193,0.179"
+    },
+    {
+      "figure_index": 1,
+      "reason": "axis_fit_failed"
+    },
+    {
+      "figure_index": 2,
+      "reason": "axis_fit_failed"
+    },
+    {
+      "figure_index": 4,
+      "reason": "legend_unresolved",
+      "color": "0.074,0.509,0.774"
+    },
+    {
+      "figure_index": 4,
+      "reason": "legend_unresolved",
+      "color": "0.955,0.452,0.160"
+    },
+    {
+      "figure_index": 4,
+      "reason": "legend_unresolved",
+      "color": "0.292,0.722,0.361"
+    },
+    {
+      "figure_index": 5,
+      "reason": "axis_fit_failed"
+    },
+    {
+      "figure_index": 6,
+      "reason": "axis_fit_failed"
+    },
+    {
+      "figure_index": 7,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 8,
+      "reason": "no_vector_curves"
+    }
+  ],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
+}

@@ -1,0 +1,700 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "dcdc_TPS628302.pdf",
+  "document_sha256": "733977a5b89523edf436f093bac8a47737543c9c760bc764ce977ec887290696",
+  "page_1based": 7,
+  "manufacturer": "texas_instruments",
+  "section_title": "6.5 Electrical Characteristics (continued)",
+  "plots": [
+    {
+      "_figure_index": 0,
+      "title": "Figure 6-1. High-Side FET On-Resistance",
+      "axes": {
+        "x": {
+          "label": "Input Voltage [V]",
+          "unit": null,
+          "min": 2.25,
+          "max": 5.5,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "RDS(on) (mOhm)",
+          "unit": "mOhm",
+          "min": 0.0,
+          "max": 75.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "TJ = 125 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              70.45617
+            ],
+            [
+              2.400235,
+              65.514984
+            ],
+            [
+              3.000002,
+              52.767583
+            ],
+            [
+              3.600359,
+              45.748748
+            ],
+            [
+              5.000118,
+              38.155732
+            ],
+            [
+              5.491733,
+              36.609937
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = 85 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              62.896573
+            ],
+            [
+              2.400235,
+              58.317131
+            ],
+            [
+              3.000002,
+              46.344491
+            ],
+            [
+              3.600359,
+              40.160581
+            ],
+            [
+              5.000118,
+              33.372764
+            ],
+            [
+              5.491733,
+              32.076549
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = −40 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              43.492827
+            ],
+            [
+              2.400235,
+              39.509129
+            ],
+            [
+              3.000002,
+              30.362136
+            ],
+            [
+              3.600359,
+              26.062748
+            ],
+            [
+              5.000118,
+              22.077559
+            ],
+            [
+              5.491733,
+              21.46547
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = 25 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              53.430908
+            ],
+            [
+              2.400235,
+              49.091393
+            ],
+            [
+              3.000002,
+              38.550149
+            ],
+            [
+              3.600359,
+              33.324473
+            ],
+            [
+              5.000118,
+              27.72887
+            ],
+            [
+              5.491733,
+              26.754291
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "TJ = –40°C to +125°C, VIN = 2.25 V to 5.5 V. Typical values are at TJ = 25°C and VIN = 5 V (unless otherwise noted)",
+        "IOUT = 1 A, VOUT = 1.8 V",
+        "VIN > 2 V, VSW = 0.4 V, EN = LOW"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.006109,
+        "y_fit_residual_pct_of_span": 0.006571,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 1,
+      "title": "Figure 6-2. Low-Side FET On-Resistance",
+      "axes": {
+        "x": {
+          "label": "Input Voltage [V]",
+          "unit": null,
+          "min": 2.25,
+          "max": 5.5,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "RDS(on) (mOhm)",
+          "unit": "mOhm",
+          "min": 0.0,
+          "max": 40.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "TJ = 125 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              37.667076
+            ],
+            [
+              2.400235,
+              35.046793
+            ],
+            [
+              3.000002,
+              28.288308
+            ],
+            [
+              3.600359,
+              24.592575
+            ],
+            [
+              5.000118,
+              20.534799
+            ],
+            [
+              5.491733,
+              19.761979
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = 85 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              33.409656
+            ],
+            [
+              2.400235,
+              30.949797
+            ],
+            [
+              3.000002,
+              24.785489
+            ],
+            [
+              3.600359,
+              21.47478
+            ],
+            [
+              5.000118,
+              18.074542
+            ],
+            [
+              5.491733,
+              17.434824
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = −40 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              23.062392
+            ],
+            [
+              2.400235,
+              21.105988
+            ],
+            [
+              3.000002,
+              16.580794
+            ],
+            [
+              3.600359,
+              14.523779
+            ],
+            [
+              5.000118,
+              12.450135
+            ],
+            [
+              5.491733,
+              12.136802
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = 25 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              28.766419
+            ],
+            [
+              2.400235,
+              26.32121
+            ],
+            [
+              3.000002,
+              20.938437
+            ],
+            [
+              3.600359,
+              18.319337
+            ],
+            [
+              5.000118,
+              15.648743
+            ],
+            [
+              5.491733,
+              15.369887
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "TJ = –40°C to +125°C, VIN = 2.25 V to 5.5 V. Typical values are at TJ = 25°C and VIN = 5 V (unless otherwise noted)",
+        "IOUT = 1 A, VOUT = 1.8 V",
+        "VIN > 2 V, VSW = 0.4 V, EN = LOW"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.006115,
+        "y_fit_residual_pct_of_span": 0.00826,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 2,
+      "title": "Figure 6-3. Shutdown Current",
+      "axes": {
+        "x": {
+          "label": "Input Voltage [V]",
+          "unit": null,
+          "min": 2.25,
+          "max": 5.5,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Shutdown Current [A]",
+          "unit": null,
+          "min": 0.0,
+          "max": 1.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "TJ = 125 C",
+          "condition": null,
+          "points": [
+            [
+              2.258423,
+              0.380674
+            ],
+            [
+              2.400509,
+              0.38529
+            ],
+            [
+              3.000163,
+              0.411169
+            ],
+            [
+              3.600226,
+              0.441544
+            ],
+            [
+              5.000009,
+              0.538582
+            ],
+            [
+              5.49161,
+              0.590448
+            ]
+          ],
+          "_x_range": [
+            2.258423,
+            5.49161
+          ]
+        },
+        {
+          "name": "TJ = 85 C",
+          "condition": null,
+          "points": [
+            [
+              2.258423,
+              0.181003
+            ],
+            [
+              2.400509,
+              0.181647
+            ],
+            [
+              3.000163,
+              0.184548
+            ],
+            [
+              3.600226,
+              0.188084
+            ],
+            [
+              5.000009,
+              0.202148
+            ],
+            [
+              5.49161,
+              0.211814
+            ]
+          ],
+          "_x_range": [
+            2.258423,
+            5.49161
+          ]
+        },
+        {
+          "name": "TJ = −40 C",
+          "condition": null,
+          "points": [
+            [
+              2.258423,
+              0.082776
+            ],
+            [
+              2.400509,
+              0.083103
+            ],
+            [
+              3.000163,
+              0.084816
+            ],
+            [
+              3.600226,
+              0.086748
+            ],
+            [
+              5.000009,
+              0.092007
+            ],
+            [
+              5.49161,
+              0.094473
+            ]
+          ],
+          "_x_range": [
+            2.258423,
+            5.49161
+          ]
+        },
+        {
+          "name": "TJ = 25 C",
+          "condition": null,
+          "points": [
+            [
+              2.258423,
+              0.126789
+            ],
+            [
+              2.400509,
+              0.126789
+            ],
+            [
+              3.000163,
+              0.127641
+            ],
+            [
+              3.600226,
+              0.12872
+            ],
+            [
+              5.000009,
+              0.131404
+            ],
+            [
+              5.49161,
+              0.133336
+            ]
+          ],
+          "_x_range": [
+            2.258423,
+            5.49161
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "TJ = –40°C to +125°C, VIN = 2.25 V to 5.5 V. Typical values are at TJ = 25°C and VIN = 5 V (unless otherwise noted)",
+        "IOUT = 1 A, VOUT = 1.8 V",
+        "VIN > 2 V, VSW = 0.4 V, EN = LOW"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.007089,
+        "y_fit_residual_pct_of_span": 0.006985,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 3,
+      "title": "Figure 6-4. Quiescent Current",
+      "axes": {
+        "x": {
+          "label": "Input Voltage [V]",
+          "unit": null,
+          "min": 2.25,
+          "max": 5.5,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Quiescent Current [A]",
+          "unit": null,
+          "min": 0.0,
+          "max": 12.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "TJ = 125 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              9.224657
+            ],
+            [
+              2.400235,
+              9.241651
+            ],
+            [
+              3.000002,
+              9.391399
+            ],
+            [
+              3.600359,
+              9.230004
+            ],
+            [
+              5.000118,
+              9.576793
+            ],
+            [
+              5.491733,
+              9.834335
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = 85 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              7.548944
+            ],
+            [
+              2.400235,
+              7.576515
+            ],
+            [
+              3.000002,
+              7.720078
+            ],
+            [
+              3.600359,
+              7.562255
+            ],
+            [
+              5.000118,
+              7.838572
+            ],
+            [
+              5.491733,
+              8.052491
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = −40 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              4.850213
+            ],
+            [
+              2.400235,
+              4.88373
+            ],
+            [
+              3.000002,
+              5.058902
+            ],
+            [
+              3.600359,
+              5.271518
+            ],
+            [
+              5.000118,
+              5.087189
+            ],
+            [
+              5.491733,
+              5.276626
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        },
+        {
+          "name": "TJ = 25 C",
+          "condition": null,
+          "points": [
+            [
+              2.258334,
+              6.23642
+            ],
+            [
+              2.400235,
+              6.260786
+            ],
+            [
+              3.000002,
+              6.423123
+            ],
+            [
+              3.600359,
+              6.244024
+            ],
+            [
+              5.000118,
+              6.495382
+            ],
+            [
+              5.491733,
+              6.69766
+            ]
+          ],
+          "_x_range": [
+            2.258334,
+            5.491733
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "TJ = –40°C to +125°C, VIN = 2.25 V to 5.5 V. Typical values are at TJ = 25°C and VIN = 5 V (unless otherwise noted)",
+        "IOUT = 1 A, VOUT = 1.8 V",
+        "VIN > 2 V, VSW = 0.4 V, EN = LOW"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.006115,
+        "y_fit_residual_pct_of_span": 0.009039,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    }
+  ],
+  "skips": [],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
+}

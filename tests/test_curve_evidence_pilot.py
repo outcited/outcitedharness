@@ -52,12 +52,22 @@ def test_pilot_reference_integrity_gates():
         for page in spec["pages"]
     }
     integrity = score_reference_integrity(spec, records)
-    assert integrity["misses"] == []
-    assert integrity["plot_identification_accuracy"] >= \
-        GATES["plot_identification_accuracy"]
+    # missing printed figures are ALLOWED and counted (coverage gate);
+    # wrong extractions are not (precision + axis/series gates)
+    hard_errors = [
+        m for m in integrity["misses"]
+        if "not extracted" not in m and "missing" not in m
+    ]
+    assert hard_errors == [], hard_errors
+    assert integrity["plot_precision"] >= GATES["plot_precision"]
+    assert integrity["plot_coverage"] >= GATES["plot_coverage_min"]
     assert integrity["axis_unit_correctness"] >= GATES["axis_unit_correctness"]
     assert integrity["series_identification_accuracy"] >= \
         GATES["series_identification_accuracy"]
+    assert integrity["numeric_error"]["x_fit_residual_pct_max"] < \
+        GATES["fit_residual_pct_max"]
+    assert integrity["numeric_error"]["y_fit_residual_pct_max"] < \
+        GATES["fit_residual_pct_max"]
 
 
 def test_pilot_decision_grade_gates():

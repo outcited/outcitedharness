@@ -3,6 +3,7 @@
   "source_artifact": "dcdc_TPS548C26.pdf",
   "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
   "page_1based": 10,
+  "manufacturer": "texas_instruments",
   "section_title": "6.6 Typical Characteristics",
   "plots": [
     {
@@ -873,6 +874,13 @@
         "MODE = FCCM"
       ],
       "conditions_page": [],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009859,
+        "y_fit_residual_pct_of_span": 0.009885,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -1743,6 +1751,13 @@
         "MODE = FCCM"
       ],
       "conditions_page": [],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010368,
+        "y_fit_residual_pct_of_span": 0.007984,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -2613,6 +2628,13 @@
         "MODE = FCCM"
       ],
       "conditions_page": [],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009859,
+        "y_fit_residual_pct_of_span": 0.009884,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -3483,6 +3505,13 @@
         "MODE = FCCM"
       ],
       "conditions_page": [],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010368,
+        "y_fit_residual_pct_of_span": 0.010294,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -4353,6 +4382,13 @@
         "MODE = DCM"
       ],
       "conditions_page": [],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009859,
+        "y_fit_residual_pct_of_span": 0.009906,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -5223,8 +5259,16 @@
         "MODE = DCM"
       ],
       "conditions_page": [],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010368,
+        "y_fit_residual_pct_of_span": 0.010323,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     }
   ],
-  "source": "Vector reference extraction (deterministic geometry from the vector PDF): frames/ticks/legends from the page word layer, curve points from vector paths. Hand-review pending; never generated from extractor output."
+  "skips": [],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
 }

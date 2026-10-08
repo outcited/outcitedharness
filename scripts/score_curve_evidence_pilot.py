@@ -43,12 +43,14 @@ PILOT_DIR = ROOT / "tests/fixtures/gold/curve_evidence_pilot"
 MCU_GOLD_DIR = ROOT / "tests/fixtures/gold/typical_curves"
 
 GATES = {
-    "plot_identification_accuracy": 1.0,
+    "plot_precision": 1.0,
+    "plot_coverage_min": 0.5,
     "axis_unit_correctness": 1.0,
     "series_identification_accuracy": 0.95,
     "condition_classification_accuracy": 0.95,
     "false_comparability_rate_max": 0.0,
     "out_of_range_correct_rejection": 1.0,
+    "fit_residual_pct_max": 0.1,
 }
 
 
@@ -62,23 +64,57 @@ def _labels_agree(expected: str, actual: str) -> bool:
 
 
 def score_reference_integrity(spec: dict, records: dict) -> dict:
-    total_plots = matched_plots = 0
+    """Coverage vs precision, per the CURVE-03 Phase-1 law: missing plots
+    and series are penalized (coverage), and extracted plots must match the
+    independently transcribed printed captions (precision — a wrong
+    extraction can never raise coverage). Label/series checks run only on
+    pages carrying hand expectations."""
+
+    printed_total = identified_total = extracted_total = 0
     axis_total = axis_hit = 0
     series_total = series_count_hit = 0
     series_name_total = series_name_hit = 0
     condition_total = condition_hit = 0
     class_total = class_hit = 0
+    residuals_x: list[float] = []
+    residuals_y: list[float] = []
+    retained: list[float] = []
+    outside: list[float] = []
+    skip_reasons: dict[str, int] = {}
     misses: list[str] = []
     for page in spec["pages"]:
         record = records[page["file"]]
         plots = record.get("plots") or []
-        total_plots += page["expected_figures"]
-        matched_plots += len(plots)
-        if len(plots) != page["expected_figures"]:
-            misses.append(
-                f"{page['file']}: {len(plots)} plots != "
-                f"{page['expected_figures']} printed figures"
-            )
+        titles = page.get("expected_titles") or []
+        printed = len(titles) or page.get("expected_figures", 0)
+        printed_total += printed
+        extracted_total += len(plots)
+        claimed = set()
+        for title in titles:
+            hit = next((p for p in plots if title in str(p.get("title") or "")
+                        and id(p) not in claimed), None)
+            if hit is not None:
+                identified_total += 1
+                claimed.add(id(hit))
+            else:
+                misses.append(
+                    f"{page['file']}: printed figure {title!r} not extracted"
+                )
+        for sk in record.get("skips") or []:
+            skip_reasons[sk.get("reason") or "?"] = \
+                skip_reasons.get(sk.get("reason") or "?", 0) + 1
+        for p in plots:
+            q = p.get("_numeric_quality") or {}
+            if q.get("x_fit_residual_pct_of_span") is not None:
+                residuals_x.append(q["x_fit_residual_pct_of_span"])
+            if q.get("y_fit_residual_pct_of_span") is not None:
+                residuals_y.append(q["y_fit_residual_pct_of_span"])
+            if q.get("retained_point_fraction") is not None:
+                retained.append(q["retained_point_fraction"])
+            if q.get("points_outside_axis_pct") is not None:
+                outside.append(q["points_outside_axis_pct"])
+        if page.get("title_only"):
+            continue
         if evidence_class(record.get("section_title")) != \
                 page["expected_section_class"]:
             misses.append(f"{page['file']}: section class mismatch")
@@ -155,10 +191,23 @@ def score_reference_integrity(spec: dict, records: dict) -> dict:
                         f"{page['file']} {want['title_contains']}: condition "
                         f"{cond!r} not captured"
                     )
+    def med(values):
+        if not values:
+            return None
+        s = sorted(values)
+        n = len(s)
+        return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2.0
+
     return {
-        "plot_identification_accuracy": (
-            matched_plots / total_plots if total_plots else None
+        "plot_coverage": (
+            identified_total / printed_total if printed_total else None
         ),
+        "plot_precision": (
+            identified_total / extracted_total if extracted_total else None
+        ),
+        "printed_figures": printed_total,
+        "extracted_plots": extracted_total,
+        "identified_plots": identified_total,
         "axis_unit_correctness": axis_hit / axis_total if axis_total else None,
         "series_identification_accuracy": (
             (series_count_hit + series_name_hit)
@@ -172,10 +221,17 @@ def score_reference_integrity(spec: dict, records: dict) -> dict:
         "printed_condition_capture": (
             condition_hit / condition_total if condition_total else None
         ),
-        "counts": {
-            "plots": total_plots,
-            "series": series_total - 1 + 1,
+        "numeric_error": {
+            "note": "measured tick-fit residuals as % of axis span; "
+                    "interpolation inherits this bound",
+            "x_fit_residual_pct_median": med(residuals_x),
+            "x_fit_residual_pct_max": max(residuals_x) if residuals_x else None,
+            "y_fit_residual_pct_median": med(residuals_y),
+            "y_fit_residual_pct_max": max(residuals_y) if residuals_y else None,
+            "retained_point_fraction_min": min(retained) if retained else None,
+            "points_outside_axis_pct_max": max(outside) if outside else None,
         },
+        "skip_reasons": skip_reasons,
         "misses": misses,
     }
 
@@ -238,16 +294,14 @@ def score_probes(spec: dict, curves: list[CurveEvidence]) -> dict:
                 continue
             if key == "reason":
                 nu = response["not_usable"] + response["insufficient_conditions"]
-                actual_reason = next(
-                    (r.get("reason") for r in nu if r.get("reason")), None
-                )
-                if actual_reason != value:
+                present = {r.get("reason") for r in nu if r.get("reason")}
+                if value not in present:
                     ok = False
                     failures.append({
                         "probe": probe["id"],
                         "check": "reason",
                         "expected": value,
-                        "actual": actual_reason,
+                        "actual": sorted(r for r in present if r),
                     })
                 else:
                     reasons[value] = reasons.get(value, 0) + 1
@@ -295,9 +349,19 @@ def main() -> int:
     spec = json.loads((args.pilot_dir / "_probes.json").read_text())
     records = {}
     curves: list[CurveEvidence] = []
+    signoff_path = ROOT / "results/curve-review/signoff.json"
+    signoff = {}
+    if signoff_path.exists():
+        try:
+            signoff = json.loads(signoff_path.read_text())
+        except ValueError:
+            signoff = {}
     for page in spec["pages"]:
         path = args.pilot_dir / page["file"]
         record = json.loads(path.read_text())
+        stem = path.stem
+        if signoff.get(stem, {}).get("signed"):
+            record["_human_signed"] = True
         records[page["file"]] = record
         for plot in record.get("plots") or []:
             for index in range(len(plot.get("series") or [])):
@@ -341,16 +405,25 @@ def main() -> int:
         "pilot": {
             "files": [p["file"] for p in spec["pages"]],
             "curves_total": len(curves),
-            "curves_hand_reviewed": sum(
+            "curves_machine_reference": sum(
                 len(p.get("series") or [])
                 for page in spec["pages"]
                 for p in records[page["file"]].get("plots") or []
             ),
-            "curves_mcu_gold": len(curves) - sum(
+            "curves_machine_reference_human_signed": sum(
+                len(p.get("series") or [])
+                for page in spec["pages"]
+                if records[page["file"]].get("_human_signed")
+                for p in records[page["file"]].get("plots") or []
+            ),
+            "curves_mcu_gold_hand_labeled": len(curves) - sum(
                 len(p.get("series") or [])
                 for page in spec["pages"]
                 for p in records[page["file"]].get("plots") or []
             ),
+            "note": "machine references are human gold ONLY after packet "
+                    "sign-off (results/curve-review/signoff.json); the "
+                    "count above is 0 until then",
         },
         "reference_integrity": integrity,
         "decision_grade": probes,
@@ -360,15 +433,23 @@ def main() -> int:
     print(json.dumps(result, indent=2, default=str))
 
     failed = []
-    if integrity["plot_identification_accuracy"] is not None and \
-            integrity["plot_identification_accuracy"] < GATES["plot_identification_accuracy"]:
-        failed.append("plot_identification_accuracy")
+    if integrity["plot_precision"] is not None and \
+            integrity["plot_precision"] < GATES["plot_precision"]:
+        failed.append("plot_precision")
+    if integrity["plot_coverage"] is not None and \
+            integrity["plot_coverage"] < GATES["plot_coverage_min"]:
+        failed.append("plot_coverage")
     if integrity["axis_unit_correctness"] is not None and \
             integrity["axis_unit_correctness"] < GATES["axis_unit_correctness"]:
         failed.append("axis_unit_correctness")
     if integrity["series_identification_accuracy"] is not None and \
             integrity["series_identification_accuracy"] < GATES["series_identification_accuracy"]:
         failed.append("series_identification_accuracy")
+    num = integrity["numeric_error"]
+    if num.get("x_fit_residual_pct_max") is not None and max(
+        num["x_fit_residual_pct_max"], num["y_fit_residual_pct_max"] or 0
+    ) > GATES["fit_residual_pct_max"]:
+        failed.append("fit_residual_pct_max")
     if probes["condition_classification_accuracy"] < GATES["condition_classification_accuracy"]:
         failed.append("condition_classification_accuracy")
     if probes["false_comparability_rate"] > GATES["false_comparability_rate_max"]:

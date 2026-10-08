@@ -182,7 +182,7 @@ def test_r2_legend_temperature_overrides_page_default(lmr_curves):
     shutdown = [c for c in lmr_curves if "Shutdown" in (c.caption or "")]
     by_name = {c.series["name"]: c for c in shutdown}
     assert by_name["-40C"].conditions["keys"]["ta_c"] == -40.0
-    assert by_name["-40C"].conditions["legend_override"] == {
+    assert by_name["-40C"].conditions["legend_override"]["ta_c"] == {
         "page_default": 25.0, "series_legend": -40.0,
     }
     assert by_name["25C"].conditions["keys"].get("ta_c") == 25.0
@@ -362,3 +362,98 @@ def test_provider_use_case_discovery(tps_curves):
         if r["supported_region"]["min"] <= 1.0
     ]
     assert light, "curves whose support reaches light load are discoverable"
+
+
+# --- CURVE-03 law additions --------------------------------------------------------
+
+
+def test_sweep_variable_required_condition_matched_by_operating_point():
+    """Requiring the curve's own x quantity (VIN on a VIN-swept curve) is
+    satisfied by the operating point, not treated as missing; a required
+    value that disagrees with the queried point is a mismatch."""
+    curve = _linear_curve([(0.0, 0.0), (24.0, 24.0)])
+    curve.axes["x"]["label"] = "Input Voltage (V)"
+    rebuilt = CurveEvidence(
+        document_sha256=curve.document_sha256, page_1based=1,
+        figure_index=0, series_index=0, caption=curve.caption,
+        region_bbox=None, figure_revision=None, axes={
+            "x": {"label": "Input Voltage (V)", "unit": "V", "min": 0,
+                  "max": 24},
+            "y": {"label": "Quiescent Current (uA)", "unit": "µA",
+                  "min": 0, "max": 30},
+        },
+        series={"name": "s", "points": curve.points},
+        conditions_verbatim=["TA = 25°C"],
+        evidence_class_="typical", applies_to={}, uncertainty={},
+        verification={"status": "reference"},
+    )
+    ok = query_operating_point(rebuilt, 12.0,
+                               required_conditions={"vin_v": 12.0})
+    assert ok["status"] == "ok"
+    assert ok["matched_conditions"]["vin_v"] == {"swept_at": 12.0}
+    bad = query_operating_point(rebuilt, 12.0,
+                                required_conditions={"vin_v": 5.0})
+    assert bad["status"] == "not_comparable"
+    assert bad["compatibility"]["mismatched"][0]["required"] == 5.0
+
+
+def test_numeric_legend_overrides_page_default():
+    curve = CurveEvidence(
+        document_sha256="c" * 64, page_1based=1, figure_index=0,
+        series_index=0, caption="Figure 1. Efficiency",
+        region_bbox=None, figure_revision=None, axes={
+            "x": {"label": "Output Current (mA)", "unit": "mA",
+                  "min": 0, "max": 150},
+            "y": {"label": "Efficiency (%)", "unit": "%", "min": 0,
+                  "max": 100},
+        },
+        series={"name": "VIN = 12 V",
+                "points": [{"x": 1, "y": 60}, {"x": 100, "y": 85}]},
+        conditions_verbatim=[
+            "VOUT = 3.3 V Fixed 1 MHz (FPWM)",
+            "TA = 25°C, VIN = 13.5 V.",
+        ],
+        evidence_class_="typical", applies_to={}, uncertainty={},
+        verification={"status": "reference"},
+    )
+    assert curve.conditions["keys"]["vin_v"] == 12.0, \
+        "legend VIN beats the page default"
+    assert curve.conditions["legend_override"]["vin_v"] == {
+        "page_default": 13.5, "series_legend": 12.0,
+    }
+    assert "conflict" not in curve.conditions
+
+
+def test_envelope_vs_default_point_resolves():
+    parsed = typed_conditions([
+        "VIN = 2.25 V to 5.5 V",
+        "Typical values are at VIN = 5 V (unless otherwise noted)",
+    ])
+    assert parsed["keys"]["vin_v"] == 5.0
+    assert parsed["resolved_envelopes"][0]["envelope"] == [2.25, 5.5]
+    assert "conflict" not in parsed
+
+
+def test_unit_conversion_and_refusal():
+    from harness.electronics.curve_evidence import convert_value
+    assert convert_value(0.1, "A", "mA") == pytest.approx(100.0)
+    assert convert_value(12.0, "V", "mV") == pytest.approx(12000.0)
+    assert convert_value(5.0, "V", "A") is None, \
+        "incompatible unit families never convert"
+    curve = _linear_curve([(1.0, 10.0), (150.0, 90.0)])
+    curve.axes["x"]["unit"] = "mA"
+    rebuilt = CurveEvidence(
+        document_sha256=curve.document_sha256, page_1based=1,
+        figure_index=0, series_index=0, caption=curve.caption,
+        region_bbox=None, figure_revision=None, axes=curve.axes,
+        series={"name": "s", "points": curve.points},
+        conditions_verbatim=[], evidence_class_="typical",
+        applies_to={}, uncertainty={},
+        verification={"status": "reference"},
+    )
+    r = query_operating_point(rebuilt, 0.1, x_unit="A")  # axis is mA
+    assert r["status"] == "ok"
+    assert r["x"] == pytest.approx(100.0)
+    refused = query_operating_point(rebuilt, 12.0, x_unit="V")
+    assert refused["status"] == "not_usable"
+    assert "unit_incompatible" in refused["reason"]

@@ -1,0 +1,110 @@
+{
+  "schema": "harness.electronics-curve-cohort.v1",
+  "source": "Parametric baseline for the CURVE-03 A/B/C experiments. Every row is a verbatim title-page quote with its document SHA — frozen independently of the curve references so baseline A never borrows from curve evidence. Where a value is not stated on the title page it is null, never guessed.",
+  "families": [
+    {
+      "family": "TPS548C26",
+      "manufacturer": "texas_instruments",
+      "vin_min_v": 4.0,
+      "vin_max_v": 16.0,
+      "iout_max_a": 35.0,
+      "title_quote": "TPS548C26 4-V to 16-V Input, 35-A Synchronous Buck Converter with Differential Remote Sense",
+      "document_sha256": "cf47fb67fb2f54c309c671b0e3de476a708bdbe93d4a3da78a3a7178cd98cd01",
+      "semantic": {
+        "forced_pwm_mode": true,
+        "mode_quote": "MODE = FCCM / MODE = DCM printed per efficiency figure (TPS548C26 p.10)"
+      }
+    },
+    {
+      "family": "LMR33610",
+      "manufacturer": "texas_instruments",
+      "vin_min_v": 3.8,
+      "vin_max_v": 36.0,
+      "iout_max_a": 1.0,
+      "title_quote": "LMR33610 SIMPLE SWITCHER 3.8-V to 36-V, 1-A Synchronous Step-Down Converter",
+      "document_sha256": "777b3966aff2772c9e1a5f4394b35b16e5e2ee6e27b4db0254c62ab9a20c9e2f",
+      "semantic": {
+        "shutdown_documented": true,
+        "mode_quote": "EN = 0 V shutdown and quiescent-current curves printed (LMR33610 p.8)"
+      }
+    },
+    {
+      "family": "LMR36502",
+      "manufacturer": "texas_instruments",
+      "vin_min_v": 3.0,
+      "vin_max_v": 65.0,
+      "iout_max_a": 0.15,
+      "title_quote": "LMR3650x 3-V to 65-V, 100-mA and 150-mA Wide VIN Synchronous Buck Converter Optimized for Size and Light Load Efficiency",
+      "document_sha256": "6b3d562aca65dab56fbf67904609d8cc5acd04f8c56f9d9071411896437a9935",
+      "semantic": {
+        "light_load_optimized": true,
+        "fpwm_available": true,
+        "mode_quote": "Optimized for Size and Light Load Efficiency; VOUT = 3.3 V Fixed 1 MHz (FPWM) printed on efficiency figure (p.10)"
+      }
+    },
+    {
+      "family": "TPS563203",
+      "manufacturer": "texas_instruments",
+      "vin_min_v": 4.2,
+      "vin_max_v": 17.0,
+      "iout_max_a": 3.0,
+      "title_quote": "TPS56320x 4.2V to 17V Input, 3A, Synchronous Buck Converter in SOT563",
+      "document_sha256": "8311e941fe051dbb52aa3fa62072c9a9c7cbec92646cd2c2b03d561d0a4b28b0",
+      "semantic": {
+        "light_load_optimized": false,
+        "mode_quote": null
+      }
+    },
+    {
+      "family": "TPS628302",
+      "manufacturer": "texas_instruments",
+      "vin_min_v": 2.25,
+      "vin_max_v": 5.5,
+      "iout_max_a": 4.0,
+      "title_quote": "TPS62830x, 2.25V to 5.5V Input, 1, 2, 3, 4A Step-Down Converter With 1% Output Accuracy in Small WQFN and SOT583 Packages",
+      "document_sha256": "733977a5b89523edf436f093bac8a47737543c9c760bc764ce977ec887290696",
+      "semantic": {
+        "shutdown_documented": true,
+        "mode_quote": "Shutdown Current and Quiescent Current figures printed (p.7)"
+      }
+    },
+    {
+      "family": "TPS542941",
+      "manufacturer": "texas_instruments",
+      "vin_min_v": null,
+      "vin_max_v": null,
+      "iout_max_a": null,
+      "title_quote": "dual-rail outputs VO1 = 3.3V, VO2 = 1.5V printed on regulation figures (p.9); title-page parametrics not machine-readable in this copy",
+      "document_sha256": "1fde1c29e6212715ceef4eba4077f66b9ec05eea75f9fa828f1f4fb0b7187391",
+      "semantic": {
+        "mode_quote": null
+      }
+    },
+    {
+      "family": "SiC448",
+      "manufacturer": "vishay",
+      "vin_min_v": 4.5,
+      "vin_max_v": 45.0,
+      "iout_max_a": 6.0,
+      "title_quote": "SiC448 microBUCK ... 4.5 V to 45 V input; Fig. 11 Efficiency, Load 0 A to 6 A (p.13)",
+      "document_sha256": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1",
+      "semantic": {
+        "psm_documented": true,
+        "mode_quote": "Fig. 53 Output Ripple PSM (p.19) — PSM light-load mode documented"
+      }
+    },
+    {
+      "family": "SiC461-464",
+      "manufacturer": "vishay",
+      "vin_min_v": 4.5,
+      "vin_max_v": 60.0,
+      "iout_max_a": null,
+      "title_quote": "SiC461, SiC462, SiC463, SiC464 ... 4.5 V to 60 V; per-device rated currents not on the title page (family table p.2 not machine-read)",
+      "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+      "semantic": {
+        "psm_documented": true,
+        "mode_quote": "Fig. 53 Output Ripple PSM naming in family doc; case-temperature derating curves per device (p.14-17)"
+      }
+    }
+  ]
+}

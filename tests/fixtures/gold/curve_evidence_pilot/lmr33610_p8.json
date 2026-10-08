@@ -3,6 +3,7 @@
   "source_artifact": "dcdc_LMR33610.pdf",
   "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
   "page_1based": 8,
+  "manufacturer": "texas_instruments",
   "section_title": "7.8 Typical Characteristics",
   "plots": [
     {
@@ -182,6 +183,13 @@
       "conditions_page": [
         "Unless otherwise specified the following conditions apply: TA = 25°C and VIN = 12 V"
       ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.008189,
+        "y_fit_residual_pct_of_span": 0.007343,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -357,137 +365,13 @@
       "conditions_page": [
         "Unless otherwise specified the following conditions apply: TA = 25°C and VIN = 12 V"
       ],
-      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
-    },
-    {
-      "_figure_index": 2,
-      "title": "Figure 7-4. Precision Enable Thresholds",
-      "axes": {
-        "x": {
-          "label": "Temperature (C)",
-          "unit": "C",
-          "min": 0.0,
-          "max": 140.0,
-          "scale": "linear"
-        },
-        "y": {
-          "label": "EN Threshold Voltage (V)",
-          "unit": "V",
-          "min": 1.0,
-          "max": 1.35,
-          "scale": "linear"
-        }
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010949,
+        "y_fit_residual_pct_of_span": 0.007496,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
       },
-      "series": [
-        {
-          "name": "UP",
-          "condition": null,
-          "points": [
-            [
-              -39.992627,
-              1.001139
-            ],
-            [
-              -29.991702,
-              1.221066
-            ],
-            [
-              -20.009532,
-              1.351164
-            ],
-            [
-              -0.026437,
-              1.351164
-            ],
-            [
-              19.957024,
-              1.351164
-            ],
-            [
-              24.991581,
-              1.221066
-            ],
-            [
-              39.940332,
-              1.351164
-            ],
-            [
-              39.98873,
-              1.231085
-            ],
-            [
-              60.03977,
-              1.351164
-            ],
-            [
-              79.984348,
-              1.231085
-            ],
-            [
-              80.023079,
-              1.351164
-            ],
-            [
-              100.006357,
-              1.351164
-            ],
-            [
-              119.989635,
-              1.351164
-            ],
-            [
-              124.966066,
-              1.231085
-            ],
-            [
-              139.972943,
-              1.001139
-            ]
-          ],
-          "_x_range": [
-            -39.992627,
-            139.972943
-          ]
-        },
-        {
-          "name": "DN",
-          "condition": null,
-          "points": [
-            [
-              -39.992627,
-              1.151078
-            ],
-            [
-              -29.991702,
-              1.141088
-            ],
-            [
-              24.991581,
-              1.151078
-            ],
-            [
-              39.98873,
-              1.131097
-            ],
-            [
-              79.984348,
-              1.121107
-            ],
-            [
-              124.966066,
-              1.111088
-            ]
-          ],
-          "_x_range": [
-            -39.992627,
-            124.966066
-          ]
-        }
-      ],
-      "conditions_plot": [],
-      "conditions_page": [
-        "Unless otherwise specified the following conditions apply: TA = 25°C and VIN = 12 V"
-      ],
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -692,6 +576,13 @@
       "conditions_page": [
         "Unless otherwise specified the following conditions apply: TA = 25°C and VIN = 12 V"
       ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.008387,
+        "y_fit_residual_pct_of_span": 0.009051,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     },
     {
@@ -872,8 +763,22 @@
       "conditions_page": [
         "Unless otherwise specified the following conditions apply: TA = 25°C and VIN = 12 V"
       ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.008185,
+        "y_fit_residual_pct_of_span": 0.010089,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     }
   ],
-  "source": "Vector reference extraction (deterministic geometry from the vector PDF): frames/ticks/legends from the page word layer, curve points from vector paths. Hand-review pending; never generated from extractor output."
+  "skips": [
+    {
+      "figure_index": 2,
+      "reason": "points_outside_axis",
+      "pct": 23.81
+    }
+  ],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
 }

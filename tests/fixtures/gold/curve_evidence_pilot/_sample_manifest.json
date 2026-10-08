@@ -1,0 +1,270 @@
+{
+  "schema": "harness.electronics-curve-evidence-sample-manifest.v1",
+  "source": "CURVE-03 Phase 1 verified-candidate resolution (2026-10-08). Candidates supplied by the independent plot review; resolved against corpus-delivery vaults and caches by SHA. No automatic gold promotion: every machine reference stays unsigned until its review packet is signed.",
+  "candidates_from_review": [
+    {
+      "device": "IR3883",
+      "manufacturer": "infineon",
+      "requested_pages": [
+        13
+      ],
+      "requested_figures": [
+        "5-4",
+        "5-5"
+      ],
+      "challenge": "FCCM vs diode-emulation efficiency and power loss, multiple output voltages",
+      "status": "not_held_pending_acquisition",
+      "document_sha256": null,
+      "expected_source_url": "https://www.infineon.com/dgdl/ir3883.pdf",
+      "note": "absent from all corpus-delivery manifests, datasheet_cache, and datasheet_text_cache; acquire into the vault before extraction"
+    },
+    {
+      "device": "TLS4125D0EPV",
+      "manufacturer": "infineon",
+      "requested_pages": [
+        18
+      ],
+      "requested_figures": [
+        "section 4.3 efficiency plots"
+      ],
+      "challenge": "440 kHz vs 2.2 MHz legends, logarithmic AND linear load axes, 12 V/18 V legends",
+      "status": "held_refused_raster",
+      "document_sha256": "14cc7b1af8ba9b93b1af2b0ed4c4d84b50a5f5c9c9d4ab5318b90b0f21f4c6ad",
+      "vault_ref": "datasheet-tail-20261007/blobs/14/cc/14cc7b1af8ba9b93b1af2b0ed4c4d84b50a5f5c9c9d4ab5318b90b0f21f4c6ad.pdf",
+      "second_revision_sha256": "c660412244f6e27ee0d3c1bb77a3b3e21a37a1a68b8b7fe59d9f1c66a41a931e",
+      "note": "page 18 verified: section text and titles are in the word layer but plot areas contain 3 drawings total (curves and ticks are raster images). The deterministic vector tool refuses; needs the vision lane (wave-A) or OCR-assisted labeling. BOTH held revisions are raster.",
+      "refusal_reason": "raster_plots"
+    },
+    {
+      "device": "IR3447",
+      "manufacturer": "infineon",
+      "requested_pages": [
+        41
+      ],
+      "requested_figures": [
+        "40",
+        "41"
+      ],
+      "challenge": "efficiency and power loss over 0-25 A",
+      "status": "not_held_pending_acquisition",
+      "document_sha256": null,
+      "expected_source_url": "https://www.infineon.com/dgdl/ir3447.pdf",
+      "note": "absent from all manifests and caches"
+    },
+    {
+      "device": "ADP5003",
+      "manufacturer": "analog_devices",
+      "requested_pages": [
+        8
+      ],
+      "requested_figures": [
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "challenge": "buck and adaptive-mode efficiency, input/output voltage and frequency variations",
+      "status": "not_held_pending_acquisition",
+      "document_sha256": null,
+      "expected_source_url": "https://www.analog.com/media/en/technical-documentation/data-sheets/adp5003.pdf",
+      "note": "absent from all manifests and caches"
+    },
+    {
+      "device": "LT8292",
+      "manufacturer": "analog_devices",
+      "requested_pages": [
+        12
+      ],
+      "requested_figures": [
+        "4",
+        "5",
+        "6"
+      ],
+      "challenge": "buck, buck-boost, boost, three operating modes, logarithmic current axes",
+      "status": "not_held_pending_acquisition",
+      "document_sha256": null,
+      "expected_source_url": "https://www.analog.com/media/en/technical-documentation/data-sheets/lt8292.pdf",
+      "note": "absent from all manifests and caches; would provide the first REAL logarithmic-axis reference in the corpus"
+    }
+  ],
+  "corpus_boundary_finding": {
+    "vector_extractable_manufacturers": [
+      "texas_instruments",
+      "vishay"
+    ],
+    "scanned_and_refused": [
+      {
+        "manufacturer": "microchip",
+        "docs_scanned": 14,
+        "refusal_reason": "axis_fit_failed (tick labels are vector text, not word layer)"
+      },
+      {
+        "manufacturer": "murata",
+        "docs_scanned": 12,
+        "refusal_reason": "axis_fit_failed (raster plots)"
+      },
+      {
+        "manufacturer": "onsemi",
+        "docs_scanned": 4,
+        "refusal_reason": "raster or no vector curves"
+      },
+      {
+        "manufacturer": "infineon",
+        "docs_scanned": 6,
+        "refusal_reason": "raster plots (iPOL bucks) or no DC-DC curves"
+      },
+      {
+        "manufacturer": "wurth",
+        "docs_scanned": 2,
+        "refusal_reason": "seminar decks, not datasheets"
+      }
+    ],
+    "third_manufacturer_paths": [
+      "acquire ADP5003 + LT8292 (reviewed candidates) and run the vision lane over their pages 8/12",
+      "acquire IR3883 + IR3447",
+      "or extend the deterministic tool with a vector-text tick reader for Microchip layouts"
+    ]
+  },
+  "independent_pilot_sample": {
+    "files": [
+      {
+        "file": "tps548c26_p10.json",
+        "manufacturer": "texas_instruments",
+        "family": "TPS548C26",
+        "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+        "human_signed": false,
+        "page_1based": 10,
+        "source_artifact": "dcdc_TPS548C26.pdf"
+      },
+      {
+        "file": "lmr33610_p8.json",
+        "manufacturer": "texas_instruments",
+        "family": "LMR33610",
+        "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
+        "human_signed": false,
+        "page_1based": 8,
+        "source_artifact": "dcdc_LMR33610.pdf"
+      },
+      {
+        "file": "TPS563206_p7.json",
+        "manufacturer": "texas_instruments",
+        "family": "TPS563203",
+        "document_sha256": "8311e941fe051dbb509a976e6ac03c7ffd0210ad1cbe0134a203773852a51596",
+        "human_signed": false,
+        "page_1based": 7,
+        "source_artifact": "dcdc_TPS563206.pdf"
+      },
+      {
+        "file": "TPS542941_p9.json",
+        "manufacturer": "texas_instruments",
+        "family": "TPS542941",
+        "document_sha256": "1fde1c29e6212715ceef4eba4077f66b9ec05eea75f9fa828f1f4fb0b7187391",
+        "human_signed": false,
+        "page_1based": 9,
+        "source_artifact": "dcdc_TPS542941.pdf"
+      },
+      {
+        "file": "LMR36502_p10.json",
+        "manufacturer": "texas_instruments",
+        "family": "LMR36502",
+        "document_sha256": "6b3d562aca65dab56fbf67904609d8cc5acd04f8c56f9d9071411896437a9935",
+        "human_signed": false,
+        "page_1based": 10,
+        "source_artifact": "dcdc_LMR36502.pdf"
+      },
+      {
+        "file": "TPS628302_p7.json",
+        "manufacturer": "texas_instruments",
+        "family": "TPS628302",
+        "document_sha256": "733977a5b89523edf436f093bac8a47737543c9c760bc764ce977ec887290696",
+        "human_signed": false,
+        "page_1based": 7,
+        "source_artifact": "dcdc_TPS628302.pdf"
+      },
+      {
+        "file": "sic448_p13.json",
+        "manufacturer": "vishay",
+        "family": "SiC448",
+        "document_sha256": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1",
+        "human_signed": false,
+        "page_1based": 13,
+        "source_artifact": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1.pdf"
+      },
+      {
+        "file": "vishay_sic46x_p14.json",
+        "manufacturer": "vishay",
+        "family": "SiC461",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "human_signed": false,
+        "page_1based": 14,
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+      },
+      {
+        "file": "vishay_sic46x_p15.json",
+        "manufacturer": "vishay",
+        "family": "SiC462",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "human_signed": false,
+        "page_1based": 15,
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+      },
+      {
+        "file": "vishay_sic46x_p16.json",
+        "manufacturer": "vishay",
+        "family": "SiC463",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "human_signed": false,
+        "page_1based": 16,
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+      },
+      {
+        "file": "vishay_sic46x_p17.json",
+        "manufacturer": "vishay",
+        "family": "SiC464",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "human_signed": false,
+        "page_1based": 17,
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+      },
+      {
+        "file": "vishay_sic46x_p18.json",
+        "manufacturer": "vishay",
+        "family": "SiC46x",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "human_signed": false,
+        "page_1based": 18,
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+      },
+      {
+        "file": "vishay_sic46x_p19.json",
+        "manufacturer": "vishay",
+        "family": "SiC46x",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "human_signed": false,
+        "page_1based": 19,
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+      }
+    ],
+    "counts": {
+      "independent_power_plots_extracted": 40,
+      "curve_series": 81,
+      "device_families": 11,
+      "manufacturers_with_vector_curves": 2,
+      "printed_figures_on_sampled_pages": 70,
+      "review_packet_tooling": "scripts/emit_curve_review_packets.py -> results/curve-review/ (renders + checklist + signoff.json)",
+      "human_signed_packets": 0
+    }
+  },
+  "challenge_coverage": {
+    "plot_local_condition_overrides": "covered: TPS548C26 per-plot MODE/VCC rows vs page defaults (probes P1/P2); LMR33610 legend-temperature override of page TA default (recorded in conditions.legend_override)",
+    "linear_vs_log_axes": "log10 tick-fit and log-space interpolation implemented and unit-tested synthetically; NO real logarithmic-axis reference in the vector-extractable corpus (TLS4125D0EPV raster, LT8292 not held) — open item",
+    "efficiency_vs_power_loss": "covered: TPS548C26 figures 6-1..6-6 split into distinct phenomena (efficiency_vs_load vs power_dissipation_vs_load); probes P1 vs P8",
+    "multiple_traces_same_figure": "covered: 4-trace fsw legends (TPS548C26, TPS628302), 3-trace temperature legends (LMR33610); unmatched trace colors skip with legend_unresolved (35 skips recorded)",
+    "cross_manufacturer_comparability": "partial: TI vs Vishay evidence compared only through typed conditions; Vishay external-component legends (VIN=..V, L=..uH) are vector-text and unresolvable deterministically -> refused, recorded",
+    "typical_never_guaranteed": "covered: evidence_class carried end-to-end, guarantee:false on every computed value, comparisons are status:proposal (tests test_r3_*, test_r4_*)",
+    "unmatched_plots_and_series_penalized": "covered: scorer coverage metric (40/70 printed figures -> 0.571) plus per-miss listings; unmatched predictions counted as errors, never silently skipped"
+  },
+  "no_promotion_clause": "Nothing in this manifest promotes machine references to gold. Human gold = the 14 hand-labeled MCU series (tests/fixtures/gold/typical_curves) + any packet a human signs in results/curve-review/signoff.json."
+}

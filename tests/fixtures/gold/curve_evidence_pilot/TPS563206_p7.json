@@ -1,0 +1,230 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "dcdc_TPS563206.pdf",
+  "document_sha256": "8311e941fe051dbb509a976e6ac03c7ffd0210ad1cbe0134a203773852a51596",
+  "page_1based": 7,
+  "manufacturer": "texas_instruments",
+  "section_title": "5.6 Typical Characteristics",
+  "plots": [
+    {
+      "_figure_index": 2,
+      "title": "Figure 5-3. Enable On Threshold Voltage",
+      "axes": {
+        "x": {
+          "label": "Junction Temperature (OC)",
+          "unit": "OC",
+          "min": -40.0,
+          "max": 140.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "VENON (V)",
+          "unit": "V",
+          "min": 1.2,
+          "max": 1.22,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              -39.572614,
+              1.211227
+            ],
+            [
+              -0.026714,
+              1.214463
+            ],
+            [
+              24.977292,
+              1.215355
+            ],
+            [
+              64.977523,
+              1.215755
+            ],
+            [
+              84.984034,
+              1.215459
+            ],
+            [
+              124.997028,
+              1.214979
+            ]
+          ],
+          "_x_range": [
+            -39.572614,
+            124.997028
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "VIN = 12 V (unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.007574,
+        "y_fit_residual_pct_of_span": 0.013767,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 4,
+      "title": "Figure 5-6. High-Side Rdson",
+      "axes": {
+        "x": {
+          "label": "Junction Temperature (OC)",
+          "unit": "OC",
+          "min": -40.0,
+          "max": 140.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "RDSONHI m)",
+          "unit": null,
+          "min": 80.0,
+          "max": 140.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              -39.585438,
+              82.560747
+            ],
+            [
+              -0.026516,
+              93.389486
+            ],
+            [
+              24.986647,
+              101.86327
+            ],
+            [
+              64.970177,
+              116.23565
+            ],
+            [
+              84.977418,
+              124.008443
+            ],
+            [
+              124.995602,
+              138.773896
+            ]
+          ],
+          "_x_range": [
+            -39.585438,
+            124.995602
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "VIN = 12 V (unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009127,
+        "y_fit_residual_pct_of_span": 0.014235,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 5,
+      "title": "Figure 5-5. Low-Side Rdson",
+      "axes": {
+        "x": {
+          "label": "Junction Temperature (OC)",
+          "unit": "OC",
+          "min": -40.0,
+          "max": 140.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "RDSON(LO) (m)",
+          "unit": "m",
+          "min": 45.0,
+          "max": 80.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              -39.569368,
+              45.329342
+            ],
+            [
+              -0.016458,
+              51.416105
+            ],
+            [
+              24.994971,
+              56.14044
+            ],
+            [
+              64.973601,
+              63.999461
+            ],
+            [
+              84.958376,
+              68.280856
+            ],
+            [
+              124.977036,
+              76.373127
+            ]
+          ],
+          "_x_range": [
+            -39.569368,
+            124.977036
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "VIN = 12 V (unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.012303,
+        "y_fit_residual_pct_of_span": 0.011472,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    }
+  ],
+  "skips": [
+    {
+      "figure_index": 0,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 1,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 3,
+      "reason": "points_outside_axis",
+      "pct": 50.0
+    }
+  ],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
+}

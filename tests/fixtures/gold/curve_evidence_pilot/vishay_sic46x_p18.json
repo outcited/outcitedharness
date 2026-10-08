@@ -1,0 +1,237 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+  "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+  "page_1based": 18,
+  "manufacturer": "vishay",
+  "section_title": null,
+  "plots": [
+    {
+      "_figure_index": 2,
+      "title": "Fig. 36 - SiC463 Efficiency vs. Switching Frequency",
+      "axes": {
+        "x": {
+          "label": "Switching Frequency (kHz)",
+          "unit": "kHz",
+          "min": 0.0,
+          "max": 1000.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Normalized Efficiency",
+          "unit": null,
+          "min": 0.96,
+          "max": 1.04,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              229.955171,
+              1.011984
+            ],
+            [
+              279.878998,
+              1.009782
+            ],
+            [
+              459.807228,
+              1.002091
+            ],
+            [
+              500.097305,
+              1.000232
+            ],
+            [
+              680.013355,
+              0.991131
+            ],
+            [
+              819.925704,
+              0.983426
+            ]
+          ],
+          "_x_range": [
+            229.955171,
+            819.925704
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.01059,
+        "y_fit_residual_pct_of_span": 0.000412,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 3,
+      "title": "Fig. 39 - SiC464 Efficiency vs. Switching Frequency",
+      "axes": {
+        "x": {
+          "label": "Switching Frequency (kHz)",
+          "unit": "kHz",
+          "min": 0.0,
+          "max": 1000.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Normalized Efficiency",
+          "unit": null,
+          "min": 0.96,
+          "max": 1.04,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              229.980592,
+              1.011985
+            ],
+            [
+              279.904044,
+              1.009783
+            ],
+            [
+              459.831014,
+              1.002092
+            ],
+            [
+              500.120787,
+              1.000233
+            ],
+            [
+              680.035485,
+              0.991132
+            ],
+            [
+              819.946782,
+              0.983426
+            ]
+          ],
+          "_x_range": [
+            229.980592,
+            819.946782
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010672,
+        "y_fit_residual_pct_of_span": 0.000412,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 4,
+      "title": "Fig. 37 - RDS(ON) vs. Temperature",
+      "axes": {
+        "x": {
+          "label": "(°C)",
+          "unit": "°C",
+          "min": -60.0,
+          "max": 140.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Normalized On-State Resistance, RDSON",
+          "unit": null,
+          "min": 0.0,
+          "max": 2.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              -39.975969,
+              0.725859
+            ],
+            [
+              -25.009575,
+              0.774913
+            ],
+            [
+              -0.005455,
+              0.871068
+            ],
+            [
+              24.998647,
+              1.005665
+            ],
+            [
+              50.002749,
+              1.154683
+            ],
+            [
+              75.005624,
+              1.31974
+            ],
+            [
+              100.013407,
+              1.500804
+            ],
+            [
+              125.028478,
+              1.690486
+            ]
+          ],
+          "_x_range": [
+            -39.975969,
+            125.028478
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010953,
+        "y_fit_residual_pct_of_span": 0.007587,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    }
+  ],
+  "skips": [
+    {
+      "figure_index": 0,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 1,
+      "reason": "no_vector_curves"
+    },
+    {
+      "figure_index": 5,
+      "reason": "no_vector_curves"
+    }
+  ],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
+}

@@ -1,0 +1,590 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+  "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+  "page_1based": 14,
+  "manufacturer": "vishay",
+  "section_title": null,
+  "plots": [
+    {
+      "_figure_index": 0,
+      "title": "Fig. 11 - SiC461 Efficiency vs. Output Current,",
+      "axes": {
+        "x": {
+          "label": "Output Current, IOUT (A)",
+          "unit": "A",
+          "min": 0.0,
+          "max": 10.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Efficiency (%)",
+          "unit": "%",
+          "min": 82.0,
+          "max": 96.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              0.01011,
+              82.054108
+            ],
+            [
+              0.019917,
+              86.584965
+            ],
+            [
+              0.029053,
+              86.797988
+            ],
+            [
+              0.039347,
+              87.729905
+            ],
+            [
+              0.049276,
+              88.279944
+            ],
+            [
+              0.0589,
+              88.76701
+            ],
+            [
+              0.069255,
+              89.234015
+            ],
+            [
+              0.079062,
+              90.356941
+            ],
+            [
+              0.089112,
+              90.43914
+            ],
+            [
+              0.099284,
+              90.58696
+            ],
+            [
+              0.19924,
+              90.986113
+            ],
+            [
+              0.299439,
+              90.786607
+            ],
+            [
+              0.399943,
+              91.075838
+            ],
+            [
+              0.500081,
+              91.39516
+            ],
+            [
+              1.001626,
+              91.854363
+            ],
+            [
+              1.502683,
+              91.804486
+            ],
+            [
+              1.991985,
+              92.857195
+            ],
+            [
+              2.508026,
+              93.82673
+            ],
+            [
+              3.007012,
+              94.40338
+            ],
+            [
+              3.506486,
+              94.793199
+            ],
+            [
+              4.001086,
+              95.07379
+            ],
+            [
+              4.501169,
+              95.210186
+            ],
+            [
+              4.999059,
+              95.313146
+            ],
+            [
+              5.498472,
+              95.357032
+            ],
+            [
+              5.997519,
+              95.407048
+            ],
+            [
+              6.497785,
+              95.398827
+            ],
+            [
+              6.992994,
+              95.325684
+            ],
+            [
+              7.492467,
+              95.261874
+            ],
+            [
+              7.991941,
+              95.176053
+            ],
+            [
+              8.490197,
+              95.056098
+            ],
+            [
+              8.990889,
+              94.906189
+            ],
+            [
+              9.488535,
+              94.706263
+            ],
+            [
+              9.984354,
+              94.506198
+            ]
+          ],
+          "_x_range": [
+            0.01011,
+            9.984354
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
+        "VIN = 12 V, L = 3.3 μH",
+        "VIN = 12 V, L = 3.3 μH",
+        "98 VIN = 24 V, L = 4.7 μH",
+        "VIN = 24 V, L = 4.7 μH"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009609,
+        "y_fit_residual_pct_of_span": 0.00039,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 3,
+      "title": "Fig. 14 - SiC461 Efficiency vs. Output Current - Light Load,",
+      "axes": {
+        "x": {
+          "label": "Output Current, IOUT (A)",
+          "unit": "A",
+          "min": 0.01,
+          "max": 1.0,
+          "scale": "log10"
+        },
+        "y": {
+          "label": "Efficiency (%)",
+          "unit": "%",
+          "min": 73.0,
+          "max": 88.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              0.010079,
+              72.05511
+            ],
+            [
+              0.019536,
+              79.14634
+            ],
+            [
+              0.028646,
+              80.398567
+            ],
+            [
+              0.038963,
+              81.982038
+            ],
+            [
+              0.0489,
+              82.846812
+            ],
+            [
+              0.05854,
+              83.536248
+            ],
+            [
+              0.068871,
+              83.90113
+            ],
+            [
+              0.078663,
+              84.0376
+            ],
+            [
+              0.088712,
+              84.45431
+            ],
+            [
+              0.098935,
+              84.64992
+            ],
+            [
+              0.198865,
+              86.461389
+            ],
+            [
+              0.299112,
+              86.763372
+            ],
+            [
+              0.399549,
+              86.80872
+            ],
+            [
+              0.499801,
+              86.26599
+            ],
+            [
+              1.001361,
+              87.745801
+            ]
+          ],
+          "_x_range": [
+            0.010079,
+            1.001361
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
+        "VIN = 12 V, L = 3.3 μH",
+        "VIN = 12 V, L = 3.3 μH",
+        "98 VIN = 24 V, L = 4.7 μH",
+        "VIN = 24 V, L = 4.7 μH"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009534,
+        "y_fit_residual_pct_of_span": 0.000445,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 6.6667
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 6,
+      "title": "Fig. 13 - SiC461 Load Current vs. Case Temperature,",
+      "axes": {
+        "x": {
+          "label": "Output Current (A)",
+          "unit": "A",
+          "min": 0.0,
+          "max": 10.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Case Temperature(°C)",
+          "unit": "°C",
+          "min": 20.0,
+          "max": 100.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              0.500392,
+              33.534618
+            ],
+            [
+              1.000432,
+              38.233582
+            ],
+            [
+              1.500351,
+              47.832834
+            ],
+            [
+              2.000391,
+              49.432898
+            ],
+            [
+              2.50037,
+              50.433071
+            ],
+            [
+              3.000411,
+              51.732915
+            ],
+            [
+              3.500329,
+              52.432868
+            ],
+            [
+              4.000308,
+              53.432457
+            ],
+            [
+              4.500349,
+              54.632788
+            ],
+            [
+              5.000267,
+              55.732509
+            ],
+            [
+              5.500308,
+              56.932256
+            ],
+            [
+              6.000348,
+              58.731895
+            ],
+            [
+              6.500327,
+              60.331959
+            ],
+            [
+              7.000428,
+              61.831961
+            ],
+            [
+              7.500103,
+              63.431442
+            ],
+            [
+              8.000387,
+              65.731459
+            ],
+            [
+              8.500062,
+              67.731256
+            ],
+            [
+              9.000346,
+              69.731053
+            ],
+            [
+              9.500021,
+              72.230096
+            ],
+            [
+              10.000305,
+              75.630348
+            ]
+          ],
+          "_x_range": [
+            0.500392,
+            10.000305
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
+        "VIN = 12 V, L = 3.3 μH",
+        "VIN = 12 V, L = 3.3 μH",
+        "98 VIN = 24 V, L = 4.7 μH",
+        "VIN = 24 V, L = 4.7 μH"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009613,
+        "y_fit_residual_pct_of_span": 0.00048,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": "title says A vs B but printed axes put A on x — labels kept as printed; human review should confirm orientation",
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 7,
+      "title": "Fig. 16 - SiC461 Load Current vs. Case Temperature,",
+      "axes": {
+        "x": {
+          "label": "Output Current (A)",
+          "unit": "A",
+          "min": 0.0,
+          "max": 10.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "Case Temperature (°C)",
+          "unit": "°C",
+          "min": 20.0,
+          "max": 100.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "",
+          "condition": null,
+          "points": [
+            [
+              0.500717,
+              36.835097
+            ],
+            [
+              1.000765,
+              40.034689
+            ],
+            [
+              1.500691,
+              50.733785
+            ],
+            [
+              2.000739,
+              52.633514
+            ],
+            [
+              2.500726,
+              54.033475
+            ],
+            [
+              3.000714,
+              54.832952
+            ],
+            [
+              3.500701,
+              56.033267
+            ],
+            [
+              4.000689,
+              57.233067
+            ],
+            [
+              4.500737,
+              58.632993
+            ],
+            [
+              5.000723,
+              59.832793
+            ],
+            [
+              5.500712,
+              61.332234
+            ],
+            [
+              6.0007,
+              63.33206
+            ],
+            [
+              6.500748,
+              65.432499
+            ],
+            [
+              7.000855,
+              67.631904
+            ],
+            [
+              7.500538,
+              70.731432
+            ],
+            [
+              8.000832,
+              73.631383
+            ],
+            [
+              8.500513,
+              77.230714
+            ],
+            [
+              9.000805,
+              81.730752
+            ],
+            [
+              9.500488,
+              85.530244
+            ],
+            [
+              10.000781,
+              90.22986
+            ]
+          ],
+          "_x_range": [
+            0.500717,
+            10.000781
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
+        "VIN = 12 V, L = 3.3 μH",
+        "VIN = 12 V, L = 3.3 μH",
+        "98 VIN = 24 V, L = 4.7 μH",
+        "VIN = 24 V, L = 4.7 μH"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.009612,
+        "y_fit_residual_pct_of_span": 0.00048,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": "title says A vs B but printed axes put A on x — labels kept as printed; human review should confirm orientation",
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    }
+  ],
+  "skips": [
+    {
+      "figure_index": 1,
+      "reason": "legend_unresolved",
+      "color": "0.078,0.500,0.767"
+    },
+    {
+      "figure_index": 1,
+      "reason": "legend_unresolved",
+      "color": "0.940,0.423,0.133"
+    },
+    {
+      "figure_index": 2,
+      "reason": "axis_fit_failed"
+    },
+    {
+      "figure_index": 4,
+      "reason": "legend_unresolved",
+      "color": "0.078,0.500,0.767"
+    },
+    {
+      "figure_index": 4,
+      "reason": "legend_unresolved",
+      "color": "0.940,0.423,0.133"
+    },
+    {
+      "figure_index": 4,
+      "reason": "legend_unresolved",
+      "color": "0.292,0.720,0.305"
+    },
+    {
+      "figure_index": 5,
+      "reason": "axis_fit_failed"
+    }
+  ],
+  "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
+}
