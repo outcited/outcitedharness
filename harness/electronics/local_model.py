@@ -96,6 +96,83 @@ RESPONSE_SCHEMAS: dict[str, dict[str, Any]] = {
             },
         },
     },
+    "power_modes": {
+        "type": "object",
+        "required": ["modes"],
+        "properties": {
+            "modes": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["mode", "value", "unit", "value_role", "conditions"],
+                    "properties": {
+                        "mode": {"type": "string"},
+                        "value": {
+                            "type": ["string", "number", "integer"],
+                        },
+                        "unit": {"type": ["string", "null"]},
+                        "value_role": {"type": ["string", "null"]},
+                        "conditions": {"type": "object"},
+                    },
+                },
+            },
+        },
+    },
+    "typical_characteristics": {
+        "type": "object",
+        "required": ["title", "axes", "series"],
+        "properties": {
+            "title": {"type": ["string", "null"]},
+            "axes": {
+                "type": "object",
+                "required": ["x", "y"],
+                "properties": {
+                    "x": {
+                        "type": "object",
+                        "required": ["label", "unit"],
+                        "properties": {
+                            "label": {"type": ["string", "null"]},
+                            "unit": {"type": ["string", "null"]},
+                            "min": {"type": ["number", "null"]},
+                            "max": {"type": ["number", "null"]},
+                        },
+                    },
+                    "y": {
+                        "type": "object",
+                        "required": ["label", "unit"],
+                        "properties": {
+                            "label": {"type": ["string", "null"]},
+                            "unit": {"type": ["string", "null"]},
+                            "min": {"type": ["number", "null"]},
+                            "max": {"type": ["number", "null"]},
+                        },
+                    },
+                },
+            },
+            "series": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["name", "condition", "points"],
+                    "properties": {
+                        "name": {"type": ["string", "null"]},
+                        "condition": {"type": ["string", "null"]},
+                        "points": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": ["x", "y"],
+                                "properties": {
+                                    "x": {"type": "number"},
+                                    "y": {"type": "number"},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
     "series_summary": {
         "type": "object",
         "required": ["summary", "characteristics", "applications"],
@@ -150,7 +227,10 @@ def validate_local_url(value: str) -> str:
             raise ValueError(
                 "local model URL must use localhost or a private IP"
             ) from exc
-        if not (address.is_loopback or address.is_private):
+        # 100.64.0.0/10 is the Tailscale CGNAT overlay every fabric node
+        # rides; ipaddress.is_private misses it on some versions.
+        in_cgnat_overlay = address in ipaddress.ip_network("100.64.0.0/10")
+        if not (address.is_loopback or address.is_private or in_cgnat_overlay):
             raise ValueError("local model URL must use a private address")
     if parsed.port is None:
         raise ValueError("local model URL requires an explicit port")
@@ -376,6 +456,28 @@ def local_prompt(
             "a transformation. Use value_role for the printed "
             "min/typ/max/value header. Do not combine values, select a "
             "different condition, or convert units. "
+        ),
+        "power_modes": (
+            "Return one row per printed power or low-power mode current. "
+            "Copy mode names verbatim from the printed Mode or Operating "
+            "mode cell; never normalize or invent a mode name. Each current "
+            "value must come from the same printed row as its mode and its "
+            "unit; value_role is the printed min/typ/max header. Put VDD, "
+            "frequency, temperature, and peripheral qualifiers in conditions "
+            "verbatim from the row and column headers. TA = 25 C is recorded "
+            "like any other condition, never assumed. Skip rows whose value "
+            "is blank, -, —, or N/A, and skip prose. Do not convert units. "
+        ),
+        "typical_characteristics": (
+            "Read the printed plot and digitize it. Copy the plot title and "
+            "each axis label and unit verbatim. Set axis min and max from "
+            "the printed axis range or the plotted tick span. For each "
+            "printed curve return one series: name and condition copied from "
+            "its legend entry verbatim. Points are digitized (x, y) samples "
+            "in the printed axis units at visually identifiable features "
+            "(endpoints, bends, crossings, labeled markers) — never invent "
+            "samples between features. Do not extrapolate past the plotted "
+            "range. Do not read values from another plot on the page. "
         ),
         "series_summary": (
             "Copy each characteristic and application nearly verbatim from "

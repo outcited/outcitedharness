@@ -334,6 +334,31 @@ def _request(
                     else ""
                 )
                 + (
+                    " For power modes, return one row per printed power or "
+                    "low-power mode current. Copy mode names verbatim; never "
+                    "normalize or invent one. Every current value must come "
+                    "from the same printed row as its mode and unit, with the "
+                    "printed min/typ/max header as the role. Copy VDD, "
+                    "frequency, temperature, and peripheral qualifiers "
+                    "verbatim into conditions; TA = 25 C is recorded, never "
+                    "assumed. Skip blank and non-value cells and prose. Do "
+                    "not convert units."
+                    if candidate.capability == PairCapability.POWER_MODES
+                    else ""
+                )
+                + (
+                    " For typical characteristics, digitize only the printed "
+                    "plot. Copy the plot title and each axis label and unit "
+                    "verbatim; set axis min/max from the printed range or the "
+                    "plotted tick span. Each printed curve is one series whose "
+                    "name and condition copy its legend entry verbatim. Emit "
+                    "(x, y) points only at visually identifiable features in "
+                    "printed axis units; never invent intermediate samples or "
+                    "extrapolate past the plotted range."
+                    if candidate.capability == PairCapability.TYPICAL_CHARACTERISTICS
+                    else ""
+                )
+                + (
                     " For series summaries, copy each characteristic and "
                     "application nearly verbatim from visible source text. "
                     "Do not add competitors, recommendations, positioning, or "

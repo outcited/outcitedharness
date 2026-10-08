@@ -1,0 +1,139 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "msp430fr6005.pdf",
+  "source": "MSP430FR6007/FR6005 datasheet SLASEV3A (p.29), section 8.5 Typical Characteristics, Active Mode Supply Currents. Written cold from the frozen page render (200 DPI) before scoring. Marked points sit at f = 1, 4, 8 MHz (the printed x markers).",
+  "document_sha256": "4a6a30c0de57c6959ae0494a56df05bf40358aac9108821e692d3e7c8fcc5b3e",
+  "page_1based": 29,
+  "plots": [
+    {
+      "title": "8.5 Typical Characteristics, Active Mode Supply Currents",
+      "axes": {
+        "x": {
+          "label": "MCLK Frequency",
+          "unit": "MHz",
+          "min": 0.0,
+          "max": 9.0
+        },
+        "y": {
+          "label": "Active Mode Current",
+          "unit": "µA",
+          "min": 0.0,
+          "max": 3000.0
+        }
+      },
+      "series": [
+        {
+          "name": "I(AM,0%)",
+          "condition": "cache hit ratio 0%",
+          "points": [
+            [
+              1.0,
+              380.0
+            ],
+            [
+              4.0,
+              1440.0
+            ],
+            [
+              8.0,
+              2870.0
+            ]
+          ]
+        },
+        {
+          "name": "I(AM,50%)",
+          "condition": "cache hit ratio 50%",
+          "points": [
+            [
+              1.0,
+              240.0
+            ],
+            [
+              4.0,
+              830.0
+            ],
+            [
+              8.0,
+              1630.0
+            ]
+          ]
+        },
+        {
+          "name": "I(AM,66%)",
+          "condition": "cache hit ratio 66%",
+          "points": [
+            [
+              1.0,
+              200.0
+            ],
+            [
+              4.0,
+              640.0
+            ],
+            [
+              8.0,
+              1250.0
+            ]
+          ]
+        },
+        {
+          "name": "I(AM,75%)",
+          "condition": "cache hit ratio 75%",
+          "points": [
+            [
+              1.0,
+              160.0
+            ],
+            [
+              4.0,
+              510.0
+            ],
+            [
+              8.0,
+              1000.0
+            ]
+          ]
+        },
+        {
+          "name": "I(AM,100%)",
+          "condition": "cache hit ratio 100%",
+          "points": [
+            [
+              1.0,
+              140.0
+            ],
+            [
+              4.0,
+              290.0
+            ],
+            [
+              8.0,
+              590.0
+            ]
+          ]
+        },
+        {
+          "name": "I(AM,RAMonly)",
+          "condition": "program and data in RAM, FRAM off",
+          "points": [
+            [
+              1.0,
+              100.0
+            ],
+            [
+              4.0,
+              250.0
+            ],
+            [
+              8.0,
+              430.0
+            ]
+          ]
+        }
+      ],
+      "printed_equation": "I(AM,75%)[µA] ~ 120 × f[MHz] + 68",
+      "anchor_notes": "The printed equation is a closed-form extraction target: at f = 8 MHz it evaluates to 1028 µA, consistent with the digitized I(AM,75%) endpoint (~1000) within digitization error. Footnotes A/B define the cache-hit-ratio and RAM-only conditions — the series condition field should keep them."
+    }
+  ],
+  "notes": "Acceptance gold for the typical-curves lane: axis-label exact >= 0.95, series-count exact >= 0.90, sampled-point error <= 2% of y-axis span. Points sample identifiable features only (the printed x markers at 1/4/8 MHz here). printed_equation is captured for the formula-extraction extension (fill-only: null when no formula is printed). Label strings recovered verbatim from the page text layer (deterministic word-run joins); digitized points remain hand-labeled from the frozen render."
+}

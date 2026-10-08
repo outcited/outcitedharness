@@ -48,10 +48,15 @@ from harness.electronics.table_extractors import (
     normalize_parametric_facts,
     parse_parametric_table,
 )
+from harness.electronics.word_columns import (
+    extract_pin_columns,
+    select_package_columns,
+)
 
 
 SCHEMA = "harness.electronics-structural-local-extraction.v1"
 DETERMINISTIC_PARAMETRIC_MODEL = "pymupdf-parametric-normalizer-v1"
+DETERMINISTIC_PIN_MODEL = "pymupdf-word-columns-v1"
 
 
 def _verify(
@@ -132,6 +137,47 @@ def _deterministic_parametric_result(
         "provider": "local",
         "model": DETERMINISTIC_PARAMETRIC_MODEL,
         "capability": "parametrics",
+        "request_sha256": hashlib.sha256(canonical_json(request)).hexdigest(),
+        "response_sha256": hashlib.sha256(canonical_json(parsed)).hexdigest(),
+        "image_sha256": None,
+        "latency_ms": 0.0,
+        "usage": None,
+        "result": parsed,
+    }
+
+
+def _deterministic_pin_result(
+    item: dict[str, Any],
+    source_path: Path,
+) -> dict[str, Any] | None:
+    package_scope = item["structural_evidence"].get("package_scope") or {}
+    requested_package = package_scope.get("package")
+    if not requested_package:
+        return None
+    columns = extract_pin_columns(source_path, int(item["page_1based"]))
+    selected = select_package_columns(columns, str(requested_package))
+    if not selected:
+        return None
+    pins: list[dict[str, Any]] = []
+    for column in selected:
+        for claim in column.rows:
+            pins.append({"pin_no": claim.pin_no, "name": claim.name})
+    if not pins:
+        return None
+    parsed = {"package": str(requested_package), "pins": pins}
+    request = {
+        "model": DETERMINISTIC_PIN_MODEL,
+        "capability": item["capability"],
+        "document_sha256": item["document_sha256"],
+        "page_1based": int(item["page_1based"]),
+        "page_evidence_sha256": item["page_evidence_sha256"],
+        "structural_evidence": item["structural_evidence"],
+    }
+    return {
+        "schema": "harness.electronics-local-model-result.v1",
+        "provider": "local",
+        "model": DETERMINISTIC_PIN_MODEL,
+        "capability": item["capability"],
         "request_sha256": hashlib.sha256(canonical_json(request)).hexdigest(),
         "response_sha256": hashlib.sha256(canonical_json(parsed)).hexdigest(),
         "image_sha256": None,
@@ -350,6 +396,7 @@ def main() -> int:
         "harness/electronics/models.py",
         "harness/electronics/regions.py",
         "harness/electronics/table_extractors.py",
+        "harness/electronics/word_columns.py",
         "scripts/build_datasheet_structural_work_queue.py",
         "scripts/run_datasheet_structural_extraction.py",
     ):
@@ -404,6 +451,17 @@ def main() -> int:
                     deterministic_result,
                     page,
                 )
+            elif item["capability"] == "pin_or_ball":
+                deterministic_result = _deterministic_pin_result(
+                    item,
+                    source_path,
+                )
+                if deterministic_result is not None:
+                    deterministic_verdict = _verify(
+                        item["capability"],
+                        deterministic_result,
+                        page,
+                    )
             if deterministic_verdict is None or not deterministic_verdict.passed:
                 page["digital_text"] = pdftotext_layout_page(
                     source_path,

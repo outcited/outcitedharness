@@ -69,7 +69,7 @@ class ShadowPolicy(StrictModel):
     data_use: Literal["shadow_learning"] = "shadow_learning"
     authorization_scope: Identifier = "owned_repository_cursor_shadow"
     teacher_model: Identifier = "gpt-5.6-sol-max-fast"
-    local_model_key: Identifier = "asus2_qwen"
+    local_model_key: Identifier = "dsv41_flash"
     allowed_paths: tuple[str, ...] = (".",)
     excluded_paths: tuple[str, ...] = DEFAULT_EXCLUDED_PATHS
     max_prompt_chars: int = Field(default=60_000, ge=1_000, le=200_000)

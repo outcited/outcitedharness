@@ -58,6 +58,18 @@ LANE_PATTERNS: dict[str, tuple[re.Pattern[str], ...]] = {
         re.compile(r"\bPOWER\s+(?:CONSUMPTION|MODES?)\b", re.IGNORECASE),
         re.compile(r"\bTHERMAL\s+CHARACTERISTICS?\b", re.IGNORECASE),
     ),
+    "power_modes": (
+        re.compile(r"\bPOWER\s+(?:CONSUMPTION|DISSIPATION)\b", re.IGNORECASE),
+        re.compile(r"\bCURRENT\s+CONSUMPTION\b", re.IGNORECASE),
+        re.compile(r"\bSUPPLY\s+CURRENTS?\b", re.IGNORECASE),
+        re.compile(r"\b(?:LOW[- ]?POWER|POWER|ACTIVE|OPERATING)\s+MODE\s+CURRENT", re.IGNORECASE),
+    ),
+    "typical_characteristics": (
+        re.compile(r"\bTYPICAL\s+(?:OPERATING\s+)?CHARACTERISTICS?\b", re.IGNORECASE),
+        re.compile(r"\bTYPICAL\s+PERFORMANCE\b", re.IGNORECASE),
+        re.compile(r"\bPERFORMANCE\s+(?:CURVES|GRAPHS|PLOTS)\b", re.IGNORECASE),
+        re.compile(r"\b(?:CURVES|GRAPHS)\s+AND\s+PLOTS\b", re.IGNORECASE),
+    ),
     "series_summary": (
         re.compile(r"\bFEATURES?\b", re.IGNORECASE),
         re.compile(r"\bDESCRIPTION\b", re.IGNORECASE),

@@ -9,6 +9,7 @@ import hashlib
 import json
 import sys
 import time
+from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -95,18 +96,19 @@ def _anthropic_url(model: ModelConfig) -> str:
     )
 
 
-def frontier_chat(
-    client: httpx.Client,
-    *,
+def _openai_chat_url(model: ModelConfig) -> str:
+    return f"{model.base_url}/chat/completions"
+
+
+def _anthropic_request(
     model: ModelConfig,
+    *,
     instruction: str,
     image: bytes,
     max_tokens: int,
-) -> tuple[str, dict[str, Any]]:
-    if model.provider != "anthropic" or not model.capabilities.vision:
-        raise ValueError("frontier model must be an Anthropic vision model")
-    if model.missing_key:
-        raise ValueError(f"missing ${model.api_key_env}")
+) -> tuple[str, dict[str, str], dict[str, Any]]:
+    if not model.capabilities.vision:
+        raise ValueError("frontier model must be a vision model")
     payload = {
         "model": model.model,
         "max_tokens": max_tokens,
@@ -129,41 +131,152 @@ def frontier_chat(
             }
         ],
     }
+    headers = {
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+        "x-api-key": str(model.api_key),
+    }
+    return _anthropic_url(model), headers, payload
+
+
+def _openai_compatible_request(
+    model: ModelConfig,
+    *,
+    instruction: str,
+    image: bytes,
+    max_tokens: int,
+) -> tuple[str, dict[str, str], dict[str, Any]]:
+    if not model.capabilities.vision:
+        raise ValueError("frontier model must be a vision model")
+    payload: dict[str, Any] = {
+        "model": model.model,
+        "max_tokens": max_tokens,
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": (
+                                "data:image/png;base64,"
+                                + base64.b64encode(image).decode()
+                            ),
+                        },
+                    },
+                    {"type": "text", "text": instruction},
+                ],
+            },
+        ],
+    }
+    if model.extra_body:
+        payload.update(model.extra_body)
+    headers = {"content-type": "application/json", **model.extra_headers}
+    if model.api_key:
+        headers["Authorization"] = f"Bearer {model.api_key}"
+    return _openai_chat_url(model), headers, payload
+
+
+def _parse_anthropic_response(
+    body: dict[str, Any],
+    response: httpx.Response,
+    *,
+    model: ModelConfig,
+) -> tuple[str, dict[str, Any]]:
+    if body.get("model") != model.model:
+        raise ValueError("frontier response model identity mismatch")
+    blocks = body.get("content")
+    if not isinstance(blocks, list):
+        raise ValueError("frontier response has invalid content")
+    text = "".join(
+        str(block.get("text") or "")
+        for block in blocks
+        if isinstance(block, dict) and block.get("type") == "text"
+    )
+    if not text:
+        raise ValueError("frontier response has no text")
+    return text, {
+        "model": body.get("model"),
+        "request_id": response.headers.get("request-id"),
+        "response_id": body.get("id"),
+        "stop_reason": body.get("stop_reason"),
+        "usage": body.get("usage"),
+    }
+
+
+def _parse_openai_compatible_response(
+    body: dict[str, Any],
+    response: httpx.Response,
+    *,
+    model: ModelConfig,
+) -> tuple[str, dict[str, Any]]:
+    choices = body.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise ValueError("frontier response has no choices")
+    first = choices[0] if isinstance(choices[0], dict) else {}
+    message = first.get("message") or {}
+    content = message.get("content")
+    if isinstance(content, list):
+        content = "".join(
+            str(part.get("text") or "")
+            for part in content
+            if isinstance(part, dict) and part.get("type") in {"text", "output_text"}
+        )
+    if not isinstance(content, str) or not content.strip():
+        raise ValueError("frontier response has no text")
+    return content, {
+        "model": body.get("model"),
+        "response_id": body.get("id"),
+        "stop_reason": first.get("finish_reason"),
+        "usage": body.get("usage"),
+    }
+
+
+def frontier_chat(
+    client: httpx.Client,
+    *,
+    model: ModelConfig,
+    instruction: str,
+    image: bytes,
+    max_tokens: int,
+) -> tuple[str, dict[str, Any]]:
+    if model.missing_key:
+        raise ValueError(f"missing ${model.api_key_env}")
+    parse_response: Callable[..., tuple[str, dict[str, Any]]]
+    if model.provider == "anthropic":
+        url, headers, payload = _anthropic_request(
+            model,
+            instruction=instruction,
+            image=image,
+            max_tokens=max_tokens,
+        )
+        parse_response = _parse_anthropic_response
+    elif model.provider == "openai_compatible":
+        url, headers, payload = _openai_compatible_request(
+            model,
+            instruction=instruction,
+            image=image,
+            max_tokens=max_tokens,
+        )
+        parse_response = _parse_openai_compatible_response
+    else:
+        raise ValueError(f"unsupported frontier provider: {model.provider}")
     started = time.monotonic()
     last_error: Exception | None = None
     for attempt in range(1, 4):
         try:
-            response = client.post(
-                _anthropic_url(model),
-                headers={
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json",
-                    "x-api-key": str(model.api_key),
-                },
-                json=payload,
-            )
+            response = client.post(url, headers=headers, json=payload)
             response.raise_for_status()
             body = response.json()
-            if not isinstance(body, dict) or body.get("model") != model.model:
-                raise ValueError("frontier response model identity mismatch")
-            blocks = body.get("content") if isinstance(body, dict) else None
-            if not isinstance(blocks, list):
-                raise ValueError("frontier response has invalid content")
-            text = "".join(
-                str(block.get("text") or "")
-                for block in blocks
-                if isinstance(block, dict) and block.get("type") == "text"
-            )
-            if not text:
-                raise ValueError("frontier response has no text")
+            if not isinstance(body, dict):
+                raise ValueError("frontier response is not a JSON object")
+            text, evidence = parse_response(body, response, model=model)
             return text, {
                 "attempts": attempt,
                 "elapsed_seconds": time.monotonic() - started,
-                "model": body.get("model"),
-                "request_id": response.headers.get("request-id"),
-                "response_id": body.get("id"),
-                "stop_reason": body.get("stop_reason"),
-                "usage": body.get("usage"),
+                **evidence,
             }
         except (httpx.HTTPError, ValueError) as error:
             last_error = error
@@ -232,8 +345,10 @@ def _cost(
         return None
     try:
         return (
-            int(usage["input_tokens"]) * input_per_million
-            + int(usage["output_tokens"]) * output_per_million
+            int(usage.get("input_tokens", usage.get("prompt_tokens")))
+            * input_per_million
+            + int(usage.get("output_tokens", usage.get("completion_tokens")))
+            * output_per_million
         ) / 1_000_000
     except (KeyError, TypeError, ValueError):
         return None

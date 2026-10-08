@@ -74,10 +74,14 @@ through subagents. A fresh session should have a working shell.
   worker at TP4+EP — same traffic shape as ours, spec decode NOT required); prefix-cache
   fixes vllm#48375 and vllm#53142 are both still OPEN, so growing-history soak with prefix
   cache ON is unproven there too.
-- Decision pending with Sam: (a) stay on current image + working watchdog; (b) trial sglang
-  nightly (main, SM121 kernel) in a maintenance window with a growing-history soak
-  (15–30 turns, each turn = full history + new turn, 30K→120K); (c) trial vLLM recipe same
-  soak; (d) SPECULATIVE=0 on current image (spec is everyone's prime suspect; ~40 → ~20 tok/s).
+- **LIVE as of 2026-09-09 18:18Z:** trial (b) is up. Image
+  `lmsysorg/sglang:nightly-dev-cu13-20260909-db272201` (main + #37500 SM121 QSA kernel).
+  `IMAGE=` override in `~/qwen38-sglang-recipe/.env` (backup `.env.bak-pre-nightly-20260909`).
+  Same weights (`HF_REVISION=7b719225…`). `/v1/models` 200, KV pool 774,848 tokens (was 886,400).
+  Watchdog re-enabled after boot. Revert = copy `.env.bak-pre-nightly-20260909` back +
+  `./stop.sh && ./start.sh`. Growing-history soak not yet run. HF token is in
+  `~/.secrets/hf-token` on asus2/asus4 (not in git); start.sh reads it if `HF_TOKEN` unset.
+  **Rotate that token** — it was pasted in chat.
 
 ### Open watch items
 1. **Prefix cache hits on Sam's real traffic**: at 12:06 the only cache hits were from

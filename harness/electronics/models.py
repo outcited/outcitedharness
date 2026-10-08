@@ -44,6 +44,8 @@ class PairCapability(str, Enum):
     PIN_OR_BALL = "pin_or_ball"
     PIN_SEMANTICS = "pin_semantics"
     PARAMETRICS = "parametrics"
+    POWER_MODES = "power_modes"
+    TYPICAL_CHARACTERISTICS = "typical_characteristics"
     SERIES_SUMMARY = "series_summary"
     OPN_DECODER = "opn_decoder"
 

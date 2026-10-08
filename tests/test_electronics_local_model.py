@@ -19,6 +19,7 @@ from harness.electronics.local_model import (
 def test_local_url_refuses_public_or_credentialed_hosts():
     assert validate_local_url("http://127.0.0.1:8082/v1").endswith("/v1")
     assert validate_local_url("http://192.168.4.46:8900/v1").endswith("/v1")
+    assert validate_local_url("http://100.116.221.82:8888/v1").endswith("/v1")
     with pytest.raises(ValueError, match="private"):
         validate_local_url("http://8.8.8.8:8082/v1")
     with pytest.raises(ValueError, match="unauthenticated"):

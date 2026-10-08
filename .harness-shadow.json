@@ -6,7 +6,7 @@
   "data_use": "shadow_learning",
   "authorization_scope": "owned_repository_cursor_shadow",
   "teacher_model": "gpt-5.6-sol",
-  "local_model_key": "asus2_qwen",
+  "local_model_key": "dsv41_flash",
   "allowed_paths": [
     "harness/**",
     "scripts/**",

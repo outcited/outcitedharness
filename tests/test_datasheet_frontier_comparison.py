@@ -121,3 +121,62 @@ def test_frontier_chat_sends_anthropic_image_without_persisting_key(monkeypatch)
     assert evidence["request_id"] == "request-1"
     assert evidence["model"] == "claude-test"
     assert "test-secret-value" not in json.dumps(evidence)
+
+
+def test_frontier_chat_sends_openai_vision_payload(monkeypatch):
+    monkeypatch.setenv("TEST_GLM_KEY", "test-glm-secret")
+    model = ModelConfig(
+        key="glm5v_turbo",
+        tier=3,
+        display_name="GLM 5V Turbo",
+        short_name="GLM5VT",
+        provider="openai_compatible",
+        base_url="https://api.zai.test/api/paas/v4",
+        model="glm-5v-turbo",
+        api_key_env="TEST_GLM_KEY",
+        capabilities={"vision": True},
+        extra_headers={"Accept-Language": "en-US,en"},
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        assert payload["model"] == "glm-5v-turbo"
+        assert payload["messages"][0]["role"] == "system"
+        user_content = payload["messages"][1]["content"]
+        image_url = user_content[0]["image_url"]["url"]
+        assert image_url.startswith("data:image/png;base64,")
+        assert base64.b64decode(image_url.split(",", 1)[1]) == b"png-bytes"
+        assert user_content[1]["text"] == "Extract pins."
+        assert request.headers["authorization"] == "Bearer test-glm-secret"
+        assert request.url == "https://api.zai.test/api/paas/v4/chat/completions"
+        return httpx.Response(
+            200,
+            json={
+                "id": "chatcmpl-1",
+                "model": "glm-5v-turbo",
+                "choices": [
+                    {
+                        "finish_reason": "stop",
+                        "message": {
+                            "role": "assistant",
+                            "content": '{"pins":[{"pin_no":"1","name":"PA0"}]}',
+                        },
+                    }
+                ],
+                "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+            },
+        )
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        text, evidence = frontier.frontier_chat(
+            client,
+            model=model,
+            instruction="Extract pins.",
+            image=b"png-bytes",
+            max_tokens=256,
+        )
+
+    assert json.loads(text)["pins"][0]["name"] == "PA0"
+    assert evidence["model"] == "glm-5v-turbo"
+    assert evidence["response_id"] == "chatcmpl-1"
+    assert "test-glm-secret" not in json.dumps(evidence)

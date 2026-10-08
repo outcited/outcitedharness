@@ -42,6 +42,14 @@ AXES = {
 }
 WANTED = {"vout_min_v": ["VOUT"], "vout_max_v": ["VOUT"], "iq": ["IQ", "ICC", "ISY"]}
 
+# Quantity kinds that never satisfy output-current axes (CR ti-wave-defect-report-20260913).
+_QUANTITY_REJECT = re.compile(
+    r"leakage|standby|quiescent|sleep|shutdown|sink\s+current|pull[- ]?down|"
+    r"start[- ]?up|ground\s+current|supply\s+current\s*\(note|slope|%\s*/\s*m|"
+    r"offset|differential|sync\s+current|on[- ]pin|off[- ]state|switching\s+current",
+    re.I,
+)
+
 GOLD_AXES = {
     "vds_v", "id_a", "rds_on_mohm", "vin_min_v", "vin_max_v", "iout_max_a",
     "charge_current_max_a", "regulated_outputs",
@@ -66,6 +74,9 @@ def _axis_for(fact: dict, device_class: str) -> tuple[str, bool] | None:
     if re.fullmatch(r"I(D|C)?[MPK](?:\(\d\))?", sym) or re.search(
         r"pulsed|peak\s+switching|surge", par, re.I
     ):
+        return None
+    # Quantity-kind classifier: leakage/standby/sink/slope never fill output axes.
+    if _QUANTITY_REJECT.search(par):
         return None
     for axis, symbols in AXES.get(device_class, {}).items():
         for s in symbols:
@@ -117,15 +128,23 @@ def _pick_value(fact: dict, axis: str) -> tuple[float | None, str]:
     return None, ""
 
 
-def _outputs_from_prose(facts: list[dict]) -> int | None:
+def _outputs_from_prose(facts: list[dict]) -> tuple[int | None, str]:
     text = " ".join(str(f.get("parameter") or "") for f in facts if f.get("table_kind") == "prose")
     text += " ".join(str(f.get("verbatim") or "") for f in facts[:40])
     m = _OUTPUT_COUNT.search(text)
     if not m:
-        return None
+        return None, ""
     word = m.group(1).lower()
-    return {"dual": 2, "two": 2, "2": 2, "triple": 3, "three": 3, "3": 3,
-            "quad": 4, "four": 4, "4": 4}.get(word.rstrip("-"))
+    count = {"dual": 2, "two": 2, "2": 2, "triple": 3, "three": 3, "3": 3,
+             "quad": 4, "four": 4, "4": 4}.get(word.rstrip("-"))
+    if count is None:
+        return None, ""
+    # Verbatim must be a document excerpt, never the matching rule
+    # (CR ti-wave-defect-report-20260913, class 3).
+    span_start = max(0, m.start() - 60)
+    span_end = min(len(text), m.end() + 60)
+    excerpt = " ".join(text[span_start:span_end].split())
+    return count, excerpt
 
 
 def extract_part(pdf: Path, part: str, device_class: str) -> list[dict]:
@@ -153,6 +172,15 @@ def extract_part(pdf: Path, part: str, device_class: str) -> list[dict]:
         if axis.endswith("_min_v") != is_min and axis in ("vin_min_v", "vin_max_v", "vout_min_v", "vout_max_v"):
             continue
         rating_weight = 3 if _ABS_MAX.search(str(fact.get("table_title") or "")) else 1
+        if axis.startswith("vin_"):
+            # Operating range, not abs-max pin bounds: the abs-max negative
+            # limit (-0.3V) is never the operating maximum/minimum.
+            if rating_weight >= 3:
+                continue
+            if isinstance(fact.get("max") or fact.get("typ") or fact.get("min") or fact.get("value"), (int, float)):
+                probe = fact.get("max") or fact.get("typ") or fact.get("min") or fact.get("value")
+                if probe < 0:
+                    continue
         if axis.endswith("_max_v") or axis.endswith("_max_a"):
             rating_weight += 1 if _MAX_HINT.search((fact.get("parameter") or "")) else 0
         cond = str(fact.get("condition_verbatim") or "") + str(fact.get("parameter") or "")
@@ -197,7 +225,7 @@ def extract_part(pdf: Path, part: str, device_class: str) -> list[dict]:
             }
         )
     if device_class == "pmic":
-        n = _outputs_from_prose(facts)
+        n, excerpt = _outputs_from_prose(facts)
         if n:
             rows.append(
                 {
@@ -208,7 +236,7 @@ def extract_part(pdf: Path, part: str, device_class: str) -> list[dict]:
                     "unit": "count",
                     "role": "prose",
                     "page_1based": 1,
-                    "verbatim": _OUTPUT_COUNT.pattern,
+                    "verbatim": excerpt[:220],
                     "condition_verbatim": None,
                     "table_kind": "prose",
                 }

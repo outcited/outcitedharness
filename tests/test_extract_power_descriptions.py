@@ -70,7 +70,7 @@ class TestPage1Description:
             ("Features", 12, 200),
         ])
         result = page1_description(pdf, "BD90C0AFP-C")
-        assert result["candidate"] == "tagline"
+        assert result["candidate_kind"] == "tagline"
         assert result["description_verbatim"] == "35V Voltage Resistance 1A LDO Regulators"
 
     def test_description_section_first_sentence(self, tmp_path):
@@ -82,7 +82,7 @@ class TestPage1Description:
             ("advanced processing techniques to achieve low resistance.", 10, 155),
         ])
         result = page1_description(pdf, "IRFI3205")
-        assert result["candidate"] == "description_section"
+        assert result["candidate_kind"] == "section_paragraph"
         assert result["description_verbatim"].startswith("Fifth generation")
         assert result["description_verbatim"].endswith("resistance.")
 
@@ -103,7 +103,9 @@ class TestPage1Description:
             ("Datasheet", 10, 110),
             ("Rev. 2.1, 2020-10-23", 8, 790),
         ])
-        assert page1_description(pdf, "BSC0921NDI") == {"no_description_line": True}
+        result = page1_description(pdf, "BSC0921NDI")
+        assert result["no_description_line"] is True
+        assert result["candidate_kind"] == "none"
 
     def test_two_column_features_never_splice_into_description(self, tmp_path):
         """CR remaining-527-ack-20260912: the y-sorted join spliced Features
@@ -122,7 +124,7 @@ class TestPage1Description:
             ("− Ideal Load and Line Transient Responses", 10, 150),
         ])
         result = page1_description(pdf, "LM2578A")
-        assert result["candidate"] == "description_section"
+        assert result["candidate_kind"] == "section_paragraph"
         assert result["description_verbatim"].startswith("The LM2578A is a switching regulator which can")
         assert "Feedback Inputs" not in result["description_verbatim"] or "converter" in result["description_verbatim"]
 
@@ -137,7 +139,7 @@ class TestPage1Description:
             ("30A of current from a compact BGA package.", 10, 166),
         ])
         result = page1_description(pdf, "RAA210130")
-        assert result["candidate"] == "description_section"
+        assert result["candidate_kind"] == "section_paragraph"
         assert result["description_verbatim"] == (
             "The RAA210130 is a fully PMBus enabled DC/DC step-down power supply "
             "capable of delivering up to 30A of current from a compact BGA package."

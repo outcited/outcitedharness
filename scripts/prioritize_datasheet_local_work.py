@@ -20,7 +20,9 @@ SCHEMA = "harness.electronics-prioritized-local-work.v1"
 CAPABILITY_SCORE = {
     "pin_semantics": 5.0,
     "pin_or_ball": 4.5,
+    "typical_characteristics": 4.5,
     "parametrics": 4.0,
+    "power_modes": 4.0,
     "opn_decoder": 3.0,
     "series_summary": 2.0,
 }

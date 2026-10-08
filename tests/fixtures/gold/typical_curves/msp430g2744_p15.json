@@ -1,0 +1,185 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "msp430g2744.pdf",
+  "source": "MSP430G2744/G2544/G2444 datasheet SLAS892C (p.15), sections 5.4-5.5. Written cold from the frozen page render (200 DPI) before scoring; table values cross-checked against the printed EC table on the same page.",
+  "document_sha256": "636b74db6257b97cf13e6985f5e1a21d4d98670dac5504c9f2739c598943381d",
+  "page_1based": 15,
+  "plots": [
+    {
+      "title": "Figure 5-2. Active-mode Current vs Supply Voltage",
+      "axes": {
+        "x": {
+          "label": "VCC −Supply Voltage",
+          "unit": "V",
+          "min": 1.5,
+          "max": 4.0
+        },
+        "y": {
+          "label": "Active-mode Current",
+          "unit": "mA",
+          "min": 0.0,
+          "max": 8.0
+        }
+      },
+      "series": [
+        {
+          "name": "fDCO = 16 MHz",
+          "condition": "TA = 25°C",
+          "points": [
+            [
+              3.3,
+              6.0
+            ],
+            [
+              3.6,
+              6.8
+            ]
+          ]
+        },
+        {
+          "name": "fDCO = 12 MHz",
+          "condition": "TA = 25°C",
+          "points": [
+            [
+              2.7,
+              3.5
+            ],
+            [
+              3.6,
+              5.15
+            ]
+          ]
+        },
+        {
+          "name": "fDCO = 8 MHz",
+          "condition": "TA = 25°C",
+          "points": [
+            [
+              2.2,
+              1.9
+            ],
+            [
+              3.6,
+              3.5
+            ]
+          ]
+        },
+        {
+          "name": "fDCO = 1 MHz",
+          "condition": "TA = 25°C",
+          "points": [
+            [
+              1.8,
+              0.22
+            ],
+            [
+              2.2,
+              0.27
+            ],
+            [
+              3.0,
+              0.39
+            ],
+            [
+              3.6,
+              0.45
+            ]
+          ]
+        }
+      ],
+      "anchor_notes": "EC table 5.4 on the same page prints I_AM,1MHz typ 270 µA @ VCC = 2.2 V and 390 µA typ / 550 µA max @ VCC = 3 V — the fDCO = 1 MHz series passes through both typ values."
+    },
+    {
+      "title": "Figure 5-3. Active-Mode Current vs DCO Frequency",
+      "axes": {
+        "x": {
+          "label": "fDCO −DCO Frequency",
+          "unit": "MHz",
+          "min": 0.0,
+          "max": 16.0
+        },
+        "y": {
+          "label": "Active-mode Current",
+          "unit": "mA",
+          "min": 0.0,
+          "max": 5.0
+        }
+      },
+      "series": [
+        {
+          "name": "TA = 85 °C",
+          "condition": "VCC = 3 V",
+          "points": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              8.0,
+              2.9
+            ],
+            [
+              12.0,
+              4.3
+            ]
+          ]
+        },
+        {
+          "name": "TA = 25°C",
+          "condition": "VCC = 3 V",
+          "points": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              8.0,
+              2.7
+            ],
+            [
+              12.0,
+              4.05
+            ]
+          ]
+        },
+        {
+          "name": "TA = 85 °C",
+          "condition": "VCC = 2.2 V",
+          "points": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              4.0,
+              0.9
+            ],
+            [
+              8.0,
+              1.9
+            ]
+          ]
+        },
+        {
+          "name": "TA = 25°C",
+          "condition": "VCC = 2.2 V",
+          "points": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              4.0,
+              0.85
+            ],
+            [
+              8.0,
+              1.8
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": "Acceptance gold for the typical-curves lane: axis-label exact >= 0.95, series-count exact >= 0.90, sampled-point error <= 2% of y-axis span. Points sample identifiable features only (endpoints, bends, crossings, labeled markers). Label strings recovered verbatim from the page text layer (deterministic word-run joins); digitized points remain hand-labeled from the frozen render."
+}

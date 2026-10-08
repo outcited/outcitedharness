@@ -9,7 +9,7 @@ aliases:
 
 # Internal orchestration failover order. This is not a client-visible route.
 auto_ladder:
-  - asus2_qwen
+  - dsv41_flash
 
 context_window: 131072
 max_output_tokens: 8192

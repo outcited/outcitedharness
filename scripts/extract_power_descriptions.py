@@ -99,13 +99,33 @@ def _page_lines(page) -> list[dict]:
 
 
 def _is_part_numberish(text: str, part_number: str) -> bool:
+    """True when the line is just a device label, not vendor copy. Catches
+    exact matches and near-variants that differ only by a package/suffix
+    token (IRFS4227 row vs "IRFSL4227PbF" label: the letters of the row's
+    part number appear in order inside a short line)."""
     bare = re.sub(r"[^a-z0-9]", "", text.lower())
     part = re.sub(r"[^a-z0-9]", "", part_number.lower())
-    return bool(part) and part in bare and len(bare) <= len(part) + 4
+    if not part:
+        return False
+    if part in bare and len(bare) <= len(part) + 4:
+        return True
+    # Subsequence match: part number's chars appear in order and the line is
+    # short and has no lowercase prose words.
+    it = iter(bare)
+    if all(ch in it for ch in part) and len(bare) <= len(part) + 6:
+        words = re.findall(r"[A-Za-z]{3,}", text)
+        if len(words) <= 2:
+            return True
+    return False
 
 
 _BULLET_START = re.compile(r"^\s*(?:[•l○·*\u2022\u25cf\u2023\u2043]|[-–—]\s)", re.I)
 _FEATURES_BAND = re.compile(r"^\s*features?\b|^\s*key\s+features\b|^\s*applications?\b|^\s*benefits?\b", re.I)
+
+
+def _alnum_density(text: str) -> float:
+    t = text.strip()
+    return (sum(1 for c in t if c.isalnum()) / len(t)) if t else 0.0
 
 
 def _merge_tagline(lines: list[dict], start: int) -> str:
@@ -194,47 +214,214 @@ def _paragraph_from_segments(segments: list[dict], anchor_x: float, start_y: flo
     return _first_sentence(" ".join(paragraph))
 
 
-DESC_HEADERS = re.compile(r"^(general\s+|product\s+)?description$", re.I)
-# Renesas covers open with the description paragraph under the title, no
-# header: "The RAA210130 is a fully PMBus enabled DC/DC ...".
-PARAGRAPH_OPENER = re.compile(r"^The\s+[A-Za-z0-9][\w./-]*\s+(?:is|are|provides|offers|features|delivers|combines)\b")
+DESC_HEADERS = re.compile(
+    r"^(?:[●•▪◦\u2022\u25cf\u2023\u2043\x84l]\s*)?"
+    r"(?:general\s+|product\s+|device\s+)?description"
+    r"(?:\s*/\s*ordering\s+information)?\s*$",
+    re.I,
+)
+# Headerless covers: the description paragraph sits under the title with no
+# "Description" heading, in the upper part of page 1. Two openers are common —
+# "The RAA210130 is a fully PMBus ..." (Renesas) and "CoolMOS™ is a
+# revolutionary technology ..." / "Advanced HEXFET® Power MOSFETs from
+# International Rectifier utilize ..." (Infineon/IR). The opener must be a
+# full sentence start (capitalised, ends its clause with a verb), which is why
+# the bare "first short line in the header" heuristic is not used.
+PARAGRAPH_OPENER = re.compile(
+    r"^(?:The\s+[A-Za-z0-9][\w./-]*\s+(?:is|are|provides|offers|features|delivers|combines)\b"
+    r"|[A-Z][\w®™ª-]*\s+(?:is|are|provides|offers|combines|delivers|features|utilizes|utilise)\b"
+    r"|[A-Z][\w®™ª-]*(?:\s+[\w®™ª,-]+){1,5}\s+(?:from\s+[A-Z][\w&.-]+)?\s*(?:utilizes|utilise|provides|offers|combines|are|is)\b)",
+    re.I,
+)
+HEADER_REGION_FRAC = 0.45
+
+# A section heading we must not walk past while collecting a Description
+# paragraph (matches the existing BOILERPLATE capture of section names, plus
+# the common vendor headings that follow a Description block).
+SECTION_STOP = re.compile(
+    r"^\s*(?:absolute\s+maximum\s+(?:ratings?|conditions?)|electrical\s+characteristics|"
+    r"thermal\s+(?:information|characteristics|resistance)|package\s+(?:information|outline|type)|"
+    r"ordering\s+information|revision\s+history|pin\s+(?:configuration|assignments?)|"
+    r"connection\s+diagram|block\s+diagram|typical\s+(?:application|operating)|"
+    r"application\s+(?:information|examples?|circuit)|features?|key\s+features|applications?|"
+    r"benefits?|general\s+description|product\s+description|description|"
+    r"qualification\s+information|related\s+literature|references?|notes?|"
+    r"functional\s+description|overview)\s*:?\s*$",
+    re.I,
+)
+
+# Feature bullets: the fallback layout. A bullet block is contiguous lines at
+# similar size/x under a Features-style band, each a short phrase. The lead
+# bullet carrying the product claim (usually has a digit: "Delivers up to
+# 250W per Channel into 4Ω with No Heat sink").
+_BULLET_MARK = re.compile(r"^\s*(?:[•▪◦\u2022\u25cf\u2023\u2043]|[-–—]\s|l\s|○\s)", re.I)
+_BULLET_BAND = re.compile(r"^\s*(?:features?|key\s+features|product\s+features|"
+                          r"applications?|benefits?|highlights?|general\s+features?)\s*:?\s*$", re.I)
 
 
 def _column_lines(lines: list[dict], start: int, x: float) -> list[dict]:
     return [l for l in lines[start:] if abs(l["x"] - x) <= 30.0]
 
 
-def _description_first_sentence(lines: list[dict]) -> str | None:
-    """First sentence of a page-1 Description section, from the visual
-    segment anchored in the header's column (two-column Features text and
-    justified word fragments never splice in); falls back to a headerless
-    paragraph opener in its own column (Renesas-style covers)."""
+# Vendor annotation blocks that can sit inside a Description section on SiC
+# covers: a pin-definition note is not the product description.
+NOTE_BLOCK = re.compile(r"^\s*(note|pin\s+definition|caution|warning)s?\b", re.I)
+
+
+def _paragraph_from_segments(segments: list[dict], anchor_x: float, start_y: float,
+                             stop_at_section: bool = False) -> str | None:
+    """First sentence from the column anchored at anchor_x, beginning at
+    start_y (the header line, or the opener line itself). Stops at
+    bullet-like fragments, boilerplate, and visual paragraph breaks. When
+    stop_at_section is set, a section heading also ends the paragraph."""
+    paragraph = []
+    prev_y = None
+    for seg in segments:
+        if seg["y"] < start_y - 5.0 or abs(seg["x"] - anchor_x) > 30.0:
+            continue
+        text = seg["text"]
+        if prev_y is not None and seg["y"] - prev_y > 60.0:
+            break
+        if stop_at_section and paragraph and SECTION_STOP.match(text):
+            break
+        if NOTE_BLOCK.match(text):
+            break
+        if len(text) < 12 or text.lstrip()[:1] in "−•▪◦l·":
+            if paragraph:
+                break
+            continue
+        if BOILERPLATE.search(text):
+            break
+        paragraph.append(text)
+        prev_y = seg["y"]
+        if text.endswith("."):
+            break
+        if len(" ".join(paragraph)) > 400:
+            break
+    if not paragraph:
+        return None
+    return _first_sentence(" ".join(paragraph))
+
+
+def _looks_like_prose(text: str) -> bool:
+    """A Description section that holds only a figure label or a heading
+    fragment is not vendor prose. Require a verb-bearing clause: at least 5
+    words and a lowercase function word, which every real description
+    paragraph has and a bare label like "HEXFET® Power MOSFET" does not."""
+    words = text.split()
+    if len(words) < 5:
+        return False
+    return any(w.lower() in {"is", "are", "provides", "offers", "combines", "delivers",
+                             "utilizes", "utilizes", "of", "with", "for", "and", "the",
+                             "a", "an", "to", "that", "which", "designed", "used"}
+               for w in words)
+
+
+def _description_section_paragraph(lines: list[dict]) -> str | None:
+    """CR spec 2026-09-17: anchor on a Description / General Description /
+    Product Description heading and take the paragraph(s) following it, up to
+    the next section heading. The heading's own segment must not enter the
+    walk (it is short and would end it), so the walk starts below the
+    header's y."""
     segments = _visual_segments(lines)
     for ln in lines:
         if not DESC_HEADERS.match(ln["text"]):
             continue
-        # The header's own segment must not enter the paragraph loop (it is
-        # short and would end it); everything else in its column follows.
-        remaining = [s for s in segments if not (DESC_HEADERS.match(s["text"]) and abs(s["x"] - ln["x"]) <= 30.0)]
-        sentence = _paragraph_from_segments(remaining, ln["x"], ln["y"] - 5.0)
-        if sentence:
+        # The heading's own segment must not enter the walk: it matches
+        # BOILERPLATE and would end the paragraph at once. Everything else in
+        # the heading's column follows.
+        remaining = [s for s in segments if not DESC_HEADERS.match(s["text"])]
+        sentence = _paragraph_from_segments(remaining, ln["x"], ln["y"] + 1.0, stop_at_section=True)
+        if sentence and _looks_like_prose(sentence):
             return sentence
-    for ln in lines:
-        if PARAGRAPH_OPENER.match(ln["text"]):
-            # -5 keeps the opener's own segment (bucket y can sit slightly
-            # above the raw line's y).
-            sentence = _paragraph_from_segments(segments, ln["x"], ln["y"] - 5.0)
-            if sentence:
-                return sentence
+    # Headerless cover: a paragraph opener under the title, no heading. Only
+    # in the page's header region — a mid-document sentence that happens to
+    # read like an opener is not a cover description. The paragraph is one
+    # contiguous same-column run of segments; interleaved figure glyphs in
+    # other columns are ignored by working on segments, not raw lines.
+    if not lines:
+        return None
+    top = lines[0]["h"] * HEADER_REGION_FRAC
+    body = [s for s in segments if s["y"] <= top and len(s["text"]) >= 12]
+    for idx, seg in enumerate(body):
+        if not (PARAGRAPH_OPENER.match(seg["text"]) and not BOILERPLATE.search(seg["text"])):
+            continue
+        start = idx
+        while start > 0:
+            prev, cur = body[start - 1], body[start]
+            if abs(prev["x"] - cur["x"]) > 30.0:
+                break
+            if not (0 < cur["y"] - prev["y"] <= 20.0):
+                break
+            if SECTION_STOP.match(prev["text"]) or BOILERPLATE.search(prev["text"]):
+                break
+            start -= 1
+        opener = body[start]
+        sentence = _paragraph_from_segments(segments, opener["x"], opener["y"] - 5.0, stop_at_section=True)
+        if sentence and _looks_like_prose(sentence):
+            return sentence
     return None
+    return None
+
+
+def _feature_bullet_block(lines: list[dict], part_number: str) -> str | None:
+    """Fallback layout (CR spec 2026-09-17, step 2): the contiguous
+    feature-bullet block, verbatim and whitespace-normalized. The bullet
+    glyphs are stripped (they are markup, not copy) and the block's lines
+    joined in reading order. Returns None when there is no genuine
+    multi-line bullet block."""
+    n = len(lines)
+    for i, ln in enumerate(lines):
+        if not (_BULLET_BAND.match(ln["text"]) or _BULLET_MARK.match(ln["text"])):
+            continue
+        block, size, x = [], ln["size"], ln["x"]
+        for nxt in lines[i + 1:]:
+            # Column guard first: a table cell in the other column must not
+            # end the block (it belongs to a different reading column).
+            if abs(nxt["size"] - size) > 2.0 or abs(nxt["x"] - x) > 30.0:
+                continue
+            if nxt["text"].lstrip()[:1] in "0123456789":
+                break
+            if not (MIN_LINE_CHARS <= len(nxt["text"]) <= 160):
+                break
+            if SECTION_STOP.match(nxt["text"]) or _BULLET_BAND.match(nxt["text"]):
+                break
+            if not _BULLET_MARK.match(nxt["text"]) and block:
+                break
+            block.append(re.sub(r"^\s*(?:[•▪◦\u2022\u25cf\u2023\u2043]|[-–—]\s|l\s|○\s)", "", nxt["text"], flags=re.I).strip())
+        if len(block) >= 3:
+            return " ".join(block)
+    return None
+
+
+def _text_artifacts_present(lines: list[dict]) -> bool:
+    """The text layer splits words mid-token on some vendor PDFs ("packag
+    ing", "compatib le"). CR decides at ingest; the extractor only flags.
+    Heuristic: a line ending in a lowercase fragment followed by a line
+    starting with a lowercase fragment, where joining yields a real word."""
+    from itertools import pairwise
+    for a, b in pairwise(lines):
+        ta, tb = a["text"].rstrip(), b["text"].lstrip()
+        if not ta or not tb:
+            continue
+        if ta[-1].islower() and tb[0].islower() and ta.endswith(("g", "e", "n", "t", "c", "l", "r", "s", "d")):
+            return True
+    return False
 
 
 def page1_description(pdf_path: Path, part_number: str) -> dict:
     """Deterministic page-1 candidates, verbatim only.
 
-    Order: large-font tagline block in the header region, else the
-    Description section's first sentence. Everything is recorded verbatim;
-    the floor verdict is reported separately so CR's locked validator rules.
+    Priority per CR ruling 2026-09-17 (am-mu57vf5v-4f3c):
+      1. Description / General Description / Product Description section
+         paragraph (anchor on the heading, take what follows to the next
+         section heading).
+      2. Contiguous feature-bullet block (verbatim).
+      3. Large-font tagline in the header region (legacy layout).
+    Everything is recorded verbatim; candidate_kind names which rule fired
+    and the floor verdict is reported separately so CR's locked validator
+    rules. Also flags text_artifacts when the text layer splits words
+    mid-token; CR decides at ingest, we never repair editorially.
     """
     try:
         doc = pymupdf.open(pdf_path)
@@ -244,6 +431,20 @@ def page1_description(pdf_path: Path, part_number: str) -> dict:
         lines = _page_lines(doc[0])
     finally:
         doc.close()
+    artifacts = _text_artifacts_present(lines)
+    out_extra = {"text_artifacts": True} if artifacts else {}
+
+    # 1. Description section paragraph.
+    sentence = _description_section_paragraph(lines)
+    if sentence and not _is_part_numberish(sentence, part_number):
+        return {"description_verbatim": sentence, "candidate_kind": "section_paragraph", **out_extra}
+
+    # 2. Feature-bullet block.
+    bullets = _feature_bullet_block(lines, part_number)
+    if bullets and not _is_part_numberish(bullets, part_number):
+        return {"description_verbatim": bullets, "candidate_kind": "bullet_block", **out_extra}
+
+    # 3. Legacy tagline (header region, largest type).
     candidates = []
     for i, ln in enumerate(lines):
         if ln["size"] < TAGLINE_MIN_SIZE or BOILERPLATE.search(ln["text"]) or _is_part_numberish(ln["text"], part_number):
@@ -251,31 +452,12 @@ def page1_description(pdf_path: Path, part_number: str) -> dict:
         if len(ln["text"]) < MIN_LINE_CHARS:
             continue
         tagline = _merge_tagline(lines, i)
-        if not BOILERPLATE.search(tagline):
+        if not BOILERPLATE.search(tagline) and not _is_garbled(tagline) and _alnum_density(tagline) >= 0.5:
             candidates.append((ln["size"], ln["y"], tagline))
     if candidates:
-        # Largest type wins (the vendor tagline block); ties go to the
-        # earliest position on the page.
         best = max(candidates, key=lambda c: (c[0], -c[1]))
-        return {"description_verbatim": best[2], "candidate": "tagline"}
-    sentence = _description_first_sentence(lines)
-    if sentence:
-        sentence = re.sub(r"^\s*\d*\s*description\s+", "", sentence, flags=re.I)
-    if sentence and not _is_part_numberish(sentence, part_number):
-        return {"description_verbatim": sentence, "candidate": "description_section"}
-    # Last chance: a smaller tagline under the part number (ROHM SiC covers
-    # print "N-channel SiC power MOSFET" at ~10.5pt). Only when nothing else
-    # qualified, and only in the page's header region.
-    if lines:
-        top = lines[0]["h"] * 0.35
-        small = [l for l in lines if l["y"] <= top and l["size"] >= 10.0
-                 and len(l["text"]) >= MIN_LINE_CHARS
-                 and not BOILERPLATE.search(l["text"])
-                 and not _is_part_numberish(l["text"], part_number)]
-        if small:
-            best = max(small, key=lambda l: (l["size"], -l["y"]))
-            return {"description_verbatim": best["text"], "candidate": "sub_tagline"}
-    return {"no_description_line": True}
+        return {"description_verbatim": best[2], "candidate_kind": "tagline", **out_extra}
+    return {"no_description_line": True, "candidate_kind": "none", **out_extra}
 
 
 def sha256_of(path: Path) -> str:
@@ -335,7 +517,9 @@ def main() -> int:
         }
         if "description_verbatim" in result:
             line = result["description_verbatim"]
-            row["candidate_kind"] = result["candidate"]
+            row["candidate_kind"] = result.get("candidate_kind", "tagline")
+            if result.get("text_artifacts"):
+                row["text_artifacts"] = True
             row["page1_line_verbatim"] = line
             if meets_floor(line):
                 row["description_verbatim"] = line

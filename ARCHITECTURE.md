@@ -1,5 +1,18 @@
 # Harness Architecture
 
+**Updated 2026-10-03 — fleet re-architecture summary.** Content below that
+references Qwen3.8 TP2 lanes and per-lane coding models is HISTORICAL. Current
+truth: TP4 = DeepSeek V4.1-Flash (extraction engine: vision, 1M ctx, hard
+pages + manual coding, 100.116.221.82:8888). asus2+asus4 = extraction workers
++ local dense canon (Qwen3.8-27B-FP8, no-MoE rule) + LoRA training. Coding =
+cloud (GLM-5.3 plan); code adjudication = local sweep -> Claude Sonnet 5.5 ->
+GPT-6.1. Pipeline package `harness/pipeline/` (SQLite queue semantics, P0-P4
+severity ladder, one-front-door API with council-pillar validation, section
+census). Governance: PILLAR_COUNCIL.md, fleet-state probe (7 nodes, hourly,
+change-mail), RUNBOOK.md. Substrate: every PDF -> per-page raw text + printed
+page labels + needs_ocr, sha-stamped, versioned, under
+/Volumes/M5_4TB/extract-results/.
+
 ## Runtime path
 
 ```mermaid

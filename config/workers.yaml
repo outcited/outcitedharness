@@ -8,14 +8,14 @@ workers:
   primary_coder:
     enabled: true
     role: coder
-    model_key: asus2_qwen
-    endpoint: http://100.68.133.1:8888/v1
+    model_key: dsv41_flash
+    endpoint: http://100.116.221.82:8888/v1
     capabilities:
       - coding
       - tool_calling
       - long_context
     failover_order: 1
-    notes: ASUS2+ASUS4 Qwen3.8 Flash Next TP2; primary coding and foreman service after DGX3 moved to datasheet vision.
+    notes: dgx2+asus1+dgx3+asus3 DeepSeek V4.1-Flash TP4 (SGLang) — restored 2026-10-02. Extraction engine + optional manual agentic coding; also serves the foreman lane.
 
   dgx2_coder:
     enabled: false
@@ -83,17 +83,29 @@ workers:
       - document_extraction
     notes: Manual paid rescue only. Never part of harness-orch automatic routing.
 
-  qwen38_critic:
-    enabled: true
+  tp4_adjudicator:
+    enabled: false
     role: critic
-    priority: 1
-    model_key: asus2_qwen
-    endpoint: http://100.68.133.1:8888/v1
+    priority: 0
+    model_key: dgx2_qwen72b
+    endpoint: http://100.116.221.82:8888/v1
     capabilities:
       - review
       - reasoning
       - long_context
-    notes: Same endpoint as the active dual-Spark foreman; skipped for independent grading so ASUS3 Nemotron becomes the first critic.
+    notes: DISABLED 2026-10-02 — the local Qwen2.5-72B TP4 deployment was torn down (~/qwen72-tp4 on dgx2 has stop.sh). Adjudication is hosted/cloud per the 2026-10-02 architecture decision. Entry retained as the record.
+
+  qwen38_critic:
+    enabled: true
+    role: critic
+    priority: 1
+    model_key: dsv41_flash
+    endpoint: http://100.116.221.82:8888/v1
+    capabilities:
+      - review
+      - reasoning
+      - long_context
+    notes: Same endpoint as the TP4 lane (DeepSeek V4.1-Flash); skipped for independent grading so ASUS3 Nemotron becomes the first critic. Adjudication itself is hosted/cloud per the 2026-10-02 architecture.
 
   researcher:
     enabled: true
@@ -144,13 +156,13 @@ workers:
     enabled: true
     role: foreman
     priority: 1
-    model_key: asus2_qwen
-    endpoint: http://100.68.133.1:8888/v1
+    model_key: dsv41_flash
+    endpoint: http://100.116.221.82:8888/v1
     capabilities:
       - reasoning
       - long_context
       - tool_calling
-    notes: gx10-26b6 + gx10-33af; Qwen3.8 Flash Next NVFP4 SGLang TP2 foreman and shared primary coding service. ASUS3 Nemotron supplies independent local QA.
+    notes: TP4 fabric ranks (dgx2 head); DeepSeek V4.1-Flash foreman and shared coding/extraction service since restore 2026-10-02. ASUS3 Nemotron supplies independent local QA.
 
   secondary:
     enabled: false

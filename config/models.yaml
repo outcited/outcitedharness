@@ -109,10 +109,13 @@ models:
     capabilities:
       vision: true
 
+  # Retired 2026-10-02: asus2+asus4 are now dedicated PDF-text-extraction
+  # workers; the Qwen3.8 TP2 SGLang service no longer exists; key kept for
+  # historical bakeoff scripts only.
   asus2_qwen:
-    enabled: true
+    enabled: false
     tier: 0
-    display_name: "ASUS2+ASUS4 Qwen3.8 Flash Next TP2 SGLang"
+    display_name: "ASUS2+ASUS4 Qwen3.8 Flash Next TP2 SGLang (retired)"
     short_name: "QWEN38_TP2"
     provider: openai_compatible
     base_url: http://100.68.133.1:8888/v1
@@ -179,12 +182,12 @@ models:
       vision: false
 
   # DeepSeek V4.1-Flash TP4/EP4 on four Sparks (dgx2 head + asus1/dgx3/asus3),
-  # SGLang; replaced the GLM-5.3-Flash TP4 lane 2026-09-16. See
-  # deploy/deepseek-v41/README.md. Multimodal — vision validated live against
-  # this endpoint; the 1M ctx ceiling is optimistic under concurrency. No API
-  # key on this endpoint. Enabled for client vision cases (loopback alias
-  # local-dsv41); not yet in the qualification record — no tournament or
-  # escalation claims may rest on it until qualified.
+  # SGLang via ~/DS4.1 on dgx2. RESTORED 2026-10-02 after the Oct 1 lane swap
+  # put a BF16 Qwen-72B here and a text-only 0731 impostor on the TP2 pair.
+  # Vision re-validated live 2026-10-02 (red PNG -> "Red"); tool calling and
+  # 1M ctx per the 2026-09-16 qualification (deploy/deepseek-v41/README.md).
+  # The extraction pipeline engine AND the optional manual agentic-coding
+  # endpoint. No API key.
   dsv41_flash:
     enabled: true
     tier: 0
@@ -198,6 +201,24 @@ models:
     max_tokens: 32768
     capabilities:
       vision: true
+
+  # Qwen2.5-72B-Instruct BF16 ran TP4 here Oct 1 - Oct 2 2026 (undocumented
+  # swap, torn down 2026-10-02, see ~/qwen72-tp4 on dgx2). Adjudication moved
+  # to a hosted provider per the 2026-10-02 architecture decision — entry kept
+  # disabled as the record; weights remain at /srv/models/Qwen2.5-72B-Instruct.
+  dgx2_qwen72b:
+    enabled: false
+    tier: 0
+    display_name: "Qwen2.5-72B TP4 (torn down — adjudication now hosted)"
+    short_name: "QWEN25_72B_TP4"
+    provider: openai_compatible
+    base_url: http://100.116.221.82:8888/v1
+    model: qwen2.5-72b-instruct
+    temperature: 0
+    timeout_s: 900
+    max_tokens: 8192
+    capabilities:
+      vision: false
 
   dgx_qwen_sc5:
     enabled: false
@@ -214,6 +235,8 @@ models:
 
   # Shadow-only two-node reasoner on ASUS2 + ASUS4. Disabled prevents normal
   # routing; controlled bakeoffs address this model key explicitly.
+  # Retired 2026-10-02: nothing listens on :9000 anymore; asus2+asus4 are
+  # PDF-extraction workers now (see dsv41_flash for the DeepSeek lane).
   deepseek_flash_tp2_shadow:
     enabled: false
     tier: 1
@@ -341,6 +364,63 @@ models:
       X-Title: model-harness
     capabilities:
       vision: false
+
+  # GLM 5V turbo vision experiment via Z.ai pay-as-you-go (2026-09-11).
+  # The coding plan (api.z.ai/api/coding/paas/v4) excludes this model.
+  # Disabled from dispatch; the datasheet comparison script selects it
+  # explicitly with --frontier-model-key glm5v_turbo.
+  # 2026-09-13: also available via OpenRouter (z-ai/glm-5v-turbo, vision);
+  # multi-brand test: 89/90 parse, grounding 0.606. max_tokens raised 8k->16k
+  # after long pin-table truncation (run2 of vision-compare-multibrand).
+  glm5v_turbo:
+    enabled: false
+    tier: 3
+    display_name: "GLM 5V Turbo"
+    short_name: "GLM5VT"
+    provider: openai_compatible
+    base_url: https://api.z.ai/api/paas/v4
+    model: glm-5v-turbo
+    api_key_env: GLM_API_KEY
+    temperature: 0
+    timeout_s: 240
+    max_tokens: 16384
+    extra_headers:
+      Accept-Language: en-US,en
+    extra_body:
+      thinking:
+        type: disabled
+    capabilities:
+      vision: true
+
+  # Bulk datasheet vision lane (2026-09-13). DeepSeek V4 Flash Vision Exp via
+  # OpenRouter. REQUIRES reasoning effort low + 32k budget: without headroom the
+  # model burns the entire completion budget on reasoning_tokens and returns
+  # empty content (finish_reason=length). On pages it completes, extraction
+  # matches glm5v_turbo (58/66 identical row counts) at ~1/6 the cost, and it
+  # beat GLM on a 100-row Infineon pin table (0.94 vs 0.385 grounding).
+  # Overflow rate ~24% on multi-brand corpus: escalate finish_reason=length
+  # to glm5v_turbo. Disabled from dispatch; comparison scripts select it
+  # explicitly.
+  ds_v4_vision:
+    enabled: false
+    tier: 3
+    display_name: "DeepSeek V4 Flash Vision Exp (bulk vision lane)"
+    short_name: "DS_V4_VISION"
+    provider: openai_compatible
+    base_url: https://openrouter.ai/api/v1
+    model: deepseek/deepseek-v4-flash-vision-exp
+    api_key_env: OPENROUTER_API_KEY
+    temperature: 0
+    timeout_s: 600
+    max_tokens: 32768
+    extra_headers:
+      HTTP-Referer: https://localhost/harness
+      X-Title: model-harness
+    extra_body:
+      reasoning:
+        effort: low
+    capabilities:
+      vision: true
 
   qwen_coder:
     enabled: false

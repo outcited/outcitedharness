@@ -1,0 +1,44 @@
+### Power/parametric table extraction v1 — full run, asus2, queued 2026-10-02.
+### Data: results/lora-v1-pairs (2713 train / 150 holdout, seed 1788172800).
+### Gate before promotion: deploy/lora-v1/RUNBOOK.md.
+
+model_name_or_path: /training/models/Qwen3-VL-8B-Instruct
+trust_remote_code: true
+
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_target: all
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+freeze_vision_tower: true
+freeze_multi_modal_projector: true
+freeze_language_model: false
+
+dataset: power_tables_v1_train
+dataset_dir: /training/datasets/power-tables-v1
+template: qwen3_vl_nothink
+cutoff_len: 16384
+preprocessing_num_workers: 8
+dataloader_num_workers: 2
+
+output_dir: /training/checkpoints/power-tables-qwen3-vl-8b-v1
+logging_steps: 10
+save_steps: 200
+save_total_limit: 2
+plot_loss: true
+overwrite_output_dir: false
+report_to: none
+
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 8
+gradient_checkpointing: true
+learning_rate: 0.0001
+num_train_epochs: 3.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
+bf16: true
+seed: 1788172800
+data_seed: 1788172800
+ddp_timeout: 180000000

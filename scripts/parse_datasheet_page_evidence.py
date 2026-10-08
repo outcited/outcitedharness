@@ -115,7 +115,7 @@ def main() -> int:
                                 page_1based=page_number,
                             )
                         )
-                    if "parametrics" in lanes:
+                    if lanes & {"parametrics", "power_modes"}:
                         page_parametric_rows.extend(
                             parse_parametric_table(
                                 table,
@@ -144,6 +144,10 @@ def main() -> int:
                     queue_capabilities.update({"pin_or_ball", "pin_semantics"})
                 if "parametrics" in lanes:
                     queue_capabilities.add("parametrics")
+                if "power_modes" in lanes:
+                    queue_capabilities.add("power_modes")
+                if "typical_characteristics" in lanes:
+                    queue_capabilities.add("typical_characteristics")
                 if "series_summary" in lanes:
                     queue_capabilities.add("series_summary")
                 if "opn_decoder" in lanes:

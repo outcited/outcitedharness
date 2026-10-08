@@ -14,13 +14,13 @@ def test_repo_registry_preserves_auto_ladder():
     registry = load_registry(root)
     gateway = yaml.safe_load((root / "config" / "gateway.yaml").read_text())
     assert registry.failover_keys() == list(gateway["auto_ladder"])
-    assert registry.failover_keys() == ["asus2_qwen"]
+    assert registry.failover_keys() == ["dsv41_flash"]
 
 
 def test_primary_coder_and_g10_foreman_are_the_live_boxes():
     registry = load_registry(find_project_root())
     primary = registry.get("primary_coder")
-    assert primary is not None and primary.enabled and primary.model_key == "asus2_qwen"
+    assert primary is not None and primary.enabled and primary.model_key == "dsv41_flash"
     assert registry.get("fallback_reasoner") is None
     assert "coding" in primary.capabilities
     assert "tool_calling" in primary.capabilities
@@ -48,8 +48,8 @@ def test_primary_coder_and_g10_foreman_are_the_live_boxes():
     assert "asus3_nemotron" not in registry.failover_keys()
     peer = registry.get("asus2_foreman")
     assert peer is not None and peer.enabled is True and peer.role == "foreman"
-    assert peer.model_key == "asus2_qwen"
-    assert "asus2_qwen" in registry.failover_keys()
+    assert peer.model_key == "dsv41_flash"
+    assert "dsv41_flash" in registry.failover_keys()
     embedder = registry.get("spark_embedder")
     assert embedder is not None and embedder.enabled and embedder.role == "embedder"
     assert embedder.model_key == "spark_embed"
@@ -154,7 +154,7 @@ def test_healthz_exposes_registry(tmp_path: Path):
         settings=Settings(results_dir=tmp_path / "results", db_path=tmp_path / "h.db"),
         models={
             "dgx_qwen": model("dgx_qwen", "openai_compatible", "http://192.168.4.38:8900/v1"),
-            "asus2_qwen": model("asus2_qwen", "openai_compatible", "http://100.68.133.1:8888/v1"),
+            "dsv41_flash": model("dsv41_flash", "openai_compatible", "http://100.116.221.82:8888/v1"),
             "frontier": model("frontier", "anthropic", "https://api.anthropic.com/v1"),
         },
         pricing={},
@@ -164,12 +164,12 @@ def test_healthz_exposes_registry(tmp_path: Path):
         listen_port=8787,
         api_key="harness-local",
         aliases={"harness-auto": "auto"},
-        auto_ladder=["dgx_qwen", "asus2_qwen"],
+        auto_ladder=["dgx_qwen", "dsv41_flash"],
         context_window=131072,
         max_output_tokens=8192,
     )
     body = TestClient(create_app(cfg, spec)).get("/healthz").json()
-    assert body["auto_ladder"] == ["asus2_qwen"]
+    assert body["auto_ladder"] == ["dsv41_flash"]
     by_id = {w["id"]: w for w in body["workers"]}
     assert by_id["primary_coder"]["status"] == "healthy"
     assert by_id["secondary"]["detail"] == "secondary unavailable"

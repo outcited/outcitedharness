@@ -1,0 +1,24 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "EXAMPLE-REPLACE.pdf",
+  "source": "EXAMPLE: <vendor> <part> datasheet Rev X, Typical characteristics (p.NN). Written cold from the printed plot before scoring — never from extractor output.",
+  "document_sha256": null,
+  "page_1based": 0,
+  "plots": [
+    {
+      "title": "Figure NN. Current consumption vs VDD, run mode",
+      "axes": {
+        "x": {"label": "VDD", "unit": "V", "min": 1.7, "max": 3.6},
+        "y": {"label": "IDD", "unit": "mA", "min": 0.0, "max": 10.0}
+      },
+      "series": [
+        {
+          "name": "Run mode",
+          "condition": "fHCLK = 64 MHz",
+          "points": [[1.8, 3.2], [2.4, 3.4], [3.3, 3.6]]
+        }
+      ]
+    }
+  ],
+  "notes": "Acceptance gold for the typical-curves lane: axis-label exact >= 0.95, series-count exact >= 0.90, sampled-point error <= 2% of axis span. Points sample identifiable features only (endpoints, bends, crossings, labeled markers)."
+}

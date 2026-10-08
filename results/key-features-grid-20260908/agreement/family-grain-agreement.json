@@ -1,8 +1,8 @@
 {
   "schema": "harness.electronics-family-grain-agreement-report.v1",
-  "generated_at": "2026-09-09T15:07:59.212603+00:00",
+  "generated_at": "2026-09-09T15:08:33.387079+00:00",
   "grids": "results/key-features-grid-20260908/grids.jsonl",
-  "grids_sha256": "28195dd125318b0311ec1652a82393c0a01f48f6d79efbed61df639e4f5cc163",
+  "grids_sha256": "61b9960710e7cda68afe72a6beb38e917fb9f288d62d9f236d4929ce0bbfadce",
   "documents": 587,
   "documents_with_family_key": 379,
   "family_keys_with_two_or_more_documents": 98,

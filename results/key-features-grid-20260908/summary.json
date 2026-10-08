@@ -1,6 +1,6 @@
 {
  "schema": "harness.electronics-key-features-grid.v1.summary",
- "generated_at": "2026-09-09T15:07:58.540127+00:00",
+ "generated_at": "2026-09-09T15:08:32.734482+00:00",
  "documents": 587,
  "meets_six_of_ten": 517,
  "groups_populated_histogram": {
@@ -178,7 +178,7 @@
   "eeprom": 108,
   "total_sram": 460,
   "code_flash": 99,
-  "data_flash": 70,
+  "data_flash": 76,
   "sram_bank": 282,
   "stated": 112,
   "junction": 226,
