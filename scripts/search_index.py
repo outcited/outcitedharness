@@ -40,6 +40,7 @@ def main() -> int:
                         help="embeddings endpoint (http://host:8800/v1/"
                              "embeddings) — batch-attach unit vectors")
     parser.add_argument("--embed-model", default="bge-m3-cr-tapes-v1")
+    parser.add_argument("--embed-batch", type=int, default=16)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--release", action="store_true",
                         help="print the pinned release and exit")
@@ -63,7 +64,8 @@ def main() -> int:
                                            dry_run=args.dry_run)
         stats["curves"] = curve_stats
     if args.embed and not args.dry_run:
-        stats["vectors"] = attach_vectors(con, args.embed, args.embed_model)
+        stats["vectors"] = attach_vectors(con, args.embed, args.embed_model,
+                                          batch=max(1, args.embed_batch))
     release = units.index_release(con)
     print(json.dumps({"stats": stats, "release": release}, indent=2))
     return 0

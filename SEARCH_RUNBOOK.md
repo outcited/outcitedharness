@@ -141,6 +141,34 @@ release id — it cannot silently keep the same retrieval identity).
 | connectors | 0.000 | 0.000 | 91 ms |
 | **all** | **0.143** | 0.123 | 84 ms |
 
+**Hybrid result, 2026-10-08 (decision gate RUN — NULL RESULT).** Vectors
+attached (91,758 × bge-m3-cr-tapes-v1), release
+`search-release-v1-bb77ee0a3550`:
+
+| Aisle | FTS recall | hybrid recall |
+|---|---|---|
+| mcu | 0.118 | 0.118 |
+| power | 0.243 | 0.257 |
+| connectors | 0.000 | 0.000 |
+| **all** | **0.143** | **0.148** (noise) |
+
+nDCG 0.123 → 0.105 (semantic noise reorders), p50 latency 18 ms → 759 ms
+(query-embed RTT), locator precision 0.80 → 0.73. **Verdict per the gate
+criteria (material improvement / no precision loss / acceptable latency):
+fail on all three. FTS stays the default; vectors remain attached and
+staged, off the query path unless embed is passed.**
+
+Root cause (verified, not a wiring bug — rationale shows semantic:cos
+contributing): the vocabulary gap is in the INDEXED TEXT. Claim units are
+symbol/value rows with no descriptive prose — ESP8266EX (the only WiFi
+part in the corpus) best-cosines at 0.337 for "wifi microcontroller iot"
+while prose-bearing buck converters score 0.45. The prose that says "WiFi
+SoC" lives in the substrate pages (81,473 outputs in pipeline.db results;
+page_index.py already classifies description/features/application lanes)
+and was never indexed — the PRD's own section grain (R1 #2), skipped in
+the pilot. Next lever: index section-grain units from existing substrate
+text (R5-compliant: no new extraction, no vision), then re-run hybrid.
+
 Coverage: mcu 1.00 / power 1.00 / connectors 0.667. Locator precision 0.80
 (72/90; the 18 imprecise are unhashed burn-wave units, marked
 discovery_only). must_not violations 0.
