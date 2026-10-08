@@ -1,7 +1,96 @@
 # SEARCH RUNBOOK — engineering-evidence retrieval (PRD-SEARCH-01)
 
-Owner: M5 / Harnessv1 extraction lane. Branch: `search/evidence-retrieval-v0`.
+Owner: M5 / Harnessv1 extraction lane. Branch: `search/evidence-retrieval-v0`,
+isolated worktree `../Harnessv1-search` (agent-isolation directive 2026-10-08;
+the main worktree belongs to whichever lane checked it out — never switch it).
 Architecture and reuse map: `SEARCH_RECON.md`. Requirements: `PRD-SEARCH-01.md`.
+
+## Provisional-approval status (2026-10-08 review)
+
+Approved provisionally; NOT production search. Serving stays localhost-only
+(hard-refused non-localhost binds unless `SEARCH_ALLOW_REMOTE=1`, which
+requires auth + network policy first). Hard invariants under regression
+test: zero invented quotations, zero family→OPN scope expansion.
+
+## Worktree isolation (P3)
+
+Every agent works in its own worktree + branch. This lane:
+`git worktree add ../Harnessv1-search search/evidence-retrieval-v0`.
+`.agent-branch` at the worktree root names the only branch it may commit
+to; the shared `.git/hooks/pre-commit` shim delegates to
+`scripts/agent_guard.py` when the checked-out branch carries it (no-op on
+lanes that don't adopt it). A cross-lane commit is now a hard stop.
+
+## Provenance serving gate (P1)
+
+Every unit carries `evidence_grade`:
+
+- `evidence_grade` — real artifact sha256 AND a precise locator (page or
+  bbox). May satisfy `min_verification` filters.
+- `discovery_only` — placeholder identity (`unhashed:` stems) or imprecise
+  locator. Fully searchable, visibly marked, and STRUCTURALLY BARRED from
+  satisfying any verified-evidence filter (`min_verification` above
+  `unverified` excludes it in the query layer, not by convention).
+
+Responses also carry per-unit `evidence_id` (`ev-…`): the durable evidence
+identity that stays stable across extraction-version bumps (`unit_id`
+moves; `evidence_id` does not). Consumers cite `evidence_id`.
+
+## Decomposed evaluation (P0) — the three separated questions
+
+```
+scripts/search_benchmark.py --live --decomposed
+```
+
+1. corpus coverage — does the expected evidence exist in the index at all?
+2. conditional retrieval — when it exists, does it reach the top-10?
+3. locator validity — are returned hits traceable (page + cell/quote/bbox/
+   figure) and evidence-grade?
+
+Live results 2026-10-08 (101 anchor-bearing entries):
+
+| Layer | Result | Reading |
+|---|---|---|
+| coverage | 0.901 (mcu 1.00 / power 1.00 / connectors 0.667) | corpus gap is ONLY live-connector material |
+| conditional recall@10 | **0.143** | **the blocker: engine ranking, not coverage** |
+| locator precision | 0.80 (72/90; the 18 = unhashed burn-wave units) | gate marks them correctly |
+| must_not violations | 0 | invariant holds |
+
+Correction of the pilot framing: the earlier "missing aisles explain the
+live 0.129" claim was WRONG for mcu/power — their anchors are present; the
+engine simply fails to rank them for natural-language queries. FTS bm25
+alone cannot bridge the vocabulary gap. The semantic vector path is
+required, not optional.
+
+### Attaching vectors (the conditional-recall fix)
+
+```
+scripts/search_index.py --embed http://100.81.201.24:8800/v1/embeddings
+SEARCH_EMBED_URL=... python -m harness.search.api   # query side
+```
+
+Idempotent (skips units already embedded with the same model), batches of
+16, model bge-m3-cr-tapes-v1 (the serving-qualified dgx1/e10b embedders —
+same encoder family as the claim sidecars). NOT yet run: fleet endpoints
+were unreachable from this box at session time. Re-run the decomposed eval
+after attaching; conditional recall is the number to watch.
+
+## Curve lane integration (P2)
+
+```
+scripts/search_index.py --curves /Volumes/M5_4TB/extract-results/curves-pilot-v1
+```
+
+Indexes the curve lane's committed pilot fixtures (their contract verbatim:
+real document sha256, printed page, axes, per-series printed conditions,
+digitized points, digitization quality) as figure-grain units with a full
+`structured` payload. 40 figures from 8 documents live now. The envelope
+slims curve series to conditions + x-range + point-count + samples; the
+full points ride on `GET /v1/units/{id}`. Margin adjudication
+("efficiency ≥ 90 % @ 12 V in / 5 V out / 2 A") deliberately stays with the
+curve lane's bounded operating-point query — retrieval returns curve,
+conditions, applicability, page, and uncertainty (fit residuals); consumers
+evaluate. Hash-named artifacts (vishay pilot) mint no part numbers.
 
 ## What this is
 
@@ -79,35 +168,23 @@ Pilot measurements (2026-10-08):
 | Mode | Recall@10 | nDCG@10 | locator | must_not viol | invented quotes | p50/p95 |
 |---|---|---|---|---|---|---|
 | fixture (reviewed subset) | 0.964 | 0.842 | 0.909 | 0 | n/a (fixture) | 0.7/1.4 ms |
-| live (91,718 units) | 0.129 | 0.111 | 0.000* | 0 | 0 / 259 checked | 24/91 ms |
+| live (91,758 units incl. curves) | 0.129 | 0.111 | 0.000* | 0 | 0 / 259 checked | 24/91 ms |
 
-*Known, disclosed gaps that dominate the live number — the benchmark is
-measuring them on purpose:
-
-1. The live catalog (1,882 parts) is power-aisle only: no MCU aisle
-   (except ESP8266EX) and no connectors, so ~60 of 108 entries cannot hit.
-2. No figure units exist yet (typical-curves wave not yet indexed) — all
-   figure_only entries score zero.
-3. Burn-wave provenance is `unhashed:<stem>` with null pages, so
-   source-locator accuracy is 0 until the substrate backfills real hashes
-   and pages (then re-index under a new extraction_version upgrades it).
-4. Latency p95 ~90ms is pilot-brute-force (per-hit row SELECT + in-Python
-   cosine); fine at 92K units, needs a candidates shortlist at corpus scale.
-
-Do NOT quote the live number as corpus-wide precision (PRD: benchmark ≠
-corpus claim). The fixture row is the reviewed-pilot measurement against
-the acceptance targets (≥0.90 locator, 0 invented quotes, 0 scope
-expansion — all met).
+*Live number decomposed above: coverage 0.901, conditional recall 0.143,
+locator precision 0.80. Use the decomposed numbers, not the blended one.
 
 ## Vectors (semantic path)
 
-Optional. Attach with `units.attach_vector(con, unit_id, model, values)`
-using the serving-qualified embedders (dgx1/e10b :8800/:8804, BGE family —
-same encoder as `harness/electronics/embeddings.py` sidecars). The query
-path activates only when vectors exist AND an `embed` callable is passed;
-without it, retrieval is FTS-only (deterministic tier, no fleet cost).
-Batch-attach script is deliberately NOT written yet — pilot on FTS first,
-add vectors when the benchmark shows vocabulary-miss the FTS cannot close.
+Required by the decomposed-eval finding (conditional recall 0.143 on
+FTS-only). Attach with `scripts/search_index.py --embed URL` using the
+serving-qualified embedders (dgx1/e10b :8800/:8804, bge-m3-cr-tapes-v1 —
+same encoder family as `harness/electronics/embeddings.py` sidecars;
+idempotent per model, batches of 16). Query side activates via
+`SEARCH_EMBED_URL` on the API or the `embed=` callable on `search()`;
+without it, retrieval stays FTS-only (deterministic tier, no fleet cost).
+Not yet attached live — fleet endpoints unreachable at session time; this
+is the single highest-leverage next action, then re-run the decomposed
+eval.
 
 ## Adjudication annotation (verification states)
 
@@ -135,7 +212,10 @@ cell_verifier output.
 | Symptom | Cause | Fix |
 |---|---|---|
 | API 404 unknown unit | index rebuilt between request and fetch | re-run search (release changed) — expected, units are immutable |
-| p95 latency creep | unit count growth (per-hit SELECT) | add candidates shortlist; do not "fix" with commit changes |
+| p95 latency creep | unit count growth (per-hit SELECT + brute cosine) | add candidates shortlist; do not "fix" with commit changes |
 | release never changes after rebuild | fingerprint cached, meta not dirty | `units.index_release(con, force=True)` |
+| conditional recall low, coverage high | vectors not attached | `--embed` (above), then re-run decomposed |
+| conditional recall low, coverage low | corpus gap (e.g. connectors) | fill the aisle upstream; retrieval cannot rank what isn't indexed |
 | FTS "malformed MATCH expression" | empty/odd query string | fts_query() quotes everything; if seen, check technical_normalize changes |
 | sqlite locked | indexer + API on same db concurrently | WAL allows it; if sustained, indexer holds the big transaction — let it finish (seconds) |
+| commit refused by "agent guard" | worktree HEAD ≠ .agent-branch | switch branches in YOUR worktree; never re-branch another agent's worktree |

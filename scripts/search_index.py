@@ -34,6 +34,12 @@ def main() -> int:
     parser.add_argument("--wave", default=DEFAULT_WAVE,
                         help="power-topology wave jsonl (optional)")
     parser.add_argument("--no-wave", action="store_true")
+    parser.add_argument("--curves", default=None,
+                        help="directory of curve-evidence fixtures to index")
+    parser.add_argument("--embed", default=None,
+                        help="embeddings endpoint (http://host:8800/v1/"
+                             "embeddings) — batch-attach unit vectors")
+    parser.add_argument("--embed-model", default="bge-m3-cr-tapes-v1")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--release", action="store_true",
                         help="print the pinned release and exit")
@@ -49,13 +55,40 @@ def main() -> int:
         return 2
     wave = None if args.no_wave else args.wave
 
-    stats = indexer.index_catalog(
-        units.connect(args.db), args.catalog,
-        wave_path=wave, dry_run=args.dry_run)
     con = units.connect(args.db)
+    stats = indexer.index_catalog(
+        con, args.catalog, wave_path=wave, dry_run=args.dry_run)
+    if args.curves:
+        curve_stats = indexer.index_curves(con, args.curves,
+                                           dry_run=args.dry_run)
+        stats["curves"] = curve_stats
+    if args.embed and not args.dry_run:
+        stats["vectors"] = attach_vectors(con, args.embed, args.embed_model)
     release = units.index_release(con)
     print(json.dumps({"stats": stats, "release": release}, indent=2))
     return 0
+
+
+def attach_vectors(con, url: str, model: str, batch: int = 16) -> dict:
+    """Idempotent vector attach: skips units already embedded with this
+    model. 1024-dim BGE vectors, cosine at query time."""
+    from harness.search.query import make_embedder
+    embed = make_embedder(url, model)
+    active = units.unit_count(con)
+    rows = con.execute(
+        "SELECT u.unit_id, u.text_repr FROM units u"
+        " LEFT JOIN vectors v ON v.unit_id = u.unit_id AND v.model = ?"
+        " WHERE v.unit_id IS NULL AND u.retired = 0"
+        " ORDER BY u.unit_id", (model,)).fetchall()
+    attached = 0
+    for offset in range(0, len(rows), batch):
+        chunk = rows[offset:offset + batch]
+        vectors = embed([r["text_repr"] for r in chunk])
+        for row, vector in zip(chunk, vectors):
+            units.attach_vector(con, row["unit_id"], model, vector)
+        attached += len(chunk)
+    return {"model": model, "attached": attached,
+            "skipped_already_embedded": active - attached}
 
 
 if __name__ == "__main__":

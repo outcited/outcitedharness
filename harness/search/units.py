@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS units (
     page INTEGER,
     locator TEXT NOT NULL,
     text_repr TEXT NOT NULL,
+    structured TEXT,
     ident TEXT,
     vendor TEXT,
     doc_class TEXT,
@@ -224,7 +225,8 @@ def make_unit(*, doc_sha256: str, grain: str, locator: Any, text_repr: str,
               applicability: Any = None, rev_code: str | None = None,
               rev_date: str | None = None,
               verification_state: str = "unverified",
-              verification_source: str | None = None) -> dict:
+              verification_source: str | None = None,
+              structured: dict | None = None) -> dict:
     """Validate and stamp one evidence unit. Raises on any law violation."""
     if grain not in GRAINS:
         raise ValueError(f"unknown grain: {grain!r}")
@@ -250,12 +252,14 @@ def make_unit(*, doc_sha256: str, grain: str, locator: Any, text_repr: str,
     return {
         "unit_id": unit_id_for(doc_sha256, grain, locator_json,
                                extraction_version),
+        "evidence_id": evidence_id_for(doc_sha256, grain, locator_json),
         "doc_sha256": doc_sha256,
         "grain": grain,
         "page": page,
         "locator": json.loads(locator_json),
         "locator_json": locator_json,
         "text_repr": text_repr,
+        "structured": structured,
         "ident": ident_tokens or None,
         "vendor": vendor,
         "doc_class": doc_class,
@@ -282,7 +286,54 @@ def connect(db_path: str | None = None) -> sqlite3.Connection:
     # the index is a derived artifact, rebuilt from catalog + waves.
     con.execute("PRAGMA synchronous=NORMAL")
     con.executescript(SCHEMA)
+    try:  # migration for pre-structured indexes (v0 pilot dbs)
+        con.execute("ALTER TABLE units ADD COLUMN structured TEXT")
+        con.commit()
+    except sqlite3.OperationalError:
+        pass
     return con
+
+
+# --- provenance serving gate (P1 directive 2026-10-08) --------------------
+#
+# evidence_grade decides how a unit may be PRESENTED, never whether it is
+# searchable. discovery_only material (placeholder doc identities such as
+# ``unhashed:`` stems, or no reliable locator: neither page nor bbox) stays
+# fully searchable but is visibly marked and can never be presented as
+# verified evidence. evidence_grade material carries a real artifact hash
+# and a precise locator.
+
+UNHASHED_PREFIX = "unhashed:"
+
+
+def evidence_grade(*, doc_sha256: str, page: int | None,
+                   locator: dict | None) -> str:
+    if not (doc_sha256 or "").startswith(UNHASHED_PREFIX) and \
+            (page is not None or bool(locator and locator.get("bbox"))):
+        return "evidence_grade"
+    return "discovery_only"
+
+
+def unit_evidence_grade(unit: dict) -> str:
+    """Grade for a unit dict (make_unit output or row_to_unit row)."""
+    locator = unit.get("locator")
+    if isinstance(locator, str):
+        locator = json.loads(locator)
+    return evidence_grade(doc_sha256=unit.get("doc_sha256") or "",
+                          page=unit.get("page"), locator=locator)
+
+
+def evidence_id_for(doc_sha256: str, grain: str, locator_json: str) -> str:
+    """Durable evidence identity: stable across re-indexing and extraction
+    version bumps (unit_id changes when the extraction changes; evidence_id
+    does not). This is the handle downstream consumers cite."""
+    digest = hashlib.sha256()
+    digest.update(doc_sha256.encode("ascii", errors="replace"))
+    digest.update(b"|")
+    digest.update(grain.encode("ascii", errors="replace"))
+    digest.update(b"|")
+    digest.update(locator_json.encode("utf-8"))
+    return "ev-" + digest.hexdigest()[:24]
 
 
 def now() -> float:
@@ -306,13 +357,15 @@ def _insert_unit(con: sqlite3.Connection, unit: dict, ts: float) -> None:
     text_norm = technical_normalize(unit["text_repr"])
     cur = con.execute(
         "INSERT INTO units (unit_id, doc_sha256, grain, page, locator,"
-        " text_repr, ident, vendor, doc_class, category, family,"
-        " applicability, rev_code, rev_date, extraction_version,"
+        " text_repr, structured, ident, vendor, doc_class, category,"
+        " family, applicability, rev_code, rev_date, extraction_version,"
         " verification_state, verification_source, retired, created_at)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?)",
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?)",
         (unit["unit_id"], unit["doc_sha256"], unit["grain"], unit["page"],
-         unit["locator_json"], unit["text_repr"], unit["ident"],
-         unit["vendor"],
+         unit["locator_json"], unit["text_repr"],
+         json.dumps(unit.get("structured"), ensure_ascii=False)
+         if unit.get("structured") is not None else None,
+         unit["ident"], unit["vendor"],
          unit["doc_class"], unit["category"], unit["family"],
          json.dumps(unit["applicability"], ensure_ascii=False),
          unit["rev_code"], unit["rev_date"], unit["extraction_version"],
@@ -411,6 +464,12 @@ def row_to_unit(row: sqlite3.Row) -> dict:
     unit["applicability"] = json.loads(unit["applicability"])
     unit["locator"] = json.loads(unit["locator"])
     unit["retired"] = bool(unit["retired"])
+    if unit.get("structured") is not None:
+        unit["structured"] = json.loads(unit["structured"])
+    unit["evidence_id"] = evidence_id_for(
+        unit["doc_sha256"], unit["grain"], json.dumps(
+            unit["locator"], sort_keys=True, ensure_ascii=False))
+    unit["evidence_grade"] = unit_evidence_grade(unit)
     return unit
 
 

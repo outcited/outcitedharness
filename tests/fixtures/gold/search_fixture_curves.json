@@ -1,0 +1,36 @@
+{
+  "schema": "harness.electronics-typical-curves-gold.v1",
+  "source_artifact": "dcdc_TESTBUCK5.pdf",
+  "document_sha256": "aa11bb22cc33dd44ee55ff6677889900aabbccddeeff00112233445566778899",
+  "page_1based": 7,
+  "manufacturer": "texas_instruments",
+  "section_title": "8.5 Typical Characteristics",
+  "plots": [
+    {
+      "_figure_index": 2,
+      "title": "Figure 8-3. Efficiency vs Output Current",
+      "axes": {
+        "x": {"label": "Output Current", "unit": "A", "min": 0.0, "max": 5.0, "scale": "linear"},
+        "y": {"label": "Efficiency", "unit": "%", "min": 0.0, "max": 100.0, "scale": "linear"}
+      },
+      "series": [
+        {"name": "12V in 5V out", "condition": "VIN = 12 V VOUT = 5 V fsw = 500 kHz", "points": [[0.1, 62.0], [1.0, 88.5], [2.0, 91.2], [3.0, 90.8], [4.0, 89.4]]},
+        {"name": "24V in 5V out", "condition": "VIN = 24 V VOUT = 5 V fsw = 500 kHz", "points": [[0.1, 58.0], [1.0, 85.2], [2.0, 89.9], [3.0, 89.1], [4.0, 87.0]]}
+      ],
+      "conditions_page": 2,
+      "_numeric_quality": {"x_fit_residual_pct_of_span": 0.012, "y_fit_residual_pct_of_span": 0.02, "retained_points": 10}
+    },
+    {
+      "_figure_index": 5,
+      "title": "Figure 8-6. Output Ripple vs Load Current",
+      "axes": {
+        "x": {"label": "Load Current", "unit": "A", "min": 0.0, "max": 5.0, "scale": "linear"},
+        "y": {"label": "Output Ripple", "unit": "mV", "min": 0.0, "max": 40.0, "scale": "linear"}
+      },
+      "series": [
+        {"name": "12V in", "condition": "VIN = 12 V VOUT = 5 V", "points": [[0.5, 12.0], [2.0, 9.5], [4.0, 8.0]]}
+      ],
+      "_numeric_quality": {"x_fit_residual_pct_of_span": 0.4, "y_fit_residual_pct_of_span": 0.5, "retained_points": 3}
+    }
+  ]
+}

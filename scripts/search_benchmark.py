@@ -75,6 +75,109 @@ def _matches(unit: dict, anchor: str) -> bool:
     return False
 
 
+def index_has_anchor(con, anchor: str) -> bool:
+    """Coverage question: does matching evidence exist in the index at all,
+    independent of any query? (Prevents a corpus gap from masquerading as
+    an engine failure — and vice versa.)"""
+    from harness.search.query import _fts_scores, fts_query
+    match = fts_query(anchor)
+    if not match:
+        return False
+    for table in ("units_fts", "ident_fts"):
+        if _fts_scores(con, match, table, 50):
+            return True
+    row = con.execute(
+        "SELECT 1 FROM units WHERE retired=0 AND (family = ? OR vendor = ?)"
+        " LIMIT 1", (anchor, anchor)).fetchone()
+    return row is not None
+
+
+def decomposed(entries: list[dict], con, limit: int = 10) -> dict:
+    """P0 directive 2026-10-08: three independent evaluations.
+
+    1. corpus coverage  — does the expected evidence exist in the index?
+    2. conditional retrieval — when it exists, does it reach the top-10?
+    3. locator validity — can returned evidence be traced to a precise
+       source (page + cell/quote/bbox), and is it evidence-grade?
+    """
+    per_aisle: dict[str, dict] = {}
+    covered_entries, uncovered_entries = [], []
+    for entry in entries:
+        anchors = entry.get("expected", {}).get("anchors") or []
+        if not anchors:
+            continue
+        if any(index_has_anchor(con, a) for a in anchors):
+            covered_entries.append(entry)
+        else:
+            uncovered_entries.append(entry)
+
+    conditional = run(covered_entries, con, limit=limit)
+
+    located = traceable = evidence_grade_hits = 0
+    for entry in covered_entries:
+        anchors = entry["expected"]["anchors"]
+        response = query_service.search(
+            con, entry["query"], limit=limit, with_interpretations=False)
+        for hit in response["units"]:
+            if not any(_matches(hit, a) for a in anchors):
+                continue
+            located += 1
+            locator = hit.get("locator") or {}
+            precise = hit.get("page") is not None and bool(
+                locator.get("quote") or locator.get("quotes")
+                or locator.get("bbox")
+                or locator.get("row_header") or locator.get("column_header")
+                or locator.get("figure_index"))
+            if precise:
+                traceable += 1
+            if hit.get("evidence_grade") == "evidence_grade":
+                evidence_grade_hits += 1
+
+    for aisle in ("mcu", "power", "connectors"):
+        aisle_entries = [e for e in entries if e["aisle"] == aisle
+                         and (e.get("expected", {}).get("anchors"))]
+        aisle_covered = [e for e in aisle_entries
+                         if any(index_has_anchor(con, a) for a in
+                                e["expected"]["anchors"])]
+        per_aisle[aisle] = {
+            "entries": len(aisle_entries),
+            "covered": len(aisle_covered),
+            "coverage_rate": round(len(aisle_covered) / len(aisle_entries),
+                                   4) if aisle_entries else None,
+        }
+    return {
+        "schema": "harness.search-eval-decomposed.v1",
+        "1_corpus_coverage": {
+            "scored_entries": len(covered_entries) + len(uncovered_entries),
+            "covered": len(covered_entries),
+            "uncovered": len(uncovered_entries),
+            "coverage_rate": round(
+                len(covered_entries) /
+                max(1, len(covered_entries) + len(uncovered_entries)), 4),
+            "per_aisle": per_aisle,
+        },
+        "2_conditional_retrieval": {
+            "note": "recall/ndcg computed ONLY over entries whose evidence "
+                    "exists in the index",
+            "entries": conditional["scored"],
+            "recall_at_10": conditional["recall_at_10"],
+            "ndcg_at_10": conditional["ndcg_at_10"],
+            "must_not_violations": conditional["must_not_violations"],
+            "latency_p50_ms": conditional["latency_p50_ms"],
+            "latency_p95_ms": conditional["latency_p95_ms"],
+        },
+        "3_locator_validity": {
+            "matched_hits": located,
+            "precise_locators": traceable,
+            "locator_precision": round(traceable / located, 4)
+            if located else None,
+            "evidence_grade_hits": evidence_grade_hits,
+            "evidence_grade_share": round(evidence_grade_hits / located, 4)
+            if located else None,
+        },
+    }
+
+
 def run(entries: list[dict], con, limit: int = 10) -> dict:
     per_entry = []
     recalls, ndcgs = [], []
@@ -189,6 +292,9 @@ def main() -> int:
                         help="score against SEARCH_DB (all entries)")
     parser.add_argument("--catalog",
                         default="/Volumes/M5_4TB/extract-results/catalog.db")
+    parser.add_argument("--decomposed", action="store_true",
+                        help="P0 eval split: coverage vs conditional "
+                             "retrieval vs locator validity")
     parser.add_argument("--no-quote-audit", action="store_true")
     parser.add_argument("--limit", type=int, default=10)
     parser.add_argument("--verbose", action="store_true")
@@ -225,7 +331,8 @@ def main() -> int:
         con.close()
         con = units_store.connect()
 
-    report = run(entries, con, limit=args.limit)
+    report = decomposed(entries, con, limit=args.limit) \
+        if args.decomposed else run(entries, con, limit=args.limit)
     output = {k: v for k, v in report.items()
               if k != "per_entry" or args.verbose}
     if not args.no_quote_audit and not args.fixture:

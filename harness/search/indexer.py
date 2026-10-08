@@ -321,6 +321,129 @@ def topology_units(wave_path: str) -> Iterator[dict]:
                                 "coverage_kind": "primary"}])
 
 
+CURVE_SOURCE_SCHEMA = "harness.electronics-typical-curves-gold.v1"
+CURVE_STRUCTURED_SCHEMA = "harness.search-curve-figure.v1"
+
+
+def _part_from_artifact(source_artifact: str) -> str | None:
+    """OPN from the artifact stem, only when the stem names a part
+    (``dcdc_TPS548C26.pdf`` -> TPS548C26). Hash-named artifacts (vishay
+    pilot) carry no printed part here -> None, never a minted part."""
+    stem = Path(source_artifact or "").stem
+    if not stem:
+        return None
+    token = stem.split("_")[-1].upper()
+    if len(token) > 20 or len(token) < 2:
+        return None
+    if len(token) == 64 and all(c in "0123456789ABCDEF" for c in token):
+        return None
+    has_digit = any(c.isdigit() for c in token)
+    has_alpha = any(c.isalpha() for c in token)
+    return token if has_digit and has_alpha else None
+
+
+def curve_units(curve_paths: Iterable[str | Path]) -> Iterator[dict]:
+    """Figure-grain units from the curve-evidence pilot fixtures.
+
+    Consumes the curve lane's committed contract verbatim (real document
+    sha256, printed page, plot axes, per-series printed conditions,
+    digitized points, digitization quality). One unit per printed figure.
+    Margin adjudication (e.g. "efficiency >= 90% @ point") stays with the
+    curve lane's bounded operating-point query — retrieval returns the
+    curve, its conditions, and its uncertainty so consumers can evaluate.
+    """
+    for path in curve_paths:
+        path = Path(path)
+        if not path.exists() or path.name.startswith("_"):
+            continue
+        record = json.loads(path.read_text())
+        if record.get("schema") != CURVE_SOURCE_SCHEMA:
+            continue
+        doc_sha = record["document_sha256"]
+        page = record.get("page_1based")
+        manufacturer = record.get("manufacturer")
+        section = record.get("section_title") or "Typical Characteristics"
+        part = _part_from_artifact(record.get("source_artifact"))
+        category = "power" if "dcdc" in (record.get("source_artifact")
+                                         or "").lower() else None
+        for plot in record.get("plots") or []:
+            title = plot.get("title") or f"Figure {plot.get('_figure_index')}"
+            axes = plot.get("axes") or {}
+            x = axes.get("x") or {}
+            y = axes.get("y") or {}
+            series = plot.get("series") or []
+            series_bits = []
+            for s in series:
+                bit = s.get("name") or "series"
+                if s.get("condition"):
+                    bit += f" [{s['condition']}]"
+                series_bits.append(bit)
+            text_repr = " ".join(t for t in
+                                 (part or "", manufacturer or "", "—", title,
+                                  f"x: {x.get('label', '')} ({x.get('unit', '')})",
+                                  f"y: {y.get('label', '')} ({y.get('unit', '')})",
+                                  "; ".join(series_bits)) if t)
+            locator = {
+                "kind": "figure",
+                "figure_index": plot.get("_figure_index"),
+                "title": title,
+                "section": section,
+            }
+            structured = {
+                "schema": CURVE_STRUCTURED_SCHEMA,
+                "title": title,
+                "section_title": section,
+                "part": part,
+                "axes": axes,
+                "series": [
+                    {"name": s.get("name"),
+                     "condition": s.get("condition"),
+                     "x_range": s.get("_x_range"),
+                     "points": s.get("points") or []}
+                    for s in series
+                ],
+                "conditions_page": plot.get("conditions_page"),
+                "conditions_plot": plot.get("conditions_plot"),
+                "digitization_quality": plot.get("_numeric_quality"),
+                "source_artifact": record.get("source_artifact"),
+                "source_schema": record.get("schema"),
+            }
+            yield units_store.make_unit(
+                doc_sha256=doc_sha, grain="figure",
+                locator=locator, text_repr=text_repr,
+                extraction_version=f"curve-evidence/{record['schema']}",
+                page=page, vendor=manufacturer, doc_class="datasheet",
+                category=category,
+                ident=[t for t in (part, manufacturer or "") if t],
+                applicability=[{"scope": "opn", "value": part,
+                                "coverage_kind": "primary"}]
+                if part else [],
+                structured=structured)
+
+
+def index_curves(search_con, curve_dir: str | Path,
+                 *, dry_run: bool = False) -> dict:
+    """Index every curve fixture in a directory (idempotent per document)."""
+    paths = sorted(Path(curve_dir).glob("*.json"))
+    stats = {"files": 0, "units": 0}
+    by_doc: dict[tuple[str, str], list[dict]] = {}
+    for unit in curve_units(paths):
+        by_doc.setdefault((unit["doc_sha256"], unit["extraction_version"]),
+                          []).append(unit)
+    if dry_run:
+        stats["files"] = len(by_doc)
+        stats["units"] = sum(len(g) for g in by_doc.values())
+        return stats
+    for (doc, version), group in by_doc.items():
+        result = units_store.replace_document(
+            search_con, group, doc_sha256=doc, extraction_version=version,
+            commit=False)
+        stats["files"] += 1
+        stats["units"] += result["units"]
+    search_con.commit()
+    return stats
+
+
 def aisle_map_from_wave(wave_path: str) -> dict[str, str]:
     """part -> normalized aisle map (used to categorize claim units)."""
     out: dict[str, str] = {}

@@ -41,6 +41,25 @@ _BOOST_STATE = {"m4_verified": 0.10, "supported": 0.06, "unverified": 0.0,
                 "rejected": -0.25}
 
 
+def make_embedder(url: str, model: str = "bge-m3-cr-tapes-v1",
+                  timeout: float = 30.0):
+    """OpenAI-style /v1/embeddings client over the serving-qualified fleet
+    embedders (dgx1/e10b :8800/:8804). Returns a callable for search()."""
+    import json as _json
+    import urllib.request
+
+    def embed(texts: list[str]):
+        req = urllib.request.Request(
+            url, data=_json.dumps({"model": model, "input": texts}).encode(),
+            headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            payload = _json.loads(resp.read())
+        ordered = sorted(payload["data"], key=lambda d: d["index"])
+        return [item["embedding"] for item in ordered]
+
+    return embed
+
+
 def fts_query(text: str) -> str:
     """Escape a normalized query into an FTS5 OR-of-phrases match string."""
     normed = units_store.technical_normalize(text)
@@ -127,11 +146,19 @@ def _passes_filters(unit: dict, filters: dict[str, Any]) -> bool:
             grains = {filters["grain"]}
         if unit["grain"] not in grains:
             return False
+    grade = unit.get("evidence_grade") or units_store.unit_evidence_grade(unit)
+    if filters.get("evidence_grade") and grade != filters["evidence_grade"]:
+        return False
     min_state = filters.get("min_verification")
     if min_state:
         ladder = ["rejected", "not_in_doc", "unsupported", "ambiguous",
                   "unverified", "supported", "m4_verified"]
         if ladder.index(unit["verification_state"]) < ladder.index(min_state):
+            return False
+        # P1 gate: only evidence-grade material may ever satisfy a
+        # verified-evidence bar. Discovery-only material cannot.
+        if grade == "discovery_only" and min_state != "unverified" and \
+                ladder.index(min_state) > ladder.index("unverified"):
             return False
     return True
 
@@ -219,6 +246,26 @@ def search(con: sqlite3.Connection, query: str, *, limit: int = 10,
                      with_interpretations)
 
 
+def _slim_structured(structured: dict | None) -> dict | None:
+    """Curve payloads carry hundreds of digitized points; the search
+    envelope summarizes them. The full payload rides on GET /v1/units/{id}."""
+    if not structured or structured.get("schema") != \
+            "harness.search-curve-figure.v1":
+        return structured
+    slim = dict(structured)
+    slim["series"] = [
+        {
+            "name": s.get("name"),
+            "condition": s.get("condition"),
+            "x_range": s.get("x_range"),
+            "point_count": len(s.get("points") or []),
+            "sample_points": (s.get("points") or [])[:3],
+        }
+        for s in structured.get("series") or []
+    ]
+    return slim
+
+
 def _envelope(query: str, expansion: dict, hits: list[dict],
               started: float, con: sqlite3.Connection,
               with_interpretations: bool) -> dict:
@@ -233,11 +280,14 @@ def _envelope(query: str, expansion: dict, hits: list[dict],
         "units": [
             {
                 "unit_id": h["unit"]["unit_id"],
+                "evidence_id": h["unit"].get("evidence_id"),
+                "evidence_grade": h["unit"].get("evidence_grade"),
                 "grain": h["unit"]["grain"],
                 "doc_sha256": h["unit"]["doc_sha256"],
                 "page": h["unit"]["page"],
                 "locator": h["unit"]["locator"],
                 "text_repr": h["unit"]["text_repr"],
+                "structured": _slim_structured(h["unit"].get("structured")),
                 "vendor": h["unit"]["vendor"],
                 "family": h["unit"]["family"],
                 "category": h["unit"]["category"],
@@ -258,11 +308,21 @@ def _envelope(query: str, expansion: dict, hits: list[dict],
             "release": release["release"],
             "unit_count": release["unit_count"],
             "active_count": release["active_count"],
+            "returned_evidence_grade": sum(
+                1 for h in hits
+                if (h["unit"].get("evidence_grade") or "discovery_only")
+                == "evidence_grade"),
+            "returned_discovery_only": sum(
+                1 for h in hits
+                if (h["unit"].get("evidence_grade") or "discovery_only")
+                == "discovery_only"),
         },
         "qualification": "none",
         "notice": ("Relevance is not engineering qualification. "
                    "Interpretations are hypotheses. Applicability is reported "
                    "exactly as extracted; family evidence is never widened "
-                   "to OPN evidence."),
+                   "to OPN evidence. Units graded discovery_only (placeholder "
+                   "document identity or imprecise locator) are visibly "
+                   "marked and never presented as verified evidence."),
         "took_ms": round((time.time() - started) * 1000.0, 2),
     }

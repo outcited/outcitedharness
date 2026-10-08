@@ -84,3 +84,33 @@ by the indexer).
 - Ports: 8791 (search API) — checked against RUNBOOK fleet table
   (:8790 discovery, :8888 V4.1, :8901 canon, :8950 student, :8800/:8804
   embedders). No service restarts; the API is a new process.
+
+## 7. Review addendum (2026-10-08, provisional approval)
+
+Approved provisionally, not production. Changes shipped in response:
+
+1. **Worktree isolation (P3)** — this lane now works in
+   `../Harnessv1-search`; `.agent-branch` + `scripts/agent_guard.py` +
+   shared pre-commit shim make cross-lane commits a hard stop. The main
+   worktree belongs to whoever checked it out.
+2. **Provenance serving gate (P1)** — every unit carries `evidence_grade`
+   (evidence_grade | discovery_only). Placeholder identities
+   (`unhashed:`) or imprecise locators are searchable but visibly marked
+   and structurally barred from verified-evidence filters.
+3. **Durable evidence identity** — `evidence_id` (ev-…) stable across
+   extraction versions; the citation handle for the shared evidence
+   service (review recommendation: one contract behind discovery,
+   comparison, curves, adjudication, and product citations).
+4. **Decomposed evaluation (P0)** — coverage / conditional retrieval /
+   locator validity measured independently (`--decomposed`). Finding:
+   coverage 0.901 (gap = live connectors only), conditional recall 0.143
+   — the blocker is engine ranking (semantic vocabulary gap), not corpus
+   coverage. Earlier pilot framing corrected in SEARCH_RUNBOOK.
+5. **Curve lane integration (P2)** — curve fixtures indexed as
+   figure-grain units with full structured payloads (conditions, points,
+   digitization quality); envelope summarizes, `/v1/units/{id}` returns
+   full points. Margin adjudication stays with the curve lane's bounded
+   operating-point query; retrieval returns curve + conditions +
+   applicability + page + uncertainty.
+6. **Vector path wired** (`--embed`, `SEARCH_EMBED_URL`) — the
+   conditional-recall fix; attach pending fleet reachability.

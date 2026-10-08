@@ -5,11 +5,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 import pytest  # noqa: E402
 
-from search_benchmark import load_benchmark, run  # noqa: E402
+from search_benchmark import decomposed, load_benchmark, run  # noqa: E402
 
 from harness.search import indexer, units  # noqa: E402
 
@@ -76,3 +77,26 @@ def test_scoring_bounds(con):
     for metric in ("recall_at_10", "ndcg_at_10", "locator_accuracy"):
         if report[metric] is not None:
             assert 0.0 <= report[metric] <= 1.0
+
+
+def test_decomposed_eval_separates_coverage_from_ranking(con):
+    """P0 directive: a coverage gap must not read as an engine failure."""
+    entries = load_benchmark(BENCH, fixture=True)
+    report = decomposed(entries, con)
+    cov = report["1_corpus_coverage"]
+    cond = report["2_conditional_retrieval"]
+    loc = report["3_locator_validity"]
+    # every fixture anchor exists in the fixture index -> full coverage
+    assert cov["coverage_rate"] == 1.0
+    assert cond["entries"] == cov["covered"]
+    assert cond["recall_at_10"] >= 0.90
+    assert cond["must_not_violations"] == 0
+    assert loc["matched_hits"] > 0
+    assert loc["locator_precision"] is not None
+    assert set(cov["per_aisle"]) == {"mcu", "power", "connectors"}
+
+
+def test_index_has_anchor_negative(con):
+    from search_benchmark import index_has_anchor
+    assert index_has_anchor(con, "STM32F103")
+    assert not index_has_anchor(con, "ZZZNOTACORPUSPART999")

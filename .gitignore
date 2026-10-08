@@ -15,3 +15,4 @@ build/
 # on disk and backed up outside git.
 results/
 .DS_Store
+.agent-branch

@@ -30,7 +30,25 @@ SEARCH_DB = os.environ.get(
     "SEARCH_DB", "/Volumes/M5_4TB/extract-results/search_index.db")
 
 _ALLOWED_FILTERS = ("vendor", "family", "category", "grain",
-                    "min_verification", "include_retired")
+                    "min_verification", "include_retired", "evidence_grade")
+
+_EMBEDDER = None
+
+
+def _embed():
+    """Optional semantic path: activates only when SEARCH_EMBED_URL is
+    configured (serving-qualified fleet embedders) and the index carries
+    vectors. FTS-only otherwise — deterministic tier, no fleet cost."""
+    global _EMBEDDER
+    url = os.environ.get("SEARCH_EMBED_URL")
+    if not url:
+        return None
+    if _EMBEDDER is None:
+        from harness.search.query import make_embedder
+        _EMBEDDER = make_embedder(
+            url, os.environ.get("SEARCH_EMBED_MODEL",
+                                "bge-m3-cr-tapes-v1"))
+    return _EMBEDDER
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -86,6 +104,7 @@ class Handler(BaseHTTPRequestHandler):
                 con, query,
                 limit=int(req.get("limit", 10)),
                 filters=filters,
+                embed=_embed(),
                 with_interpretations=bool(req.get("interpretations", True)))
             return self._json(200, response)
         except ValueError as e:
@@ -97,6 +116,14 @@ class Handler(BaseHTTPRequestHandler):
 def main(listen=None):
     host = os.environ.get("SEARCH_HOST", "127.0.0.1")
     port = int(os.environ.get("SEARCH_PORT", "8791"))
+    # Localhost-only until auth, network policy, and cross-machine clients
+    # are explicitly configured (review directive 2026-10-08).
+    if host not in ("127.0.0.1", "localhost") and \
+            os.environ.get("SEARCH_ALLOW_REMOTE") != "1":
+        raise SystemExit(
+            "refusing to bind non-localhost by default: set "
+            "SEARCH_ALLOW_REMOTE=1 only after authentication and network "
+            "access policy are configured")
     ThreadingHTTPServer((host, port), Handler).serve_forever()
 
 
