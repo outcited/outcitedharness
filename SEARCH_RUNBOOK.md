@@ -97,10 +97,16 @@ artifacts or a current bleed? Read-only audit of pipeline.db.
    `/Volumes/M5_4TB/exports/power` 8,201, `vault/cas/*` 11,648,
    `macbookM4-4TB` 4,070 (dead generation).
 4. **Data-quality anomalies observed (extraction lane's call, not search's)**:
-   all 85,235 job rows carry `created_at` = 2029-12-03 11:32:56–57 (a
-   two-second bulk window with a future clock — organic dispatch never
-   produced these; `claimed_at` spans Oct 3–8 for real), and the `results`
-   table is empty (output flows through burn waves/catalog instead).
+   corrected 2026-10-08 after consistent-snapshot re-audit — the earlier
+   "all 85,235 claimed / results empty / dispatch still creating jobs"
+   reading was single-statement queries racing the live dispatcher's
+   transactions. Truth: done 81,473 · dead 3,759 · claimed 3 · pending 0;
+   `results` holds 81,473 substrate outputs (authoritative path, M4 joins
+   by sha). The real anomalies: ids 1–3,950 carry a bulk 2029-12-03
+   created_at stamp (single corrupt write), and claim() had no attempts
+   cap at claim time — fixed on branch `queue/claim-cap-fifo`
+   (see QUEUE_RECOVERY.md there; 3 zombie jobs at 123 attempts swept by
+   that fix, pending approval-restart of the dispatcher).
 
 **Recommendation (NOT executed — extraction lane owns this):** dead-letter
 the 4,070 dead-generation substrate jobs (`state=dead`,
