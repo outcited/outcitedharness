@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from http.server import ThreadingHTTPServer
+from pathlib import Path
 
 import pytest
 
@@ -182,3 +183,64 @@ def test_api_smoke(db, tmp_path):
         assert got["latest_result"]["cohorts"]["passing"] == 1
     finally:
         server.shutdown()
+
+
+def test_curve_evidence_route_is_advisory_only(db, tmp_path):
+    """PRD-CURVE-02 R7: the curve-evidence route serves the evidence-query
+    contract and can never promote curves into hard-elimination rules.
+
+    Patches the api module attributes directly (its env constants bind at
+    import time) and restores them, so test_api_smoke's first-import env
+    trick above keeps working."""
+
+    import threading
+    import urllib.request
+
+    from harness.discovery import api as api_mod
+    from harness.discovery.curves import load_reference_curves
+
+    pilot = Path(__file__).parent / "fixtures" / "gold" / \
+        "curve_evidence_pilot"
+    curves = load_reference_curves(
+        [pilot / "tps548c26_p10.json", pilot / "lmr33610_p8.json"]
+    )
+    saved = (api_mod.DESIGNS_DB, api_mod.CATALOG,
+             api_mod.CURVE_EVIDENCE_GLOB, api_mod._CURVES_CACHE)
+    api_mod.DESIGNS_DB = db
+    api_mod.CURVE_EVIDENCE_GLOB = str(pilot / "nothing-here.json")
+    api_mod._CURVES_CACHE = curves  # inject; the glob points nowhere
+    try:
+        server = ThreadingHTTPServer(("127.0.0.1", 0), api_mod.Handler)
+        port = server.server_address[1]
+        t = threading.Thread(target=server.serve_forever, daemon=True)
+        t.start()
+        try:
+            base = f"http://127.0.0.1:{port}"
+
+            def post(path, body):
+                req = urllib.request.Request(
+                    base + path, data=json.dumps(body).encode(),
+                    headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req) as r:
+                    return json.loads(r.read())
+
+            design_id = service.create_design(db, aisle="power",
+                                              name="12V rail")
+            body = {
+                "phenomenon": "efficiency_vs_load",
+                "operating_point": {"x": 10.0},
+                "conditions": {"vin_v": 12.0, "vout_v": 1.1,
+                               "categorical": {"mode": "fccm"}},
+            }
+            out = post(f"/designs/{design_id}/curve-evidence", body)
+            assert out["promotion"] == "none"
+            assert out["design_id"] == design_id
+            assert len(out["results"]) == 8
+            assert out["results"][0]["guarantee"] is False
+            assert out["derived"]["status"] == "proposal"
+            assert out["not_usable"], "reasons a curve cannot be used"
+        finally:
+            server.shutdown()
+    finally:
+        (api_mod.DESIGNS_DB, api_mod.CATALOG,
+         api_mod.CURVE_EVIDENCE_GLOB, api_mod._CURVES_CACHE) = saved

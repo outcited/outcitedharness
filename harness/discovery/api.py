@@ -6,6 +6,12 @@ GET  /designs/{id}                  -> design + latest summary
 POST /designs/{id}/discover         -> cohorts + constraint driver
 GET  /designs/{id}/ledger           ?cohort=&limit= -> verdict rows
 GET  /designs/{id}/next-question    -> knife ranking by expected reduction
+POST /designs/{id}/curve-evidence   -> curve evidence query (advisory)
+
+The curve-evidence route is an evidence provider only (PRD-CURVE-02 R7):
+applicable curves, matched conditions, supported regions, computed values
+with uncertainty, citations, and reasons curves cannot be used. It never
+promotes curves into hard-elimination rules.
 
 Read-only over catalog.db (mode=ro); mutable state is the design only.
 Every discover result is stamped with the corpus release it ran against
@@ -19,13 +25,29 @@ import json
 import os
 import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
+from harness.discovery import curves as curves_provider
 from harness.discovery import service
 
 DESIGNS_DB = os.environ.get("DESIGNS_DB",
                             "/Volumes/M5_4TB/extract-results/designs.db")
 CATALOG = os.environ.get("DISCOVERY_CATALOG",
                          "/Volumes/M5_4TB/extract-results/catalog.db")
+CURVE_EVIDENCE_GLOB = os.environ.get(
+    "CURVE_EVIDENCE_GLOB",
+    "/Volumes/M5_4TB/extract-results/harnessv1-results/"
+    "curve-evidence/*.json",
+)
+_CURVES_CACHE: list | None = None
+
+
+def _loaded_curves() -> list:
+    global _CURVES_CACHE
+    if _CURVES_CACHE is None:
+        paths = sorted(Path(CURVE_EVIDENCE_GLOB))
+        _CURVES_CACHE = curves_provider.load_reference_curves(paths)
+    return _CURVES_CACHE
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -91,6 +113,26 @@ class Handler(BaseHTTPRequestHandler):
             if m:
                 return self._json(200, service.discover(
                     DESIGNS_DB, m.group(1), catalog_path=CATALOG))
+            m = re.match(r"^/designs/([\w\-]+)/curve-evidence$", self.path)
+            if m:
+                if not _loaded_curves():
+                    return self._json(200, {
+                        "schema": curves_provider.PROVIDER_SCHEMA,
+                        "error": "no curve evidence loaded",
+                        "promotion": "none",
+                    })
+                result = curves_provider.query_curve_evidence(
+                    _loaded_curves(),
+                    phenomenon=req.get("phenomenon"),
+                    quantity=req.get("quantity"),
+                    use_case=req.get("use_case"),
+                    operating_point=req.get("operating_point"),
+                    conditions=req.get("conditions"),
+                    load_profile=req.get("load_profile"),
+                    category=req.get("category"),
+                )
+                result["design_id"] = m.group(1)
+                return self._json(200, result)
             return self._json(404, {"error": "unknown route"})
         except KeyError as e:
             return self._json(404, {"error": str(e)})

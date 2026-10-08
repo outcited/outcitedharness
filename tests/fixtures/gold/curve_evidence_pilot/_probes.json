@@ -1,0 +1,292 @@
+{
+  "schema": "harness.electronics-curve-evidence-pilot.v1",
+  "source": "Hand-authored against the printed pages (TPS548C26 SLVSGM2 p.10; LMR33610 SNVSBI9A p.8) and the frozen reference fixtures. Expectations encode the printed facts: figure captions, axis labels/units, legend entries, condition rows. Probes marked must_reject measure false comparability; probes marked expect_out_of_range measure correct rejection of unsupported operating points.",
+  "pages": [
+    {
+      "file": "tps548c26_p10.json",
+      "expected_figures": 6,
+      "expected_section_class": "typical",
+      "expected_page_conditions": ["PVIN = 12 V", "VOUT = 1.1 V"],
+      "plots": [
+        {
+          "title_contains": "6-1",
+          "x_label": "Load Current (A)",
+          "x_unit": "A",
+          "y_label": "Efficiency (%)",
+          "y_unit": "%",
+          "series_names": ["600 kHz", "800 kHz", "1.0 MHz", "1.2 MHz"],
+          "conditions": ["PVIN = 12 V", "VCC = Internal LDO", "VOUT = 1.1 V", "MODE = FCCM"]
+        },
+        {
+          "title_contains": "6-2",
+          "x_label": "Load Current (A)",
+          "x_unit": "A",
+          "y_label": "Power Dissipation (W)",
+          "y_unit": "W",
+          "series_names": ["600 kHz", "800 kHz", "1.0 MHz", "1.2 MHz"]
+        },
+        {
+          "title_contains": "6-3",
+          "x_label": "Load Current (A)",
+          "x_unit": "A",
+          "y_label": "Efficiency (%)",
+          "y_unit": "%",
+          "series_names": ["600 kHz", "800 kHz", "1.0 MHz", "1.2 MHz"],
+          "conditions": ["PVIN = 12 V", "VCC = External 5 V Bias", "VOUT = 1.1 V", "MODE = FCCM"]
+        },
+        {
+          "title_contains": "6-4",
+          "x_label": "Load Current (A)",
+          "x_unit": "A",
+          "y_label": "Power Dissipation (W)",
+          "y_unit": "W",
+          "series_names": ["600 kHz", "800 kHz", "1.0 MHz", "1.2 MHz"]
+        },
+        {
+          "title_contains": "6-5",
+          "x_label": "Load Current (A)",
+          "x_unit": "A",
+          "y_label": "Efficiency (%)",
+          "y_unit": "%",
+          "series_names": ["600 kHz", "800 kHz", "1.0 MHz", "1.2 MHz"],
+          "conditions": ["MODE = DCM"]
+        },
+        {
+          "title_contains": "6-6",
+          "x_label": "Load Current (A)",
+          "x_unit": "A",
+          "y_label": "Power Dissipation (W)",
+          "y_unit": "W",
+          "series_names": ["600 kHz", "800 kHz", "1.0 MHz", "1.2 MHz"],
+          "conditions": ["MODE = DCM"]
+        }
+      ]
+    },
+    {
+      "file": "lmr33610_p8.json",
+      "expected_figures": 5,
+      "expected_section_class": "typical",
+      "expected_page_conditions": ["TA = 25°C", "VIN = 12 V"],
+      "plots": [
+        {
+          "title_contains": "7-1",
+          "x_label": "Input Voltage (V)",
+          "x_unit": "V",
+          "y_label": "Quiescent Current (µA)",
+          "y_unit": "µA",
+          "series_names": ["-40C", "25C", "125C"],
+          "conditions": ["VFB = 1.2 V"]
+        },
+        {
+          "title_contains": "7-2",
+          "x_label": "Input Voltage (V)",
+          "x_unit": "V",
+          "y_label": "Shutdown Current (µA)",
+          "y_unit": "µA",
+          "series_names": ["-40C", "25C", "125C"],
+          "conditions": ["EN = 0 V"]
+        },
+        {
+          "title_contains": "7-3",
+          "x_label": "Input Voltage (V)",
+          "x_unit": "V",
+          "y_label": "Output Current (mA)",
+          "y_unit": "mA",
+          "series_names": ["-40C", "25C", "125C"]
+        },
+        {
+          "title_contains": "7-4",
+          "x_label": "Temperature (C)",
+          "x_unit": "C",
+          "y_label": "EN Threshold Voltage (V)",
+          "y_unit": "V",
+          "series_names": ["UP", "DN"]
+        },
+        {
+          "title_contains": "7-6",
+          "x_label": "Input Voltage (V)",
+          "x_unit": "V",
+          "y_label": "Peak Inductor Current (mA)",
+          "y_unit": "mA",
+          "series_names": ["-40C", "25C", "125C"],
+          "conditions": ["VOUT = 5 V"]
+        }
+      ]
+    }
+  ],
+  "probes": [
+    {
+      "id": "P1-eff-fccm-10A",
+      "description": "efficiency at 10 A, matched conditions, FCCM",
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "operating_point": {"x": 10.0},
+        "conditions": {"vin_v": 12.0, "vout_v": 1.1, "categorical": {"mode": "fccm"}}
+      },
+      "expect": {"ok": 8, "not_comparable": 4, "out_of_range": 0, "insufficient": 0, "unpinned_dimensions": ["categorical.vcc"]}
+    },
+    {
+      "id": "P2-eff-dcm-10A",
+      "description": "efficiency at 10 A under DCM",
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "operating_point": {"x": 10.0},
+        "conditions": {"vin_v": 12.0, "vout_v": 1.1, "categorical": {"mode": "dcm"}}
+      },
+      "expect": {"ok": 4, "not_comparable": 8, "out_of_range": 0, "insufficient": 0}
+    },
+    {
+      "id": "P3-eff-vin24-mismatch",
+      "description": "efficiency query at VIN = 24 V — no curve was measured there",
+      "must_reject": true,
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "operating_point": {"x": 10.0},
+        "conditions": {"vin_v": 24.0, "vout_v": 1.1}
+      },
+      "expect": {"ok": 0, "not_comparable": 12, "out_of_range": 0, "insufficient": 0, "reason": "condition_mismatch"}
+    },
+    {
+      "id": "P4-eff-vin-missing",
+      "description": "engineer omitted VIN — question insufficient, never defaulted",
+      "must_reject": true,
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "operating_point": {"x": 10.0},
+        "conditions": {"vout_v": 3.3}
+      },
+      "expect": {"ok": 0, "not_comparable": 0, "out_of_range": 0, "insufficient": 12, "reason": "condition_missing"}
+    },
+    {
+      "id": "P4b-eff-vout33-mismatch",
+      "description": "VOUT = 3.3 V stated but every curve was measured at 1.1 V",
+      "must_reject": true,
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "operating_point": {"x": 10.0},
+        "conditions": {"vin_v": 12.0, "vout_v": 3.3}
+      },
+      "expect": {"ok": 0, "not_comparable": 12, "out_of_range": 0, "insufficient": 0, "reason": "condition_mismatch"}
+    },
+    {
+      "id": "P5-eff-above-range",
+      "description": "load 40 A beyond the 35 A plotted maximum",
+      "expect_out_of_range": true,
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "operating_point": {"x": 40.0},
+        "conditions": {"vin_v": 12.0, "vout_v": 1.1, "categorical": {"mode": "fccm"}}
+      },
+      "expect": {"ok": 0, "not_comparable": 4, "out_of_range": 8, "insufficient": 0}
+    },
+    {
+      "id": "P6-eff-below-range",
+      "description": "load 0.001 A below the plotted minimum support",
+      "expect_out_of_range": true,
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "operating_point": {"x": 0.001},
+        "conditions": {"vin_v": 12.0, "vout_v": 1.1}
+      },
+      "expect": {"ok": 0, "not_comparable": 0, "out_of_range": 12, "insufficient": 0}
+    },
+    {
+      "id": "P7-eff-load-profile",
+      "description": "bounded load distribution (light-load weighted)",
+      "request": {
+        "use_case": "light_load_efficiency",
+        "conditions": {"vin_v": 12.0, "vout_v": 1.1, "categorical": {"mode": "fccm"}},
+        "load_profile": [
+          {"x": 1.0, "weight": 0.5},
+          {"x": 5.0, "weight": 0.3},
+          {"x": 20.0, "weight": 0.2}
+        ]
+      },
+      "expect": {"profile_ok": 8, "profile_not_comparable": 4, "ok": 0, "insufficient": 0}
+    },
+    {
+      "id": "P8-pdiss-10A",
+      "description": "power dissipation at 10 A, matched conditions",
+      "request": {
+        "phenomenon": "power_dissipation_vs_load",
+        "operating_point": {"x": 10.0},
+        "conditions": {"vin_v": 12.0, "vout_v": 1.1, "categorical": {"mode": "fccm"}}
+      },
+      "expect": {"ok": 8, "not_comparable": 4, "out_of_range": 0, "insufficient": 0}
+    },
+    {
+      "id": "P9-wrong-phenomenon",
+      "description": "supply-current-vs-temperature does not exist on this page",
+      "request": {
+        "phenomenon": "supply_current_vs_temperature",
+        "operating_point": {"x": 25.0},
+        "conditions": {"ta_c": 25.0}
+      },
+      "expect": {"applicable": 0, "ok": 0}
+    },
+    {
+      "id": "P10-eff-no-op-point",
+      "description": "discovery listing without an operating point",
+      "request": {
+        "phenomenon": "efficiency_vs_load",
+        "conditions": {"vin_v": 12.0, "vout_v": 1.1}
+      },
+      "expect": {"applicable": 12, "listed": 12}
+    },
+    {
+      "id": "P11-lmr-temp85-no-curve",
+      "description": "85 C is not a printed legend temperature",
+      "must_reject": true,
+      "request": {
+        "phenomenon": "supply_current_vs_input_voltage",
+        "operating_point": {"x": 12.0},
+        "conditions": {"ta_c": 85.0}
+      },
+      "expect": {"ok": 0, "not_comparable": 10, "out_of_range": 0, "insufficient": 0, "reason": "condition_mismatch"}
+    },
+    {
+      "id": "P12-lmr-temp25",
+      "description": "quiescent + shutdown current at 25 C, VIN swept",
+      "request": {
+        "phenomenon": "supply_current_vs_input_voltage",
+        "operating_point": {"x": 12.0},
+        "conditions": {"ta_c": 25.0}
+      },
+      "expect": {"ok": 2, "not_comparable": 4, "out_of_range": 4, "insufficient": 0}
+    },
+    {
+      "id": "P13-lmr-temp125-en0",
+      "description": "shutdown current at 125 C with EN = 0 V",
+      "request": {
+        "phenomenon": "supply_current_vs_input_voltage",
+        "operating_point": {"x": 12.0},
+        "conditions": {"ta_c": 125.0, "ven_v": 0.0}
+      },
+      "expect": {"ok": 1, "not_comparable": 9, "out_of_range": 0, "insufficient": 0}
+    },
+    {
+      "id": "P14-lmr-above-range",
+      "description": "45 V beyond the 40 V plotted maximum",
+      "expect_out_of_range": true,
+      "request": {
+        "phenomenon": "supply_current_vs_input_voltage",
+        "operating_point": {"x": 45.0}
+      },
+      "expect": {"ok": 0, "not_comparable": 0, "out_of_range": 10, "insufficient": 0}
+    },
+    {
+      "id": "P15-lmr-profile-oob",
+      "description": "load profile extending past the plotted support is refused whole",
+      "must_reject": true,
+      "request": {
+        "phenomenon": "supply_current_vs_input_voltage",
+        "conditions": {"ta_c": 25.0},
+        "load_profile": [
+          {"x": 12.0, "weight": 1.0},
+          {"x": 50.0, "weight": 1.0}
+        ]
+      },
+      "expect": {"profile_ok": 0, "profile_rejected": 6, "profile_not_comparable": 4}
+    }
+  ]
+}
