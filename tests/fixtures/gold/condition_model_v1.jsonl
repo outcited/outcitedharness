@@ -1,0 +1,167 @@
+{"vendor": "infineon", "stem": "infineon-BSC009NE2LS5", "freq": 927, "condition_verbatim": "-", "expected": {"reject": "dash"}}
+{"vendor": "infineon", "stem": "infineon-IAUA180N08S5N026", "freq": 264, "condition_verbatim": "–", "expected": {"reject": "dash"}}
+{"vendor": "infineon", "stem": "infineon-IMBG65R026M2H", "freq": 146, "condition_verbatim": "static", "expected": {"keys": {}, "mode": "static"}}
+{"vendor": "infineon", "stem": "infineon-IPA50R380CE", "freq": 323, "condition_verbatim": "static;", "expected": {"keys": {}, "mode": "static"}}
+{"vendor": "infineon", "stem": "infineon-IPA50R280CE", "freq": 320, "condition_verbatim": "AC (f>1 Hz)", "expected": {"keys": {"f_hz": 1.0}, "mode": "ac", "comparators": ["f>1 Hz"]}}
+{"vendor": "rohm", "stem": "rohm-BU10JA2VG-C", "freq": 178, "condition_verbatim": "A ceramic capacitor is recommended.", "expected": {"reject": "no_anchors"}}
+{"vendor": "infineon", "stem": "infineon-BSP135", "freq": 153, "condition_verbatim": "minimal footprint", "expected": {"reject": "no_anchors"}}
+{"vendor": "rohm", "stem": "rohm-QH8MA4", "freq": 252, "condition_verbatim": "Ta = 25°C ,unless otherwise specified", "expected": {"keys": {"ta_c": 25.0}, "residue": ["unless otherwise specified"]}}
+{"vendor": "rohm", "stem": "rohm-BD50HA3VEFJ-C", "freq": 253, "condition_verbatim": "Ta=25℃", "expected": {"keys": {"ta_c": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-BSC050N03LS G", "freq": 291, "condition_verbatim": "T C=25 °C", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-2N7002", "freq": 289, "condition_verbatim": "V GS=0 V, V DS=25 V, f =1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 25.0, "f_hz": 1000000.0}}}
+{"vendor": "infineon", "stem": "infineon-BSC007N04LS6SC", "freq": 180, "condition_verbatim": "V_GS=20 V, V_DS=0 V", "expected": {"keys": {"vgs_v": 20.0, "vds_v": 0.0}}}
+{"vendor": "rohm", "stem": "rohm-R6002END3", "freq": 171, "condition_verbatim": "VDD ⋍ 300V", "expected": {"keys": {"vdd_v": 300.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-HP8JB5", "freq": 203, "condition_verbatim": "VGS = ±20V, VDS = 0V", "expected": {"keys": {"vgs_v": 20.0, "vds_v": 0.0}, "sym": ["vgs_v"]}}
+{"vendor": "infineon", "stem": "infineon-AIMZA75R020M1H", "freq": 148, "condition_verbatim": "TC=100°C", "expected": {"keys": {"tc_c": 100.0}}}
+{"vendor": "rohm", "stem": "rohm-BU10JA2DG-C", "freq": 175, "condition_verbatim": "IOUT=0mA", "expected": {"keys": {"iout_a": 0.0}}}
+{"vendor": "rohm", "stem": "rohm-BD15HA3WEFJ", "freq": 156, "condition_verbatim": "VEN=0V, OFF mode", "expected": {"keys": {"ven_v": 0.0}, "residue": ["OFF mode"]}}
+{"vendor": "rohm", "stem": "rohm-QH8K51", "freq": 166, "condition_verbatim": "VDS = 10V, ID = 1mA", "expected": {"keys": {"vds_v": 10.0, "id_a": 0.001}}}
+{"vendor": "infineon", "stem": "infineon-IPA65R150CFD", "freq": 289, "condition_verbatim": "f = 1MHz, open drain", "expected": {"keys": {"f_hz": 1000000.0}, "residue": ["open drain"]}}
+{"vendor": "infineon", "stem": "infineon-AIMZA75R020M1H", "freq": 810, "condition_verbatim": "TC=25°C", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-BSC007N04LS6", "freq": 556, "condition_verbatim": "TC=25 °C", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-AUIRFP4568", "freq": 455, "condition_verbatim": "VGS = 0V", "expected": {"keys": {"vgs_v": 0.0}}}
+{"vendor": "infineon", "stem": "infineon-IMBG75R050M2H", "freq": 314, "condition_verbatim": "Tc = 25°C", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-BSC007N04LS6SC", "freq": 305, "condition_verbatim": "T_C=25 °C", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-IPD65R420CFDA", "freq": 282, "condition_verbatim": "VGS = 0V, ID = 1mA", "expected": {"keys": {"vgs_v": 0.0, "id_a": 0.001}}}
+{"vendor": "infineon", "stem": "infineon-AIMZA75R020M1H", "freq": 275, "condition_verbatim": "VGS=20 V, VDS=0 V", "expected": {"keys": {"vgs_v": 20.0, "vds_v": 0.0}}}
+{"vendor": "infineon", "stem": "infineon-IAUC100N04S6L014", "freq": 264, "condition_verbatim": "V GS=0V, V DS=25V, f =1MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 25.0, "f_hz": 1000000.0}}}
+{"vendor": "infineon", "stem": "infineon-IPA60R060C7", "freq": 256, "condition_verbatim": "VGS=0V, VDS=400V, f=250kHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 400.0, "f_hz": 250000.0}}}
+{"vendor": "infineon", "stem": "infineon-IRF100B201", "freq": 242, "condition_verbatim": "VGS = 10V", "expected": {"keys": {"vgs_v": 10.0}}}
+{"vendor": "infineon", "stem": "infineon-IAUAN04S7N005", "freq": 218, "condition_verbatim": "V GS = 0 V, V DS = 20 V, f = 1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 20.0, "f_hz": 1000000.0}}}
+{"vendor": "infineon", "stem": "infineon-BSC026N08NS5", "freq": 177, "condition_verbatim": "VGS=0 V, VDS=40 V, f=1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 40.0, "f_hz": 1000000.0}}}
+{"vendor": "infineon", "stem": "infineon-BSS670S2L", "freq": 172, "condition_verbatim": "VGS=20V, VDS=0V", "expected": {"keys": {"vgs_v": 20.0, "vds_v": 0.0}}}
+{"vendor": "infineon", "stem": "infineon-IAUC120N04S6L012", "freq": 168, "condition_verbatim": "VGS=0V, ID=1mA", "expected": {"keys": {"vgs_v": 0.0, "id_a": 0.001}}}
+{"vendor": "infineon", "stem": "infineon-2N7002", "freq": 166, "condition_verbatim": "V GS=20 V, V DS=0 V", "expected": {"keys": {"vgs_v": 20.0, "vds_v": 0.0}}}
+{"vendor": "infineon", "stem": "infineon-IAUC100N04S6L014", "freq": 164, "condition_verbatim": "T C=25°C", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-BSC012N06NS", "freq": 142, "condition_verbatim": "VGS=0 V, VDS=30 V, f=1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 30.0, "f_hz": 1000000.0}}}
+{"vendor": "infineon", "stem": "infineon-IRF3710Z", "freq": 11, "condition_verbatim": "ID = 35A", "expected": {"keys": {"id_a": 35.0}}}
+{"vendor": "infineon", "stem": "infineon-IQEH50NE2LM7ZCG", "freq": 6, "condition_verbatim": "V =12 V, I =20 A, V =0 to 4.5 V", "expected": {"reject": "ambiguous_symbols"}}
+{"vendor": "infineon", "stem": "infineon-IPAN60R180CM8", "freq": 22, "condition_verbatim": "f=1MHz", "expected": {"keys": {"f_hz": 1000000.0}}}
+{"vendor": "infineon", "stem": "infineon-IPP60R065S7", "freq": 8, "condition_verbatim": "VDD=300V, VGS=13V, ID=8A, RG=10Ω; see table 9", "expected": {"keys": {"vdd_v": 300.0, "vgs_v": 13.0, "id_a": 8.0, "rg_ohm": 10.0}, "residue": ["see table 9"]}}
+{"vendor": "infineon", "stem": "infineon-IRFB7534", "freq": 12, "condition_verbatim": "VGS = 0V, VDS = 25V, ƒ = 1.0MHz, See Fig.7", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 25.0, "f_hz": 1000000.0}, "residue": ["See Fig.7"]}}
+{"vendor": "infineon", "stem": "infineon-IRF630N", "freq": 10, "condition_verbatim": "VDS = 200V, VGS = 0V", "expected": {"keys": {"vds_v": 200.0, "vgs_v": 0.0}}}
+{"vendor": "infineon", "stem": "infineon-IAUC41N06S5L100", "freq": 6, "condition_verbatim": "V GS=10V, I D=20A", "expected": {"keys": {"vgs_v": 10.0, "id_a": 20.0}}}
+{"vendor": "infineon", "stem": "infineon-IAUCN10S7N021", "freq": 7, "condition_verbatim": "V DD = 50 V, I D = 88 A, V GS = 0 to 10 V", "expected": {"keys": {"vdd_v": 50.0, "id_a": 88.0, "vgs_v": [0.0, 10.0]}}}
+{"vendor": "infineon", "stem": "infineon-IMCQ120R017M2H", "freq": 7, "condition_verbatim": "VDD = 800 V, ID = 40 A, VGS = 0/18 V, RG,ext = 2.3 Ω, Lσ = 15 nH, diode: body diode at VGS = 0 V, Tvj = 175 °C", "expected": {"keys": {"vdd_v": 800.0, "id_a": 40.0, "vgs_v": [0.0, 18.0], "rg_ext_ohm": 2.3, "lsigma_h": 1.5e-08, "tvj_c": 175.0}, "residue": ["diode: body diode at VGS = 0 V"]}}
+{"vendor": "infineon", "stem": "infineon-IMBG120R017M2H", "freq": 19, "condition_verbatim": "VDD ≤ 800 V, VDS,peak < 1200 V, VGS(on) = 15 V, Tvj(start) = 25 °C", "expected": {"keys": {"vdd_v": 800.0, "vds_peak_v": 1200.0, "vgs_on_v": 15.0, "tvj_start_c": 25.0}, "comparators": ["VDD ≤ 800 V", "VDS,peak < 1200 V"]}}
+{"vendor": "infineon", "stem": "infineon-IPB65R145CFD7A", "freq": 16, "condition_verbatim": "VDD=400V, ID=8.5A, VGS=0 to 10V", "expected": {"keys": {"vdd_v": 400.0, "id_a": 8.5, "vgs_v": [0.0, 10.0]}}}
+{"vendor": "infineon", "stem": "infineon-IAUAN04S7N008", "freq": 13, "condition_verbatim": "V DD = 20 V, I D = 90 A, V GS = 0 to 10 V", "expected": {"keys": {"vdd_v": 20.0, "id_a": 90.0, "vgs_v": [0.0, 10.0]}}}
+{"vendor": "infineon", "stem": "infineon-IAUS240N08S5N019", "freq": 6, "condition_verbatim": "V GS=0 V, V DS=40 V, \nf =1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 40.0, "f_hz": 1000000.0}}}
+{"vendor": "infineon", "stem": "infineon-IPB65R065C7", "freq": 6, "condition_verbatim": "ID=10.2A; VDD=50V; see table 10", "expected": {"keys": {"id_a": 10.2, "vdd_v": 50.0}, "residue": ["see table 10"]}}
+{"vendor": "infineon", "stem": "infineon-IMBG120R116M2H", "freq": 7, "condition_verbatim": "VDD = 800 V, ID = 6 A, VGS = 0/18 V, RG,ext = 2.3 Ω, Lσ = 15 nH, diode: body diode at VGS = 0 V, Tvj = 25 °C", "expected": {"keys": {"vdd_v": 800.0, "id_a": 6.0, "vgs_v": [0.0, 18.0], "rg_ext_ohm": 2.3, "lsigma_h": 1.5e-08, "tvj_c": 25.0}, "residue": ["diode: body diode at VGS = 0 V"]}}
+{"vendor": "infineon", "stem": "infineon-IQD005N04NM6", "freq": 8, "condition_verbatim": "VR=20 V, IF=50 A, diF/dt=1000 A/µs", "expected": {"keys": {"vr_v": 20.0, "if_a": 50.0, "difdt_a_per_s": 1000000000.0}}}
+{"vendor": "infineon", "stem": "infineon-IMBG40R015M2H", "freq": 11, "condition_verbatim": "T_A=25 °C, R_thJA=40 °C/W", "expected": {"keys": {"ta_c": 25.0, "rthja_c_per_w": 40.0}}}
+{"vendor": "infineon", "stem": "infineon-IMBG120R116M2H", "freq": 1, "condition_verbatim": "VDD = 800 V, ISD = 6 A, VGS = -5 V, RG,ext = 2.3 Ω, Qfr includes also QC, Tvj = 25 °C", "expected": {"keys": {"vdd_v": 800.0, "isd_a": 6.0, "vgs_v": -5.0, "rg_ext_ohm": 2.3, "tvj_c": 25.0}, "residue": ["Qfr includes also QC"]}}
+{"vendor": "infineon", "stem": "infineon-IRFS7530", "freq": 1, "condition_verbatim": "TJ = 125°C IF = 100A,", "expected": {"keys": {"tj_c": 125.0, "if_a": 100.0}}}
+{"vendor": "infineon", "stem": "infineon-IPA80R900P7", "freq": 2, "condition_verbatim": "VGS=10V, ID=2.2A, Tj=150°C", "expected": {"keys": {"vgs_v": 10.0, "id_a": 2.2, "tj_c": 150.0}}}
+{"vendor": "infineon", "stem": "infineon-IPB95R310PFD7", "freq": 2, "condition_verbatim": "VGS=10V, ID=10.4A, Tj=150°C", "expected": {"keys": {"vgs_v": 10.0, "id_a": 10.4, "tj_c": 150.0}}}
+{"vendor": "infineon", "stem": "infineon-IPD85P04P4L-06", "freq": 2, "condition_verbatim": "V DS=-32V, V GS=0V,  T j=125°C2)", "expected": {"keys": {"vds_v": -32.0, "vgs_v": 0.0, "tj_c": 125.0}, "residue": ["2)"]}}
+{"vendor": "infineon", "stem": "infineon-IRFP250N", "freq": 1, "condition_verbatim": "RG= 3.9", "expected": {"reject": "units_absent"}}
+{"vendor": "infineon", "stem": "infineon-IPB107N20N3 G", "freq": 1, "condition_verbatim": "(TO263)", "expected": {"reject": "no_anchors"}}
+{"vendor": "infineon", "stem": "infineon-IPA040N06NM5S", "freq": 1, "condition_verbatim": "ID=72 A, RGS=25 Ω", "expected": {"keys": {"id_a": 72.0, "rgs_ohm": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-AIMCQ120R040M1T", "freq": 1, "condition_verbatim": "VDD ≤ 800 V, VDS,peak < 1200 V, Tvj(start) = 25 °C, RG,ext = 2 Ω; VGS(on) = 18 V", "expected": {"keys": {"vdd_v": 800.0, "vds_peak_v": 1200.0, "tvj_start_c": 25.0, "rg_ext_ohm": 2.0, "vgs_on_v": 18.0}, "comparators": ["VDD ≤ 800 V", "VDS,peak < 1200 V"]}}
+{"vendor": "infineon", "stem": "infineon-IRFB4127", "freq": 1, "condition_verbatim": "ID = 44A, VDS =0V, VGS = 10V", "expected": {"keys": {"id_a": 44.0, "vds_v": 0.0, "vgs_v": 10.0}}}
+{"vendor": "infineon", "stem": "infineon-BSZ086P03NS3 G", "freq": 2, "condition_verbatim": "VR=15 V, IF=|IS|, diF/dt=100 A/µs", "expected": {"keys": {"vr_v": 15.0, "difdt_a_per_s": 100000000.0}, "residue": ["IF=|IS|"]}}
+{"vendor": "infineon", "stem": "infineon-BSZ065N03LS", "freq": 2, "condition_verbatim": "VGS=4.5 V, TA=25 °C, RthJA=60 K/W", "expected": {"keys": {"vgs_v": 4.5, "ta_c": 25.0, "rthja_c_per_w": 60.0}}}
+{"vendor": "infineon", "stem": "infineon-BSC097N06NS", "freq": 1, "condition_verbatim": "I_D=30 A, R=25 Ω", "expected": {"keys": {"id_a": 30.0, "r_ohm": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-IPF048N15NM6", "freq": 1, "condition_verbatim": "I_AS=46 A, R=25 Ω", "expected": {"keys": {"i_as_a": 46.0, "r_ohm": 25.0}}}
+{"vendor": "infineon", "stem": "infineon-BSP372N", "freq": 2, "condition_verbatim": "V GS=4.5 V, I D=1.7 A", "expected": {"keys": {"vgs_v": 4.5, "id_a": 1.7}}}
+{"vendor": "infineon", "stem": "infineon-AIMBG75R060M2H", "freq": 2, "condition_verbatim": "V_DS = V_GS, I_D = 3.0 mA, T_j = 175°C", "expected": {"keys": {"id_a": 0.003, "tj_c": 175.0}, "residue": ["V_DS = V_GS"]}}
+{"vendor": "infineon", "stem": "infineon-IPC302N08N3", "freq": 2, "condition_verbatim": "VGS=0 ,VDS=80", "expected": {"reject": "units_absent"}}
+{"vendor": "rohm", "stem": "rohm-HP8JB5", "freq": 316, "condition_verbatim": "RG = 10Ω", "expected": {"keys": {"rg_ohm": 10.0}}}
+{"vendor": "rohm", "stem": "rohm-HP8JB5", "freq": 297, "condition_verbatim": "Ta = 25°C", "expected": {"keys": {"ta_c": 25.0}}}
+{"vendor": "rohm", "stem": "rohm-HP8JB5", "freq": 259, "condition_verbatim": "f = 1MHz", "expected": {"keys": {"f_hz": 1000000.0}}}
+{"vendor": "rohm", "stem": "rohm-R6002END3", "freq": 210, "condition_verbatim": "TC = 25℃", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "rohm", "stem": "rohm-HP8JB5", "freq": 139, "condition_verbatim": "Ta = 25℃", "expected": {"keys": {"ta_c": 25.0}}}
+{"vendor": "rohm", "stem": "rohm-BU10JA2MNVX-C", "freq": 112, "condition_verbatim": "STBY=1.5V", "expected": {"keys": {"stby_v": 1.5}}}
+{"vendor": "rohm", "stem": "rohm-BD54FA1FP3", "freq": 109, "condition_verbatim": "Ceramic capacitor recommended", "expected": {"reject": "no_anchors"}}
+{"vendor": "rohm", "stem": "rohm-R6002END3", "freq": 106, "condition_verbatim": "VDD ⋍ 300V, VGS = 10V", "expected": {"keys": {"vdd_v": 300.0, "vgs_v": 10.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-R6002JND4", "freq": 103, "condition_verbatim": "VDS = 0V to 480V", "expected": {"keys": {"vds_v": [0.0, 480.0]}}}
+{"vendor": "rohm", "stem": "rohm-R6002JND4", "freq": 95, "condition_verbatim": "VGS = ±30V, VDS = 0V", "expected": {"keys": {"vgs_v": 30.0, "vds_v": 0.0}, "sym": ["vgs_v"]}}
+{"vendor": "rohm", "stem": "rohm-BU10TD3WG", "freq": 95, "condition_verbatim": "Vo=0V", "expected": {"keys": {"vout_v": 0.0}}}
+{"vendor": "rohm", "stem": "rohm-BU10TD3WG", "freq": 91, "condition_verbatim": "VIN=4.0V, STBY=0V, VOUT=4.0V", "expected": {"keys": {"vin_v": 4.0, "stby_v": 0.0, "vout_v": 4.0}}}
+{"vendor": "rohm", "stem": "rohm-BU10TD3WG", "freq": 91, "condition_verbatim": "Vo=VOUT*0.95", "expected": {"reject": "no_anchors"}}
+{"vendor": "rohm", "stem": "rohm-R6003KND3", "freq": 87, "condition_verbatim": "VDS = 600V, VGS = 0V", "expected": {"keys": {"vds_v": 600.0, "vgs_v": 0.0}}}
+{"vendor": "rohm", "stem": "rohm-BD733U2EFJ-C", "freq": 84, "condition_verbatim": "Ta=25°C", "expected": {"keys": {"ta_c": 25.0}}}
+{"vendor": "rohm", "stem": "rohm-BU10JA2MNVX-C", "freq": 75, "condition_verbatim": "IOUT=0.01mA to 100mA", "expected": {"keys": {"iout_a": [1e-05, 0.1]}}}
+{"vendor": "rohm", "stem": "rohm-HP8KB5", "freq": 70, "condition_verbatim": "VDS = VGS, ID = 1mA", "expected": {"keys": {"id_a": 0.001}, "residue": ["VDS = VGS"]}}
+{"vendor": "rohm", "stem": "rohm-R6035ENZ", "freq": 5, "condition_verbatim": "VGS = 10V, ID = 18.1A, Tj = 125°C", "expected": {"keys": {"vgs_v": 10.0, "id_a": 18.1, "tj_c": 125.0}}}
+{"vendor": "rohm", "stem": "rohm-R6002ENH", "freq": 33, "condition_verbatim": "VDS = 600V, VGS = 0V, Tj = 125°C", "expected": {"keys": {"vds_v": 600.0, "vgs_v": 0.0, "tj_c": 125.0}}}
+{"vendor": "rohm", "stem": "rohm-R6020JNX", "freq": 12, "condition_verbatim": "VDD ⋍ 300V, ID = 20A", "expected": {"keys": {"vdd_v": 300.0, "id_a": 20.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-QS8J4HZG", "freq": 24, "condition_verbatim": "VDD ⋍ -15V,VGS = -10V", "expected": {"keys": {"vdd_v": -15.0, "vgs_v": -10.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-BU10TD3WG", "freq": 11, "condition_verbatim": "1.0V≦VOUT＜1.2V(IOUT=200mA)", "expected": {"keys": {"vout_v": [1.0, 1.2], "iout_a": 0.2}, "comparators": ["1.0V≦VOUT＜1.2V"]}}
+{"vendor": "rohm", "stem": "rohm-R6015ENZ", "freq": 5, "condition_verbatim": "Tc = 25℃", "expected": {"keys": {"tc_c": 25.0}}}
+{"vendor": "rohm", "stem": "rohm-BD60FC0WEFJ", "freq": 13, "condition_verbatim": "1s(Note 3)", "expected": {"reject": "no_anchors"}}
+{"vendor": "rohm", "stem": "rohm-BU25TA2WHFV", "freq": 20, "condition_verbatim": "VRR=-20 dBv,fRR=1 kHz, IOUT=10 mA, 2.5 V≤VOUT", "expected": {"keys": {"frr_hz": 1000.0, "iout_a": 0.01, "vout_v": 2.5}, "residue": ["VRR=-20 dBv"], "comparators": ["2.5 V≤VOUT"]}}
+{"vendor": "rohm", "stem": "rohm-BU26TD2WNVX", "freq": 9, "condition_verbatim": "3.2V≦VOUT≦3.4V(IOUT=200mA)", "expected": {"keys": {"vout_v": [3.2, 3.4], "iout_a": 0.2}, "comparators": ["3.2V≦VOUT≦3.4V"]}}
+{"vendor": "rohm", "stem": "rohm-R6002END3", "freq": 31, "condition_verbatim": "wavesoldering for 10s", "expected": {"reject": "no_anchors"}}
+{"vendor": "rohm", "stem": "rohm-R6024ENX", "freq": 13, "condition_verbatim": "VDD ⋍ 300V, ID = 24A, VGS = 10V", "expected": {"keys": {"vdd_v": 300.0, "id_a": 24.0, "vgs_v": 10.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-R6025JNX", "freq": 9, "condition_verbatim": "VDS = VGS, ID = 4.5mA", "expected": {"keys": {"id_a": 0.0045}, "residue": ["VDS = VGS"]}}
+{"vendor": "rohm", "stem": "rohm-R6004RND3", "freq": 48, "condition_verbatim": "VGS = 0V, VDS = 100V", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 100.0}}}
+{"vendor": "rohm", "stem": "rohm-R6020ENX", "freq": 9, "condition_verbatim": "VDS = 10V, ID = 10A", "expected": {"keys": {"vds_v": 10.0, "id_a": 10.0}}}
+{"vendor": "rohm", "stem": "rohm-BU10JA2DG-C", "freq": 17, "condition_verbatim": "VIN=VOUT+1.0V (Note 1)", "expected": {"reject": "no_anchors"}}
+{"vendor": "rohm", "stem": "rohm-RQ5A030AP", "freq": 7, "condition_verbatim": "ID = -1.5A", "expected": {"keys": {"id_a": -1.5}}}
+{"vendor": "rohm", "stem": "rohm-BU26TD2WNVX", "freq": 13, "condition_verbatim": "2.9V≦VOUT≦3.1V(IOUT=200mA)", "expected": {"keys": {"vout_v": [2.9, 3.1], "iout_a": 0.2}, "comparators": ["2.9V≦VOUT≦3.1V"]}}
+{"vendor": "rohm", "stem": "rohm-BD90GA5VEFJ-M", "freq": 2, "condition_verbatim": "25℃, VCC =( Vo+0.9V )→14.0V", "expected": {"keys": {"t_c": 25.0}, "bare": ["t_c"], "residue": ["VCC =( Vo+0.9V )→14.0V"]}}
+{"vendor": "rohm", "stem": "rohm-BD80C0AHFP-C", "freq": 2, "condition_verbatim": "Vo ≥ 3.0V", "expected": {"keys": {"vout_v": 3.0}, "comparators": ["Vo ≥ 3.0V"]}}
+{"vendor": "rohm", "stem": "rohm-R6007ENX", "freq": 1, "condition_verbatim": "VDD ⋍ 300V, ID = 7A, VGS = 10V", "expected": {"keys": {"vdd_v": 300.0, "id_a": 7.0, "vgs_v": 10.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-R6504END3", "freq": 1, "condition_verbatim": "Ta = 25°C; VDD ⋍ 300V", "expected": {"keys": {"ta_c": 25.0, "vdd_v": 300.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-BD90GC0VEFJ-M", "freq": 1, "condition_verbatim": "VCC=5V, IO=1.0A, -40~105℃", "expected": {"keys": {"vcc_v": 5.0, "iout_a": 1.0, "t_c": [-40.0, 105.0]}, "bare": ["t_c"]}}
+{"vendor": "rohm", "stem": "rohm-RQ5C025TP", "freq": 2, "condition_verbatim": "VDS = -10V, ID = -1.2A", "expected": {"keys": {"vds_v": -10.0, "id_a": -1.2}}}
+{"vendor": "rohm", "stem": "rohm-RQ7C065UN", "freq": 2, "condition_verbatim": "VGS = 1.8V, ID = 3.2A", "expected": {"keys": {"vgs_v": 1.8, "id_a": 3.2}}}
+{"vendor": "rohm", "stem": "rohm-R6015KNX", "freq": 2, "condition_verbatim": "VGS = 10V, ID = 6.5A, Tj  =  25°C", "expected": {"keys": {"vgs_v": 10.0, "id_a": 6.5, "tj_c": 25.0}}}
+{"vendor": "rohm", "stem": "rohm-RQ6E030AT", "freq": 1, "condition_verbatim": "VDS = -5V, ID = -3.0A", "expected": {"keys": {"vds_v": -5.0, "id_a": -3.0}}}
+{"vendor": "rohm", "stem": "rohm-R6024ENX", "freq": 2, "condition_verbatim": "VDD = 300V, ID = 24A", "expected": {"keys": {"vdd_v": 300.0, "id_a": 24.0}}}
+{"vendor": "rohm", "stem": "rohm-RQ5A030AP", "freq": 2, "condition_verbatim": "VGS = -1.5V, ID = -0.6A", "expected": {"keys": {"vgs_v": -1.5, "id_a": -0.6}}}
+{"vendor": "rohm", "stem": "rohm-BD933M5WHFP-C", "freq": 2, "condition_verbatim": "LOW", "expected": {"reject": "no_anchors"}}
+{"vendor": "rohm", "stem": "rohm-QH8KB5", "freq": 1, "condition_verbatim": "VDD ⋍ 20V ID = 4.5A VGS = 10V", "expected": {"keys": {"vdd_v": 20.0, "id_a": 4.5, "vgs_v": 10.0}, "approx": ["vdd_v"]}}
+{"vendor": "rohm", "stem": "rohm-RF6G035BG", "freq": 2, "condition_verbatim": "VDS = 5V, ID = 3.5A", "expected": {"keys": {"vds_v": 5.0, "id_a": 3.5}}}
+{"vendor": "rohm", "stem": "rohm-RQ6P015SP", "freq": 2, "condition_verbatim": "VGS = -4.5V, ID = -0.75A", "expected": {"keys": {"vgs_v": -4.5, "id_a": -0.75}}}
+{"vendor": "rohm", "stem": "rohm-HP8KF7H", "freq": 1, "condition_verbatim": "VDS = 5.0V, ID = 6.0A", "expected": {"keys": {"vds_v": 5.0, "id_a": 6.0}}}
+{"vendor": "rohm", "stem": "rohm-R6070JNZ4", "freq": 1, "condition_verbatim": "VGS = 0V, IS = 70A", "expected": {"keys": {"vgs_v": 0.0, "is_a": 70.0}}}
+{"vendor": "ti", "stem": "ti-CSD17308Q3", "freq": 36, "condition_verbatim": "VGS = 0 V, VDS = 15 V, ƒ = 1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 15.0, "f_hz": 1000000.0}}}
+{"vendor": "ti", "stem": "ti-CSD13201W10", "freq": 31, "condition_verbatim": "VDS = VGS, ID = 250 μA", "expected": {"keys": {"id_a": 0.00025}, "residue": ["VDS = VGS"]}}
+{"vendor": "ti", "stem": "ti-CSD16404Q5A", "freq": 27, "condition_verbatim": "VDS = VGS, ID = 250mA", "expected": {"keys": {"id_a": 0.25}, "residue": ["VDS = VGS"]}}
+{"vendor": "ti", "stem": "ti-CSD13201W10", "freq": 26, "condition_verbatim": "VGS = 0 V, VDS = 6 V, ƒ = 1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 6.0, "f_hz": 1000000.0}}}
+{"vendor": "ti", "stem": "ti-CSD16321Q5", "freq": 20, "condition_verbatim": "VGS = 0V, VDS = 12.5V, f = 1MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 12.5, "f_hz": 1000000.0}}}
+{"vendor": "ti", "stem": "ti-CSD16325Q5", "freq": 18, "condition_verbatim": "VGS = 0 V, VDS = 12.5 V, ƒ = 1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 12.5, "f_hz": 1000000.0}}}
+{"vendor": "ti", "stem": "ti-CSD13201W10", "freq": 16, "condition_verbatim": "VGS = 4.5 V", "expected": {"keys": {"vgs_v": 4.5}}}
+{"vendor": "ti", "stem": "ti-CSD13380F3", "freq": 15, "condition_verbatim": "TA = 25°C (unless otherwise stated)", "expected": {"keys": {"ta_c": 25.0}, "residue": ["(unless otherwise stated)"]}}
+{"vendor": "ti", "stem": "ti-CSD13380F3", "freq": 15, "condition_verbatim": "VDS = VGS, IDS = 250 μA", "expected": {"keys": {"id_a": 0.00025}, "residue": ["VDS = VGS"]}}
+{"vendor": "ti", "stem": "ti-CSD17322Q5A", "freq": 12, "condition_verbatim": "VDS = 15V, ID = 14A", "expected": {"keys": {"vds_v": 15.0, "id_a": 14.0}}}
+{"vendor": "ti", "stem": "ti-CSD15571Q2", "freq": 12, "condition_verbatim": "VDS = VGS, IDS = 250μA", "expected": {"keys": {"id_a": 0.00025}, "residue": ["VDS = VGS"]}}
+{"vendor": "ti", "stem": "ti-CSD16327Q3", "freq": 12, "condition_verbatim": "VGS = 0 V, VDS = 12.5 V, f = 1 MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 12.5, "f_hz": 1000000.0}}}
+{"vendor": "ti", "stem": "ti-CSD17303Q5", "freq": 11, "condition_verbatim": "VGS = 0V, VDS = 24V", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 24.0}}}
+{"vendor": "ti", "stem": "ti-BUF08821", "freq": 10, "condition_verbatim": "ISINK = 3mA", "expected": {"keys": {"isink_a": 0.003}}}
+{"vendor": "ti", "stem": "ti-CSD16407Q5", "freq": 10, "condition_verbatim": "TA = 25°C unless otherwise stated", "expected": {"keys": {"ta_c": 25.0}, "residue": ["unless otherwise stated"]}}
+{"vendor": "ti", "stem": "ti-CSD17506Q5A", "freq": 10, "condition_verbatim": "VDS = 15V, IDS = 20A", "expected": {"keys": {"vds_v": 15.0, "id_a": 20.0}}}
+{"vendor": "ti", "stem": "ti-CSD13201W10", "freq": 10, "condition_verbatim": "VGS = 0 V, ID = 250 μA", "expected": {"keys": {"vgs_v": 0.0, "id_a": 0.00025}}}
+{"vendor": "ti", "stem": "ti-CSD17306Q5A", "freq": 6, "condition_verbatim": "VDS = 15V, ID = 22A", "expected": {"keys": {"vds_v": 15.0, "id_a": 22.0}}}
+{"vendor": "ti", "stem": "ti-CSD16321Q5", "freq": 6, "condition_verbatim": "VGS = 8V", "expected": {"keys": {"vgs_v": 8.0}}}
+{"vendor": "ti", "stem": "ti-BUF08821", "freq": 7, "condition_verbatim": "Code 512", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD13201W10", "freq": 7, "condition_verbatim": "VDS = 6 V, ID = 1 A", "expected": {"keys": {"vds_v": 6.0, "id_a": 1.0}}}
+{"vendor": "ti", "stem": "ti-CSD16404Q5A", "freq": 9, "condition_verbatim": "VGS = 0V, ID = 250mA", "expected": {"keys": {"vgs_v": 0.0, "id_a": 0.25}}}
+{"vendor": "ti", "stem": "ti-CSD13303W1015", "freq": 6, "condition_verbatim": "VGS = 0V, VDS = 6V, f = 1MHz", "expected": {"keys": {"vgs_v": 0.0, "vds_v": 6.0, "f_hz": 1000000.0}}}
+{"vendor": "ti", "stem": "ti-BUF08630", "freq": 6, "condition_verbatim": "Over temperature", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD13303W1015", "freq": 5, "condition_verbatim": "VDS = 6V, ID = 1.5A", "expected": {"keys": {"vds_v": 6.0, "id_a": 1.5}}}
+{"vendor": "ti", "stem": "ti-CSD15571Q2", "freq": 7, "condition_verbatim": "4.5V", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-BQ79614-Q1", "freq": 6, "condition_verbatim": "PAP (HTQFP) 64 PINS", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD13201W10", "freq": 5, "condition_verbatim": "VGS = 1.8 V", "expected": {"keys": {"vgs_v": 1.8}}}
+{"vendor": "ti", "stem": "ti-CSD17303Q5", "freq": 5, "condition_verbatim": "VDS = 15V, IDS = 25A", "expected": {"keys": {"vds_v": 15.0, "id_a": 25.0}}}
+{"vendor": "ti", "stem": "ti-CSD17308Q3", "freq": 1, "condition_verbatim": "ID = 36 A, L = 0.1 mH, RG = 25 Ω", "expected": {"keys": {"id_a": 36.0, "l_h": 0.0001, "rg_ohm": 25.0}}}
+{"vendor": "ti", "stem": "ti-CSD17308Q3", "freq": 2, "condition_verbatim": "VGS = 4.5 V, ID = 10 A", "expected": {"keys": {"vgs_v": 4.5, "id_a": 10.0}}}
+{"vendor": "ti", "stem": "ti-BQ78Z100", "freq": 1, "condition_verbatim": "ΔVREG/ΔTA, IREG = 10 mA", "expected": {"keys": {"ireg_a": 0.01}, "residue": ["ΔVREG/ΔTA"]}}
+{"vendor": "ti", "stem": "ti-CSD16401Q5", "freq": 1, "condition_verbatim": "Continuous Drain Current (Package Limited)", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD15380F3", "freq": 1, "condition_verbatim": "Pulsed Drain Current(3)", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD13306W", "freq": 1, "condition_verbatim": "VDS = 6 V, ID = 1.5 A", "expected": {"keys": {"vds_v": 6.0, "id_a": 1.5}}}
+{"vendor": "ti", "stem": "ti-CSD16407Q5", "freq": 2, "condition_verbatim": "VDS = 13.5 V, VGS = 0 V", "expected": {"keys": {"vds_v": 13.5, "vgs_v": 0.0}}}
+{"vendor": "ti", "stem": "ti-BQ25890", "freq": 1, "condition_verbatim": "SW", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD16406Q3", "freq": 1, "condition_verbatim": "VDS = 15 V, ID = 20 A", "expected": {"keys": {"vds_v": 15.0, "id_a": 20.0}}}
+{"vendor": "ti", "stem": "ti-CSD16401Q5", "freq": 2, "condition_verbatim": "VGS = 10 V, ID = 40 A", "expected": {"keys": {"vgs_v": 10.0, "id_a": 40.0}}}
+{"vendor": "ti", "stem": "ti-BUF12840", "freq": 2, "condition_verbatim": "Outputs at midscale with no load", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD16413Q5A", "freq": 1, "condition_verbatim": "(4.5V)", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD16404Q5A", "freq": 2, "condition_verbatim": "IS = 20A, VGS = 0V", "expected": {"keys": {"is_a": 20.0, "vgs_v": 0.0}}}
+{"vendor": "ti", "stem": "ti-BQ79826Z-Q1", "freq": 1, "condition_verbatim": "RMODE < 168kΩ", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-BQ79731-Q1", "freq": 1, "condition_verbatim": "PHP (HTQFP 48-pin)", "expected": {"reject": "no_anchors"}}
+{"vendor": "ti", "stem": "ti-CSD17313Q2", "freq": 2, "condition_verbatim": "VGS = 3 V, ID = 4 A", "expected": {"keys": {"vgs_v": 3.0, "id_a": 4.0}}}
+{"vendor": "ti", "stem": "ti-BQ78Z100", "freq": 1, "condition_verbatim": "External PBI capacitor", "expected": {"reject": "no_anchors"}}
