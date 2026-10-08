@@ -1,0 +1,108 @@
+{"id": "m-para-01", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "microcontroller that sleeps most of the time and runs from a coin cell", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-para-02", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "fast 32 bit brain for motor control", "expected": {"anchors": ["STM32F103", "TM4C123"]}}
+{"id": "m-para-03", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "mcu with built in analog to digital converter", "expected": {"anchors": ["STM32F103", "TM4C123"]}}
+{"id": "m-para-04", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "chip with direct memory access channels", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-para-05", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "controller for battery powered sensor node", "expected": {"anchors": ["STM32F103", "TM4C123"]}}
+{"id": "m-para-06", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "mcu that keeps running while main power is off", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-para-07", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "plenty of flash for a logging application", "expected": {"anchors": ["TM4C123"]}}
+{"id": "m-para-08", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "automotive grade microcontroller", "expected": {"anchors": ["TM4C123"]}}
+{"id": "m-para-09", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "mcu with on chip temperature sensor", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-para-10", "aisle": "mcu", "kind": "paraphrase", "fixture": true, "query": "72 MHz cortex microcontroller", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-para-11", "aisle": "mcu", "kind": "paraphrase", "fixture": false, "query": "wifi microcontroller for iot", "expected": {"anchors": ["ESP8266EX"]}}
+{"id": "m-para-12", "aisle": "mcu", "kind": "paraphrase", "fixture": false, "query": "low cost wifi soc", "expected": {"anchors": ["ESP8266EX"]}}
+{"id": "m-term-01", "aisle": "mcu", "kind": "terminology_mismatch", "fixture": true, "query": "arm 72 megahertz part", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-term-02", "aisle": "mcu", "kind": "terminology_mismatch", "fixture": true, "query": "10k sram chip", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-term-03", "aisle": "mcu", "kind": "terminology_mismatch", "fixture": true, "query": "m3 core 16k flash", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-term-04", "aisle": "mcu", "kind": "terminology_mismatch", "fixture": true, "query": "80 megahertz m4f", "expected": {"anchors": ["TM4C123"]}}
+{"id": "m-term-05", "aisle": "mcu", "kind": "terminology_mismatch", "fixture": false, "query": "microcontroller unit esp", "expected": {"anchors": ["ESP8266EX"]}}
+{"id": "m-term-06", "aisle": "mcu", "kind": "terminology_mismatch", "fixture": true, "query": "two 12 bit converters adc", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-fig-01", "aisle": "mcu", "kind": "figure_only", "fixture": true, "query": "STM32F103 typical IDD versus frequency curve", "expected": {"anchors": ["STM32F103"], "grains": ["figure"]}}
+{"id": "m-fig-02", "aisle": "mcu", "kind": "figure_only", "fixture": true, "query": "TM4C123 GPIO output drive strength graph", "expected": {"anchors": ["TM4C123"], "grains": ["figure"]}}
+{"id": "m-fig-03", "aisle": "mcu", "kind": "figure_only", "fixture": false, "query": "esd clamping behavior diagram", "expected": {"anchors": ["infineon.com"], "grains": ["figure"]}}
+{"id": "m-fig-04", "aisle": "mcu", "kind": "figure_only", "fixture": false, "query": "typical characteristics dropout versus load current", "expected": {"anchors": ["ti.com"], "grains": ["figure"]}}
+{"id": "m-tab-01", "aisle": "mcu", "kind": "table_header", "fixture": true, "query": "stm32f103 supply voltage minimum", "expected": {"anchors": ["STM32F103"], "page": 1}}
+{"id": "m-tab-02", "aisle": "mcu", "kind": "table_header", "fixture": true, "query": "tm4c123 flash size column", "expected": {"anchors": ["TM4C123"], "page": 1}}
+{"id": "m-tab-03", "aisle": "mcu", "kind": "table_header", "fixture": true, "query": "storage temperature min max row", "expected": {"anchors": ["AIMBF170R1K0M1"]}}
+{"id": "m-tab-04", "aisle": "mcu", "kind": "table_header", "fixture": true, "query": "which column gives the C8 flash size", "expected": {"anchors": ["STM32F103C8T6"], "page": 1}}
+{"id": "m-tab-05", "aisle": "mcu", "kind": "table_header", "fixture": true, "query": "VDD maximum rating table row", "expected": {"anchors": ["STM32F103"], "page": 1}}
+{"id": "m-x-01", "aisle": "mcu", "kind": "cross_document", "fixture": true, "query": "STM32F103C8T6 versus C4T6 memory sizes", "expected": {"anchors": ["STM32F103C4T6", "STM32F103C8T6"]}}
+{"id": "m-x-02", "aisle": "mcu", "kind": "cross_document", "fixture": true, "query": "which STM32F103 parts share the same datasheet", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-x-03", "aisle": "mcu", "kind": "cross_document", "fixture": true, "query": "infineon coolSiC automotive qualified parts", "expected": {"anchors": ["CoolSiC", "AIMBG75R040M1H", "AIMBF170R1K0M1"]}, "must_not": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "m-x-04", "aisle": "mcu", "kind": "cross_document", "fixture": true, "query": "72 MHz vs 80 MHz MCU families", "expected": {"anchors": ["STM32F103", "TM4C123"]}}
+{"id": "m-amb-01", "aisle": "mcu", "kind": "ambiguous", "fixture": true, "query": "low power wireless industrial sensor node mcu", "expected": {"anchors": ["STM32F103"]}}
+{"id": "m-amb-02", "aisle": "mcu", "kind": "ambiguous", "fixture": true, "query": "small industrial controller high temperature", "expected": {"anchors": ["TM4C123"]}}
+{"id": "m-amb-03", "aisle": "mcu", "kind": "ambiguous", "fixture": false, "query": "compact automotive power supply controller", "expected": {"anchors": ["ti.com"]}, "must_not": {"anchors": ["ESP8266EX"]}}
+{"id": "m-uns-01", "aisle": "mcu", "kind": "unsupported", "fixture": true, "query": "STM32F103 with 512 Kbytes of Flash", "expected": {"anchors": [], "note": "corpus prints 16 or 32 Kbytes"}}
+{"id": "m-uns-02", "aisle": "mcu", "kind": "unsupported", "fixture": false, "query": "2N7002 100 volt drain source", "expected": {"anchors": [], "note": "no such claim in corpus"}}
+{"id": "p-para-01", "aisle": "power", "kind": "paraphrase", "fixture": true, "query": "mosfet with very low on resistance at 80 volts", "expected": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "p-para-02", "aisle": "power", "kind": "paraphrase", "fixture": true, "query": "high current switching transistor 126 amps", "expected": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "p-para-03", "aisle": "power", "kind": "paraphrase", "fixture": true, "query": "silicon carbide switch for onboard charger", "expected": {"anchors": ["AIMBG75R040M1H"]}}
+{"id": "p-para-04", "aisle": "power", "kind": "paraphrase", "fixture": true, "query": "600 volt superjunction transistor for server power", "expected": {"anchors": ["IPA60R120C7"]}}
+{"id": "p-para-05", "aisle": "power", "kind": "paraphrase", "fixture": true, "query": "gate charge figure of merit", "expected": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "p-para-06", "aisle": "power", "kind": "paraphrase", "fixture": true, "query": "solar inverter switching device", "expected": {"anchors": ["IPA60R120C7"]}}
+{"id": "p-para-07", "aisle": "power", "kind": "paraphrase", "fixture": false, "query": "PFC stage controller", "expected": {"anchors": ["UCC28065", "UCC28019"]}}
+{"id": "p-para-08", "aisle": "power", "kind": "paraphrase", "fixture": false, "query": "LLC resonant converter controller", "expected": {"anchors": ["UCC28065", "IPW60R037CSFD"]}}
+{"id": "p-para-09", "aisle": "power", "kind": "paraphrase", "fixture": false, "query": "LDO for automotive 12 volt rail", "expected": {"anchors": ["TPS7A21-Q1"]}}
+{"id": "p-para-10", "aisle": "power", "kind": "paraphrase", "fixture": false, "query": "boost converter controller for lighting", "expected": {"anchors": ["LM5150-Q1", "LM51501-Q1"]}}
+{"id": "p-para-11", "aisle": "power", "kind": "paraphrase", "fixture": false, "query": "isolated dc dc converter", "expected": {"anchors": ["ADS131B23"]}}
+{"id": "p-para-12", "aisle": "power", "kind": "paraphrase", "fixture": true, "query": "automotive qualified mosfet", "expected": {"anchors": ["AIMBG75R040M1H"]}}
+{"id": "p-term-01", "aisle": "power", "kind": "terminology_mismatch", "fixture": true, "query": "rdson 3.9 milliohm", "expected": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "p-term-02", "aisle": "power", "kind": "terminology_mismatch", "fixture": true, "query": "VDS 80V N-channel transistor", "expected": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "p-term-03", "aisle": "power", "kind": "terminology_mismatch", "fixture": true, "query": "750V SiC device", "expected": {"anchors": ["AIMBG75R040M1H"]}}
+{"id": "p-term-04", "aisle": "power", "kind": "terminology_mismatch", "fixture": true, "query": "AEC-Q101 qualified switch", "expected": {"anchors": ["AIMBG75R040M1H"]}}
+{"id": "p-term-05", "aisle": "power", "kind": "terminology_mismatch", "fixture": true, "query": "output charge Qoss losses", "expected": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "p-term-06", "aisle": "power", "kind": "terminology_mismatch", "fixture": false, "query": "dv/dt ruggedness 120V/ns", "expected": {"anchors": ["IPA60R120C7"]}}
+{"id": "p-term-07", "aisle": "power", "kind": "terminology_mismatch", "fixture": false, "query": "quiescent current microamp LDO", "expected": {"anchors": ["ti.com"]}}
+{"id": "p-term-08", "aisle": "power", "kind": "terminology_mismatch", "fixture": false, "query": "TO-263 seven pin package", "expected": {"anchors": ["infineon.com"]}}
+{"id": "p-fig-01", "aisle": "power", "kind": "figure_only", "fixture": false, "query": "typical output characteristics transfer graph", "expected": {"anchors": ["infineon.com"], "grains": ["figure"]}}
+{"id": "p-fig-02", "aisle": "power", "kind": "figure_only", "fixture": false, "query": "RDS(on) versus drain current curve", "expected": {"anchors": ["infineon.com"], "grains": ["figure"]}}
+{"id": "p-fig-03", "aisle": "power", "kind": "figure_only", "fixture": false, "query": "gate charge waveform plot", "expected": {"anchors": ["ti.com"], "grains": ["figure"]}}
+{"id": "p-fig-04", "aisle": "power", "kind": "figure_only", "fixture": false, "query": "thermal impedance zthjc curve", "expected": {"anchors": ["infineon.com"], "grains": ["figure"]}}
+{"id": "p-fig-05", "aisle": "power", "kind": "figure_only", "fixture": false, "query": "efficiency versus load plot", "expected": {"anchors": ["ti.com"], "grains": ["figure"]}}
+{"id": "p-tab-01", "aisle": "power", "kind": "table_header", "fixture": true, "query": "key performance parameters table value column", "expected": {"anchors": ["IPF039N08NF2S"], "page": 1}}
+{"id": "p-tab-02", "aisle": "power", "kind": "table_header", "fixture": true, "query": "storage temperature min column", "expected": {"anchors": ["AIMBF170R1K0M1"]}}
+{"id": "p-tab-03", "aisle": "power", "kind": "table_header", "fixture": false, "query": "electrical characteristics typ column", "expected": {"anchors": ["infineon.com"]}}
+{"id": "p-tab-04", "aisle": "power", "kind": "table_header", "fixture": false, "query": "absolute maximum ratings table", "expected": {"anchors": ["ti.com"]}}
+{"id": "p-tab-05", "aisle": "power", "kind": "table_header", "fixture": true, "query": "VDSS row 600V", "expected": {"anchors": ["IPA60R120C7"], "page": 1}}
+{"id": "p-x-01", "aisle": "power", "kind": "cross_document", "fixture": true, "query": "CoolSiC family automotive parts", "expected": {"anchors": ["CoolSiC", "AIMBG75R040M1H", "AIMBF170R1K0M1"]}, "must_not": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "p-x-02", "aisle": "power", "kind": "cross_document", "fixture": true, "query": "which infineon families are AEC qualified", "expected": {"anchors": ["AIMBG75R040M1H"]}}
+{"id": "p-x-03", "aisle": "power", "kind": "cross_document", "fixture": false, "query": "buck-boost controllers across vendors", "expected": {"anchors": ["ti.com", "infineon.com"]}}
+{"id": "p-x-04", "aisle": "power", "kind": "cross_document", "fixture": true, "query": "conduction loss versus switching loss device comparison", "expected": {"anchors": ["IPF039N08NF2S", "AIMBG75R040M1H"]}}
+{"id": "p-amb-01", "aisle": "power", "kind": "ambiguous", "fixture": false, "query": "low power wireless industrial sensor power stage", "expected": {"anchors": ["ti.com"]}}
+{"id": "p-amb-02", "aisle": "power", "kind": "ambiguous", "fixture": true, "query": "high voltage device for harsh environment", "expected": {"anchors": ["AIMBG75R040M1H", "IPA60R120C7"]}}
+{"id": "p-amb-03", "aisle": "power", "kind": "ambiguous", "fixture": true, "query": "efficient converter for telecom rectifier", "expected": {"anchors": ["IPA60R120C7"]}}
+{"id": "p-uns-01", "aisle": "power", "kind": "unsupported", "fixture": false, "query": "mosfet with 1 milliohm rdson at 80 volts", "expected": {"anchors": [], "note": "corpus prints 3.9 mOhm at 80 V"}}
+{"id": "p-uns-02", "aisle": "power", "kind": "unsupported", "fixture": true, "query": "CoolSiC rated for 1200 volts", "expected": {"anchors": [], "note": "fixture corpus prints 750 V"}}
+{"id": "p-uns-03", "aisle": "power", "kind": "unsupported", "fixture": false, "query": "LDO with 100 percent efficiency", "expected": {"anchors": [], "note": "physically unsupported"}}
+{"id": "c-para-01", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "fine pitch board to board connector 12 positions", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-para-02", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "low current signal connector 0.5mm pitch", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-para-03", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "connector rated for 50 volts AC", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-para-04", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "compact wire to board terminal block", "expected": {"anchors": ["DEMO-CONN"]}}
+{"id": "c-para-05", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "connector for industrial temperature range", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-para-06", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "dielectric tested connector 250V", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-para-07", "aisle": "connectors", "kind": "paraphrase", "fixture": false, "query": "header for sensor module", "expected": {"anchors": ["concentric"]}}
+{"id": "c-para-08", "aisle": "connectors", "kind": "paraphrase", "fixture": false, "query": "mating connector pitch 2.54", "expected": {"anchors": ["concentric"]}}
+{"id": "c-para-09", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "12 pin dual row connector", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-para-10", "aisle": "connectors", "kind": "paraphrase", "fixture": true, "query": "per contact current rating connector", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-term-01", "aisle": "connectors", "kind": "terminology_mismatch", "fixture": true, "query": "0.5 millimetre raster", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-term-02", "aisle": "connectors", "kind": "terminology_mismatch", "fixture": true, "query": "12 circuit header positions", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-term-03", "aisle": "connectors", "kind": "terminology_mismatch", "fixture": true, "query": "withstanding voltage 250 VAC one minute", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-term-04", "aisle": "connectors", "kind": "terminology_mismatch", "fixture": true, "query": "ampacity per contact", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-term-05", "aisle": "connectors", "kind": "terminology_mismatch", "fixture": false, "query": "pin count versus current carrying capacity", "expected": {"anchors": ["concentric"]}}
+{"id": "c-term-06", "aisle": "connectors", "kind": "terminology_mismatch", "fixture": true, "query": "operating temp -25 to 85", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-fig-01", "aisle": "connectors", "kind": "figure_only", "fixture": false, "query": "mating face drawing dimensions", "expected": {"anchors": ["concentric"], "grains": ["figure"]}}
+{"id": "c-fig-02", "aisle": "connectors", "kind": "figure_only", "fixture": false, "query": "insertion force withdrawal force graph", "expected": {"anchors": ["concentric"], "grains": ["figure"]}}
+{"id": "c-fig-03", "aisle": "connectors", "kind": "figure_only", "fixture": false, "query": "creepage and clearance illustration", "expected": {"anchors": ["concentric"], "grains": ["figure"]}}
+{"id": "c-fig-04", "aisle": "connectors", "kind": "figure_only", "fixture": false, "query": "recommended land pattern", "expected": {"anchors": ["concentric"], "grains": ["figure"]}}
+{"id": "c-tab-01", "aisle": "connectors", "kind": "table_header", "fixture": true, "query": "number of positions row", "expected": {"anchors": ["DEMO-CONN-12P"], "page": 1}}
+{"id": "c-tab-02", "aisle": "connectors", "kind": "table_header", "fixture": true, "query": "rated current per contact AC DC", "expected": {"anchors": ["DEMO-CONN-12P"], "page": 1}}
+{"id": "c-tab-03", "aisle": "connectors", "kind": "table_header", "fixture": true, "query": "pitch row mm", "expected": {"anchors": ["DEMO-CONN-12P"], "page": 1}}
+{"id": "c-tab-04", "aisle": "connectors", "kind": "table_header", "fixture": true, "query": "dielectric withstanding row", "expected": {"anchors": ["DEMO-CONN-12P"], "page": 1}}
+{"id": "c-tab-05", "aisle": "connectors", "kind": "table_header", "fixture": true, "query": "operating temperature range row", "expected": {"anchors": ["DEMO-CONN-12P"], "page": 1}}
+{"id": "c-x-01", "aisle": "connectors", "kind": "cross_document", "fixture": true, "query": "connector series across pitch variants", "expected": {"anchors": ["DEMO-CONN"]}}
+{"id": "c-x-02", "aisle": "connectors", "kind": "cross_document", "fixture": false, "query": "connector families by vendor", "expected": {"anchors": ["concentric"]}}
+{"id": "c-x-03", "aisle": "connectors", "kind": "cross_document", "fixture": true, "query": "connector operating range versus mosfet storage range", "expected": {"anchors": ["DEMO-CONN-12P", "AIMBF170R1K0M1"]}}
+{"id": "c-amb-01", "aisle": "connectors", "kind": "ambiguous", "fixture": true, "query": "harsh environment connector for power and signal", "expected": {"anchors": ["DEMO-CONN-12P"]}, "must_not": {"anchors": ["IPF039N08NF2S"]}}
+{"id": "c-amb-02", "aisle": "connectors", "kind": "ambiguous", "fixture": true, "query": "small connector high current", "expected": {"anchors": ["DEMO-CONN-12P"]}}
+{"id": "c-uns-01", "aisle": "connectors", "kind": "unsupported", "fixture": true, "query": "DEMO-CONN-12P rated 10 A per contact", "expected": {"anchors": [], "note": "corpus prints 0.5 A per contact"}}
+{"id": "c-uns-02", "aisle": "connectors", "kind": "unsupported", "fixture": false, "query": "connector with 1000 positions", "expected": {"anchors": [], "note": "no such part in corpus"}}
