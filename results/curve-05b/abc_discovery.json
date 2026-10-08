@@ -1,0 +1,1561 @@
+{
+  "schema": "harness.electronics-abc-discovery.v1",
+  "bundle_release": "curve-evidence-bundle-v1-5cc1a6e41ad8",
+  "bundle_sha256": "bc0bb4ab395bf7fc0ae49187bc0edccd2337021965c204101dbc6c7ac1b71498",
+  "bundle_rows": 81,
+  "laws": [
+    "curves advisory: no hard eliminations, no verified claims from pending packets, typical never guaranteed",
+    "every ranking change cites evidence ids resolvable in the bundle"
+  ],
+  "cases": [
+    {
+      "case": "48V-to-5V at 3 A, warm enclosure",
+      "intent": "I need 48 V to 5 V conversion at 3 A continuous in a warm enclosure; thermal margin and efficiency decide the family.",
+      "knife_activated": "VIN rating knife (parametric, hard) — everything but the SiC46x family and two UNKNOWN rows fails; IOUT stays UNKNOWN for SiC46x (never eliminated); curve evidence activates the thermal-envelope preference question only",
+      "A_cohort": {
+        "TPS548C26": "FAIL",
+        "LMR33610": "FAIL",
+        "LMR36502": "FAIL",
+        "TPS563203": "FAIL",
+        "TPS628302": "FAIL",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "FAIL",
+        "SiC461-464": "UNKNOWN"
+      },
+      "B_cohort": {
+        "TPS548C26": "FAIL",
+        "LMR33610": "FAIL",
+        "LMR36502": "FAIL",
+        "TPS563203": "FAIL",
+        "TPS628302": "FAIL",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "FAIL",
+        "SiC461-464": "UNKNOWN"
+      },
+      "C_evidence": {
+        "case_temperature_limit_at_3A": [
+          {
+            "evidence_id": "curve-bdf33617a2723aa5a45e5c25ab700344",
+            "part": "SiC462",
+            "series": "",
+            "status": "ok",
+            "value": 44.73739236425494,
+            "unit": "°C",
+            "guarantee": false,
+            "evidence_class": "unspecified",
+            "reason": null,
+            "matched_conditions": {
+              "vin_v": 48.0,
+              "vout_v": 5.0
+            },
+            "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "page": 15,
+            "figure": 4
+          },
+          {
+            "evidence_id": "curve-afe9caba4402aa070d9b62512a63262f",
+            "part": "SiC462",
+            "series": "",
+            "status": "ok",
+            "value": 47.635925198639534,
+            "unit": "°C",
+            "guarantee": false,
+            "evidence_class": "unspecified",
+            "reason": null,
+            "matched_conditions": {
+              "vin_v": 48.0,
+              "vout_v": 5.0
+            },
+            "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "page": 15,
+            "figure": 5
+          },
+          {
+            "evidence_id": "curve-9c22e23de0b7e6978b159d5467fc1587",
+            "part": "SiC463",
+            "series": "",
+            "status": "ok",
+            "value": 45.036201788528054,
+            "unit": "°C",
+            "guarantee": false,
+            "evidence_class": "unspecified",
+            "reason": null,
+            "matched_conditions": {
+              "vin_v": 48.0,
+              "vout_v": 5.0
+            },
+            "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "page": 16,
+            "figure": 5
+          },
+          {
+            "evidence_id": "curve-ba0c8ccbf1e30b49a885a466afbdfb90",
+            "part": "SiC463",
+            "series": "",
+            "status": "ok",
+            "value": 40.93913726749413,
+            "unit": "°C",
+            "guarantee": false,
+            "evidence_class": "unspecified",
+            "reason": null,
+            "matched_conditions": {
+              "vin_v": 48.0,
+              "vout_v": 5.0
+            },
+            "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "page": 16,
+            "figure": 6
+          }
+        ],
+        "efficiency_at_3A_single_family": [
+          {
+            "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+            "part": "SiC462",
+            "series": "",
+            "status": "ok",
+            "value": 95.48396635104518,
+            "unit": "%",
+            "guarantee": false,
+            "evidence_class": "unspecified",
+            "reason": null,
+            "matched_conditions": {
+              "vin_v": 48.0,
+              "vout_v": 5.0
+            },
+            "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "page": 15,
+            "figure": 3
+          }
+        ],
+        "light_load_efficiency_at_0A5": [
+          {
+            "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+            "part": "SiC462",
+            "series": "",
+            "status": "ok",
+            "value": 91.82755907740919,
+            "unit": "%",
+            "guarantee": false,
+            "evidence_class": "unspecified",
+            "reason": null,
+            "matched_conditions": {
+              "vin_v": 48.0,
+              "vout_v": 5.0
+            },
+            "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "page": 15,
+            "figure": 3
+          }
+        ],
+        "refused_conflicted_evidence": [
+          {
+            "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+            "part": "SiC461",
+            "reason": "condition_conflict",
+            "detail": "figure mixes 12 V / 24 V legend curves; the extracted trace is not legend-bound"
+          },
+          {
+            "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+            "part": "SiC461",
+            "reason": "condition_conflict",
+            "detail": "figure mixes 12 V / 24 V legend curves; the extracted trace is not legend-bound"
+          },
+          {
+            "evidence_id": "curve-279c9b584fa37bb6b111a1d42c701ef5",
+            "part": "SiC461",
+            "reason": "condition_conflict",
+            "detail": "figure mixes 12 V / 24 V legend curves; the extracted trace is not legend-bound"
+          },
+          {
+            "evidence_id": "curve-c51f912deecf71de0fbf73b4c919bcd5",
+            "part": "SiC461",
+            "reason": "condition_conflict",
+            "detail": "figure mixes 12 V / 24 V legend curves; the extracted trace is not legend-bound"
+          },
+          {
+            "evidence_id": "curve-39e596c63c7b3082eab69d44bd33b955",
+            "part": "SiC464",
+            "reason": "condition_conflict",
+            "detail": "figure mixes 12 V / 24 V legend curves; the extracted trace is not legend-bound"
+          }
+        ],
+        "ranking_change": "cross-family THERMAL ranking forms: SiC462 sustains a higher case temperature than SiC463 at the shared 3 A point (best typical readings 47.6 C vs 45.0 C). Efficiency cannot rank families today: only SiC462 answers (95.48% typical at 3 A); SiC461/SiC464 refuse on legend conflicts. A and B could not separate SiC462/SiC463 at all.",
+        "winners": {
+          "thermal_headroom_3A": [
+            "SiC462",
+            "SiC463"
+          ],
+          "efficiency_3A": [
+            "SiC462"
+          ],
+          "light_load_0A5": [
+            "SiC462"
+          ]
+        }
+      },
+      "defensibility": {
+        "verdict": "defensible-with-caveats",
+        "caveats": [
+          "all values typical; adjudication human_review_pending on every row",
+          "SiC462's efficiency figure carries NO captured legend rows, so it relies on the page-default conditions (VIN = 48 V) — sibling figures on other pages print 12 V/24 V legends, so its cold-review packet must confirm the legend before the number is trusted",
+          "derating series are unnamed variants (two per device); values reported as printed orientation",
+          "guarantee:false everywhere; no hard eliminations"
+        ]
+      },
+      "missing_evidence": [
+        "legend binding for SiC461/SiC464 efficiency figures (their legend values are vector-text) — unlocks the four-way efficiency comparison",
+        "SiC46x per-device IOUT ratings — parametric IOUT stays UNKNOWN",
+        "a second manufacturer at 48 V -> 5 V for cross-vendor comparison",
+        "airflow / junction context for the derating envelopes"
+      ]
+    },
+    {
+      "case": "12V-to-1.1V at 30 A continuous (variant selection)",
+      "intent": "one parametric-eligible family (35 A rating); the real decision is which switching mode, frequency, and bias configuration to design in.",
+      "knife_activated": "IOUT rating knife (parametric, hard) leaves exactly one family; curve evidence answers the VARIANT preference question A/B cannot",
+      "A_cohort": {
+        "TPS548C26": "PASS",
+        "LMR33610": "FAIL",
+        "LMR36502": "FAIL",
+        "TPS563203": "FAIL",
+        "TPS628302": "FAIL",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "FAIL",
+        "SiC461-464": "UNKNOWN"
+      },
+      "B_cohort": {
+        "TPS548C26": "PASS",
+        "LMR33610": "FAIL",
+        "LMR36502": "FAIL",
+        "TPS563203": "FAIL",
+        "TPS628302": "FAIL",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "FAIL",
+        "SiC461-464": "UNKNOWN"
+      },
+      "C_evidence": {
+        "efficiency_comparison": {
+          "schema": "harness.electronics-curve-evidence.v1",
+          "kind": "comparison_at_operating_point",
+          "status": "proposal",
+          "x": 30.0,
+          "required_conditions": {
+            "vin_v": 12.0,
+            "vout_v": 1.1
+          },
+          "method": "linear_interpolation_on_digitized_polyline",
+          "assumptions": [
+            "values are typical printed-curve readings at matched conditions, not guaranteed limits",
+            "linear interpolation between digitized samples, bounded by the plotted support"
+          ],
+          "condition_dimensions_unpinned": {
+            "categorical.vcc": [
+              "internal ldo",
+              "external 5 v bias"
+            ],
+            "categorical.mode": [
+              "fccm",
+              "dcm"
+            ],
+            "legend_frequency": [
+              "600 kHz",
+              "1.2 MHz",
+              "1.0 MHz",
+              "800 kHz"
+            ]
+          },
+          "entries": [
+            {
+              "curve_id": "curve-e88e7d739df90930bcf9c2501e12d956",
+              "part": "TPS548C26",
+              "series_name": "800 kHz",
+              "value": 88.19680512030689,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-e88e7d739df90930bcf9c2501e12d956",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 4,
+                "series_index": 3,
+                "caption": "Figure 6-5. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "800 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009906,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-01a67edb2cd36f1a75d7c9f5df0a5e43",
+              "part": "TPS548C26",
+              "series_name": "800 kHz",
+              "value": 88.17496542713593,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-01a67edb2cd36f1a75d7c9f5df0a5e43",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 2,
+                "series_index": 3,
+                "caption": "Figure 6-3. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "800 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009884,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-6245945fec4898d725d049ca2a64e2e2",
+              "part": "TPS548C26",
+              "series_name": "600 kHz",
+              "value": 87.87823460822554,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-6245945fec4898d725d049ca2a64e2e2",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 4,
+                "series_index": 0,
+                "caption": "Figure 6-5. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "600 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009906,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-b620887713e5dd87d43186b0d6ce6f2d",
+              "part": "TPS548C26",
+              "series_name": "600 kHz",
+              "value": 87.85654754766931,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-b620887713e5dd87d43186b0d6ce6f2d",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 2,
+                "series_index": 0,
+                "caption": "Figure 6-3. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "600 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009884,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-86af295dd7cab8ac16970f9bf6c2cf18",
+              "part": "TPS548C26",
+              "series_name": "1.0 MHz",
+              "value": 87.24754842424336,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-86af295dd7cab8ac16970f9bf6c2cf18",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 4,
+                "series_index": 2,
+                "caption": "Figure 6-5. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.0 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009906,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-6ed828ea26cf5364aec942dfd4b7821c",
+              "part": "TPS548C26",
+              "series_name": "1.0 MHz",
+              "value": 87.2257326616507,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-6ed828ea26cf5364aec942dfd4b7821c",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 2,
+                "series_index": 2,
+                "caption": "Figure 6-3. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.0 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009884,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-0140731a6d181c4e874b932de4f91e6f",
+              "part": "TPS548C26",
+              "series_name": "1.2 MHz",
+              "value": 85.91376142424336,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-0140731a6d181c4e874b932de4f91e6f",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 2,
+                "series_index": 1,
+                "caption": "Figure 6-3. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.2 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009884,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-0b92caee20cfe848390ec2e17b2b1b21",
+              "part": "TPS548C26",
+              "series_name": "1.2 MHz",
+              "value": 85.91279942713592,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-0b92caee20cfe848390ec2e17b2b1b21",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 4,
+                "series_index": 1,
+                "caption": "Figure 6-5. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.2 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009906,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974440000000016,
+                "local_sample_spacing": 1.0067169999999983,
+                "distance_to_nearest_sample": 0.0029119999999984714
+              }
+            },
+            {
+              "curve_id": "curve-8ff87c61e3c2aaefec5f02feb5aac6dc",
+              "part": "TPS548C26",
+              "series_name": "600 kHz",
+              "value": 85.66070192400292,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-8ff87c61e3c2aaefec5f02feb5aac6dc",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 0,
+                "series_index": 0,
+                "caption": "Figure 6-1. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "600 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009885,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974419999999995,
+                "local_sample_spacing": 1.006723000000001,
+                "distance_to_nearest_sample": 0.0029140000000005273
+              }
+            },
+            {
+              "curve_id": "curve-45dfa68a3b1ebbd560db11027d6a7d0b",
+              "part": "TPS548C26",
+              "series_name": "800 kHz",
+              "value": 85.28311065739831,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-45dfa68a3b1ebbd560db11027d6a7d0b",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 0,
+                "series_index": 3,
+                "caption": "Figure 6-1. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "800 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009885,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974419999999995,
+                "local_sample_spacing": 1.006723000000001,
+                "distance_to_nearest_sample": 0.0029140000000005273
+              }
+            },
+            {
+              "curve_id": "curve-3a1453f3a76cb747f0eda8c55cd6dae1",
+              "part": "TPS548C26",
+              "series_name": "1.0 MHz",
+              "value": 83.95534654418941,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-3a1453f3a76cb747f0eda8c55cd6dae1",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 0,
+                "series_index": 2,
+                "caption": "Figure 6-1. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.0 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009885,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974419999999995,
+                "local_sample_spacing": 1.006723000000001,
+                "distance_to_nearest_sample": 0.0029140000000005273
+              }
+            },
+            {
+              "curve_id": "curve-5d4987051e5f1d3fe0b57209e195629a",
+              "part": "TPS548C26",
+              "series_name": "1.2 MHz",
+              "value": 82.25763179053226,
+              "unit": "%",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-5d4987051e5f1d3fe0b57209e195629a",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 0,
+                "series_index": 1,
+                "caption": "Figure 6-1. Efficiency vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.2 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.009859,
+                  "y_fit_residual_pct_of_span": 0.009885,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9974419999999995,
+                "local_sample_spacing": 1.006723000000001,
+                "distance_to_nearest_sample": 0.0029140000000005273
+              }
+            }
+          ],
+          "rejected": [],
+          "note": "proposal evidence only — promotion to any elimination rule requires the aisle qualification policy"
+        },
+        "dissipation_comparison": {
+          "schema": "harness.electronics-curve-evidence.v1",
+          "kind": "comparison_at_operating_point",
+          "status": "proposal",
+          "x": 30.0,
+          "required_conditions": {
+            "vin_v": 12.0,
+            "vout_v": 1.1
+          },
+          "method": "linear_interpolation_on_digitized_polyline",
+          "assumptions": [
+            "values are typical printed-curve readings at matched conditions, not guaranteed limits",
+            "linear interpolation between digitized samples, bounded by the plotted support"
+          ],
+          "condition_dimensions_unpinned": {
+            "categorical.vcc": [
+              "internal ldo",
+              "external 5 v bias"
+            ],
+            "categorical.mode": [
+              "fccm",
+              "dcm"
+            ],
+            "legend_frequency": [
+              "600 kHz",
+              "1.2 MHz",
+              "1.0 MHz",
+              "800 kHz"
+            ]
+          },
+          "entries": [
+            {
+              "curve_id": "curve-b5688c27e31a85b457f38dcb699e8b3f",
+              "part": "TPS548C26",
+              "series_name": "1.2 MHz",
+              "value": 6.9444619559429785,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-b5688c27e31a85b457f38dcb699e8b3f",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 1,
+                "series_index": 1,
+                "caption": "Figure 6-2. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.2 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.007984,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-186cc4bf177a85556df222e65848bffb",
+              "part": "TPS548C26",
+              "series_name": "1.0 MHz",
+              "value": 6.149398116795321,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-186cc4bf177a85556df222e65848bffb",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 1,
+                "series_index": 2,
+                "caption": "Figure 6-2. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.0 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.007984,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-693de5b989eb820ce55115eb2b0c1648",
+              "part": "TPS548C26",
+              "series_name": "800 kHz",
+              "value": 5.5515155181380225,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-693de5b989eb820ce55115eb2b0c1648",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 1,
+                "series_index": 3,
+                "caption": "Figure 6-2. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "800 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.007984,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-863312be3ffacb7e8647bac94410d574",
+              "part": "TPS548C26",
+              "series_name": "600 kHz",
+              "value": 5.385951616059444,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-863312be3ffacb7e8647bac94410d574",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 1,
+                "series_index": 0,
+                "caption": "Figure 6-2. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "600 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = Internal LDO",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = Internal LDO VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.007984,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-1af3f5ed2db8fa1f5dee509a9b233577",
+              "part": "TPS548C26",
+              "series_name": "1.2 MHz",
+              "value": 5.280763701027838,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-1af3f5ed2db8fa1f5dee509a9b233577",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 3,
+                "series_index": 1,
+                "caption": "Figure 6-4. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.2 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010294,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-25c7f69f534b7b88b42971fbbb3edf84",
+              "part": "TPS548C26",
+              "series_name": "1.2 MHz",
+              "value": 5.278186899116151,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-25c7f69f534b7b88b42971fbbb3edf84",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 5,
+                "series_index": 1,
+                "caption": "Figure 6-6. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.2 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010323,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-74f91e3fa6ea1dfd391cde6310a306c3",
+              "part": "TPS548C26",
+              "series_name": "1.0 MHz",
+              "value": 4.702040985964566,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-74f91e3fa6ea1dfd391cde6310a306c3",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 3,
+                "series_index": 2,
+                "caption": "Figure 6-4. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.0 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010294,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-3b6b5d05c176d4e021bd25211367e53d",
+              "part": "TPS548C26",
+              "series_name": "1.0 MHz",
+              "value": 4.694258392387707,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-3b6b5d05c176d4e021bd25211367e53d",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 5,
+                "series_index": 2,
+                "caption": "Figure 6-6. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "1.0 MHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010323,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-680405535416cb818ea172e13dd0b73a",
+              "part": "TPS548C26",
+              "series_name": "600 kHz",
+              "value": 4.437840187737243,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-680405535416cb818ea172e13dd0b73a",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 3,
+                "series_index": 0,
+                "caption": "Figure 6-4. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "600 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010294,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-20e7752303fc191e54b16ea1758e5bee",
+              "part": "TPS548C26",
+              "series_name": "600 kHz",
+              "value": 4.426964413213322,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-20e7752303fc191e54b16ea1758e5bee",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 5,
+                "series_index": 0,
+                "caption": "Figure 6-6. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "600 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010323,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-ff774947a3b1c41459b87063d4d42f52",
+              "part": "TPS548C26",
+              "series_name": "800 kHz",
+              "value": 4.303914389391423,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-ff774947a3b1c41459b87063d4d42f52",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 3,
+                "series_index": 3,
+                "caption": "Figure 6-4. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "800 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = FCCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = FCCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010294,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            },
+            {
+              "curve_id": "curve-3f3fe061b39c8c14dc39c3b577359712",
+              "part": "TPS548C26",
+              "series_name": "800 kHz",
+              "value": 4.296530510502428,
+              "unit": "W",
+              "evidence_class": "typical",
+              "citation": {
+                "curve_id": "curve-3f3fe061b39c8c14dc39c3b577359712",
+                "document_sha256": "cf47fb67fb2f54c33a3251a1afff40d99a1ccc9e7dda8e4bf7f583aa1f0f3bab",
+                "source_path": null,
+                "page_1based": 10,
+                "figure_index": 5,
+                "series_index": 3,
+                "caption": "Figure 6-6. Power Dissipation vs Output Current",
+                "figure_revision": null,
+                "render_sha256": null,
+                "region_bbox": null,
+                "series_name": "800 kHz",
+                "conditions_verbatim": [
+                  "PVIN = 12 V",
+                  "VCC = External 5 V Bias",
+                  "VOUT = 1.1 V",
+                  "MODE = DCM",
+                  "PVIN = 12 V VCC = External 5 V Bias VOUT = 1.1 V MODE = DCM"
+                ]
+              },
+              "uncertainty": {
+                "method": "vector_reference",
+                "point_error_pct": null,
+                "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                "numeric_quality": {
+                  "x_fit_residual_pct_of_span": 0.010368,
+                  "y_fit_residual_pct_of_span": 0.010323,
+                  "retained_point_fraction": 1.0,
+                  "points_outside_axis_pct": 0.0
+                },
+                "human_signed": false,
+                "resolution": 0.9986180000000004,
+                "local_sample_spacing": 1.004244,
+                "distance_to_nearest_sample": 0.0035810000000005004
+              }
+            }
+          ],
+          "rejected": [],
+          "note": "proposal evidence only — promotion to any elimination rule requires the aisle qualification policy"
+        },
+        "ranking_change": "within-family variant ranking: best typical efficiency and lowest typical dissipation at 30 A identified with citations; A and B rank variants not at all",
+        "winners": {
+          "efficiency_30A": {
+            "series": "800 kHz",
+            "value": 88.19680512030689,
+            "unit": "%",
+            "evidence_id": "curve-e88e7d739df90930bcf9c2501e12d956"
+          },
+          "dissipation_30A": {
+            "series": "800 kHz",
+            "value": 4.296530510502428,
+            "unit": "W",
+            "evidence_id": "curve-3f3fe061b39c8c14dc39c3b577359712"
+          }
+        }
+      },
+      "defensibility": {
+        "verdict": "defensible-with-caveats",
+        "caveats": [
+          "mode (FCCM/DCM) and VCC bias left unpinned are flagged in condition_dimensions_unpinned — the winner is conditional on those dimensions",
+          "typical values; no derating curve at matched conditions exists, so thermal clearance stays an open question"
+        ]
+      },
+      "missing_evidence": [
+        "thermal derating or Zth for TPS548C26 at 12 V -> 1.1 V",
+        "30 A is 86% of the 35 A rating — margin cannot be computed from present evidence"
+      ]
+    },
+    {
+      "case": "12V-to-3.3V sensor supply, 95% sleep / 5% active",
+      "intent": "compact supply for a sensor sleeping most of the day; energy over the duty profile decides.",
+      "knife_activated": "VIN rating knife eliminates TPS628302 only; curve evidence activates the standby-budget and light-load-efficiency questions",
+      "A_cohort": {
+        "TPS548C26": "PASS",
+        "LMR33610": "PASS",
+        "LMR36502": "PASS",
+        "TPS563203": "PASS",
+        "TPS628302": "FAIL",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "PASS",
+        "SiC461-464": "UNKNOWN"
+      },
+      "B_cohort": {
+        "TPS548C26": "PASS",
+        "LMR33610": "PASS",
+        "LMR36502": "PASS+evidence",
+        "TPS563203": "PASS",
+        "TPS628302": "FAIL",
+        "TPS542941": "UNKNOWN",
+        "SiC448": "PASS+evidence",
+        "SiC461-464": "UNKNOWN"
+      },
+      "C_evidence": {
+        "efficiency_at_100mA": [
+          {
+            "evidence_id": "curve-af915a30a3152c0dd49141e9b192285c",
+            "part": "LMR36502",
+            "series": "VIN = 12 V",
+            "status": "ok",
+            "value": 84.77356601260028,
+            "unit": "%",
+            "guarantee": false,
+            "evidence_class": "typical",
+            "reason": null,
+            "matched_conditions": {
+              "vin_v": 12.0,
+              "vout_v": 3.3
+            },
+            "document_sha256": "6b3d562aca65dab56fbf67904609d8cc5acd04f8c56f9d9071411896437a9935",
+            "page": 10,
+            "figure": 0
+          },
+          {
+            "evidence_id": "curve-95eadb208e8e4b37faa0df0e04436112",
+            "part": "LMR36502",
+            "series": "VIN = 36 V",
+            "status": "not_comparable",
+            "value": null,
+            "unit": null,
+            "guarantee": false,
+            "evidence_class": "typical",
+            "reason": "condition_mismatch",
+            "matched_conditions": null,
+            "document_sha256": "6b3d562aca65dab56fbf67904609d8cc5acd04f8c56f9d9071411896437a9935",
+            "page": 10,
+            "figure": 0
+          },
+          {
+            "evidence_id": "curve-3f9d5afc541f68bcddacff7613b18969",
+            "part": "LMR36502",
+            "series": "VIN = 48 V",
+            "status": "not_comparable",
+            "value": null,
+            "unit": null,
+            "guarantee": false,
+            "evidence_class": "typical",
+            "reason": "condition_mismatch",
+            "matched_conditions": null,
+            "document_sha256": "6b3d562aca65dab56fbf67904609d8cc5acd04f8c56f9d9071411896437a9935",
+            "page": 10,
+            "figure": 0
+          },
+          {
+            "evidence_id": "curve-dd593ae8a55dab7726b8fabd653e67ae",
+            "part": "LMR36502",
+            "series": "VIN = 24 V",
+            "status": "not_comparable",
+            "value": null,
+            "unit": null,
+            "guarantee": false,
+            "evidence_class": "typical",
+            "reason": "condition_mismatch",
+            "matched_conditions": null,
+            "document_sha256": "6b3d562aca65dab56fbf67904609d8cc5acd04f8c56f9d9071411896437a9935",
+            "page": 10,
+            "figure": 0
+          }
+        ],
+        "standby_power_at_12V": [
+          {
+            "evidence_id": "curve-374453b660e64bef15eae2c0d4a15ed8",
+            "series": "25C",
+            "current_a": 5.137798706843075e-06,
+            "input_power_w": 6.16535844821169e-05,
+            "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
+            "page": 8,
+            "guarantee": false,
+            "evidence_class": "typical"
+          },
+          {
+            "evidence_id": "curve-3f7bf1551bbf803bbd303f02d5e297bd",
+            "series": "125C",
+            "current_a": 5.238166313842495e-06,
+            "input_power_w": 6.285799576610993e-05,
+            "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
+            "page": 8,
+            "guarantee": false,
+            "evidence_class": "typical"
+          },
+          {
+            "evidence_id": "curve-bf2a4ce56822bc0e94db4c37884c08ce",
+            "series": "-40C",
+            "current_a": 5.33908546154015e-06,
+            "input_power_w": 6.40690255384818e-05,
+            "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
+            "page": 8,
+            "guarantee": false,
+            "evidence_class": "typical"
+          },
+          {
+            "evidence_id": "curve-3ac363603af06a5046d42b58f9330c48",
+            "series": "-40C",
+            "current_a": 2.3350925999469803e-05,
+            "input_power_w": 0.0002802111119936376,
+            "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
+            "page": 8,
+            "guarantee": false,
+            "evidence_class": "typical"
+          },
+          {
+            "evidence_id": "curve-a4fa3cf122c34b455d07480ff0f089b3",
+            "series": "25C",
+            "current_a": 2.5050362011312975e-05,
+            "input_power_w": 0.0003006043441357557,
+            "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
+            "page": 8,
+            "guarantee": false,
+            "evidence_class": "typical"
+          },
+          {
+            "evidence_id": "curve-65742e8f5fb479b7ef1837ac5d6b692e",
+            "series": "125C",
+            "current_a": 2.7350251011832678e-05,
+            "input_power_w": 0.00032820301214199217,
+            "document_sha256": "777b3966aff2772cd6680193c7ba7cd7a0b79778b418aafbcf7ce2c147e39611",
+            "page": 8,
+            "guarantee": false,
+            "evidence_class": "typical"
+          }
+        ],
+        "ranking_change": "B flags LMR36502 'light-load optimized' (a claim); C converts the claim into a measured typical 84.77% at the exact operating point (legend VIN = 12 V) and adds the only measured 12 V standby figures (LMR33610 shutdown 61.7 uW / quiescent 300.6 uW). Preference: LMR36502 for the active burst; LMR33610 if a sleep budget under ~0.1 mW dominates and EN switching is acceptable.",
+        "winners": {
+          "efficiency_100mA": [
+            "LMR36502"
+          ],
+          "standby_power": [
+            "25C"
+          ]
+        },
+        "refusals": [
+          {
+            "evidence_id": "curve-95eadb208e8e4b37faa0df0e04436112",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-3f9d5afc541f68bcddacff7613b18969",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-dd593ae8a55dab7726b8fabd653e67ae",
+            "reason": "condition_mismatch"
+          }
+        ]
+      },
+      "defensibility": {
+        "verdict": "defensible-with-caveats",
+        "caveats": [
+          "the 84.77% figure is a legend-overridden condition (page default 13.5 V; series legend VIN = 12 V) — the override is recorded in the evidence row",
+          "standby numbers are typical; sensor's own sleep draw must be added by the engineer"
+        ]
+      },
+      "missing_evidence": [
+        "efficiency curves at 12 V -> 3.3 V for the OTHER eligible families (TPS548C26, TPS563203, SiC448) — today they are refused, not guessed",
+        "quiescent curves for LMR36502 at 12 V"
+      ]
+    }
+  ],
+  "three_examples_verdict": {
+    "delivered": 3,
+    "reproducible_from": "frozen bundle rows + pinned cohort; re-run scripts/run_abc_discovery.py",
+    "note": "example 1 is a genuine cross-family ranking on the derating envelope (SiC462 vs SiC463) plus a single-family efficiency measurement and reasoned refusals; example 2 ranks within-family variants; example 3 converts a semantic claim into a cited measurement. Cross-family EFFICIENCY ranking is NOT claimable today — SiC461/SiC464 refuse on legend conflicts until legend binding exists."
+  }
+}

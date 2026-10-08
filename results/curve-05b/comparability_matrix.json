@@ -1,0 +1,1489 @@
+{
+  "schema": "harness.electronics-curve-comparability-matrix.v1",
+  "bundle_release": "curve-evidence-bundle-v1-5cc1a6e41ad8",
+  "bundle_sha256": "bc0bb4ab395bf7fc0ae49187bc0edccd2337021965c204101dbc6c7ac1b71498",
+  "counts": {
+    "rows": 81,
+    "comparison_cells": 21,
+    "cross_family_comparable_cells": 1,
+    "single_family_cells": 19,
+    "unclassified_rows": 22
+  },
+  "cross_family_scenarios": [
+    {
+      "phenomenon": "case_temperature_limit_vs_load",
+      "conditions": {
+        "vin_v": 48.0,
+        "vout_v": 5.0
+      },
+      "families": {
+        "SiC462": 2,
+        "SiC463": 2
+      },
+      "shared_support": {
+        "min": 0.499747,
+        "max": 3.999311
+      },
+      "series": {
+        "SiC462": [
+          {
+            "evidence_id": "curve-bdf33617a2723aa5a45e5c25ab700344",
+            "series_name": "",
+            "supported_region": {
+              "min": 0.499398,
+              "max": 5.99889
+            },
+            "evidence_class": "unspecified",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 300000.0
+            }
+          },
+          {
+            "evidence_id": "curve-afe9caba4402aa070d9b62512a63262f",
+            "series_name": "",
+            "supported_region": {
+              "min": 0.499202,
+              "max": 5.998727
+            },
+            "evidence_class": "unspecified",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 300000.0
+            }
+          }
+        ],
+        "SiC463": [
+          {
+            "evidence_id": "curve-9c22e23de0b7e6978b159d5467fc1587",
+            "series_name": "",
+            "supported_region": {
+              "min": 0.499747,
+              "max": 3.999399
+            },
+            "evidence_class": "unspecified",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 300000.0
+            }
+          },
+          {
+            "evidence_id": "curve-ba0c8ccbf1e30b49a885a466afbdfb90",
+            "series_name": "",
+            "supported_region": {
+              "min": 0.499651,
+              "max": 3.999311
+            },
+            "evidence_class": "unspecified",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 300000.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [
+        {
+          "evidence_id": "curve-279c9b584fa37bb6b111a1d42c701ef5",
+          "series_name": "",
+          "supported_region": {
+            "min": 0.500392,
+            "max": 10.000305
+          },
+          "evidence_class": "unspecified",
+          "adjudication_state": "human_review_pending",
+          "guarantee": false,
+          "context_conditions": {
+            "f_hz": 300000.0,
+            "l_h": 3.2999999999999997e-06
+          },
+          "conflict": [
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            }
+          ]
+        },
+        {
+          "evidence_id": "curve-c51f912deecf71de0fbf73b4c919bcd5",
+          "series_name": "",
+          "supported_region": {
+            "min": 0.500717,
+            "max": 10.000781
+          },
+          "evidence_class": "unspecified",
+          "adjudication_state": "human_review_pending",
+          "guarantee": false,
+          "context_conditions": {
+            "f_hz": 300000.0,
+            "l_h": 3.2999999999999997e-06
+          },
+          "conflict": [
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            }
+          ]
+        }
+      ],
+      "legend_capture_ambiguity": [
+        "figures whose page siblings print legend conditions (VIN = 12 V / 24 V, L = .. uH) but whose own legend rows were not captured rely on the page-default conditions; cold-review packets ask reviewers to confirm the legend before trusting the cell"
+      ],
+      "advisory_only": true
+    }
+  ],
+  "single_family_scenarios": [
+    {
+      "phenomenon": "efficiency_vs_load",
+      "conditions": {
+        "ta_c": 25.0,
+        "vin_v": 12.0,
+        "vout_v": 3.3
+      },
+      "families": {
+        "LMR36502": 1
+      },
+      "shared_support": {
+        "min": 1.013522,
+        "max": 150.331824
+      },
+      "series": {
+        "LMR36502": [
+          {
+            "evidence_id": "curve-af915a30a3152c0dd49141e9b192285c",
+            "series_name": "VIN = 12 V",
+            "supported_region": {
+              "min": 1.013522,
+              "max": 150.331824
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "conditions": {
+        "ta_c": 25.0,
+        "vin_v": 36.0,
+        "vout_v": 3.3
+      },
+      "families": {
+        "LMR36502": 1
+      },
+      "shared_support": {
+        "min": 1.013522,
+        "max": 150.331824
+      },
+      "series": {
+        "LMR36502": [
+          {
+            "evidence_id": "curve-95eadb208e8e4b37faa0df0e04436112",
+            "series_name": "VIN = 36 V",
+            "supported_region": {
+              "min": 1.013522,
+              "max": 150.331824
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "conditions": {
+        "ta_c": 25.0,
+        "vin_v": 48.0,
+        "vout_v": 3.3
+      },
+      "families": {
+        "LMR36502": 1
+      },
+      "shared_support": {
+        "min": 1.013522,
+        "max": 150.331824
+      },
+      "series": {
+        "LMR36502": [
+          {
+            "evidence_id": "curve-3f9d5afc541f68bcddacff7613b18969",
+            "series_name": "VIN = 48 V",
+            "supported_region": {
+              "min": 1.013522,
+              "max": 150.331824
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "conditions": {
+        "ta_c": 25.0,
+        "vin_v": 24.0,
+        "vout_v": 3.3
+      },
+      "families": {
+        "LMR36502": 1
+      },
+      "shared_support": {
+        "min": 1.013522,
+        "max": 150.331824
+      },
+      "series": {
+        "LMR36502": [
+          {
+            "evidence_id": "curve-dd593ae8a55dab7726b8fabd653e67ae",
+            "series_name": "VIN = 24 V",
+            "supported_region": {
+              "min": 1.013522,
+              "max": 150.331824
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "conditions": {
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "c:mode": "fccm"
+      },
+      "families": {
+        "TPS548C26": 8
+      },
+      "shared_support": {
+        "min": 0.083583,
+        "max": 34.908155
+      },
+      "series": {
+        "TPS548C26": [
+          {
+            "evidence_id": "curve-8ff87c61e3c2aaefec5f02feb5aac6dc",
+            "series_name": "600 kHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908155
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-5d4987051e5f1d3fe0b57209e195629a",
+            "series_name": "1.2 MHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908155
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-3a1453f3a76cb747f0eda8c55cd6dae1",
+            "series_name": "1.0 MHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908155
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-45dfa68a3b1ebbd560db11027d6a7d0b",
+            "series_name": "800 kHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908155
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-b620887713e5dd87d43186b0d6ce6f2d",
+            "series_name": "600 kHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-0140731a6d181c4e874b932de4f91e6f",
+            "series_name": "1.2 MHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-6ed828ea26cf5364aec942dfd4b7821c",
+            "series_name": "1.0 MHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-01a67edb2cd36f1a75d7c9f5df0a5e43",
+            "series_name": "800 kHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "conditions": {
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "c:mode": "dcm"
+      },
+      "families": {
+        "TPS548C26": 4
+      },
+      "shared_support": {
+        "min": 0.083583,
+        "max": 34.908158
+      },
+      "series": {
+        "TPS548C26": [
+          {
+            "evidence_id": "curve-6245945fec4898d725d049ca2a64e2e2",
+            "series_name": "600 kHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-0b92caee20cfe848390ec2e17b2b1b21",
+            "series_name": "1.2 MHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-86af295dd7cab8ac16970f9bf6c2cf18",
+            "series_name": "1.0 MHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-e88e7d739df90930bcf9c2501e12d956",
+            "series_name": "800 kHz",
+            "supported_region": {
+              "min": 0.083583,
+              "max": 34.908158
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "conditions": {
+        "vin_v": 48.0,
+        "vout_v": 5.0
+      },
+      "families": {
+        "SiC462": 1
+      },
+      "shared_support": {
+        "min": 0.009151,
+        "max": 5.995668
+      },
+      "series": {
+        "SiC462": [
+          {
+            "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+            "series_name": "",
+            "supported_region": {
+              "min": 0.009151,
+              "max": 5.995668
+            },
+            "evidence_class": "unspecified",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 300000.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [
+        {
+          "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+          "series_name": "",
+          "supported_region": {
+            "min": 0.01011,
+            "max": 9.984354
+          },
+          "evidence_class": "unspecified",
+          "adjudication_state": "human_review_pending",
+          "guarantee": false,
+          "context_conditions": {
+            "f_hz": 300000.0,
+            "l_h": 3.2999999999999997e-06
+          },
+          "conflict": [
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            }
+          ]
+        },
+        {
+          "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+          "series_name": "",
+          "supported_region": {
+            "min": 0.010079,
+            "max": 1.001361
+          },
+          "evidence_class": "unspecified",
+          "adjudication_state": "human_review_pending",
+          "guarantee": false,
+          "context_conditions": {
+            "f_hz": 300000.0,
+            "l_h": 3.2999999999999997e-06
+          },
+          "conflict": [
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                3.2999999999999997e-06,
+                4.7e-06
+              ]
+            }
+          ]
+        },
+        {
+          "evidence_id": "curve-39e596c63c7b3082eab69d44bd33b955",
+          "series_name": "",
+          "supported_region": {
+            "min": 0.010081,
+            "max": 0.991736
+          },
+          "evidence_class": "unspecified",
+          "adjudication_state": "human_review_pending",
+          "guarantee": false,
+          "context_conditions": {
+            "f_hz": 300000.0,
+            "l_h": 9.999999999999999e-06
+          },
+          "conflict": [
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                12.0
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                9.999999999999999e-06,
+                1.4999999999999999e-05
+              ]
+            },
+            {
+              "key": "vin_v",
+              "values": [
+                48.0,
+                24.0
+              ]
+            },
+            {
+              "key": "l_h",
+              "values": [
+                9.999999999999999e-06,
+                1.4999999999999999e-05
+              ]
+            }
+          ]
+        }
+      ],
+      "legend_capture_ambiguity": [
+        "figures whose page siblings print legend conditions (VIN = 12 V / 24 V, L = .. uH) but whose own legend rows were not captured rely on the page-default conditions; cold-review packets ask reviewers to confirm the legend before trusting the cell"
+      ],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "conditions": {
+        "ta_c": -40.0,
+        "vout_v": 0.0
+      },
+      "families": {
+        "LMR33610": 1
+      },
+      "shared_support": {
+        "min": 0.007857,
+        "max": 40.009594
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-66dc98e65c35f9474e3b086f17aa53ab",
+            "series_name": "-40C",
+            "supported_region": {
+              "min": 0.007857,
+              "max": 40.009594
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 400000.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "conditions": {
+        "ta_c": 125.0,
+        "vout_v": 0.0
+      },
+      "families": {
+        "LMR33610": 1
+      },
+      "shared_support": {
+        "min": 4.999479,
+        "max": 35.999944
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-752c1feb273f653b3e42e31cd83e8cd4",
+            "series_name": "125C",
+            "supported_region": {
+              "min": 4.999479,
+              "max": 35.999944
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 400000.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "conditions": {
+        "ta_c": 25.0,
+        "vout_v": 0.0
+      },
+      "families": {
+        "LMR33610": 1
+      },
+      "shared_support": {
+        "min": 4.999479,
+        "max": 35.999944
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-4a6edf73b2927b0f2620fc9e6857403d",
+            "series_name": "25C",
+            "supported_region": {
+              "min": 4.999479,
+              "max": 35.999944
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "f_hz": 400000.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "conditions": {
+        "ta_c": -40.0,
+        "vout_v": 5.0
+      },
+      "families": {
+        "LMR33610": 1
+      },
+      "shared_support": {
+        "min": -0.009504,
+        "max": 39.985377
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-6a1d7cf4a38f391829140422f59575bc",
+            "series_name": "-40C",
+            "supported_region": {
+              "min": -0.009504,
+              "max": 39.985377
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "iout_a": 0.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "conditions": {
+        "ta_c": 125.0,
+        "vout_v": 5.0
+      },
+      "families": {
+        "LMR33610": 1
+      },
+      "shared_support": {
+        "min": 8.000219,
+        "max": 35.996646
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-b34210682e2f0d46e6f1d878ea69bb1b",
+            "series_name": "125C",
+            "supported_region": {
+              "min": 8.000219,
+              "max": 35.996646
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "iout_a": 0.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "conditions": {
+        "ta_c": 25.0,
+        "vout_v": 5.0
+      },
+      "families": {
+        "LMR33610": 1
+      },
+      "shared_support": {
+        "min": 8.000219,
+        "max": 35.996646
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-4411362f846915da13b73796e02d2165",
+            "series_name": "25C",
+            "supported_region": {
+              "min": 8.000219,
+              "max": 35.996646
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "iout_a": 0.0
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "power_dissipation_vs_load",
+      "conditions": {
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "c:mode": "fccm"
+      },
+      "families": {
+        "TPS548C26": 8
+      },
+      "shared_support": {
+        "min": 0.083092,
+        "max": 34.907658
+      },
+      "series": {
+        "TPS548C26": [
+          {
+            "evidence_id": "curve-863312be3ffacb7e8647bac94410d574",
+            "series_name": "600 kHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-b5688c27e31a85b457f38dcb699e8b3f",
+            "series_name": "1.2 MHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-186cc4bf177a85556df222e65848bffb",
+            "series_name": "1.0 MHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-693de5b989eb820ce55115eb2b0c1648",
+            "series_name": "800 kHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "internal ldo"
+            }
+          },
+          {
+            "evidence_id": "curve-680405535416cb818ea172e13dd0b73a",
+            "series_name": "600 kHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-1af3f5ed2db8fa1f5dee509a9b233577",
+            "series_name": "1.2 MHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-74f91e3fa6ea1dfd391cde6310a306c3",
+            "series_name": "1.0 MHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-ff774947a3b1c41459b87063d4d42f52",
+            "series_name": "800 kHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "power_dissipation_vs_load",
+      "conditions": {
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "c:mode": "dcm"
+      },
+      "families": {
+        "TPS548C26": 4
+      },
+      "shared_support": {
+        "min": 0.083092,
+        "max": 34.907658
+      },
+      "series": {
+        "TPS548C26": [
+          {
+            "evidence_id": "curve-20e7752303fc191e54b16ea1758e5bee",
+            "series_name": "600 kHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-25c7f69f534b7b88b42971fbbb3edf84",
+            "series_name": "1.2 MHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-3b6b5d05c176d4e021bd25211367e53d",
+            "series_name": "1.0 MHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          },
+          {
+            "evidence_id": "curve-3f3fe061b39c8c14dc39c3b577359712",
+            "series_name": "800 kHz",
+            "supported_region": {
+              "min": 0.083092,
+              "max": 34.907658
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "c:vcc": "external 5 v bias"
+            }
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "supply_current_vs_input_voltage",
+      "conditions": {
+        "ta_c": -40.0
+      },
+      "families": {
+        "LMR33610": 2
+      },
+      "shared_support": {
+        "min": 0.007805,
+        "max": 39.985363
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-bf2a4ce56822bc0e94db4c37884c08ce",
+            "series_name": "-40C",
+            "supported_region": {
+              "min": -0.009504,
+              "max": 39.985363
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "ven_v": 0.0
+            }
+          },
+          {
+            "evidence_id": "curve-3ac363603af06a5046d42b58f9330c48",
+            "series_name": "-40C",
+            "supported_region": {
+              "min": 0.007805,
+              "max": 39.98917
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "supply_current_vs_input_voltage",
+      "conditions": {
+        "ta_c": 125.0
+      },
+      "families": {
+        "LMR33610": 2
+      },
+      "shared_support": {
+        "min": 5.998541,
+        "max": 35.996633
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-3f7bf1551bbf803bbd303f02d5e297bd",
+            "series_name": "125C",
+            "supported_region": {
+              "min": 5.000605,
+              "max": 35.996633
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "ven_v": 0.0
+            }
+          },
+          {
+            "evidence_id": "curve-65742e8f5fb479b7ef1837ac5d6b692e",
+            "series_name": "125C",
+            "supported_region": {
+              "min": 5.998541,
+              "max": 35.999628
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "supply_current_vs_input_voltage",
+      "conditions": {
+        "ta_c": 25.0
+      },
+      "families": {
+        "LMR33610": 2
+      },
+      "shared_support": {
+        "min": 5.998541,
+        "max": 35.996633
+      },
+      "series": {
+        "LMR33610": [
+          {
+            "evidence_id": "curve-374453b660e64bef15eae2c0d4a15ed8",
+            "series_name": "25C",
+            "supported_region": {
+              "min": 5.000605,
+              "max": 35.996633
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {
+              "ven_v": 0.0
+            }
+          },
+          {
+            "evidence_id": "curve-a4fa3cf122c34b455d07480ff0f089b3",
+            "series_name": "25C",
+            "supported_region": {
+              "min": 5.998541,
+              "max": 35.999628
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    },
+    {
+      "phenomenon": "supply_current_vs_temperature",
+      "conditions": {
+        "vin_v": 13.5
+      },
+      "families": {
+        "LMR36502": 1
+      },
+      "shared_support": {
+        "min": -39.525515,
+        "max": 149.488785
+      },
+      "series": {
+        "LMR36502": [
+          {
+            "evidence_id": "curve-2b6a908f6f833d626dcf4635b2366058",
+            "series_name": "",
+            "supported_region": {
+              "min": -39.525515,
+              "max": 149.488785
+            },
+            "evidence_class": "typical",
+            "adjudication_state": "human_review_pending",
+            "guarantee": false,
+            "context_conditions": {}
+          }
+        ]
+      },
+      "conflicted_members": [],
+      "legend_capture_ambiguity": [],
+      "advisory_only": true
+    }
+  ],
+  "blocked": [
+    {
+      "evidence_id": "curve-1a1c7e0e0b90ffe0d3e1fa67bfee92f2",
+      "family": "TPS542941",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-f7aa4378a7ad3c983989ac74463111ab",
+      "family": "TPS542941",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-1251cb131c17477866b43fd44010e51d",
+      "family": "TPS542941",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-362aac6cc99b65d0042ed7d6605f9f5a",
+      "family": "TPS563206",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-5e31e857042843c9541d0778fcb76313",
+      "family": "TPS563206",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-a698afc3cab2254b1f8da9ccd422549b",
+      "family": "TPS563206",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-27fa5a6cd465147f23d04be65b893762",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-d78a3d644a137b6dccc340683c23e4a9",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-4aad27281b8f6e67fda029fb3ab92514",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-047d6898c91067bfdae076536c4ee12a",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-a4b211e26897e27e9d84be8d7f335d06",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-d75bfa330068f2e24b3b4bdae0ba731a",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-35162d0d8058deef0a1e40da37f29857",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-42e39f50be112beba7e9aba9e03e826f",
+      "family": "TPS628302",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-2b305ae71860b051ac2df73534b064a0",
+      "family": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-f5cc718ec3e138c3e37c89f64e48183c",
+      "family": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-96ad668dabfd0df3a624c34510c02d4e",
+      "family": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-b12391de3abcc357f9fa90d11872e751",
+      "family": "SiC463",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-ed16c61c57576bbea31b90c18bf5f3e5",
+      "family": "SiC464",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-b29b1ef6b190df440c4341ea89240250",
+      "family": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-e573dc6519ec6e72cde8b06566f3078f",
+      "family": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    },
+    {
+      "evidence_id": "curve-f7a2cc3df2be77812b80894f6e5df8ac",
+      "family": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+      "reason": "phenomenon_unclassified — not comparable until classified"
+    }
+  ],
+  "laws": [
+    "cells require condition compatibility — a missing or mismatched condition places a curve in a different cell, never into the comparison",
+    "shared_support is the intersection of sampled supports; comparisons outside it are refused",
+    "all rows advisory; typical never becomes a guarantee"
+  ]
+}
