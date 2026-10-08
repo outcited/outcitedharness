@@ -263,6 +263,50 @@ def test_make_embedder_wire_format():
         httpd.shutdown()
 
 
+def test_weight_swap_purges_stale_vectors(tmp_path, monkeypatch):
+    """Same model NAME with different served weights must purge the old
+    vector space and change the release identity (observed 2026-10-08:
+    e10b swapped checkpoints under bge-m3-cr-tapes-v1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    from search_index import attach_vectors
+    from harness.search import query as q
+
+    unit = units.make_unit(
+        doc_sha256="9" * 64, grain="claim",
+        locator={"kind": "text_span", "quote": "w"},
+        text_repr="weight probe unit", extraction_version="v1")
+    con = units.connect(str(tmp_path / "s.db"))
+    units.replace_document(con, [unit])
+
+    def fake_embedder(weights):
+        def embed(texts):
+            return [[weights, 1.0 - weights] for _ in texts]
+        return embed
+
+    monkeypatch.setattr(q, "make_embedder",
+                        lambda url, model="m", timeout=30.0:
+                        fake_embedder(0.25))
+    first = attach_vectors(con, "http://fake", "same-name-v1")
+    assert first["attached"] == 1 and first["purged_stale_weights"] == 0
+    fp1 = first["fingerprint"]
+
+    monkeypatch.setattr(q, "make_embedder",
+                        lambda url, model="m", timeout=30.0:
+                        fake_embedder(0.75))
+    second = attach_vectors(con, "http://fake", "same-name-v1")
+    assert second["purged_stale_weights"] == 1     # old space dropped
+    assert second["attached"] == 1                 # re-embedded everything
+    assert second["fingerprint"] != fp1            # identity moved
+    identity = units.vector_identity(con)
+    assert f"fp={second['fingerprint']}" in identity
+
+    # and a no-op run with unchanged weights skips re-embedding
+    third = attach_vectors(con, "http://fake", "same-name-v1")
+    assert third["purged_stale_weights"] == 0
+    assert third["attached"] == 0
+
+
 def test_curve_query_returns_conditions_and_uncertainty(tmp_path):
     con = units.connect(str(tmp_path / "s.db"))
     indexer.index_curves(con, CURVES.parent)

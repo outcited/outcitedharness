@@ -444,13 +444,34 @@ def retire_document(con: sqlite3.Connection, doc_sha256: str,
 
 
 def attach_vector(con: sqlite3.Connection, unit_id: str, model: str,
-                  values: Sequence[float]) -> None:
+                  values: Sequence[float], commit: bool = True) -> None:
     con.execute(
         "INSERT INTO vectors (unit_id, model, dim, vec) VALUES (?,?,?,?)"
         " ON CONFLICT(unit_id) DO UPDATE SET model=excluded.model,"
         " dim=excluded.dim, vec=excluded.vec",
         (unit_id, model, len(values), pack_vector(values)))
+    if commit:
+        con.commit()
+
+
+def set_model_fingerprint(con: sqlite3.Connection, fingerprint: str) -> None:
+    con.execute(
+        "INSERT INTO meta (key, value) VALUES ('embed_model_fingerprint',?)"
+        " ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        (fingerprint,))
     con.commit()
+
+
+def purge_vectors(con: sqlite3.Connection) -> int:
+    """Drop every vector — required when served weights change identity
+    (two weight spaces in one cosine index is invalid)."""
+    n = con.execute("SELECT COUNT(*) FROM vectors").fetchone()[0]
+    con.execute("DELETE FROM vectors")
+    con.execute(
+        "INSERT INTO meta (key, value) VALUES ('release_dirty','1')"
+        " ON CONFLICT(key) DO UPDATE SET value='1'")
+    con.commit()
+    return n
 
 
 def vectors_available(con: sqlite3.Connection) -> bool:
@@ -489,16 +510,37 @@ def unit_count(con: sqlite3.Connection, active_only: bool = True) -> int:
 
 VECTOR_INDEX_VERSION = "brutefloat32-v1"
 
+MODEL_PROBE_TEXT = "harness.search.model-probe.v1"
+
+
+def model_fingerprint(embed) -> str:
+    """Content fingerprint of the SERVED WEIGHTS, not the model name.
+
+    Same name can carry different weights (observed 2026-10-08: e10b
+    swapped checkpoints under bge-m3-cr-tapes-v1). A fixed probe text is
+    embedded and the first 16 values are hashed — a weight change changes
+    the fingerprint and therefore the retrieval release identity.
+    """
+    vector = list(embed([MODEL_PROBE_TEXT])[0])
+    digest = hashlib.sha256()
+    for value in vector[:16]:
+        digest.update(f"{float(value):.6f}".encode("ascii"))
+    return digest.hexdigest()[:12]
+
 
 def vector_identity(con: sqlite3.Connection) -> str:
-    """Which embedding models and how many vectors the index carries."""
+    """Which embedding models, their weight fingerprints, and counts."""
     rows = con.execute(
         "SELECT model, COUNT(*) AS n FROM vectors GROUP BY model"
         " ORDER BY model").fetchall()
+    fp_row = con.execute(
+        "SELECT value FROM meta WHERE key='embed_model_fingerprint'"
+    ).fetchone()
+    fp = fp_row[0] if fp_row else "unfingerprinted"
     if not rows:
-        return f"{VECTOR_INDEX_VERSION};models=none"
-    return f"{VECTOR_INDEX_VERSION};models=" + ",".join(
-        f"{r['model']}:{r['n']}" for r in rows)
+        return f"{VECTOR_INDEX_VERSION};models=none;fp={fp}"
+    return (f"{VECTOR_INDEX_VERSION};fp={fp};models=" + ",".join(
+        f"{r['model']}:{r['n']}" for r in rows))
 
 
 def _fingerprint(con: sqlite3.Connection, policy_identity: str = "") \

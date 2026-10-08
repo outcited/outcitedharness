@@ -83,10 +83,23 @@ def main() -> int:
 
 
 def attach_vectors(con, url: str, model: str, batch: int = 16) -> dict:
-    """Idempotent vector attach: skips units already embedded with this
-    model. 1024-dim BGE vectors, cosine at query time."""
+    """Idempotent vector attach with weight-identity checking.
+
+    Fingerprints the SERVED weights via a probe embed. If the fingerprint
+    differs from the stored one, every existing vector is purged first —
+    mixing two weight spaces in one cosine index is invalid. Commits are
+    batched (one per 50 batches) instead of per-vector.
+    """
     from harness.search.query import make_embedder
     embed = make_embedder(url, model)
+    fp = units.model_fingerprint(embed)
+    stored = con.execute(
+        "SELECT value FROM meta WHERE key='embed_model_fingerprint'"
+    ).fetchone()
+    purged = 0
+    if stored and stored[0] != fp:
+        purged = units.purge_vectors(con)
+    units.set_model_fingerprint(con, fp)
     active = units.unit_count(con)
     rows = con.execute(
         "SELECT u.unit_id, u.text_repr FROM units u"
@@ -98,9 +111,14 @@ def attach_vectors(con, url: str, model: str, batch: int = 16) -> dict:
         chunk = rows[offset:offset + batch]
         vectors = embed([r["text_repr"] for r in chunk])
         for row, vector in zip(chunk, vectors):
-            units.attach_vector(con, row["unit_id"], model, vector)
+            units.attach_vector(con, row["unit_id"], model, vector,
+                                commit=False)
         attached += len(chunk)
-    return {"model": model, "attached": attached,
+        if attached % (batch * 50) == 0:
+            con.commit()
+    con.commit()
+    return {"model": model, "fingerprint": fp, "attached": attached,
+            "purged_stale_weights": purged,
             "skipped_already_embedded": active - attached}
 
 
