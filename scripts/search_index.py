@@ -34,8 +34,14 @@ def main() -> int:
     parser.add_argument("--wave", default=DEFAULT_WAVE,
                         help="power-topology wave jsonl (optional)")
     parser.add_argument("--no-wave", action="store_true")
+    parser.add_argument("--pipeline",
+                        default="/Volumes/M5_4TB/extract-results/pipeline.db")
     parser.add_argument("--curves", default=None,
                         help="directory of curve-evidence fixtures to index")
+    parser.add_argument("--sections", action="store_true",
+                        help="index section-grain units from substrate "
+                             "page text (pipeline.db results)")
+    parser.add_argument("--sections-limit", type=int, default=None)
     parser.add_argument("--embed", default=None,
                         help="embeddings endpoint (http://host:8800/v1/"
                              "embeddings) — batch-attach unit vectors")
@@ -63,6 +69,11 @@ def main() -> int:
         curve_stats = indexer.index_curves(con, args.curves,
                                            dry_run=args.dry_run)
         stats["curves"] = curve_stats
+    if args.sections:
+        stats["sections"] = indexer.index_sections(
+            con, args.pipeline or
+            "/Volumes/M5_4TB/extract-results/pipeline.db",
+            dry_run=args.dry_run, limit_docs=args.sections_limit)
     if args.embed and not args.dry_run:
         stats["vectors"] = attach_vectors(con, args.embed, args.embed_model,
                                           batch=max(1, args.embed_batch))

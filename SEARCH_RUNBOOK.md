@@ -169,6 +169,35 @@ and was never indexed — the PRD's own section grain (R1 #2), skipped in
 the pilot. Next lever: index section-grain units from existing substrate
 text (R5-compliant: no new extraction, no vision), then re-run hybrid.
 
+**Section-grain result, 2026-10-08 (IMPLEMENTED, FTS re-measured).**
+`indexer.section_units` reads the 81,473 substrate payloads
+(pipeline.db results — page text only, no PDF re-open), slices prose
+sections by printed-vocabulary headings (page_index series_summary lane,
+strict full-match + ≤60 chars + ≤8 words), and emits front-matter +
+≤16 sections per doc. 264,303 section units from 64,192 docs; index now
+356,061 units; release `search-release-v1-351682faa7c6`. Sections carry
+the real sha + printed page → evidence-grade.
+
+| Metric | FTS (claims only) | FTS + sections |
+|---|---|---|
+| coverage (all) | 0.901 | **1.000** |
+| coverage connectors | 0.667 | **1.000** |
+| recall@10 all | 0.143 | 0.154 |
+| recall@10 mcu | 0.118 | **0.265** (2.2×) |
+| recall@10 power | 0.243 | 0.176 (dilution) |
+| recall@10 connectors | 0.000 | 0.000 |
+| nDCG@10 all | 0.123 | 0.119 |
+| locator precision | 0.80 | **0.988** |
+| p50 / p95 | 18 / 84 ms | 164 / 467 ms |
+
+Verdict: the prose-vocabulary layer works where the gap was measured (mcu
+2.2×, full coverage, locator precision 0.99). Tradeoffs to tune next:
+power recall dipped (section prose dilutes power ranking), connector
+ranking still 0 despite full coverage, and 4× units cost 4× latency
+(the P2 shortlist item is now relevant). Section units are NOT vectorized
+yet; the earlier 91,758 claim vectors were replaced during re-index and
+need re-attach before any further hybrid run (semantic stays off-default).
+
 Coverage: mcu 1.00 / power 1.00 / connectors 0.667. Locator precision 0.80
 (72/90; the 18 imprecise are unhashed burn-wave units, marked
 discovery_only). must_not violations 0.

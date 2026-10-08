@@ -31,6 +31,7 @@ Honesty notes:
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from collections import defaultdict
 from pathlib import Path
@@ -506,6 +507,178 @@ def index_curves(search_con, curve_dir: str | Path,
         stats["units"] += result["units"]
     search_con.commit()
     return stats
+
+
+SECTION_SCHEMA = "harness.search-section-units.v1"
+
+# Prose lanes only: claim units already cover parametric tables, so section
+# units carry the vocabulary layer (descriptions, features, applications —
+# the text that says "WiFi SoC" where claim rows say "VDD = 3.3 V").
+from harness.electronics.page_index import LANE_PATTERNS as _PAGE_LANES
+
+_PROSE_LANES = ("series_summary",)
+_HEADING_MAX_CHARS = 60
+_HEADING_MAX_WORDS = 8
+_MIN_SECTION_CHARS = 200
+_FRONT_MATTER_CHARS = 3500
+_SECTION_MAX_CHARS = 4000
+_MAX_SECTIONS_PER_DOC = 16
+
+_VENDOR_SEG = re.compile(r"^[a-z0-9][a-z0-9.-]*\.(com|net|org|io|de|jp|cn|co)$",
+                         re.I)
+
+
+def _aisle_of_path(source_path: str | None) -> str | None:
+    p = (source_path or "").lower()
+    if "/mcu/" in p:
+        return "mcu"
+    if "power" in p or "mosfet" in p:
+        return "power"
+    if "connector" in p:
+        return "connectors"
+    return None
+
+
+def _vendor_of_path(source_path: str | None) -> str | None:
+    for seg in (source_path or "").split("/"):
+        if _VENDOR_SEG.match(seg):
+            return seg.lower()
+    return None
+
+
+def _slice_sections(page_text: str) -> list[dict]:
+    """Deterministic heading-slicer over extracted page text.
+
+    A heading is a short line matching a printed-vocabulary prose-lane
+    pattern (page_index.LANE_PATTERNS). A section runs from its heading to
+    the next heading (or page end); only spans with real content are kept.
+    Character spans are the unit's locator — stable against re-extraction
+    of the same text.
+    """
+    lines = page_text.splitlines()
+    headings: list[tuple[int, str, str]] = []  # (line_idx, lane, heading)
+    for i, raw in enumerate(lines):
+        stripped = raw.strip()
+        if not stripped or len(stripped) > _HEADING_MAX_CHARS:
+            continue
+        if stripped.endswith((".", ",", ";", ":")) or \
+                len(stripped.split()) > _HEADING_MAX_WORDS:
+            continue
+        for lane in _PROSE_LANES:
+            if any(pat.fullmatch(stripped)
+                   for pat in _PAGE_LANES[lane]):
+                headings.append((i, lane, stripped))
+                break
+    sections = []
+    for n, (start, lane, heading) in enumerate(headings):
+        end = headings[n + 1][0] if n + 1 < len(headings) else len(lines)
+        body = "\n".join(lines[start + 1:end]).strip()
+        if len(body) < _MIN_SECTION_CHARS:
+            continue
+        char_start = sum(len(l) + 1 for l in lines[:start])
+        sections.append({
+            "heading": heading, "lane": lane, "body": body,
+            "span": [char_start, char_start + len(page_text)],
+        })
+    return sections
+
+
+def section_units(pipeline_con: sqlite3.Connection,
+                  *, limit_docs: int | None = None) -> Iterator[dict]:
+    """Section-grain units from substrate page text (PRD R1 grain 2).
+
+    Reads the existing extracted text in pipeline.db results — no PDFs are
+    reopened, no vision, no new extraction (R5). Every unit carries the
+    real document sha and printed page, so sections are evidence-grade.
+    Applicability is NOT minted here (no printed part binding at this
+    grain); the artifact stem rides in ident for part-number search.
+    """
+    sql = ("SELECT r.document_sha256, r.output, j.source_path"
+           " FROM results r JOIN jobs j ON j.id = r.job_id"
+           " WHERE r.document_sha256 IS NOT NULL"
+           " ORDER BY r.document_sha256")
+    if limit_docs:
+        sql += f" LIMIT {int(limit_docs)}"
+    seen = 0
+    for row in pipeline_con.execute(sql):
+        try:
+            payload = json.loads(row["output"])
+        except json.JSONDecodeError:
+            continue
+        pages = (payload or {}).get("pages") or []
+        if not pages:
+            continue
+        doc_sha = row["document_sha256"]
+        vendor = _vendor_of_path(row["source_path"])
+        aisle = _aisle_of_path(row["source_path"])
+        stem = Path((payload.get("filename") or "")).stem
+        ident = [t for t in re.findall(r"[A-Za-z0-9]{4,}", stem)[:4]]
+        emitted = 0
+        pending: list[tuple[int, dict]] = []
+        for page in pages:
+            text = (page.get("text") or "").strip()
+            if not text:
+                continue
+            page_no = page.get("page") or 1
+            is_first = page_no == (pages[0].get("page") or 1)
+            if is_first:
+                body = text[:_FRONT_MATTER_CHARS]
+                yield units_store.make_unit(
+                    doc_sha256=doc_sha, grain="section",
+                    locator={"kind": "section", "heading": "front-matter",
+                             "span": [0, len(body)], "page": page_no},
+                    text_repr=f"front-matter\n{body}",
+                    extraction_version="substrate-sections/v1",
+                    page=page_no, vendor=vendor, doc_class="datasheet",
+                    category=aisle, ident=ident, applicability=[])
+                emitted += 1
+            for section in _slice_sections(text):
+                body = section["body"][:_SECTION_MAX_CHARS]
+                pending.append((page_no, units_store.make_unit(
+                    doc_sha256=doc_sha, grain="section",
+                    locator={"kind": "section", "heading": section["heading"],
+                             "lane": section["lane"], "page": page_no,
+                             "span": section["span"]},
+                    text_repr=f"{section['heading']}\n{body}",
+                    extraction_version="substrate-sections/v1",
+                    page=page_no, vendor=vendor, doc_class="datasheet",
+                    category=aisle, ident=ident, applicability=[])))
+                emitted += 1
+        # Deterministic per-doc bound: earliest pages carry the product
+        # prose; deep manual-chapter repeats are lower value. v1 keeps the
+        # first _MAX_SECTIONS_PER_DOC sections by page order.
+        pending.sort(key=lambda pair: pair[0])
+        for _, unit in pending[:_MAX_SECTIONS_PER_DOC]:
+            yield unit
+        seen += 1
+        if limit_docs and seen >= limit_docs:
+            return
+
+
+def index_sections(search_con, pipeline_path: str, *,
+                   dry_run: bool = False, limit_docs: int | None = None) -> dict:
+    """Index section units for every substrate document (idempotent)."""
+    pipeline_con = sqlite3.connect(f"file:{pipeline_path}?mode=ro", uri=True)
+    pipeline_con.row_factory = sqlite3.Row
+    stats = {"docs": 0, "units": 0}
+    try:
+        by_doc: dict[str, list[dict]] = {}
+        for unit in section_units(pipeline_con, limit_docs=limit_docs):
+            by_doc.setdefault(unit["doc_sha256"], []).append(unit)
+        if dry_run:
+            stats["docs"] = len(by_doc)
+            stats["units"] = sum(len(g) for g in by_doc.values())
+            return stats
+        for doc_sha, group in by_doc.items():
+            result = units_store.replace_document(
+                search_con, group, doc_sha256=doc_sha,
+                extraction_version="substrate-sections/v1", commit=False)
+            stats["docs"] += 1
+            stats["units"] += result["units"]
+        search_con.commit()
+        return stats
+    finally:
+        pipeline_con.close()
 
 
 def aisle_map_from_wave(wave_path: str) -> dict[str, str]:

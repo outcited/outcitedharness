@@ -140,7 +140,8 @@ def decomposed(entries: list[dict], con, limit: int = 10,
                 locator.get("quote") or locator.get("quotes")
                 or locator.get("bbox")
                 or locator.get("row_header") or locator.get("column_header")
-                or locator.get("figure_index"))
+                or locator.get("figure_index")
+                or locator.get("heading") or locator.get("span"))
             if precise:
                 traceable += 1
             if hit.get("evidence_grade") == "evidence_grade":
