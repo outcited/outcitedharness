@@ -422,18 +422,21 @@ PHENOMENA: dict[str, dict[str, Any]] = {
         "constraints": ["per printed hysteresis direction (up/dn series)"],
         "limitations": ["typical, not guaranteed"],
     },
-    "case_temperature_limit_vs_load": {
+    "case_temperature_vs_load": {
         "y_kind": "temperature", "x_kind": "load_current",
         "categories": ["power.dcdc"],
-        "phenomenon": "maximum case temperature the part sustains at a "
-                      "given load (printed derating envelope orientation)",
+        "phenomenon": "case temperature versus output current on the "
+                      "manufacturer's evaluation setup (measurement, NOT "
+                      "a guaranteed derating limit)",
         "use_cases": ["thermal_derating", "warm_enclosure_operation",
                       "thermal_budget"],
         "required_condition_keys": [],
         "engineer_params": ["load current", "case cooling assumption"],
         "constraints": ["per printed input/output/fsw page conditions"],
-        "limitations": ["typical, not guaranteed",
+        "limitations": ["typical measurement on the vendor eval board",
+                        "NOT a guaranteed thermal derating limit",
                         "case temperature, not junction",
+                        "external inductor differs per device (legend)",
                         "no heat-sink or airflow model attached"],
     },
     "output_voltage_regulation_vs_load": {
@@ -591,6 +594,21 @@ class CurveEvidence:
         )
         self.x_scale = str((self.axes.get("x") or {}).get("scale") or "linear")
         name_text = str(series.get("name") or "")
+        # figure-legend ambiguity law: on plots whose NAMED series bind
+        # two or more distinct rail values, an UNNAMED series cannot
+        # default that rail to page conditions — it refuses as ambiguous
+        # rather than guessing which trace it is
+        self._legend_ambiguity: dict[str, list] = {}
+        if not name_text.strip():
+            sibling_values = []
+            for other in (series.get("_plot_siblings") or []):
+                other_name = str((other or {}).get("name") or "")
+                m = re.match(r"^\s*VIN\s*=\s*(\d+(?:\.\d+)?)\s*V",
+                             other_name, re.I)
+                if m and float(m.group(1)) not in sibling_values:
+                    sibling_values.append(float(m.group(1)))
+            if len(sibling_values) >= 2:
+                self._legend_ambiguity["vin_v"] = sibling_values
         self.conditions = _drop_sweep(
             typed_conditions(
                 list(conditions_verbatim) + [series.get("condition")]
@@ -630,6 +648,14 @@ class CurveEvidence:
                         "ta_c": {"page_default": overridden,
                                  "series_legend": value},
                     }
+        if self._legend_ambiguity:
+            keys = dict(self.conditions.get("keys") or {})
+            for key, values in self._legend_ambiguity.items():
+                if not name_text.strip() or \
+                        not re.search(r"VIN\s*=", name_text, re.I):
+                    keys.pop(key, None)
+            self.conditions["keys"] = keys
+            self.conditions["legend_ambiguity"] = self._legend_ambiguity
         self.curve_id = "curve-" + hashlib.sha256(
             f"{document_sha256}:{page_1based}:{figure_index}:{series_index}"
             .encode()
@@ -650,7 +676,8 @@ class CurveEvidence:
     ) -> "CurveEvidence":
         """Build evidence from a frozen reference/gold plot record."""
 
-        series = (plot.get("series") or [])[series_index]
+        series = dict((plot.get("series") or [])[series_index])
+        series["_plot_siblings"] = plot.get("series") or []
         axes = plot.get("axes") or {}
         apply = dict(applies_to or {})
         if not apply.get("part"):
@@ -669,6 +696,14 @@ class CurveEvidence:
         if not apply.get("manufacturer"):
             apply.setdefault(
                 "manufacturer", record.get("manufacturer") or None
+            )
+        # canonical hierarchy grain (CURVE-05B correction): device ->
+        # family_group -> manufacturer. SiC461/462/463/464 are ONE Vishay
+        # family (SiC46x); a part number is never a family by itself.
+        if not apply.get("family_group"):
+            apply.setdefault(
+                "family_group",
+                record.get("family_group") or apply.get("part"),
             )
         if not apply.get("category"):
             stem = str(record.get("source_artifact") or "")

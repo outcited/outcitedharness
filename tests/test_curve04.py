@@ -312,7 +312,11 @@ def test_ablation_gates():
     by_id = {q["id"]: q for q in report["questions"]}
     assert by_id["Q1-light-load-efficiency"]["B_comparable"] >= 1
     assert by_id["Q2-high-current-30A"]["B_comparable"] >= 10
-    assert by_id["Q3-24to5-tradeoff"]["B_comparable"] == 0
+    # CURVE-05B correction: vendor 24 V traces are legend-bound now, so
+    # SiC46x answers within-family at 24 V -> 5 V (never cross-family)
+    assert by_id["Q3-24to5-tradeoff"]["B_comparable"] >= 1
+    assert all(v["part"].startswith("SiC")
+               for v in by_id["Q3-24to5-tradeoff"]["B_values"])
     for q in report["questions"]:
         for value in q["B_values"]:
             assert value["curve_id"], "traceability: values cite curves"

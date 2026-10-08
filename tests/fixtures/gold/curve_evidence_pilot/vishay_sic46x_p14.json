@@ -4,6 +4,7 @@
   "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
   "page_1based": 14,
   "manufacturer": "vishay",
+  "family_group": "SiC46x",
   "section_title": null,
   "plots": [
     {
@@ -171,11 +172,7 @@
       ],
       "conditions_plot": [],
       "conditions_page": [
-        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
-        "VIN = 12 V, L = 3.3 μH",
-        "VIN = 12 V, L = 3.3 μH",
-        "98 VIN = 24 V, L = 4.7 μH",
-        "VIN = 24 V, L = 4.7 μH"
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
       "_numeric_quality": {
         "x_fit_residual_pct_of_span": 0.009609,
@@ -279,17 +276,257 @@
       ],
       "conditions_plot": [],
       "conditions_page": [
-        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
-        "VIN = 12 V, L = 3.3 μH",
-        "VIN = 12 V, L = 3.3 μH",
-        "98 VIN = 24 V, L = 4.7 μH",
-        "VIN = 24 V, L = 4.7 μH"
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
       "_numeric_quality": {
         "x_fit_residual_pct_of_span": 0.009534,
         "y_fit_residual_pct_of_span": 0.000445,
         "retained_point_fraction": 1.0,
         "points_outside_axis_pct": 6.6667
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 4,
+      "title": "Fig. 15 - SiC461 Efficiency vs. Output Current - Light Load,",
+      "axes": {
+        "x": {
+          "label": "Output Current, (A)",
+          "unit": "A",
+          "min": 0.01,
+          "max": 1.0,
+          "scale": "log10"
+        },
+        "y": {
+          "label": "Efficiency (%)",
+          "unit": "%",
+          "min": 70.0,
+          "max": 100.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "VIN = 36 V, L = 8.2 μH",
+          "condition": null,
+          "points": [
+            [
+              0.010232,
+              85.238089
+            ],
+            [
+              0.019534,
+              89.04623
+            ],
+            [
+              0.028643,
+              89.182287
+            ],
+            [
+              0.03896,
+              89.614071
+            ],
+            [
+              0.048897,
+              90.30418
+            ],
+            [
+              0.058536,
+              90.408475
+            ],
+            [
+              0.068866,
+              91.901968
+            ],
+            [
+              0.07866,
+              92.75551
+            ],
+            [
+              0.088708,
+              91.770714
+            ],
+            [
+              0.098931,
+              92.044295
+            ],
+            [
+              0.198906,
+              92.602735
+            ],
+            [
+              0.29909,
+              92.933159
+            ],
+            [
+              0.399521,
+              92.85541
+            ],
+            [
+              0.499766,
+              93.061275
+            ],
+            [
+              0.9766,
+              93.531309
+            ]
+          ],
+          "_x_range": [
+            0.010232,
+            0.9766
+          ]
+        },
+        {
+          "name": "VIN = 24 V, L = 6.8 μH",
+          "condition": null,
+          "points": [
+            [
+              0.010272,
+              91.204958
+            ],
+            [
+              0.019535,
+              93.356166
+            ],
+            [
+              0.028644,
+              93.086769
+            ],
+            [
+              0.038961,
+              94.692076
+            ],
+            [
+              0.048899,
+              94.163735
+            ],
+            [
+              0.058537,
+              94.69103
+            ],
+            [
+              0.068867,
+              95.032532
+            ],
+            [
+              0.078662,
+              95.140373
+            ],
+            [
+              0.08871,
+              95.019993
+            ],
+            [
+              0.098934,
+              94.93054
+            ],
+            [
+              0.198906,
+              95.232964
+            ],
+            [
+              0.29909,
+              95.413324
+            ],
+            [
+              0.39952,
+              95.645314
+            ],
+            [
+              0.499765,
+              95.691293
+            ],
+            [
+              0.9766,
+              96.068953
+            ]
+          ],
+          "_x_range": [
+            0.010272,
+            0.9766
+          ]
+        },
+        {
+          "name": "VIN = 48 V, L = 10 μH",
+          "condition": null,
+          "points": [
+            [
+              0.010232,
+              88.038651
+            ],
+            [
+              0.019534,
+              90.997007
+            ],
+            [
+              0.028643,
+              90.493948
+            ],
+            [
+              0.038961,
+              91.331818
+            ],
+            [
+              0.048899,
+              91.590558
+            ],
+            [
+              0.058536,
+              93.513539
+            ],
+            [
+              0.068867,
+              94.204695
+            ],
+            [
+              0.078662,
+              93.468606
+            ],
+            [
+              0.088708,
+              93.419284
+            ],
+            [
+              0.098934,
+              93.296812
+            ],
+            [
+              0.198906,
+              93.626189
+            ],
+            [
+              0.29909,
+              93.715017
+            ],
+            [
+              0.399521,
+              93.786286
+            ],
+            [
+              0.499766,
+              93.94408
+            ],
+            [
+              0.9766,
+              94.399067
+            ]
+          ],
+          "_x_range": [
+            0.010232,
+            0.9766
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010076,
+        "y_fit_residual_pct_of_span": 0.011728,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
       },
       "_title_axes_note": null,
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
@@ -407,11 +644,7 @@
       ],
       "conditions_plot": [],
       "conditions_page": [
-        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
-        "VIN = 12 V, L = 3.3 μH",
-        "VIN = 12 V, L = 3.3 μH",
-        "98 VIN = 24 V, L = 4.7 μH",
-        "VIN = 24 V, L = 4.7 μH"
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
       "_numeric_quality": {
         "x_fit_residual_pct_of_span": 0.009613,
@@ -535,11 +768,7 @@
       ],
       "conditions_plot": [],
       "conditions_page": [
-        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
-        "VIN = 12 V, L = 3.3 μH",
-        "VIN = 12 V, L = 3.3 μH",
-        "98 VIN = 24 V, L = 4.7 μH",
-        "VIN = 24 V, L = 4.7 μH"
+        "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
       "_numeric_quality": {
         "x_fit_residual_pct_of_span": 0.009612,
@@ -554,32 +783,12 @@
   "skips": [
     {
       "figure_index": 1,
-      "reason": "legend_unresolved",
-      "color": "0.078,0.500,0.767"
-    },
-    {
-      "figure_index": 1,
-      "reason": "legend_unresolved",
-      "color": "0.940,0.423,0.133"
+      "reason": "points_outside_axis",
+      "pct": 12.31
     },
     {
       "figure_index": 2,
       "reason": "axis_fit_failed"
-    },
-    {
-      "figure_index": 4,
-      "reason": "legend_unresolved",
-      "color": "0.078,0.500,0.767"
-    },
-    {
-      "figure_index": 4,
-      "reason": "legend_unresolved",
-      "color": "0.940,0.423,0.133"
-    },
-    {
-      "figure_index": 4,
-      "reason": "legend_unresolved",
-      "color": "0.292,0.720,0.305"
     },
     {
       "figure_index": 5,

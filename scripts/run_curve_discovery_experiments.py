@@ -289,7 +289,7 @@ def intent_b_high_load(curves, cohort) -> dict:
     )
     derating = query_curve_evidence(
         curves,
-        phenomenon="case_temperature_limit_vs_load",
+        phenomenon="case_temperature_vs_load",
         operating_point={"x": 30.0},
         conditions={},
     )

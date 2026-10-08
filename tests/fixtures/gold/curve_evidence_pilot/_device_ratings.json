@@ -1,0 +1,10 @@
+{
+  "schema": "harness.electronics-curve-device-ratings.v1",
+  "source": "CURVE-05B correction #4: hard current-rating eligibility before curve ranking. Ratings quoted verbatim from each device's printed ELECTRICAL CHARACTERISTICS header (SiC46x datasheet, sha 0cef2db3..., pages 14-17). These are hard parametric facts; curve evidence never overrides them.",
+  "ratings": [
+    {"part": "SiC461", "family_group": "SiC46x", "manufacturer": "vishay", "rated_iout_a": 10.0, "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)", "page_1based": 14},
+    {"part": "SiC462", "family_group": "SiC46x", "manufacturer": "vishay", "rated_iout_a": 6.0, "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)", "page_1based": 15},
+    {"part": "SiC463", "family_group": "SiC46x", "manufacturer": "vishay", "rated_iout_a": 4.0, "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)", "page_1based": 16},
+    {"part": "SiC464", "family_group": "SiC46x", "manufacturer": "vishay", "rated_iout_a": 2.0, "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)", "page_1based": 17}
+  ]
+}

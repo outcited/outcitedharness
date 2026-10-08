@@ -1,0 +1,759 @@
+{
+  "schema": "harness.electronics-curve05b-corrections.v1",
+  "bundle_release": "curve-evidence-bundle-v2-3b5658b629cc",
+  "supersedes": "curve-evidence-bundle-v1-5cc1a6e41ad8",
+  "frozen_v1_results": "results/curve-05b/abc_discovery_v1_frozen.json (unchanged)",
+  "matrix_v2": {
+    "cells": [
+      {
+        "phenomenon": "case_temperature_vs_load",
+        "vin_v": 48.0,
+        "vout_v": 5.0,
+        "families": {
+          "SiC46x": [
+            "SiC461",
+            "SiC462",
+            "SiC463"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "families": {
+          "TPS548C26": [
+            "TPS548C26"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 3.3,
+        "families": {
+          "LMR36502": [
+            "LMR36502"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 5.0,
+        "families": {
+          "SiC46x": [
+            "SiC462",
+            "SiC463"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 24.0,
+        "vout_v": 3.3,
+        "families": {
+          "LMR36502": [
+            "LMR36502"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 24.0,
+        "vout_v": 5.0,
+        "families": {
+          "SiC46x": [
+            "SiC461",
+            "SiC462",
+            "SiC463",
+            "SiC464"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 36.0,
+        "vout_v": 3.3,
+        "families": {
+          "LMR36502": [
+            "LMR36502"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 36.0,
+        "vout_v": 5.0,
+        "families": {
+          "SiC46x": [
+            "SiC461",
+            "SiC462",
+            "SiC463",
+            "SiC464"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 48.0,
+        "vout_v": 3.3,
+        "families": {
+          "LMR36502": [
+            "LMR36502"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 48.0,
+        "vout_v": 5.0,
+        "families": {
+          "SiC46x": [
+            "SiC461",
+            "SiC462",
+            "SiC463",
+            "SiC464"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "output_current_capability_vs_input_voltage",
+        "vin_v": null,
+        "vout_v": 0.0,
+        "families": {
+          "LMR33610": [
+            "LMR33610"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "output_current_capability_vs_input_voltage",
+        "vin_v": null,
+        "vout_v": 5.0,
+        "families": {
+          "LMR33610": [
+            "LMR33610"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "power_dissipation_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "families": {
+          "TPS548C26": [
+            "TPS548C26"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "supply_current_vs_input_voltage",
+        "vin_v": null,
+        "vout_v": null,
+        "families": {
+          "LMR33610": [
+            "LMR33610"
+          ]
+        },
+        "canonical_cross_family": false
+      },
+      {
+        "phenomenon": "supply_current_vs_temperature",
+        "vin_v": 13.5,
+        "vout_v": null,
+        "families": {
+          "LMR36502": [
+            "LMR36502"
+          ]
+        },
+        "canonical_cross_family": false
+      }
+    ],
+    "cross_family_cells": []
+  },
+  "cold_recheck_thermal": {
+    "claim": "v1 reported SiC462 47.6 C vs SiC463 45.0 C sustained case temperature at 3 A as a cross-family ranking",
+    "corrections": [
+      "GRAIN: SiC462 and SiC463 are ONE canonical family (Vishay SiC46x); the comparison is within-family device comparison, not family-level discovery",
+      "SEMANTICS: the curves are case temperature vs output current measured on Vishay's evaluation setup — NOT guaranteed thermal derating limits"
+    ],
+    "readings_at_3A_C": {
+      "SiC462": [
+        44.73739236425494,
+        47.635925198639534
+      ],
+      "SiC463": [
+        45.036201788528054,
+        40.93913726749413
+      ]
+    },
+    "best_values_C": {
+      "SiC462": 47.635925198639534,
+      "SiC463": 45.036201788528054
+    },
+    "per_device_variant_spread_C": {
+      "SiC462": 2.8985328343845964,
+      "SiC463": 4.097064521033921
+    },
+    "delta_of_bests_C": 2.59972341011148,
+    "measurement_uncertainty": "tick-fit residual <= 0.014% of axis span (~0.006 C) — negligible vs the variant spread",
+    "external_components_differ": {
+      "SiC462_efficiency_legends": "L = 5.6-8.2 uH by input voltage",
+      "SiC463_efficiency_legends": "L = 10-22 uH by input voltage",
+      "note": "the derating traces are unnamed variants; the efficiency figures show different inductors per device, so eval-board thermal setups plausibly differ too"
+    },
+    "significance_verdict": "NOT SIGNIFICANT as a device ranking: the best-vs-best delta (2.6 C) is smaller than the unnamed-variant spread within each device (2.9 / 4.1 C). The v1 ranking is retracted."
+  },
+  "within_family_demo": {
+    "load_1.0A": {
+      "results": [
+        {
+          "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+          "device": "SiC461",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 10.0,
+          "status": "ok",
+          "value": 91.85287427201348,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 14,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+          "device": "SiC461",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 10.0,
+          "status": "ok",
+          "value": 87.74290470122236,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 14,
+          "figure": 3
+        },
+        {
+          "evidence_id": "curve-214a8be75c0ffc2980cbe42a72230132",
+          "device": "SiC461",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 10 μH",
+          "rated_iout_a": 10.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 14,
+          "figure": 4
+        },
+        {
+          "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9",
+          "device": "SiC462",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 8.2 μH",
+          "rated_iout_a": 6.0,
+          "status": "ok",
+          "value": 88.82128861884591,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 15,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+          "device": "SiC462",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 6.0,
+          "status": "ok",
+          "value": 91.60779202535609,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 15,
+          "figure": 3
+        },
+        {
+          "evidence_id": "curve-af486b741d969d2a7fd14f8d6658c772",
+          "device": "SiC463",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 15 μH",
+          "rated_iout_a": 4.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 16,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8",
+          "device": "SiC463",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 15 μH",
+          "rated_iout_a": 4.0,
+          "status": "ok",
+          "value": 92.65298969641772,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 16,
+          "figure": 1
+        },
+        {
+          "evidence_id": "curve-c7b2d232869d82fb1b00a5b2a3477542",
+          "device": "SiC463",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 22 μH",
+          "rated_iout_a": 4.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 16,
+          "figure": 2
+        },
+        {
+          "evidence_id": "curve-50dd207627c7e2b5b070e24f0e464c31",
+          "device": "SiC464",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 15 μH",
+          "rated_iout_a": 2.0,
+          "status": "ok",
+          "value": 92.65159075307203,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 17,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-39e596c63c7b3082eab69d44bd33b955",
+          "device": "SiC464",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 2.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 17,
+          "figure": 3
+        },
+        {
+          "evidence_id": "curve-29bbf05fc94f0678e06b0d8cf7968914",
+          "device": "SiC464",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 22 μH",
+          "rated_iout_a": 2.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 17,
+          "figure": 4
+        }
+      ],
+      "ranking": [
+        {
+          "device": "SiC463",
+          "series": "VIN = 48 V, L = 15 μH",
+          "eta_pct": 92.65,
+          "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8"
+        },
+        {
+          "device": "SiC464",
+          "series": "VIN = 48 V, L = 15 μH",
+          "eta_pct": 92.65,
+          "evidence_id": "curve-50dd207627c7e2b5b070e24f0e464c31"
+        },
+        {
+          "device": "SiC461",
+          "series": "",
+          "eta_pct": 91.85,
+          "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe"
+        },
+        {
+          "device": "SiC462",
+          "series": "",
+          "eta_pct": 91.61,
+          "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553"
+        },
+        {
+          "device": "SiC462",
+          "series": "VIN = 48 V, L = 8.2 μH",
+          "eta_pct": 88.82,
+          "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9"
+        },
+        {
+          "device": "SiC461",
+          "series": "",
+          "eta_pct": 87.74,
+          "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d"
+        }
+      ],
+      "rating_excluded": []
+    },
+    "load_3.0A": {
+      "results": [
+        {
+          "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+          "device": "SiC461",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 10.0,
+          "status": "ok",
+          "value": 94.39527662675907,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 14,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+          "device": "SiC461",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 10.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 14,
+          "figure": 3
+        },
+        {
+          "evidence_id": "curve-214a8be75c0ffc2980cbe42a72230132",
+          "device": "SiC461",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 10 μH",
+          "rated_iout_a": 10.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 14,
+          "figure": 4
+        },
+        {
+          "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9",
+          "device": "SiC462",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 8.2 μH",
+          "rated_iout_a": 6.0,
+          "status": "ok",
+          "value": 93.40361838579425,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 15,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+          "device": "SiC462",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 6.0,
+          "status": "ok",
+          "value": 95.48396635104518,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 15,
+          "figure": 3
+        },
+        {
+          "evidence_id": "curve-af486b741d969d2a7fd14f8d6658c772",
+          "device": "SiC463",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 15 μH",
+          "rated_iout_a": 4.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 16,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8",
+          "device": "SiC463",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 15 μH",
+          "rated_iout_a": 4.0,
+          "status": "ok",
+          "value": 93.70194601918979,
+          "unit": "%",
+          "guarantee": false,
+          "reason": null,
+          "page": 16,
+          "figure": 1
+        },
+        {
+          "evidence_id": "curve-c7b2d232869d82fb1b00a5b2a3477542",
+          "device": "SiC463",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 22 μH",
+          "rated_iout_a": 4.0,
+          "status": "out_of_range",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model",
+          "page": 16,
+          "figure": 2
+        },
+        {
+          "evidence_id": "curve-50dd207627c7e2b5b070e24f0e464c31",
+          "device": "SiC464",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 15 μH",
+          "rated_iout_a": 2.0,
+          "status": "rating_excluded",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "hard current rating 2.0 A excludes this device at 3.0 A before any curve consideration",
+          "page": 17,
+          "figure": 0
+        },
+        {
+          "evidence_id": "curve-39e596c63c7b3082eab69d44bd33b955",
+          "device": "SiC464",
+          "family": "SiC46x",
+          "series": "",
+          "rated_iout_a": 2.0,
+          "status": "rating_excluded",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "hard current rating 2.0 A excludes this device at 3.0 A before any curve consideration",
+          "page": 17,
+          "figure": 3
+        },
+        {
+          "evidence_id": "curve-29bbf05fc94f0678e06b0d8cf7968914",
+          "device": "SiC464",
+          "family": "SiC46x",
+          "series": "VIN = 48 V, L = 22 μH",
+          "rated_iout_a": 2.0,
+          "status": "rating_excluded",
+          "value": null,
+          "unit": null,
+          "guarantee": false,
+          "reason": "hard current rating 2.0 A excludes this device at 3.0 A before any curve consideration",
+          "page": 17,
+          "figure": 4
+        }
+      ],
+      "ranking": [
+        {
+          "device": "SiC462",
+          "series": "",
+          "eta_pct": 95.48,
+          "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553"
+        },
+        {
+          "device": "SiC461",
+          "series": "",
+          "eta_pct": 94.4,
+          "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe"
+        },
+        {
+          "device": "SiC463",
+          "series": "VIN = 48 V, L = 15 μH",
+          "eta_pct": 93.7,
+          "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8"
+        },
+        {
+          "device": "SiC462",
+          "series": "VIN = 48 V, L = 8.2 μH",
+          "eta_pct": 93.4,
+          "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9"
+        }
+      ],
+      "rating_excluded": [
+        {
+          "device": "SiC464",
+          "reason": "hard current rating 2.0 A excludes this device at 3.0 A before any curve consideration"
+        },
+        {
+          "device": "SiC464",
+          "reason": "hard current rating 2.0 A excludes this device at 3.0 A before any curve consideration"
+        },
+        {
+          "device": "SiC464",
+          "reason": "hard current rating 2.0 A excludes this device at 3.0 A before any curve consideration"
+        }
+      ]
+    }
+  },
+  "cross_family_search": {
+    "cross_family_cells_found": 0,
+    "cells": [
+      {
+        "phenomenon": "case_temperature_vs_load",
+        "vin_v": 48.0,
+        "vout_v": 5.0,
+        "single_family": [
+          "SiC46x"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "single_family": [
+          "TPS548C26"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 3.3,
+        "single_family": [
+          "LMR36502"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 5.0,
+        "single_family": [
+          "SiC46x"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 24.0,
+        "vout_v": 3.3,
+        "single_family": [
+          "LMR36502"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 24.0,
+        "vout_v": 5.0,
+        "single_family": [
+          "SiC46x"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 36.0,
+        "vout_v": 3.3,
+        "single_family": [
+          "LMR36502"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 36.0,
+        "vout_v": 5.0,
+        "single_family": [
+          "SiC46x"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 48.0,
+        "vout_v": 3.3,
+        "single_family": [
+          "LMR36502"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "efficiency_vs_load",
+        "vin_v": 48.0,
+        "vout_v": 5.0,
+        "single_family": [
+          "SiC46x"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "output_current_capability_vs_input_voltage",
+        "vin_v": null,
+        "vout_v": 0.0,
+        "single_family": [
+          "LMR33610"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "output_current_capability_vs_input_voltage",
+        "vin_v": null,
+        "vout_v": 5.0,
+        "single_family": [
+          "LMR33610"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "power_dissipation_vs_load",
+        "vin_v": 12.0,
+        "vout_v": 1.1,
+        "single_family": [
+          "TPS548C26"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "supply_current_vs_input_voltage",
+        "vin_v": null,
+        "vout_v": null,
+        "single_family": [
+          "LMR33610"
+        ],
+        "status": "single_canonical_family_only"
+      },
+      {
+        "phenomenon": "supply_current_vs_temperature",
+        "vin_v": 13.5,
+        "vout_v": null,
+        "single_family": [
+          "LMR36502"
+        ],
+        "status": "single_canonical_family_only"
+      }
+    ],
+    "explanation": "After canonical-grain correction, NO cell in the frozen corpus contains two different canonical families with condition-compatible curves: the 48 V/5 V and 48 V derating cells are all SiC46x (one Vishay family); every TI efficiency cell sits at different rails (12/1.1, 12/3.3, 13.5/3.3, 24/3.3, 36/3.3, 48/3.3) — LMR36502's 48 V cell is 3.3 V-out, one rail away from comparability with SiC46x 48 V/5 V. Above-OPN family discovery is therefore NOT yet demonstrated, and the exact unlockers are: (1) any second family's efficiency curve at 48 V -> 5 V (or SiC46x at 3.3 V-out), (2) the network-blocked ADI/Infineon acquisitions, (3) LMR36502 3.3 V rails being one vout away."
+  }
+}

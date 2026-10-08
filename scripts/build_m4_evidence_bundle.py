@@ -27,6 +27,13 @@ from harness.electronics.curve_evidence import condition_sufficiency
 
 PILOT = ROOT / "tests/fixtures/gold/curve_evidence_pilot"
 OUT = ROOT / "tests/fixtures/m4-handoff"
+BUNDLE = OUT / "curve_evidence_bundle.jsonl"
+MANIFEST = OUT / "release_manifest.json"
+# v2 (CURVE-05B corrections): canonical hierarchy grain + device ratings
+# + honest derating phenomenon name; v1 stays frozen and untouched
+BUNDLE_V2 = OUT / "curve_evidence_bundle_v2.jsonl"
+MANIFEST_V2 = OUT / "release_manifest_v2.json"
+RATINGS = PILOT / "_device_ratings.json"
 
 BUNDLE_SCHEMA = "harness.m4-curve-evidence-bundle.v1"
 RETRIEVAL_RELEASE = "curve-retrieval-v0-experimental"
@@ -36,6 +43,13 @@ EXTRACTION_RELEASE = "vector-reference-v1+raster-experimental-v0"
 def canonical(value) -> bytes:
     return json.dumps(value, ensure_ascii=False, sort_keys=True,
                       separators=(",", ":"), default=str).encode()
+
+
+def _load_ratings() -> dict:
+    if not RATINGS.exists():
+        return {}
+    data = json.loads(RATINGS.read_text())
+    return {r["part"]: r for r in data.get("ratings", [])}
 
 
 def build_rows() -> list[dict]:
@@ -75,10 +89,18 @@ def build_rows() -> list[dict]:
                     "manufacturer": record.get("manufacturer"),
                 },
                 "applicability": {
-                    "family": curve.applies_to.get("part"),
+                    "family": curve.applies_to.get("family_group")
+                    or curve.applies_to.get("part"),
+                    "family_group": curve.applies_to.get("family_group")
+                    or curve.applies_to.get("part"),
                     "part": curve.applies_to.get("part"),
                     "manufacturer": curve.applies_to.get("manufacturer"),
                     "category": curve.applies_to.get("category"),
+                    **({
+                        "rated_iout_a": rating["rated_iout_a"],
+                        "rating_quote": rating["quote"],
+                    } if (rating := _load_ratings().get(
+                        curve.applies_to.get("part"))) else {}),
                     "coverage_kind": "primary"
                     if curve.applies_to.get("part") else "document",
                     "note": "family-level advisory evidence; never "
@@ -147,6 +169,13 @@ def build_rows() -> list[dict]:
     return rows
 
 
+def _load_ratings() -> dict:
+    if not RATINGS.exists():
+        return {}
+    data = json.loads(RATINGS.read_text())
+    return {r["part"]: r for r in data.get("ratings", [])}
+
+
 def _example_query(curve) -> dict | None:
     if not curve.points or not curve.supported_region:
         return None
@@ -160,15 +189,24 @@ def _example_query(curve) -> dict | None:
 
 
 def main() -> int:
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--v2", action="store_true",
+                    help="emit the corrected v2 bundle alongside frozen "
+                         "v1 (canonical grain, ratings, phenomenon fix)")
+    args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     rows = build_rows()
+    bundle_path = BUNDLE_V2 if args.v2 else BUNDLE
     release_digest = hashlib.sha256(
         b"".join(canonical(r) for r in rows)
     ).hexdigest()[:12]
-    release_id = f"curve-evidence-bundle-v1-{release_digest}"
+    version = "v2" if args.v2 else "v1"
+    release_id = f"curve-evidence-bundle-{version}-{release_digest}"
     for row in rows:
         row["release_ids"]["bundle"] = release_id
-    bundle = OUT / "curve_evidence_bundle.jsonl"
+    bundle = bundle_path
     with bundle.open("w", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False,
@@ -176,6 +214,22 @@ def main() -> int:
     manifest = {
         "schema": "harness.m4-curve-evidence-release.v1",
         "release_id": release_id,
+        "supersedes": (
+            json.loads(MANIFEST.read_text())["release_id"]
+            if args.v2 and MANIFEST.exists() else None
+        ),
+        "corrections_in_v2": [
+            "canonical hierarchy: device -> family_group -> "
+            "manufacturer (SiC461-464 are ONE SiC46x family; the v1 "
+            "report's 'cross-family' SiC462-vs-SiC463 claim is "
+            "reclassified as within-family)",
+            "hard device current ratings with quotes applied before "
+            "curve ranking (SiC464 2 A cannot join a 3 A shortlist)",
+            "derating phenomenon renamed case_temperature_vs_load with "
+            "eval-setup, not-guaranteed-limit limitations",
+            "positional legend binding recovered vendor 24/36/48 V "
+            "efficiency traces (figures 11/15/17/23/26/27/29/33)",
+        ] if args.v2 else None,
         "advisory_only": True,
         "rows": len(rows),
         "bundle_sha256": hashlib.sha256(bundle.read_bytes()).hexdigest(),
@@ -194,7 +248,8 @@ def main() -> int:
                      "with row.operating_point_query.method",
         "built_at": time.time(),
     }
-    (OUT / "release_manifest.json").write_text(
+    manifest_path = MANIFEST_V2 if args.v2 else MANIFEST
+    manifest_path.write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
     )
     print(json.dumps({"release_id": release_id, "rows": len(rows),

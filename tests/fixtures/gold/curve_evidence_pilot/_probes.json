@@ -348,7 +348,7 @@
       },
       "expect": {
         "ok": 8,
-        "not_comparable": 12,
+        "not_comparable": 33,
         "out_of_range": 0,
         "insufficient": 0,
         "unpinned_dimensions": [
@@ -375,7 +375,7 @@
       },
       "expect": {
         "ok": 4,
-        "not_comparable": 16,
+        "not_comparable": 37,
         "out_of_range": 0,
         "insufficient": 0
       }
@@ -396,7 +396,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 20,
+        "not_comparable": 41,
         "out_of_range": 0,
         "insufficient": 0,
         "reason": "condition_mismatch"
@@ -419,7 +419,7 @@
         "ok": 0,
         "not_comparable": 0,
         "out_of_range": 0,
-        "insufficient": 20,
+        "insufficient": 41,
         "reason": "condition_missing"
       }
     },
@@ -439,7 +439,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 19,
+        "not_comparable": 40,
         "out_of_range": 1,
         "insufficient": 0
       }
@@ -463,7 +463,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 12,
+        "not_comparable": 33,
         "out_of_range": 8,
         "insufficient": 0
       }
@@ -484,7 +484,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 8,
+        "not_comparable": 29,
         "out_of_range": 12,
         "insufficient": 0
       }
@@ -518,7 +518,7 @@
       },
       "expect": {
         "profile_ok": 8,
-        "profile_not_comparable": 12,
+        "profile_not_comparable": 33,
         "ok": 0,
         "insufficient": 0
       }
@@ -574,8 +574,8 @@
         }
       },
       "expect": {
-        "applicable": 20,
-        "listed": 20
+        "applicable": 41,
+        "listed": 41
       }
     },
     {
@@ -681,5 +681,6 @@
         "profile_not_comparable": 12
       }
     }
-  ]
+  ],
+  "expectations_note": "counts re-derived after CURVE-05B positional legend binding recovered 21 vendor traces (applicable efficiency curves 20 -> 41); refusal semantics unchanged; original v1 expectations preserved in git history at 90800433"
 }

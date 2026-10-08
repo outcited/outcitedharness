@@ -1,0 +1,26 @@
+{
+  "schema": "harness.m4-curve-evidence-release.v1",
+  "release_id": "curve-evidence-bundle-v2-3b5658b629cc",
+  "supersedes": "curve-evidence-bundle-v1-5cc1a6e41ad8",
+  "corrections_in_v2": [
+    "canonical hierarchy: device -> family_group -> manufacturer (SiC461-464 are ONE SiC46x family; the v1 report's 'cross-family' SiC462-vs-SiC463 claim is reclassified as within-family)",
+    "hard device current ratings with quotes applied before curve ranking (SiC464 2 A cannot join a 3 A shortlist)",
+    "derating phenomenon renamed case_temperature_vs_load with eval-setup, not-guaranteed-limit limitations",
+    "positional legend binding recovered vendor 24/36/48 V efficiency traces (figures 11/15/17/23/26/27/29/33)"
+  ],
+  "advisory_only": true,
+  "rows": 102,
+  "bundle_sha256": "35dbd73c48fd41b107fa13c7358469dc87f337212756dd6aa1a04a1bdaf5f712",
+  "adjudication_states": {
+    "human_approved": 0,
+    "machine_verified_or_pending": 102
+  },
+  "laws": [
+    "no knife promotion; no automatic gold admission",
+    "typical curves never establish guaranteed limits",
+    "missing conditions are never defaulted",
+    "comparability requires explicitly matching conditions"
+  ],
+  "consuming": "pinned fixture; no M5 services or databases needed; recompute operating points from row.curve.points with row.operating_point_query.method",
+  "built_at": 1791495589.2951522
+}

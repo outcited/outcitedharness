@@ -66,7 +66,10 @@ QUESTIONS = [
     },
     {
         "id": "Q3-24to5-tradeoff",
-        "description": "24 V to 5 V conversion at 1 A",
+        "description": "24 V to 5 V conversion at 1 A (CURVE-05B "
+                       "correction: the vendor's printed 24 V-input "
+                       "traces are now legend-bound, so SiC46x answers "
+                       "within-family; still no cross-family ranking)",
         "requirements": {"vin_min": 24.0, "vin_max": 24.0,
                          "iout_min": 1.0},
         "curve_query": {
@@ -157,7 +160,6 @@ def run() -> dict:
         ]
         expected_refusal = q["id"] in (
             "Q5-no-defensible-comparison", "Q6-missing-evidence",
-            "Q3-24to5-tradeoff",
         )
         rows.append({
             "id": q["id"],
@@ -219,7 +221,7 @@ def run() -> dict:
             "questions": len(QUESTIONS),
             "cohort_families": len(cohort),
             "indexed_curves": stats["indexed"],
-            "refusal_cases": 3,
+            "refusal_cases": 2,
             "note": "coverage failures stay visible: Q3/Q6 count 0 "
                     "comparable in the numerator with the full eligible "
                     "cohort in the denominator",

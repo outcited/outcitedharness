@@ -89,9 +89,15 @@ def test_intent_b_high_load_distinguishes_modes_with_citations(ledger):
 def test_intent_c_tradeoff_refuses_every_comparison(ledger):
     exp = ledger["experiments"]["C_tradeoff"]
     eff = exp["C_curve"]["efficiency_at_24V_5V_1A"]
-    assert not eff["ok"], \
-        "no curve was measured at 24 V -> 5 V; preference must be refused"
-    assert eff["not_usable"], "refusals recorded with reasons"
+    # CURVE-05B correction: positional legend binding recovered the
+    # vendor's printed 24 V-input traces, so SiC46x genuinely answers at
+    # 24 V -> 5 V now; every non-SiC family still refuses
+    ok_parts = {r["part"] for r in eff["ok"]}
+    assert ok_parts and ok_parts <= {"SiC461", "SiC462", "SiC463",
+                                     "SiC464"}, \
+        "only legend-bound SiC46x 24 V traces answer"
+    assert all(r["citation"]["document_sha256"] for r in eff["ok"])
+    assert eff["not_usable"], "refusals still recorded with reasons"
     assert exp["priority_rankings"]["efficiency_first"]
 
 

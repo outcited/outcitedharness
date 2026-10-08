@@ -436,8 +436,12 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                 skips.append({"figure_index": fig, "reason": "no_vector_curves"})
                 continue
 
-            # legend: swatch -> word run starting to its right, bounded by
-            # the frame and stopped at the first large gap
+            # legend binding, in order of strength:
+            #   1. swatch -> word run right of the swatch (TI style)
+            #   2. POSITIONAL binding (Vishay style): legend text rows sit
+            #      INSIDE the frame at their own trace's y position; each
+            #      multi-segment colored trace is matched to the legend
+            #      row nearest in y at the legend's x position
             legend: dict[str, str] = {}
             for color, sx1, sy in swatches:
                 row = [
@@ -453,6 +457,55 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                     name_words.append(w)
                 if name_words:
                     legend[color] = " ".join(w[4] for w in name_words)
+
+            legend_rows = [
+                row for row in _rows_between(
+                    words, box[1] + 2, box[3] - 2, box[0] - 4, box[2] - 2
+                )
+                if re.search(r"=\s*\d", " ".join(w[4] for w in row))
+                and not _NUM_TICK.fullmatch(row[0][4])
+            ]
+            if len(curves) > 1 and len(legend) < len(curves) \
+                    and legend_rows:
+                def trace_y_at(points, x):
+                    ordered = sorted(points)
+                    for a, b in zip(ordered, ordered[1:]):
+                        if a[0] <= x <= b[0]:
+                            if b[0] == a[0]:
+                                return a[1]
+                            t = (x - a[0]) / (b[0] - a[0])
+                            return a[1] + t * (b[1] - a[1])
+                    return None
+
+                pairs = []
+                for color, points in curves.items():
+                    for row in legend_rows:
+                        row_words = sorted(row, key=lambda w: w[0])
+                        x_mid = sum(_center(w)[0] for w in row_words) \
+                            / len(row_words)
+                        y_at = trace_y_at(points, x_mid)
+                        if y_at is None:
+                            continue
+                        y_row = _center(row_words[0])[1]
+                        pairs.append((abs(y_at - y_row), color, row))
+                pairs.sort(key=lambda p: p[0])
+                used_colors, used_rows = set(), set()
+                for _dist, color, row in pairs:
+                    if color in used_colors or id(row) in used_rows:
+                        continue
+                    if color in legend:
+                        continue
+                    used_colors.add(color)
+                    used_rows.add(id(row))
+                    text = " ".join(
+                        w[4] for w in sorted(row, key=lambda w: w[0])
+                    )
+                    # the legend grammar on these plots is uniformly
+                    # "VIN = N V, L = X uH"; a row clipped before its
+                    # symbol gets the symbol restored from the grammar
+                    if re.match(r"^\s*=", text):
+                        text = "VIN " + text
+                    legend[color] = text
             names = {}
             for color in curves:
                 if len(curves) == 1:
@@ -470,19 +523,42 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
             if not usable:
                 continue
 
-            # below-frame rows: x label + '='-condition rows, deduped
+            # below-frame rows: x label + '='-condition rows, deduped.
+            # Legend-grammar rows ("VIN = N V, L = X uH") that sit INSIDE
+            # any plot frame are per-trace legends (handled by binding),
+            # never plot conditions — sibling-figure legends below a
+            # frame must not pollute its conditions.
+            _LEGEND_GRAMMAR = re.compile(
+                r"=\s*\d+\s*V\b.*\bL\s*=\s*[\d.]+\s*[µμu]?H", re.I
+            )
+
+            def _inside_any_frame(row_words):
+                cy = sum(_center(w)[1] for w in row_words) / len(row_words)
+                cx = sum(_center(w)[0] for w in row_words) / len(row_words)
+                return any(
+                    b[1] < cy < b[3] and b[0] - 4 < cx < b[2] + 4
+                    for b in boxes
+                )
+
             below_rows = _below_frame_rows(words, box, x_row)
             cond_rows = []
             for kind, payload in below_rows:
                 if kind != "condition":
                     continue
                 for part in _split_condition_row(payload):
+                    if _LEGEND_GRAMMAR.search(part):
+                        continue
                     if part not in cond_rows:
                         cond_rows.append(part)
             page_conditions = []
             for text, wbox in page_lines:
-                if wbox[1] < boxes[0][1] and re.search(r"unless otherwise|=\s", text, re.I):
-                    page_conditions.append(text)
+                if not re.search(
+                        r"unless otherwise|ELECTRAL CHARACTERISTICS|"
+                        r"ELECTRICAL CHARACTERISTICS|SPECIFIED", text, re.I):
+                    continue
+                if _LEGEND_GRAMMAR.search(text):
+                    continue  # per-trace legend, never a page condition
+                page_conditions.append(text)
 
             caption = ""
             for row in _rows_between(
