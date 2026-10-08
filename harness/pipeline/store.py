@@ -131,12 +131,27 @@ def enqueue(con, kind, corpus_key, source_path=None, pillar=None, grain=None,
 
 
 def claim(con, worker, kinds=("substrate",), limit=40):
+    """Bounded FIFO claim (queue-correctness fix, 2026-10-08 review).
+
+    - The attempts cap is enforced in BOTH the candidate SELECT and the
+      claim UPDATE, so an expired lease can never be reclaimed past
+      max_attempts even when the worker crashed without calling fail()
+      (production evidence: jobs at 48-123 attempts on a dead volume).
+    - Candidates are ordered by insertion id (rowid), NOT created_at:
+      created_at is provenance and is known-corrupt for the legacy cohort
+      (a single 2029-12-03 bulk stamp); id order is clock-independent FIFO
+      and immune to that class of corruption.
+    - Terminal handling: an expired lease at/over the attempt cap is a
+      zombie; it is retired to dead with a ledger row. Active leases are
+      never touched.
+    """
     cutoff = now()
     placeholders = ",".join("?" * len(kinds))
     rows = con.execute(
         f"SELECT * FROM jobs WHERE state IN ('pending','claimed') AND kind IN ({placeholders})"
+        " AND attempts < max_attempts"
         " AND (state='pending' OR claimed_at + visibility_s < ?)"
-        " ORDER BY created_at DESC LIMIT ?",
+        " ORDER BY id ASC LIMIT ?",
         (*kinds, cutoff, limit),
     ).fetchall()
     claimed = []
@@ -144,11 +159,22 @@ def claim(con, worker, kinds=("substrate",), limit=40):
         cur = con.execute(
             "UPDATE jobs SET state='claimed', claimed_by=?, claimed_at=?,"
             " attempts=attempts+1, updated_at=? WHERE id=? AND"
-            " (state='pending' OR claimed_at + visibility_s < ?)",
+            " attempts < max_attempts"
+            " AND (state='pending' OR claimed_at + visibility_s < ?)",
             (worker, cutoff, cutoff, row["id"], cutoff),
         )
         if cur.rowcount:
             claimed.append(dict(row))
+    swept = con.execute(
+        "UPDATE jobs SET state='dead', updated_at=? WHERE state='claimed'"
+        " AND attempts >= max_attempts AND claimed_at + visibility_s < ?",
+        (cutoff, cutoff)).rowcount
+    if swept:
+        con.execute(
+            "INSERT INTO adjudication_ledger (judge, severity, verdict,"
+            " reason_code, created_at) VALUES ('queue','P3','JOB_FAILED',"
+            " 'lease expired at attempt cap; worker died without fail()', ?)",
+            (cutoff,))
     con.commit()
     return claimed
 

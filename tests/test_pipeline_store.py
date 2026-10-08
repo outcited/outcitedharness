@@ -42,6 +42,77 @@ class StoreQueueTests(unittest.TestCase):
         reclaimed = store.claim(self.con, "w2")
         self.assertEqual(len(reclaimed), 1)
 
+    def _expire(self, jid, seconds=7200):
+        self.con.execute("UPDATE jobs SET claimed_at = claimed_at - ? WHERE id=?",
+                         (seconds, jid))
+        self.con.commit()
+
+    def test_expired_lease_reclaim_stops_at_attempt_cap(self):
+        """A worker that crashes without fail() must not get its job
+        reclaimed forever: claims stop at max_attempts and the job retires
+        to dead with a ledger row (production: 123-attempt zombies)."""
+        jid = store.enqueue(self.con, "substrate", "sha256:cap")
+        claims = 0
+        for _ in range(6):  # far more cycles than max_attempts=3
+            got = store.claim(self.con, "w")
+            self._expire(jid)
+            if got:
+                claims += 1
+        self.assertLessEqual(claims, 3)
+        row = self.con.execute("SELECT attempts, state FROM jobs WHERE id=?",
+                               (jid,)).fetchone()
+        self.assertEqual(row["state"], "dead")
+        self.assertLessEqual(row["attempts"], 3)
+        ledger = self.con.execute(
+            "SELECT COUNT(*) c FROM adjudication_ledger WHERE verdict='JOB_FAILED'"
+            " AND reason_code LIKE 'lease expired at attempt cap%'").fetchone()
+        self.assertEqual(ledger["c"], 1)
+
+    def test_zombie_sweep_never_touches_active_lease(self):
+        jid = store.enqueue(self.con, "substrate", "sha256:z", max_attempts=2)
+        store.claim(self.con, "w")
+        store.fail(self.con, jid, "boom")          # attempts=1, pending
+        store.claim(self.con, "w")                 # attempts=2, claimed, ACTIVE
+        row = self.con.execute("SELECT state FROM jobs WHERE id=?", (jid,)).fetchone()
+        self.assertEqual(row["state"], "claimed")  # active lease untouched
+        self._expire(jid)
+        got = store.claim(self.con, "w2")          # attempts=2 = cap: refuse+sweep
+        self.assertEqual(got, [])
+        row = self.con.execute("SELECT state FROM jobs WHERE id=?", (jid,)).fetchone()
+        self.assertEqual(row["state"], "dead")
+
+    def test_claim_order_is_fifo_by_id_not_created_at(self):
+        """created_at is provenance (known-corrupt legacy cohort stamped
+        2029); scheduling must follow insertion order regardless of clocks."""
+        stale = store.enqueue(self.con, "substrate", "sha256:old")
+        fresh = store.enqueue(self.con, "substrate", "sha256:new")
+        # corrupt the OLDER job's created_at into the far future
+        self.con.execute("UPDATE jobs SET created_at = ? WHERE id=?",
+                         (2_000_000_000, stale))
+        self.con.commit()
+        got = store.claim(self.con, "w", limit=1)
+        self.assertEqual([j["id"] for j in got], [stale])  # lowest id wins
+        self.assertLess(stale, fresh)
+
+    def test_concurrent_claim_no_double_delivery(self):
+        jid = store.enqueue(self.con, "substrate", "sha256:race")
+        first = store.claim(self.con, "w1", limit=1)
+        second = store.claim(self.con, "w2", limit=1)  # lease active: nothing
+        self.assertEqual(len(first), 1)
+        self.assertEqual(second, [])
+
+    def test_crash_recovery_is_bounded(self):
+        """Repeated crash cycles (claim, die silently, lease expiry) can
+        never push attempts past max_attempts."""
+        jid = store.enqueue(self.con, "substrate", "sha256:crash", max_attempts=3)
+        for _ in range(10):
+            store.claim(self.con, "w-crash")
+            self._expire(jid)
+        row = self.con.execute("SELECT attempts, state FROM jobs WHERE id=?",
+                               (jid,)).fetchone()
+        self.assertLessEqual(row["attempts"], 3)
+        self.assertEqual(row["state"], "dead")
+
     def test_fail_goes_pending_then_dead(self):
         jid = store.enqueue(self.con, "substrate", "sha256:x", max_attempts=2)
         for _ in range(2):
