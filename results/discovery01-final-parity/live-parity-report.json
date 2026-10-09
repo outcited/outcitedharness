@@ -1,0 +1,153 @@
+{
+  "schema": "harness.discovery01-live-parity.v1",
+  "m4_url": "http://127.0.0.1:8794",
+  "frozen_baseline_release": "curve-evidence-bundle-v3-5875789dcf3f",
+  "journeys": {
+    "A_light_load_0p5A": {
+      "status": "ok",
+      "live_transport": true,
+      "m4_evidence_release": "curve-evidence-bundle-v2-3b5658b629cc",
+      "eligible": null,
+      "ineligible": 0,
+      "unknown_retained": 0,
+      "condition_matched": [],
+      "failures": [],
+      "baseline_match": null,
+      "release_divergent": {
+        "live": "curve-evidence-bundle-v2-3b5658b629cc",
+        "frozen": "curve-evidence-bundle-v3-5875789dcf3f",
+        "policy": "structural comparison only; values not mixed"
+      }
+    },
+    "B_load_step_3A": {
+      "status": "ok",
+      "live_transport": true,
+      "m4_evidence_release": "curve-evidence-bundle-v2-3b5658b629cc",
+      "eligible": null,
+      "ineligible": 0,
+      "unknown_retained": 0,
+      "condition_matched": [],
+      "failures": [],
+      "baseline_match": null,
+      "release_divergent": {
+        "live": "curve-evidence-bundle-v2-3b5658b629cc",
+        "frozen": "curve-evidence-bundle-v3-5875789dcf3f",
+        "policy": "structural comparison only; values not mixed"
+      }
+    },
+    "C_insufficient_comparative": {
+      "status": "ok",
+      "live_transport": true,
+      "m4_evidence_release": "curve-evidence-bundle-v2-3b5658b629cc",
+      "eligible": null,
+      "ineligible": 0,
+      "unknown_retained": 0,
+      "condition_matched": [],
+      "failures": [],
+      "baseline_match": null,
+      "release_divergent": {
+        "live": "curve-evidence-bundle-v2-3b5658b629cc",
+        "frozen": "curve-evidence-bundle-v3-5875789dcf3f",
+        "policy": "structural comparison only; values not mixed"
+      }
+    }
+  },
+  "checks": [
+    {
+      "check": "A_light_load_0p5A:transport_is_http",
+      "pass": true,
+      "detail": "http"
+    },
+    {
+      "check": "A_light_load_0p5A:release_divergent_flagged",
+      "pass": true,
+      "detail": "{\"live\": \"curve-evidence-bundle-v2-3b5658b629cc\", \"frozen\": \"curve-evidence-bundle-v3-5875789dcf3f\", \"policy\": \"structural comparison only; values not mixed\"}"
+    },
+    {
+      "check": "A_light_load_0p5A:structure_parity",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "A_light_load_0p5A:unknown_retained",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "check": "B_load_step_3A:transport_is_http",
+      "pass": true,
+      "detail": "http"
+    },
+    {
+      "check": "B_load_step_3A:release_divergent_flagged",
+      "pass": true,
+      "detail": "{\"live\": \"curve-evidence-bundle-v2-3b5658b629cc\", \"frozen\": \"curve-evidence-bundle-v3-5875789dcf3f\", \"policy\": \"structural comparison only; values not mixed\"}"
+    },
+    {
+      "check": "B_load_step_3A:structure_parity",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "B:LM5161_ineligible",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "check": "B:SiC464_ineligible",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "check": "B_load_step_3A:unknown_retained",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "check": "C_insufficient_comparative:transport_is_http",
+      "pass": true,
+      "detail": "http"
+    },
+    {
+      "check": "C_insufficient_comparative:release_divergent_flagged",
+      "pass": true,
+      "detail": "{\"live\": \"curve-evidence-bundle-v2-3b5658b629cc\", \"frozen\": \"curve-evidence-bundle-v3-5875789dcf3f\", \"policy\": \"structural comparison only; values not mixed\"}"
+    },
+    {
+      "check": "C_insufficient_comparative:structure_parity",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "C:zero_comparable_is_success",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "C_insufficient_comparative:unknown_retained",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "check": "crosswalk:no_ambiguous",
+      "pass": true,
+      "detail": "ambiguity would appear as structured failure"
+    },
+    {
+      "check": "release_mismatch:structured_not_silent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "release_mismatch:cohort_preserved",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "verdict": "FAIL",
+  "preflight": {
+    "reachable": true,
+    "http_status": 401,
+    "note": "service answered with an error status \u2014 live"
+  }
+}

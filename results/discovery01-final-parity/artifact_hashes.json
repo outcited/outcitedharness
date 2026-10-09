@@ -1,0 +1,23 @@
+{
+  "J-A": {
+    "response_sha256": "7ceff21b73cef0982ec08f9a85e63cc96ce348d054b6ece1271883711d286b26"
+  },
+  "J-B": {
+    "response_sha256": "0d1740231787a04ff15e4a3db1098ae51f4cc743ff3ef23d856a2dcd57b70bbe"
+  },
+  "J-C": {
+    "response_sha256": "ccfdb900be3fd6df688e3edf35a1aaf1516ee5d2e09b57e10867de2d24534068"
+  },
+  "parity_verdict": "FAIL",
+  "parity_checks": {
+    "passed": 13,
+    "total": 18,
+    "failed": [
+      "A_light_load_0p5A:unknown_retained",
+      "B:LM5161_ineligible",
+      "B:SiC464_ineligible",
+      "B_load_step_3A:unknown_retained",
+      "C_insufficient_comparative:unknown_retained"
+    ]
+  }
+}

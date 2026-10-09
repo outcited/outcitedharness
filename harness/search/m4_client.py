@@ -19,6 +19,7 @@ never surface as a valid empty-cohort engineering result.
 from __future__ import annotations
 
 import json
+import os
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -27,6 +28,79 @@ from typing import Any
 
 CLIENT_SCHEMA = "harness.discovery01-m4-client.v1"
 DECISION_SCHEMA_EXPECTED = "harness.electronics-decision-answer.v1"
+M4_08B_CONTRACT = "fae-engineering-decisions-v1"
+
+
+def project_m4_08b(payload: dict) -> tuple[dict, list[str]]:
+    """Explicit, loss-reporting projection of M4's CURVE-08B adapter
+    envelope onto M5's decision-answer contract. M4's schema is NOT
+    adopted: every renamed or absent field is recorded in the returned
+    mismatch list, and facts M4 does not publish stay absent (never
+    invented)."""
+
+    mismatches: list[str] = []
+    canon = payload.get("canonical_envelope") or {}
+    releases = payload.get("evidence_releases") or {}
+    identity = payload.get("candidate_identity") or {}
+    elig = payload.get("eligibility") or {}
+    qual = canon.get("qualification") or {}
+    pref = canon.get("preference") or {}
+
+    if "schema" not in payload:
+        mismatches.append("schema: M4 publishes 'contract' only; M5 "
+                          "projects its own schema id")
+    if "bundle_sha256" not in payload:
+        mismatches.append("bundle_sha256: nested under "
+                          "evidence_releases.evidence_bundle_sha256")
+    if "hard_eligibility" not in payload:
+        mismatches.append("hard_eligibility: M4 publishes eligibility "
+                          "with counts/parts; rules only inside "
+                          "canonical_envelope")
+    if "comparison" not in payload:
+        mismatches.append("comparison: M4 publishes candidate_identity."
+                          "ranked; interpolation disclosure absent")
+    if "counts" not in payload:
+        mismatches.append("counts: M4 eligibility.counts lacks the "
+                          "seven-way candidate/evidence separation")
+    ranked = identity.get("ranked") or []
+    for entry in ranked:
+        if "interpolation" not in entry:
+            mismatches.append(
+                "comparison.condition_matched_entries[].interpolation: "
+                "not published by the 08B projection")
+            break
+    projected = {
+        "schema": DECISION_SCHEMA_EXPECTED,
+        "projected_from": M4_08B_CONTRACT,
+        "evidence_release": releases.get("evidence_release"),
+        "bundle_sha256": releases.get("evidence_bundle_sha256"),
+        "review_state": payload.get("review_state"),
+        "hard_eligibility": {
+            "eligible": elig.get("eligible_parts") or [],
+            "ineligible": qual.get("eliminated") or [],
+            "unknown": qual.get("unresolved") or [],
+        },
+        "counts": {
+            **(elig.get("counts") or {}),
+            "m5_seven_way_counters": None,
+        },
+        "comparison": {
+            "condition_matched_entries": ranked,
+            "approximate_scenario_entries": [],
+            "comparison_level": identity.get("grain_disclosure"),
+        },
+        "canonical_envelope": canon,
+        "m4_adapter": {
+            "contract_kind": payload.get("contract_kind"),
+            "comparator_fingerprint": payload.get("comparator_fingerprint"),
+            "identity_basis": identity.get("identity_basis"),
+            "eligibility_basis": elig.get("eligibility_basis"),
+        },
+    }
+    if not pref.get("approximate_scenario_entries") and             "approximate" not in canon:
+        mismatches.append("comparison.approximate_scenario_entries: M4 "
+                          "engine publishes no scenario mode")
+    return projected, sorted(set(mismatches))
 DEFAULT_TIMEOUT_S = 10.0
 MAX_RETRIES = 1          # bounded; only for connection-level failures
 
@@ -132,6 +206,14 @@ class HttpTransport:
         self.timeout = timeout
         self.expected_contract = expected_contract
 
+    @staticmethod
+    def _headers() -> dict:
+        headers = {"Content-Type": "application/json"}
+        token = os.environ.get("M4_BEARER_TOKEN", "")
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        return headers
+
     def decide(self, question: dict) -> DecisionResult:
         import time
         body = json.dumps({"question": question}).encode()
@@ -140,7 +222,7 @@ class HttpTransport:
             t0 = time.time()
             req = urllib.request.Request(
                 self.url, data=body,
-                headers={"Content-Type": "application/json"}, method="POST")
+                headers=self._headers(), method="POST")
             try:
                 with urllib.request.urlopen(req, timeout=self.timeout) as r:
                     payload = json.loads(r.read())
@@ -176,6 +258,10 @@ class HttpTransport:
             raise last
         answer = payload.get("answer", payload)
         latency = (time.time() - t0) * 1000.0
+        mismatches: list[str] = []
+        if answer.get("contract") == M4_08B_CONTRACT and \
+                "canonical_envelope" in answer:
+            answer, mismatches = project_m4_08b(answer)
         schema = answer.get("schema")
         if schema != self.expected_contract:
             raise M4ServiceError(
@@ -189,6 +275,9 @@ class HttpTransport:
                 "decision_schema": schema,
                 "m4_evidence_release": answer.get("evidence_release"),
                 "m4_bundle_sha256": answer.get("bundle_sha256"),
+                "m4_adapter_contract": M4_08B_CONTRACT if mismatches
+                else None,
+                "field_mismatches": mismatches,
             },
             latency_ms=latency)
 
