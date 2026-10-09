@@ -87,3 +87,27 @@ Blocked on: owner decision to open the dimension + vocabulary review.
   relationship child_ids without `identities` rows; snapshot/crosswalk
   unaffected. v2 candidate.
 - Items 3 (BQ reacquisition) and M4 parity: unchanged, waiting external.
+
+## OCR repair executed 2026-10-09 (owner-approved, bounded to one document)
+
+`infineon-IPP034NE7N3 G` (sha ae2379b0…, identity gate re-hashed before
+work): tesseract --psm 6 @300dpi via the platform's own crop_verify tool,
+10 pages / 7,538 chars / 5.7s; sidecar at `extract-results/ocr-repairs/`.
+
+- Quote cross-check vs OCR substrate: **2/4 verified** ('20V' p7, '175°C'
+  p1) → normal-contract re-key executed: catalog 4 claims + 1 part_source
+  + 1 part (backup `catalog.db.bak-pre-ipp-rekey-20261009T233518Z`, quotes
+  byte-identical), search index aligned (+prov3-ocr, 3 units page-graded
+  from OCR-recovered pages, 2 discovery-only pending adjudication).
+  **Remaining unhashed claims corpus-wide: 324 = exactly the 5 BQ stems.**
+- '30V' + '1µA': OCR-garbled at their expected table rows (illegible value
+  regions) → NOT forced; adjudication record
+  `ADJUDICATION_infineon-IPP034NE7N3-G.json` (classification
+  unverified_ocr_garble, not absence; candidates for vision-lane crop
+  verify or manual read).
+- Correction recorded: the trailing " G" is the PRINTED Infineon order
+  code (page 1: "IPP034NE7N3 G") — the earlier malformed-stem hygiene flag
+  is retracted.
+- Flagged, no action (scope discipline): page 1 prints "OptiMOS™ 3
+  Power-Transistor" — future OptiMOS membership candidate, NOT in the
+  signed 626; needs its own packet + owner signature.
