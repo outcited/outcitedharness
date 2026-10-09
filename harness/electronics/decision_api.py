@@ -583,6 +583,17 @@ def handle_decision_request(payload: Mapping[str, Any],
     """Pure service entry: validated request -> (http_status, body)."""
 
     repo_root = Path(repo_root or Path(__file__).resolve().parents[2])
+
+    # CURVE-08C (R5): M5 orchestration dialect. Bodies of the shape
+    # {"question": {...}} are answered by the canonical CURVE-08 producer
+    # answer_question() — the exact function M5's frozen journey fixtures
+    # (m4_frozen_journeys_v1.json, sha 095ebd9c...) were generated from.
+    # Pure dialect routing: zero new engineering logic, zero engine edits;
+    # the native decision-api.v1 path below is unchanged.
+    question = payload.get("question") if isinstance(payload, dict) else None
+    if isinstance(question, dict) and question:
+        return 200, answer_question(question, repo_root=repo_root)
+
     state = service_state(repo_root)
     norm = normalize_request(payload)
 

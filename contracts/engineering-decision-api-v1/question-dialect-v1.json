@@ -1,0 +1,19 @@
+{
+  "schema": "harness.engineering-decision-api.question-dialect.v1",
+  "added_by": "PRD-CURVE-08C (R5 contract reconciliation, class 1: lossless representation adapter)",
+  "request": {
+    "shape": {"question": {"requirements": "object<number>", "conditions": "object<number>?", "operating_point": {"x": "number", "unit": "string"}?, "phenomenon": "string?"}},
+    "consumer": "M5 DISCOVERY-01 orchestrator (harness/search/m4_client.py HttpTransport)",
+    "routing": "bodies carrying a non-empty 'question' object are answered by harness.electronics.decision_engine.answer_question verbatim"
+  },
+  "response": {
+    "schema": "harness.electronics-decision-answer.v1",
+    "producer": "answer_question (the function M5's m4_frozen_journeys_v1.json sha 095ebd9c fixtures were generated from)",
+    "evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+    "bundle_sha256": "0c047e516c10c489134efe226d12e242265166c5c4e394379108e9ec10ea4b16f",
+    "fields": ["schema", "question", "hard_eligibility", "comparison", "counts", "evidence_availability", "laws", "evidence_release", "bundle_sha256"]
+  },
+  "native_path_unchanged": "requests without a 'question' key keep the decision-api.v1 contract byte-identical to the frozen fixtures (regression-locked)",
+  "engineering_logic_added": "none",
+  "verification": "M5 discovery01_live_parity.py unmodified: PASS 21/21 checks, exit 0, 2026-10-09, over authenticated reverse tunnel (M5 127.0.0.1:8793 -> M4 127.0.0.1:8793)"
+}

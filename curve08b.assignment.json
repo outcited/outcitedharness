@@ -1,10 +1,11 @@
 {
-  "lane": "curve-08b-decision-api",
-  "branch": "curve/08b-decision-api",
-  "base_commit": "23b176343abf836d208680f66295cb30ed4825c6",
+  "lane": "curve-08c-parity-repair",
+  "branch": "curve/08c-parity-repair",
+  "base_commit": "18893df",
   "owner": "M4",
-  "prd": "PRD-CURVE-08B",
-  "worktree": "/Users/samsonkim/Dev/Harnessv1-curve08b",
+  "prd": "PRD-CURVE-08C",
+  "worktree": "/Users/samsonkim/Dev/Harnessv1-curve08c",
+  "supersedes_lane": "curve-08b-decision-api (branch + worktree preserved at /Users/samsonkim/Dev/Harnessv1-curve08b)",
   "rules": [
     "feature-flagged; localhost only; no production routing changes",
     "no push, no merge until separately authorized",

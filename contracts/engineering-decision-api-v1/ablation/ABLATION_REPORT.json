@@ -45,7 +45,7 @@
       "ranking": null
     },
     "B_parametrics_plus_curves": {
-      "latency_s": 0.0051,
+      "latency_s": 0.0058,
       "eligibility_verdicts": {
         "cand-f74987515d0df01cd5810778": "eligible",
         "cand-1a9c0f9250056d04853bf98e": "eligible",
