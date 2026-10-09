@@ -1,0 +1,152 @@
+{
+  "request": {
+    "category": "power",
+    "constraints": {
+      "vin_v": 48.0,
+      "vout_v": 5.0,
+      "iout_a": 1.25
+    },
+    "comparison": {
+      "metric": "efficiency"
+    },
+    "ranking_population": "m4_bundle"
+  },
+  "cache_miss": {
+    "n": 1,
+    "min_ms": 643.3,
+    "p50_ms": 643.3,
+    "max_ms": 643.3
+  },
+  "cache_hit": {
+    "n": 5,
+    "min_ms": 28.0,
+    "p50_ms": 28.5,
+    "max_ms": 29.8
+  },
+  "samples": [
+    {
+      "request_index": 0,
+      "latency_ms": 643.3,
+      "cache_hit": false,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.4,
+        "release_identity_ms": 0.5,
+        "cohort_build_ms": 604.1,
+        "candidate_scope_ms": 0.4,
+        "m4_decision_ms": 6.6,
+        "evidence_resolution_ms": 0.1,
+        "release_identity_cache": "hit"
+      },
+      "total_ms": 620.2,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 1,
+      "latency_ms": 29.8,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.4,
+        "release_identity_ms": 0.4,
+        "cached_stage_timings_ms": {
+          "identity_snapshot_ms": 8.4,
+          "release_identity_ms": 0.5,
+          "cohort_build_ms": 604.1,
+          "candidate_scope_ms": 0.4,
+          "m4_decision_ms": 6.6,
+          "evidence_resolution_ms": 0.1,
+          "release_identity_cache": "hit"
+        },
+        "note": "served from the session cache; the stage timings under cached_stage_timings_ms belong to the original miss, not to this request"
+      },
+      "total_ms": 8.8,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 2,
+      "latency_ms": 28.3,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 7.8,
+        "release_identity_ms": 0.3,
+        "cached_stage_timings_ms": {
+          "identity_snapshot_ms": 8.4,
+          "release_identity_ms": 0.5,
+          "cohort_build_ms": 604.1,
+          "candidate_scope_ms": 0.4,
+          "m4_decision_ms": 6.6,
+          "evidence_resolution_ms": 0.1,
+          "release_identity_cache": "hit"
+        },
+        "note": "served from the session cache; the stage timings under cached_stage_timings_ms belong to the original miss, not to this request"
+      },
+      "total_ms": 8.1,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 3,
+      "latency_ms": 28.5,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 7.8,
+        "release_identity_ms": 0.3,
+        "cached_stage_timings_ms": {
+          "identity_snapshot_ms": 8.4,
+          "release_identity_ms": 0.5,
+          "cohort_build_ms": 604.1,
+          "candidate_scope_ms": 0.4,
+          "m4_decision_ms": 6.6,
+          "evidence_resolution_ms": 0.1,
+          "release_identity_cache": "hit"
+        },
+        "note": "served from the session cache; the stage timings under cached_stage_timings_ms belong to the original miss, not to this request"
+      },
+      "total_ms": 8.2,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 4,
+      "latency_ms": 28.5,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.0,
+        "release_identity_ms": 0.3,
+        "cached_stage_timings_ms": {
+          "identity_snapshot_ms": 8.4,
+          "release_identity_ms": 0.5,
+          "cohort_build_ms": 604.1,
+          "candidate_scope_ms": 0.4,
+          "m4_decision_ms": 6.6,
+          "evidence_resolution_ms": 0.1,
+          "release_identity_cache": "hit"
+        },
+        "note": "served from the session cache; the stage timings under cached_stage_timings_ms belong to the original miss, not to this request"
+      },
+      "total_ms": 8.3,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 5,
+      "latency_ms": 28.0,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 7.5,
+        "release_identity_ms": 0.5,
+        "cached_stage_timings_ms": {
+          "identity_snapshot_ms": 8.4,
+          "release_identity_ms": 0.5,
+          "cohort_build_ms": 604.1,
+          "candidate_scope_ms": 0.4,
+          "m4_decision_ms": 6.6,
+          "evidence_resolution_ms": 0.1,
+          "release_identity_cache": "hit"
+        },
+        "note": "served from the session cache; the stage timings under cached_stage_timings_ms belong to the original miss, not to this request"
+      },
+      "total_ms": 8.1,
+      "errors_warnings": []
+    }
+  ],
+  "cohort_build_ms_on_miss": 604.1,
+  "m4_decision_ms_on_miss": 6.6,
+  "cohort_candidate_count": 1577
+}

@@ -34,7 +34,7 @@
       "m4_bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
       "comparison_fingerprint": "edcbdd29aee061b1"
     },
-    "latency_ms": 678.3
+    "latency_ms": 35.7
   },
   "identical": {
     "candidates_sha256": true,

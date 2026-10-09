@@ -23,7 +23,9 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "results/discovery01-production-readiness"
+OUT = Path(os.environ.get(
+    "READINESS_OUT_DIR",
+    str(ROOT / "results/discovery01-production-readiness")))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 DATA = Path(os.environ.get("READINESS_DATA_DIR",
@@ -31,10 +33,14 @@ DATA = Path(os.environ.get("READINESS_DATA_DIR",
 M5 = os.environ.get("PILOT_M5_URL", "http://127.0.0.1:8796")
 M4 = os.environ.get("PILOT_M4_URL", "http://127.0.0.1:8798")
 TOKEN = os.environ.get("PILOT_M4_TOKEN") or os.environ.get("M4_BEARER_TOKEN")
+SESSION_TOKEN = os.environ.get("PILOT_M5_TOKEN") or os.environ.get(
+    "SEARCH_SESSION_TOKEN", "")
 
 SUPPORTED = {"category": "power",
              "constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.5},
-             "comparison": {"metric": "efficiency"}}
+             "comparison": {"metric": "efficiency"},
+             "ranking_population": "discovery_cohort"}
+LEGACY = {**SUPPORTED, "ranking_population": "m4_bundle"}
 M4_QUESTION = {"question": {
     "requirements": {"vin_min": 48, "vin_max": 48, "iout_min": 0.5,
                      "vout": 5},
@@ -76,8 +82,11 @@ def main() -> int:
     idx = _ro("search_index.db")
 
     session, sess_ms, sess_err = _post(
-        M5 + "/v1/discovery/engineering-session", SUPPORTED)
+        M5 + "/v1/discovery/engineering-session", SUPPORTED, SESSION_TOKEN)
     session = session or {}
+    legacy, legacy_ms, legacy_err = _post(
+        M5 + "/v1/discovery/engineering-session", LEGACY, SESSION_TOKEN)
+    legacy = legacy or {}
     m4ans, m4_ms, m4_err = _post(
         M4 + "/v1/engineering/decisions", M4_QUESTION, TOKEN)
     m4ans = m4ans or {}
@@ -272,13 +281,20 @@ def main() -> int:
     }
     # ---------------- identity reconciliation ----------------
     ident = _ro("facet_identity.db")
-    m4_parts = sorted({c.get("part") for c in cands if c.get("part")})
+    # In-cohort mode: candidate_results IS the M5 population that was sent.
+    # Legacy mode: candidate_results is M4's own universe - that is the
+    # population whose disjointness from the catalog is the B6 finding.
+    in_cohort_parts = sorted({c.get("part") for c in cands if c.get("part")})
+    legacy_cands = legacy.get("candidate_results") or []
+    m4_parts = sorted({c.get("part") for c in legacy_cands if c.get("part")})
     in_catalog = [x for x in m4_parts if cat.execute(
         "SELECT count(*) FROM parts WHERE upper(opn)=upper(?)",
         (x,)).fetchone()[0]]
     in_identity = [x for x in m4_parts if ident.execute(
         "SELECT count(*) FROM identities WHERE identity_id=?",
         (f"opn:{x}",)).fetchone()[0]]
+    rp_in = session.get("ranking_population") or {}
+    rp_leg = legacy.get("ranking_population") or {}
     xw_path = ROOT / "tests/fixtures/discovery01/m4_identity_crosswalk_v1.json"
     xw = json.loads(xw_path.read_text()) if xw_path.exists() else {}
     rel = {f"{r[0]}|{r[1]}": r[2] for r in ident.execute(
@@ -288,14 +304,40 @@ def main() -> int:
                  ident.execute("SELECT key, value FROM meta WHERE key LIKE "
                                "'approval:%'")}
     recon = {
-        "m4_bundle_distinct_parts": len(m4_parts),
-        "m4_parts_present_in_m5_catalog": len(in_catalog),
-        "m4_parts_present_in_identity_db": len(in_identity),
-        "m4_parts": m4_parts,
+        "m4_universe_distinct_parts": len(m4_parts),
+        "m4_universe_parts_present_in_m5_catalog": len(in_catalog),
+        "m4_universe_parts_present_in_identity_db": len(in_identity),
+        "m4_universe_parts": m4_parts,
+        "in_cohort_population_parts": len(in_cohort_parts),
+        "in_cohort_candidates_sent": rp_in.get("candidates_sent"),
+        "in_cohort_m4_received": rp_in.get("m4_received"),
+        "in_cohort_m4_matched": rp_in.get("m4_matched"),
+        "in_cohort_ranked": rp_in.get("ranked"),
+        "in_cohort_unresolved_no_evidence": rp_in.get(
+            "unresolved_no_evidence"),
+        "in_cohort_assertion_holds": rp_in.get("assertion_holds"),
+        "in_cohort_ranking_strictly_in_cohort": rp_in.get(
+            "ranking_strictly_in_cohort"),
+        "legacy_out_of_cohort": rp_leg.get("out_of_cohort"),
+        "legacy_ranked": rp_leg.get("ranked"),
+        "legacy_excluded": rp_leg.get("excluded"),
         "cohort_state": session.get("cohort_state"),
-        "crosswalk_source": "tests/fixtures/discovery01/"
-                            "m4_identity_crosswalk_v1.json (test fixture)",
-        "crosswalk_is_test_fixture": "tests/fixtures" in str(xw_path),
+        "ranking_population_in_cohort": session.get("ranking_population"),
+        "ranking_population_legacy": legacy.get("ranking_population"),
+        "session_latency_ms_in_cohort": sess_ms,
+        "session_latency_ms_legacy": legacy_ms,
+        "legacy_errors": legacy_err,
+        "crosswalk_source_production": (
+            (session.get("ranking_population") or {}).get(
+                "identity_mapping") or {}).get("source"),
+        "crosswalk_source_legacy": (
+            (legacy.get("ranking_population") or {}).get(
+                "identity_mapping") or {}).get("source"),
+        "production_crosswalk_is_generated": (
+            (session.get("ranking_population") or {}).get(
+                "identity_mapping") or {}).get("source")
+            == "generated:identity-store",
+        "fixture_still_used_by_legacy_path": "tests/fixtures" in str(xw_path),
         "crosswalk_fixture_candidates": len(xw.get("candidates") or []),
         "crosswalk_fixture_bytes": xw_path.stat().st_size
         if xw_path.exists() else None,
@@ -338,8 +380,15 @@ def main() -> int:
             "stable_across_restart", "session_latency_ms")},
         "security": security,
         "identity_reconciliation": {k: recon[k] for k in (
-            "m4_bundle_distinct_parts", "m4_parts_present_in_m5_catalog",
-            "m4_parts_present_in_identity_db", "crosswalk_is_test_fixture",
+            "m4_universe_distinct_parts",
+            "m4_universe_parts_present_in_m5_catalog",
+            "m4_universe_parts_present_in_identity_db",
+            "in_cohort_population_parts", "in_cohort_candidates_sent",
+            "in_cohort_m4_matched", "in_cohort_ranked",
+            "in_cohort_unresolved_no_evidence",
+            "in_cohort_assertion_holds", "legacy_out_of_cohort",
+            "legacy_ranked", "legacy_excluded",
+            "production_crosswalk_is_generated",
             "crosswalk_fixture_candidates",
             "identity_relationships_by_kind_status",
             "catalog_parts_with_family")},

@@ -114,15 +114,20 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 675.9,
+        "latency_ms": 35.0,
         "timings_ms": {
-          "identity_snapshot_ms": 8.8,
+          "identity_snapshot_ms": 9.1,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 612.4,
-          "candidate_scope_ms": 13.2,
-          "m4_decision_ms": 8.5,
-          "evidence_resolution_ms": 0.0,
-          "release_identity_cache": "hit"
+          "cached_stage_timings_ms": {
+            "identity_snapshot_ms": 8.3,
+            "release_identity_ms": 0.4,
+            "cohort_build_ms": 608.7,
+            "candidate_scope_ms": 13.1,
+            "m4_decision_ms": 8.5,
+            "evidence_resolution_ms": 0.0,
+            "release_identity_cache": "hit"
+          },
+          "note": "served from the session cache; the stage timings under cached_stage_timings_ms belong to the original miss, not to this request"
         },
         "failures": [],
         "partial_result": false,
@@ -334,11 +339,11 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 638.4,
+        "latency_ms": 680.4,
         "timings_ms": {
           "identity_snapshot_ms": 8.0,
           "release_identity_ms": 0.3,
-          "cohort_build_ms": 603.2,
+          "cohort_build_ms": 645.1,
           "candidate_scope_ms": 2.3,
           "m4_decision_ms": 1.7,
           "evidence_resolution_ms": 0.0,
@@ -452,13 +457,13 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 678.8,
+        "latency_ms": 691.2,
         "timings_ms": {
-          "identity_snapshot_ms": 7.9,
+          "identity_snapshot_ms": 8.4,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 620.6,
-          "candidate_scope_ms": 13.3,
-          "m4_decision_ms": 8.0,
+          "cohort_build_ms": 630.0,
+          "candidate_scope_ms": 14.8,
+          "m4_decision_ms": 9.0,
           "evidence_resolution_ms": 0.0,
           "release_identity_cache": "hit"
         },
@@ -583,11 +588,11 @@
           "TPS628302",
           "SiC464"
         ],
-        "latency_ms": 641.2,
+        "latency_ms": 649.9,
         "timings_ms": {
-          "identity_snapshot_ms": 8.2,
+          "identity_snapshot_ms": 8.3,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 604.4,
+          "cohort_build_ms": 612.0,
           "candidate_scope_ms": 0.4,
           "m4_decision_ms": 5.4,
           "evidence_resolution_ms": 0.1,
@@ -702,13 +707,13 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 650.8,
+        "latency_ms": 653.9,
         "timings_ms": {
-          "identity_snapshot_ms": 8.3,
+          "identity_snapshot_ms": 8.1,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 601.8,
-          "candidate_scope_ms": 9.8,
-          "m4_decision_ms": 5.2,
+          "cohort_build_ms": 604.0,
+          "candidate_scope_ms": 9.4,
+          "m4_decision_ms": 5.1,
           "evidence_resolution_ms": 0.0,
           "release_identity_cache": "hit"
         },
@@ -1322,13 +1327,13 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 660.5,
+        "latency_ms": 647.7,
         "timings_ms": {
-          "identity_snapshot_ms": 9.1,
+          "identity_snapshot_ms": 12.4,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 619.2,
-          "candidate_scope_ms": 4.5,
-          "m4_decision_ms": 3.1,
+          "cohort_build_ms": 603.1,
+          "candidate_scope_ms": 4.6,
+          "m4_decision_ms": 2.8,
           "evidence_resolution_ms": 0.0,
           "release_identity_cache": "hit"
         },
@@ -1410,12 +1415,12 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 634.5,
+        "latency_ms": 642.0,
         "timings_ms": {
-          "identity_snapshot_ms": 8.0,
+          "identity_snapshot_ms": 8.5,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 602.2,
-          "candidate_scope_ms": 1.1,
+          "cohort_build_ms": 608.4,
+          "candidate_scope_ms": 1.4,
           "m4_decision_ms": 1.0,
           "evidence_resolution_ms": 0.0,
           "release_identity_cache": "hit"
@@ -1521,13 +1526,13 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 676.1,
+        "latency_ms": 641.7,
         "timings_ms": {
-          "identity_snapshot_ms": 8.2,
+          "identity_snapshot_ms": 8.5,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 642.7,
-          "candidate_scope_ms": 1.7,
-          "m4_decision_ms": 1.0,
+          "cohort_build_ms": 608.3,
+          "candidate_scope_ms": 1.6,
+          "m4_decision_ms": 1.1,
           "evidence_resolution_ms": 0.0,
           "release_identity_cache": "hit"
         },
@@ -1635,12 +1640,12 @@
         },
         "ranked_entries": [],
         "excluded_parts": [],
-        "latency_ms": 660.8,
+        "latency_ms": 653.9,
         "timings_ms": {
-          "identity_snapshot_ms": 8.5,
+          "identity_snapshot_ms": 9.1,
           "release_identity_ms": 0.4,
-          "cohort_build_ms": 627.8,
-          "candidate_scope_ms": 1.3,
+          "cohort_build_ms": 619.8,
+          "candidate_scope_ms": 1.5,
           "m4_decision_ms": 1.0,
           "evidence_resolution_ms": 0.0,
           "release_identity_cache": "hit"
@@ -1678,7 +1683,7 @@
       "all_in_cohort_journeys_assertion_holds": true
     },
     "m4_service_commit": "f02f08a21021240de11e951749613b1123ef2071",
-    "m5_service_commit": "1cf22043dd3bd64693c901f299ec5ff42901c415"
+    "m5_service_commit": "73b575e6b8a7f1859335f8c8cfa26103fd57fd6c"
   },
   "pass": true
 }

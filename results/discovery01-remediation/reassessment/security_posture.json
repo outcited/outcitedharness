@@ -1,0 +1,21 @@
+{
+  "m4_no_bearer_http": 401,
+  "m4_bad_bearer_http": 403,
+  "m5_session_route_without_credentials_http": 401,
+  "m5_session_route_served_without_credentials": false,
+  "m5_session_route_requires_auth": true,
+  "m5_default_bind": "127.0.0.1 (SEARCH_HOST)",
+  "m5_nonlocal_bind_guard": "SEARCH_ALLOW_REMOTE=1 required; SystemExit otherwise",
+  "m5_nonlocal_guard_present": true,
+  "m4_default_bind": "127.0.0.1 (ENGINEERING_DECISIONS_HOST)",
+  "m4_nonlocal_bind_guard_present": true,
+  "m4_token_source": "env ENGINEERING_DECISIONS_TOKEN only",
+  "m5_m4_token_source": "env M4_BEARER_TOKEN only",
+  "token_literal_committed_in_repo": 0,
+  "tls_present": false,
+  "rate_limiting_present": false,
+  "request_body_size_limit_present": false,
+  "tenancy_isolation": "not applicable (single-tenant research deployment)",
+  "audit_log_present": false,
+  "assessment_token_from_env_only": true
+}

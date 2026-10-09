@@ -1,0 +1,21 @@
+{
+  "served_m5_evidence_release": "search-release-v1-d95199aecb45",
+  "served_m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+  "served_m4_bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+  "served_comparison_fingerprint": "edcbdd29aee061b1",
+  "db_meta_cached_release": "search-release-v1-4afe4e77da5e",
+  "db_meta_policy_identity": "",
+  "discovery_serving_policy_identity": "discovery01-v1(facets=reduction-x-coverage-floor-0.30;eligibility=m4-only;curves=m4-only)",
+  "policy_identity_matches_cache": false,
+  "served_release_equals_db_cached_release": false,
+  "release_fingerprint_cost_ms_per_request": 0.0,
+  "release_fingerprint_instrumented_in_timings_ms": false,
+  "db_meta_release_dirty": "0",
+  "db_meta_release_unit_count": "443607",
+  "stable_across_restart": true,
+  "semantics_identical_after_restart": true,
+  "restart_verdict": "PASS",
+  "session_latency_ms": 35.7,
+  "m4_latency_ms": 7.6,
+  "errors": []
+}

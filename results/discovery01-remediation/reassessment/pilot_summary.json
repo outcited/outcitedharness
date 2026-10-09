@@ -1,0 +1,297 @@
+{
+  "scenarios": [
+    "P1_normal_supported_ranking",
+    "P2_hard_exclusion",
+    "P3_unknown_retention",
+    "P4_approximate_scenario",
+    "P5_interpolation",
+    "P6_no_defensible_comparison",
+    "P7_auth_failure",
+    "P8a_stale_release_cache_miss",
+    "P8b_stale_release_cache_hit",
+    "P8c_stale_pin_after_unpinned_cache",
+    "P10_in_cohort_supported_ranking",
+    "P11_in_cohort_facet_narrowed",
+    "P12_in_cohort_hard_exclusion",
+    "P13_in_cohort_unknown_heavy",
+    "P14_in_cohort_empty_population"
+  ],
+  "latencies_ms": {
+    "P1_normal_supported_ranking": 645.9,
+    "P2_hard_exclusion": 656.1,
+    "P3_unknown_retention": 658.8,
+    "P4_approximate_scenario": 648.0,
+    "P5_interpolation": 652.3,
+    "P6_no_defensible_comparison": 680.5,
+    "P7_auth_failure": 0.8,
+    "P8a_stale_release_cache_miss": 647.7,
+    "P8b_stale_release_cache_hit": 649.6,
+    "P8c_stale_pin_after_unpinned_cache": 664.9,
+    "P10_in_cohort_supported_ranking": 34.0,
+    "P11_in_cohort_facet_narrowed": 644.7,
+    "P12_in_cohort_hard_exclusion": 707.3,
+    "P13_in_cohort_unknown_heavy": 689.0,
+    "P14_in_cohort_empty_population": 656.8
+  },
+  "deterministic_replay": {
+    "P1_normal_supported_ranking": true,
+    "P2_hard_exclusion": null,
+    "P3_unknown_retention": null,
+    "P4_approximate_scenario": null,
+    "P5_interpolation": null,
+    "P6_no_defensible_comparison": null,
+    "P8a_stale_release_cache_miss": null,
+    "P8b_stale_release_cache_hit": null,
+    "P8c_stale_pin_after_unpinned_cache": null,
+    "P10_in_cohort_supported_ranking": true,
+    "P11_in_cohort_facet_narrowed": null,
+    "P12_in_cohort_hard_exclusion": null,
+    "P13_in_cohort_unknown_heavy": null,
+    "P14_in_cohort_empty_population": null
+  },
+  "P1_ranked": [
+    {
+      "part": "SiC461",
+      "value": 93.94439791602247,
+      "evidence_id": "curve-214a8be75c0ffc2980cbe42a72230132"
+    },
+    {
+      "part": "SiC463",
+      "value": 92.9555411613481,
+      "evidence_id": "curve-c7b2d232869d82fb1b00a5b2a3477542"
+    },
+    {
+      "part": "SiC464",
+      "value": 92.95487954326245,
+      "evidence_id": "curve-29bbf05fc94f0678e06b0d8cf7968914"
+    },
+    {
+      "part": "LM5161",
+      "value": 77.94750584892213,
+      "evidence_id": "curve-a697319a16d26592db2cc14cf6843bd0"
+    }
+  ],
+  "P1_identity_classes": {
+    "m4_only": 20,
+    "unmapped": 1
+  },
+  "P1_provenance_unresolved": [],
+  "P1_documents_resolved": [
+    "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2",
+    "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175"
+  ],
+  "P2_excluded": [
+    "LM2592HV",
+    "LM5005",
+    "LM5161",
+    "LM5161-Q1",
+    "LM5164",
+    "LM5164-Q1",
+    "LMR33610",
+    "LMR36502",
+    "LMR38010",
+    "LMR38020",
+    "TPS54160",
+    "TPS542941",
+    "TPS548C26",
+    "TPS563203",
+    "TPS628302",
+    "SiC464"
+  ],
+  "P3_unknowns": [
+    {
+      "part": null,
+      "m4_candidate_id": "cand-f283f3935b82163518c1089c",
+      "identity_class": "unmapped",
+      "missing_ratings": [
+        "vin_min",
+        "vin_max",
+        "vout",
+        "iout_min"
+      ],
+      "note": "electrically unconfirmed; retained, never eliminated"
+    }
+  ],
+  "P4_approx_entries": 0,
+  "P5_interpolation": "disclosed",
+  "P6_ranked_empty": true,
+  "P7_auth": {
+    "no_bearer_http": 401,
+    "bad_bearer_http": 403,
+    "m5_session_route_auth": "none (localhost-only)"
+  },
+  "P8a_failures": [
+    {
+      "error": "release_mismatch",
+      "expected": "curve-evidence-bundle-v2-3b5658b629cc",
+      "actual": "curve-evidence-bundle-v3-5875789dcf3f",
+      "action": "result marked partial; cohort preserved; stale decision data never silently used"
+    }
+  ],
+  "P8a_partial": true,
+  "P8b_failures": [
+    {
+      "error": "release_mismatch",
+      "expected": "curve-evidence-bundle-v2-3b5658b629cc",
+      "actual": "curve-evidence-bundle-v3-5875789dcf3f",
+      "action": "result marked partial; cohort preserved; stale decision data never silently used"
+    }
+  ],
+  "P8b_partial": true,
+  "P8b_cache": {
+    "hit": false,
+    "key": "633ab3fb803f7adbb78d4015",
+    "release_identity_cache": "hit"
+  },
+  "P8c_cache": {
+    "hit": false,
+    "key": "87492b2dd6da3bb44a66484f",
+    "release_identity_cache": "hit"
+  },
+  "P8c_failures": [
+    {
+      "error": "release_mismatch",
+      "expected": "curve-evidence-bundle-v2-3b5658b629cc",
+      "actual": "curve-evidence-bundle-v3-5875789dcf3f",
+      "action": "result marked partial; cohort preserved; stale decision data never silently used"
+    }
+  ],
+  "P8c_partial": true,
+  "P8c_defect_detected": false,
+  "P8c_defect_now": [
+    {
+      "error": "release_mismatch",
+      "expected": "curve-evidence-bundle-v2-3b5658b629cc",
+      "actual": "curve-evidence-bundle-v3-5875789dcf3f",
+      "action": "result marked partial; cohort preserved; stale decision data never silently used"
+    }
+  ],
+  "in_cohort_scenarios": {
+    "P10_in_cohort_supported_ranking": {
+      "mode": "discovery_cohort",
+      "in_cohort": true,
+      "out_of_cohort": false,
+      "ranking_strictly_in_cohort": true,
+      "m4_universe_substituted": false,
+      "assertion_holds": true,
+      "candidates_sent": 1577,
+      "m4_received": 1577,
+      "m4_matched": 0,
+      "ranked": 0,
+      "excluded": 0,
+      "unknown_retained": 0,
+      "unresolved_no_evidence": 1577,
+      "unmapped": 951,
+      "unknown_unplaced_included": 0,
+      "candidates_sha256": "8e070840cc549770e82bb39e3b1be0b42a2d0aff43262e5049e4ce4bab3bbc62",
+      "out_of_population_entries": [],
+      "promotion_blocked_while_normal_path": false
+    },
+    "P11_in_cohort_facet_narrowed": {
+      "mode": "discovery_cohort",
+      "in_cohort": true,
+      "out_of_cohort": false,
+      "ranking_strictly_in_cohort": true,
+      "m4_universe_substituted": false,
+      "assertion_holds": true,
+      "candidates_sent": 127,
+      "m4_received": 127,
+      "m4_matched": 0,
+      "ranked": 0,
+      "excluded": 0,
+      "unknown_retained": 0,
+      "unresolved_no_evidence": 127,
+      "unmapped": 0,
+      "unknown_unplaced_included": 0,
+      "candidates_sha256": "720fddc775697568e40798da267243188a21f7f6d948f1986b268e8748f7ae05",
+      "out_of_population_entries": [],
+      "promotion_blocked_while_normal_path": false
+    },
+    "P12_in_cohort_hard_exclusion": {
+      "mode": "discovery_cohort",
+      "in_cohort": true,
+      "out_of_cohort": false,
+      "ranking_strictly_in_cohort": true,
+      "m4_universe_substituted": false,
+      "assertion_holds": true,
+      "candidates_sent": 1577,
+      "m4_received": 1577,
+      "m4_matched": 0,
+      "ranked": 0,
+      "excluded": 0,
+      "unknown_retained": 0,
+      "unresolved_no_evidence": 1577,
+      "unmapped": 951,
+      "unknown_unplaced_included": 0,
+      "candidates_sha256": "8e070840cc549770e82bb39e3b1be0b42a2d0aff43262e5049e4ce4bab3bbc62",
+      "out_of_population_entries": [],
+      "promotion_blocked_while_normal_path": false
+    },
+    "P13_in_cohort_unknown_heavy": {
+      "mode": "discovery_cohort",
+      "in_cohort": true,
+      "out_of_cohort": false,
+      "ranking_strictly_in_cohort": true,
+      "m4_universe_substituted": false,
+      "assertion_holds": true,
+      "candidates_sent": 971,
+      "m4_received": 971,
+      "m4_matched": 0,
+      "ranked": 0,
+      "excluded": 0,
+      "unknown_retained": 0,
+      "unresolved_no_evidence": 971,
+      "unmapped": 734,
+      "unknown_unplaced_included": 612,
+      "candidates_sha256": "7f546abdc47d7933e05b1e7619b62f3e942d6dae9987f0330da8d9b5feea8855",
+      "out_of_population_entries": [],
+      "promotion_blocked_while_normal_path": false
+    },
+    "P14_in_cohort_empty_population": {
+      "mode": "discovery_cohort",
+      "in_cohort": true,
+      "out_of_cohort": false,
+      "ranking_strictly_in_cohort": true,
+      "m4_universe_substituted": false,
+      "assertion_holds": true,
+      "candidates_sent": 0,
+      "m4_received": 0,
+      "m4_matched": 0,
+      "ranked": 0,
+      "excluded": 0,
+      "unknown_retained": 0,
+      "unresolved_no_evidence": 0,
+      "unmapped": 0,
+      "unknown_unplaced_included": 0,
+      "candidates_sha256": "220fa07cf94ac1bf410fdcf2b19cb134f028a3b5fcf64ccb03ff828529721a55",
+      "out_of_population_entries": [],
+      "promotion_blocked_while_normal_path": false
+    }
+  },
+  "timings_breakdown_P1": {
+    "identity_snapshot_ms": 8.7,
+    "release_identity_ms": 0.4,
+    "cohort_build_ms": 604.4,
+    "candidate_scope_ms": 0.4,
+    "m4_decision_ms": 7.7,
+    "evidence_resolution_ms": 0.2,
+    "release_identity_cache": "hit"
+  },
+  "total_ms_by_scenario": {
+    "P1_normal_supported_ranking": 621.9,
+    "P2_hard_exclusion": 633.5,
+    "P3_unknown_retention": 636.1,
+    "P4_approximate_scenario": 625.8,
+    "P5_interpolation": 630.4,
+    "P6_no_defensible_comparison": 652.6,
+    "P7_auth_failure": null,
+    "P8a_stale_release_cache_miss": 625.4,
+    "P8b_stale_release_cache_hit": 627.2,
+    "P8c_stale_pin_after_unpinned_cache": 642.9,
+    "P10_in_cohort_supported_ranking": 8.8,
+    "P11_in_cohort_facet_narrowed": 621.6,
+    "P12_in_cohort_hard_exclusion": 680.1,
+    "P13_in_cohort_unknown_heavy": 663.0,
+    "P14_in_cohort_empty_population": 633.7
+  }
+}

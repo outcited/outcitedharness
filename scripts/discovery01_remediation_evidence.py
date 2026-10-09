@@ -152,33 +152,53 @@ def check_b3():
 # --- B2: provenance resolution ---------------------------------------------
 
 def check_b2():
-    j = journey(0.5)
-    ans, raw, lat, err = session(j)
-    ev = (ans or {}).get("evidence") or {}
-    entries = ((ans or {}).get("comparisons") or {}).get(
-        "condition_matched_entries") or []
-    cited = ev.get("curve_evidence_ids") or []
-    docs = ev.get("documents") or {}
-    unresolved = ev.get("unresolved_evidence_ids") or []
-    entry_shas = sorted({(e.get("source") or {}).get("document_sha256")
-                         for e in entries
-                         if (e.get("source") or {}).get("document_sha256")})
-    out = {
-        "blocker": "B2",
-        "check": "M4 nested source provenance resolves through the M5 index",
-        "before": {"documents_resolved": 0, "unresolved_evidence_ids": 4,
-                   "cited_evidence_ids": 4,
-                   "source": "results/discovery01-production-readiness/"
-                             "provenance_probe.json"},
-        "after": {
+    """Provenance resolution on both populations.
+
+    Ranked entries with curve evidence only exist where M4 holds evidence,
+    i.e. the transitional M4-universe population (labeled out_of_cohort).
+    The production in-cohort population currently ranks nothing (M4 has no
+    curve evidence for any catalog part), so the honest assertion there is
+    that nothing is cited and nothing is fabricated.
+    """
+    out = {"blocker": "B2",
+           "check": "M4 nested source provenance resolves through the M5 "
+                    "index",
+           "before": {"documents_resolved": 0, "unresolved_evidence_ids": 4,
+                      "cited_evidence_ids": 4,
+                      "source": "results/discovery01-production-readiness/"
+                                "provenance_probe.json"},
+           "after": {}}
+
+    for label, population in (("m4_universe_labeled_out_of_cohort",
+                               "m4_bundle"),
+                              ("discovery_cohort_in_cohort",
+                               "discovery_cohort")):
+        req = journey(0.5, ranking_population=population)             if population != "m4_bundle" else             {**journey(0.5), "ranking_population": population}
+        ans, raw, lat, err = post(
+            M5 + "/v1/discovery/engineering-session", req, SESSION_TOKEN)
+        d = ans or {}
+        ev = d.get("evidence") or {}
+        entries = ((d.get("comparisons") or {}).get(
+            "condition_matched_entries") or [])
+        cited = ev.get("curve_evidence_ids") or []
+        docs = ev.get("documents") or {}
+        unresolved = ev.get("unresolved_evidence_ids") or []
+        entry_shas = sorted({(e.get("source") or {}).get("document_sha256")
+                             for e in entries
+                             if (e.get("source") or {}).get(
+                                 "document_sha256")})
+        out["after"][label] = {
+            "request": req,
             "cited_evidence_ids": cited,
             "documents_resolved": sorted(docs.keys()),
             "documents_resolved_count": len(docs),
             "unresolved_evidence_ids": unresolved,
             "entry_source_sha256": entry_shas,
-            "every_cited_id_resolved": bool(cited) and not unresolved,
-            "sample_document_view": (
-                {k: docs[k] for k in list(docs)[:1]} if docs else {}),
+            "every_cited_id_resolved": (bool(cited) and not unresolved)
+            if cited else None,
+            "resolution_summary": ev.get("resolution"),
+            "provenance_conflicts": ev.get("provenance_conflicts"),
+            "precedence": ev.get("precedence"),
             "per_evidence_id_resolution": {
                 eid: {k: v.get(k) for k in (
                     "resolved", "reason", "resolution_path",
@@ -188,16 +208,25 @@ def check_b2():
                     "evidence_grades", "verification_states",
                     "m4_page_present_in_index", "parts")}
                 for eid, v in (ev.get("evidence_ids") or {}).items()},
-            "resolution_summary": ev.get("resolution"),
-            "precedence": ev.get("precedence"),
-            "provenance_conflicts": ev.get("provenance_conflicts"),
+            "documents_view": docs,
+            "ranked_entries": len(entries),
             "latency_ms": lat,
             "semantic_sha256": semantic(raw),
-        },
-        "errors": [err] if err else [],
-        "pass": bool(cited) and not unresolved and len(docs) >= len(
-            entry_shas),
-    }
+            "errors_warnings": err or [],
+        }
+
+    leg = out["after"]["m4_universe_labeled_out_of_cohort"]
+    inc = out["after"]["discovery_cohort_in_cohort"]
+    out["pass"] = bool(
+        leg["cited_evidence_ids"]
+        and not leg["unresolved_evidence_ids"]
+        and leg["documents_resolved_count"] >= len(leg["entry_source_sha256"])
+        and all(v["resolved"] for v in
+                leg["per_evidence_id_resolution"].values())
+        and not leg["provenance_conflicts"]
+        and inc["cited_evidence_ids"] == []
+        and inc["unresolved_evidence_ids"] == []
+        and inc["documents_resolved_count"] == 0)
     write("b2_provenance_resolution", out)
     return out
 

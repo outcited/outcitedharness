@@ -31,13 +31,17 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "results/discovery01-production-readiness"
+OUT = Path(os.environ.get(
+    "READINESS_OUT_DIR",
+    str(ROOT / "results/discovery01-production-readiness")))
 ANCHOR = OUT / "restart_anchor.json"
 
 M5 = os.environ.get("PILOT_M5_URL", "http://127.0.0.1:8796")
 M4 = os.environ.get("PILOT_M4_URL", "http://127.0.0.1:8798")
 TOKEN = os.environ.get("PILOT_M4_TOKEN") or os.environ.get(
     "M4_BEARER_TOKEN", "")
+SESSION_TOKEN = os.environ.get("PILOT_M5_TOKEN") or os.environ.get(
+    "SEARCH_SESSION_TOKEN", "")
 
 
 def _post(url, body, token=None, timeout=120):
@@ -59,8 +63,9 @@ def _post(url, body, token=None, timeout=120):
             {"transport_error": f"{type(e).__name__}: {e}"}
 
 
-def _session(body, token=TOKEN):
-    return _post(M5 + "/v1/discovery/engineering-session", body, token)
+def _session(body, token=None):
+    return _post(M5 + "/v1/discovery/engineering-session", body,
+                 SESSION_TOKEN if token is None else token)
 
 
 def _semantic(raw) -> str:
@@ -103,6 +108,16 @@ def _record(name, body, ans, raw, latency, err, replay_raw=None):
             "m4_transport": rel.get("m4_transport"),
             "comparison_fingerprint": rel.get("comparison_fingerprint"),
         },
+        "ranking_population": {
+            k: (d.get("ranking_population") or {}).get(k) for k in (
+                "mode", "in_cohort", "out_of_cohort",
+                "ranking_strictly_in_cohort", "m4_universe_substituted",
+                "assertion_holds", "candidates_sent", "m4_received",
+                "m4_matched", "ranked", "excluded", "unknown_retained",
+                "unresolved_no_evidence", "unmapped",
+                "unknown_unplaced_included", "candidates_sha256",
+                "out_of_population_entries",
+                "promotion_blocked_while_normal_path")},
         "comparison_level": comp.get("comparison_level"),
         "ranked_candidates": [
             {"part": e.get("part"), "value": e.get("value"),
@@ -153,12 +168,20 @@ def _record(name, body, ans, raw, latency, err, replay_raw=None):
     }
 
 
-def _journey(iout, **extra):
+def _journey(iout, population="m4_bundle", **extra):
+    """Legacy M4-universe journeys keep the pinned baselines comparable;
+    population is always explicit (B6) - never inferred."""
     j = {"category": "power",
          "constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": iout},
-         "comparison": {"metric": "efficiency"}}
+         "comparison": {"metric": "efficiency"},
+         "ranking_population": population}
     j.update(extra)
     return j
+
+
+def _cohort_journey(iout, **extra):
+    """The production in-cohort population: M5 discovery controls ranking."""
+    return _journey(iout, population="discovery_cohort", **extra)
 
 
 def _run_scenarios():
@@ -178,6 +201,9 @@ def _run_scenarios():
     a, raw, lat, err = _session(j3)
     records.append(_record("P3_unknown_retention", j3, a, raw, lat, err))
 
+    # approximate stays as-assessed: M5's build_m4_question does not emit
+    # M4's mode/approximate field (OH2, a non-blocker), so this scenario
+    # records the honest degraded state rather than pretending otherwise.
     j4 = _journey(0.5, comparison={"metric": "efficiency",
                                    "approximate": True})
     a, raw, lat, err = _session(j4)
@@ -237,6 +263,35 @@ def _run_scenarios():
     rec["defect_detected"] = bool(
         (rec.get("cache") or {}).get("hit") and not rec.get("failures"))
     records.append(rec)
+
+    # --- production (in-cohort) population: the B6 architecture ---------
+    ic1 = _cohort_journey(0.5)
+    a, raw, lat, err = _session(ic1)
+    _, raw2, _, _ = _session(ic1)
+    records.append(_record("P10_in_cohort_supported_ranking", ic1, a, raw,
+                           lat, err, raw2))
+    ic2 = _cohort_journey(0.5, constraints={"vin_v": 48.0, "vout_v": 5.0,
+                                            "iout_a": 0.5,
+                                            "family": "CoolSiC"})
+    a, raw, lat, err = _session(ic2)
+    records.append(_record("P11_in_cohort_facet_narrowed", ic2, a, raw, lat,
+                           err))
+    ic3 = _cohort_journey(3.0)
+    a, raw, lat, err = _session(ic3)
+    records.append(_record("P12_in_cohort_hard_exclusion", ic3, a, raw, lat,
+                           err))
+    ic4 = _cohort_journey(0.5, constraints={"vin_v": 48.0, "vout_v": 5.0,
+                                            "iout_a": 0.5,
+                                            "rds_on_ohm": "<5 mOhm"})
+    a, raw, lat, err = _session(ic4)
+    records.append(_record("P13_in_cohort_unknown_heavy", ic4, a, raw, lat,
+                           err))
+    ic5 = _cohort_journey(0.5, constraints={"vin_v": 48.0, "vout_v": 5.0,
+                                            "iout_a": 0.5,
+                                            "vendor": "no-such-vendor"})
+    a, raw, lat, err = _session(ic5)
+    records.append(_record("P14_in_cohort_empty_population", ic5, a, raw,
+                           lat, err))
 
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "pilot_records.json").write_text(
@@ -356,6 +411,10 @@ def main() -> int:
         "P8c_failures": recs[9]["failures"],
         "P8c_partial": recs[9]["partial_result"],
         "P8c_defect_detected": recs[9]["defect_detected"],
+        "P8c_defect_now": recs[9].get("failures"),
+        "in_cohort_scenarios": {
+            r["scenario"]: r["ranking_population"] for r in recs
+            if r["scenario"].startswith(("P10", "P11", "P12", "P13", "P14"))},
         "timings_breakdown_P1": recs[0].get("timings_ms"),
         "total_ms_by_scenario": {r["scenario"]: r.get("total_ms")
                                  for r in recs},

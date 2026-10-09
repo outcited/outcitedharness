@@ -33,8 +33,8 @@
     },
     "m5_flag_off_is_404": 404,
     "m5_flag_on_with_token_is_200": 200,
-    "m4_sha": "3c183d49d2806d7aa09303ae56c23c29d7cdef6f",
-    "m5_sha": "324e542c8f19221f962acf5db05a8da138aab0f9"
+    "m4_sha": "f02f08a21021240de11e951749613b1123ef2071",
+    "m5_sha": "73b575e6b8a7f1859335f8c8cfa26103fd57fd6c"
   },
   "pass": true
 }

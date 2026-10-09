@@ -1,0 +1,29 @@
+{
+  "ranked_entries": 0,
+  "evidence_ids_cited": [],
+  "documents_resolved_by_m5": {},
+  "unresolved_evidence_ids": [],
+  "resolver": "m5-search-index",
+  "entry_provenance_location": "entry.source.document_sha256",
+  "resolver_reads": [
+    "entry.document_sha256",
+    "entry.datasheet_sha256"
+  ],
+  "source_document_sha256_present_on_entries": 0,
+  "those_shas_active_units_in_m5_index": {},
+  "provenance_data_exists_but_unresolved": false,
+  "catalog_unhashed_claims": "328/86736",
+  "catalog_unhashed_distinct_docs": "6/1617",
+  "facet03_evidence_grade_active_units": "315318/356061 (88.6%)",
+  "facet03_quote_absent_in_substrate": 58,
+  "facet03_quote_unverifiable_stems": 120,
+  "facet03_unresolved_stems": [
+    "BQ2000T",
+    "BQ24003",
+    "BQ24008",
+    "BQ24071",
+    "BQ24401"
+  ],
+  "m4_bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+  "m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f"
+}
