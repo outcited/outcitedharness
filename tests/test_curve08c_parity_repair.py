@@ -149,8 +149,14 @@ class AuthContractTests(unittest.TestCase):
     def test_valid_bearer_passes(self):
         self.assertIsNone(self._handler_status("Bearer k1"))
 
-    def test_no_token_configured_disables_auth(self):
+    def test_no_token_configured_fails_closed(self):
+        """CURVE-08D (DISCOVERY-01 B4) INVERTS the previous lock here, which
+        asserted that a missing token disabled auth. A missing secret must
+        never open a protected route: it is now 503 auth_not_configured.
+        See tests/test_curve08d_auth_fail_closed.py for the full posture
+        (loopback opt-in, bind guards, constant-time comparison)."""
         os.environ.pop("ENGINEERING_DECISIONS_TOKEN", None)
+        os.environ.pop("ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH", None)
         import harness.electronics.decision_api as svc  # noqa: F401
         h = svc.Handler.__new__(svc.Handler)
 
@@ -158,4 +164,4 @@ class AuthContractTests(unittest.TestCase):
             def get(self, k, default=None):
                 return None
         h.headers = H()
-        self.assertIsNone(h.auth_status())
+        self.assertEqual(h.auth_status(), 503)

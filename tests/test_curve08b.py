@@ -90,18 +90,32 @@ def _get(port: int, path: str, token=None):
 
 
 class LiveServer:
-    """Real HTTP server on an ephemeral port; flag + optional token."""
+    """Real HTTP server on an ephemeral port; flag + optional token.
+
+    CURVE-08D (DISCOVERY-01 B4): auth now fails closed, so a server started
+    without a token uses the explicit loopback development posture
+    (ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH=1 with a loopback bind and
+    loopback clients). These suites exercise decision behaviour, not auth;
+    the auth contract itself is locked in
+    tests/test_curve08d_auth_fail_closed.py."""
 
     def __init__(self, enabled=True, token=None):
         self._old = {
             k: os.environ.get(k)
             for k in ("ENGINEERING_DECISIONS_ENABLED",
-                      "ENGINEERING_DECISIONS_TOKEN", "HARNESS_REPO_ROOT")
+                      "ENGINEERING_DECISIONS_TOKEN", "HARNESS_REPO_ROOT",
+                      "ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH",
+                      "ENGINEERING_DECISIONS_HOST")
         }
         os.environ["HARNESS_REPO_ROOT"] = str(REPO)
         os.environ["ENGINEERING_DECISIONS_ENABLED"] = "1" if enabled else ""
+        os.environ["ENGINEERING_DECISIONS_HOST"] = "127.0.0.1"
         if token:
             os.environ["ENGINEERING_DECISIONS_TOKEN"] = token
+            os.environ.pop("ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH", None)
+        else:
+            os.environ.pop("ENGINEERING_DECISIONS_TOKEN", None)
+            os.environ["ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH"] = "1"
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.port = self.server.server_address[1]
         self.thread = threading.Thread(

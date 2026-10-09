@@ -16,8 +16,16 @@ mandate, documented in CURVE_08B_ARCHITECTURE.md.
 
 Feature flag: the decisions route answers only when
 ENGINEERING_DECISIONS_ENABLED is truthy ("1"/"true"/"yes"); otherwise
-404 ``feature_disabled``. Optional bearer auth via
-ENGINEERING_DECISIONS_TOKEN. Default bind 127.0.0.1:8793.
+404 ``feature_disabled``. Bearer auth via ENGINEERING_DECISIONS_TOKEN is
+REQUIRED for the protected routes and fails closed: with no token
+configured they answer 503 ``auth_not_configured`` rather than serving
+decisions unauthenticated (CURVE-08D / DISCOVERY-01 B4). 401 = no bearer
+presented, 403 = bearer presented but invalid; comparison is
+constant-time. Loopback development without a token requires the explicit
+ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH=1 opt-in together with a loopback
+bind and a loopback client. Default bind 127.0.0.1:8793; a non-local bind
+is refused unless ENGINEERING_DECISIONS_ALLOW_REMOTE=1. Secrets come from
+the environment only.
 
 Fail-closed law (R10): a missing or tampered evidence bundle is a 500
 ``evidence_source_unavailable`` / ``evidence_bundle_tampered`` — it can
@@ -31,6 +39,7 @@ frozen fixtures are byte-stable.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -65,6 +74,24 @@ _NATIVE_RULES = {"vin_min", "vin_max", "iout_min", "vout", "temp_max",
 _METRICS = {"efficiency": "efficiency_vs_load"}
 _MODES = {"condition_matched", "approximate", "condition_matched+approximate"}
 _EVIDENCE_POLICIES = {"machine_verified_advisory"}
+
+# --- auth posture (CURVE-08D / DISCOVERY-01 B4): fail closed ---------------
+_LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "::1")
+_LOOPBACK_CLIENTS = ("127.0.0.1", "::1")
+_AUTH_ERRORS = {
+    401: ("unauthorized", "bearer token required"),
+    403: ("forbidden", "invalid bearer token"),
+    503: ("auth_not_configured",
+          "this route is protected but ENGINEERING_DECISIONS_TOKEN is not "
+          "set; auth fails closed rather than serving decisions "
+          "unauthenticated — configure a bearer token, or for loopback "
+          "development only set "
+          "ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH=1"),
+}
+
+
+def _env_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes")
 
 _CATEGORIES = {"power"}
 _SUBCATEGORY_ALIASES = {
@@ -795,6 +822,30 @@ _LAWS = [
 
 # --- HTTP front door (stdlib; feature-flagged; localhost default) ---------
 
+def _client_host(handler) -> Optional[str]:
+    addr = getattr(handler, "client_address", None)
+    return addr[0] if addr else None
+
+
+def _bind_host() -> str:
+    return os.environ.get("ENGINEERING_DECISIONS_HOST", "127.0.0.1")
+
+
+def _local_noauth_allowed(client_host: Optional[str]) -> bool:
+    """Explicit loopback development posture — never the default, and it
+    never travels with a non-loopback bind or a remote client."""
+    if not _env_flag("ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH"):
+        return False
+    if _bind_host() not in _LOOPBACK_HOSTS:
+        return False
+    return client_host in _LOOPBACK_CLIENTS
+
+
+def _auth_error(status: int) -> dict:
+    code, detail = _AUTH_ERRORS[status]
+    return {"error": {"code": code, "detail": detail}}
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -814,15 +865,22 @@ class Handler(BaseHTTPRequestHandler):
     def auth_status(self) -> Optional[int]:
         """CURVE-08C remediation #5: distinguish 401 (no bearer presented)
         from 403 (a bearer was presented but is invalid). Returns None when
-        authorized. No token configured => auth disabled (localhost/flag
-        posture unchanged)."""
-        token = os.environ.get("ENGINEERING_DECISIONS_TOKEN")
-        if not token:
-            return None
+        authorized.
+
+        CURVE-08D (DISCOVERY-01 B4): auth FAILS CLOSED. No token configured
+        => 503 (the protected route never becomes open); the only exception
+        is the explicit loopback development posture, which requires
+        ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH=1 AND a loopback bind AND a
+        loopback client. Comparison is constant-time."""
+        token = (os.environ.get("ENGINEERING_DECISIONS_TOKEN") or "").strip()
         header = self.headers.get("Authorization") or ""
+        if not token:
+            if _local_noauth_allowed(_client_host(self)):
+                return None
+            return 503
         if not header:
             return 401
-        if header != f"Bearer {token}":
+        if not hmac.compare_digest(header, f"Bearer {token}"):
             return 403
         return None
 
@@ -853,11 +911,7 @@ class Handler(BaseHTTPRequestHandler):
             if m:
                 status = self.auth_status()
                 if status is not None:
-                    return self._json(status, {"error": {
-                        "code": ("unauthorized" if status == 401
-                                 else "forbidden"),
-                        "detail": ("bearer token required" if status == 401
-                                   else "invalid bearer token")}})
+                    return self._json(status, _auth_error(status))
                 repo_root = Path(os.environ.get(
                     "HARNESS_REPO_ROOT",
                     str(Path(__file__).resolve().parents[2])))
@@ -885,10 +939,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         auth = self.auth_status()
         if auth is not None:
-            return self._json(auth, {"error": {
-                "code": ("unauthorized" if auth == 401 else "forbidden"),
-                "detail": ("bearer token required" if auth == 401
-                           else "invalid bearer token")}})
+            return self._json(auth, _auth_error(auth))
         if not _flag():
             return self._json(404, {"error": {
                 "code": "feature_disabled",
@@ -918,8 +969,29 @@ def _flag() -> bool:
 
 
 def main(listen=None):
-    host = os.environ.get("ENGINEERING_DECISIONS_HOST", "127.0.0.1")
+    host = _bind_host()
     port = int(os.environ.get("ENGINEERING_DECISIONS_PORT", "8793"))
+    # Mirror of M5's guard (DISCOVERY-01 B4): never expose this service
+    # beyond loopback without an explicit, informed opt-in.
+    if host not in _LOOPBACK_HOSTS and \
+            not _env_flag("ENGINEERING_DECISIONS_ALLOW_REMOTE"):
+        raise SystemExit(
+            "refusing to bind non-localhost by default: set "
+            "ENGINEERING_DECISIONS_ALLOW_REMOTE=1 only after authentication "
+            "and network access policy are configured")
+    # Fail closed at startup: an enabled decisions route without a bearer
+    # secret would otherwise serve unauthenticated (503 per request). The
+    # only exception is the explicit loopback development posture.
+    if _flag() and not (os.environ.get("ENGINEERING_DECISIONS_TOKEN")
+                        or "").strip():
+        if not (_env_flag("ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH")
+                and host in _LOOPBACK_HOSTS):
+            raise SystemExit(
+                "refusing to serve engineering decisions without "
+                "ENGINEERING_DECISIONS_TOKEN: auth fails closed. Configure a "
+                "bearer token, or for loopback development only set "
+                "ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH=1 with a "
+                "loopback bind")
     ThreadingHTTPServer((host, port), Handler).serve_forever()
 
 
