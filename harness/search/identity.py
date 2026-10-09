@@ -36,9 +36,11 @@ KINDS = ("category", "subcategory", "functional_class", "manufacturer",
 STATUSES = ("verified", "proposed", "ambiguous", "unknown")
 REL_TYPES = ("contains", "member_of", "variant_of", "resolves_to")
 # Closed set. A string-similarity rule does not exist and must not be added
-# without owner review (PRD-FACET-03 R1).
+# without owner review (PRD-FACET-03 R1). series_designator_v1: the
+# designator is printed inside an already-verified membership quote (same
+# sha+page+verbatim evidence, one grain down) — evidence, not name parsing.
 NORM_RULES = ("front_matter_vocab_v1", "pairs_manifest", "vault_documents",
-              "vault_mpns", "catalog_parts")
+              "vault_mpns", "catalog_parts", "series_designator_v1")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS identities (

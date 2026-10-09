@@ -433,3 +433,29 @@ def test_promote_packet_success_is_exact_and_auditable(tmp_path):
         identity.promote_packet(icon, family_id=fam2, packet_path=path2,
                                 expected_packet_sha256=sha2,
                                 expected_population=1, approval_ref="  ")
+
+
+# --- series-grain extraction (roadmap item 1) ------------------------------
+
+def test_series_extraction_cases():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    from facet03_series_backfill import extract_series
+    # printed designators captured
+    assert extract_series("CoolMOS", "600V CoolMOS C7 Power Device")[1] == "C7"
+    assert extract_series("CoolMOS", "CoolMOS™ CFD2 650V")[1] == "CFD2"
+    assert extract_series("CoolSiC", "CoolSiC MOSFET G1")[1] == "G1"
+    assert extract_series("OptiMOS", "OptiMOS 2 Power Transistor") == \
+        ("OptiMOS 2", "2")
+    assert extract_series("StrongIRFET", "StrongIRFET 2 Power-Transistor")[1] \
+        == "2"
+    # prose can never match (case-sensitive all-caps rule)
+    assert extract_series("CoolMOS", "CoolMOS is a revolutionary technology") \
+        is None
+    assert extract_series("CoolMOS", "CoolMOS Power Transistor family") is None
+    # printed acronyms are not designators
+    assert extract_series("CoolSiC", "CoolSiC MOSFET module") is None
+    # ambiguous (two designators) -> None, never guessed
+    assert extract_series("CoolMOS", "bridging CoolMOS C7 and CoolMOS P7") \
+        is None
+    # unknown family label -> None
+    assert extract_series("NoSuchFamily", "X C7") is None
