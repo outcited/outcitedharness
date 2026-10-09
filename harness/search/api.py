@@ -53,6 +53,7 @@ _ALLOWED_FILTERS = ("vendor", "family", "category", "grain",
                     "min_verification", "include_retired", "evidence_grade")
 
 _EMBEDDER = None
+_SESSION_CACHE = None
 
 
 def _embed():
@@ -220,8 +221,55 @@ class Handler(BaseHTTPRequestHandler):
                 out[k] = urllib.parse.unquote_plus(v)
         return out
 
+    def _engineering_session(self):
+        import sqlite3
+        from harness.search import orchestrator
+        n = int(self.headers.get("Content-Length") or 0)
+        try:
+            req = json.loads(self.rfile.read(n) or b"{}")
+        except json.JSONDecodeError:
+            return self._json(400, {"error": "bad json"})
+        catalog = sqlite3.connect(f"file:{CATALOG}?mode=ro", uri=True)
+        catalog.row_factory = sqlite3.Row
+        search = sqlite3.connect(f"file:{SEARCH_DB}?mode=ro", uri=True)
+        search.row_factory = sqlite3.Row
+        icon = identity_mod.connect(IDENTITY_DB) \
+            if os.path.exists(IDENTITY_DB) else None
+        m4_url = os.environ.get("SEARCH_M4_URL")
+        global _SESSION_CACHE
+        if _SESSION_CACHE is None:
+            _SESSION_CACHE = orchestrator.SessionCache(max_entries=64)
+        try:
+            transport = (orchestrator.m4_client.make_transport(
+                "http", base_url=m4_url) if m4_url else
+                orchestrator.m4_client.make_transport("frozen"))
+            result = orchestrator.engineering_session(
+                req, catalog_con=catalog, search_con=search,
+                identity_con=icon,
+                aisle_map=indexer_mod.aisle_map_from_wave(POWER_WAVE),
+                transport=transport, cache=_SESSION_CACHE)
+            return self._json(200, result)
+        except ValueError as e:
+            return self._json(422, {"error": str(e)})
+        except Exception as e:  # fail closed, never a false empty cohort
+            return self._json(500, {
+                "error": "orchestration_failed",
+                "detail": f"{type(e).__name__}: {e}"})
+        finally:
+            catalog.close()
+            search.close()
+            if icon is not None:
+                icon.close()
+
     def do_POST(self):
-        if self.path.partition("?")[0] != "/v1/search":
+        route = self.path.partition("?")[0]
+        if route == "/v1/discovery/engineering-session":
+            # feature flag (R9/R10.20): off => route does not exist;
+            # existing API behavior is untouched
+            if os.environ.get("SEARCH_ENABLE_ENGINEERING_SESSION") != "1":
+                return self._json(404, {"error": "unknown route"})
+            return self._engineering_session()
+        if route != "/v1/search":
             return self._json(404, {"error": "unknown route"})
         n = int(self.headers.get("Content-Length") or 0)
         try:

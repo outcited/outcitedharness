@@ -1,0 +1,1852 @@
+{
+  "journeys": {
+    "A_light_load_0p5A": {
+      "answer": {
+        "bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+        "comparison": {
+          "approximate_scenario_entries": [],
+          "comparison_level": {
+            "achieved_level": "cross_manufacturer",
+            "devices": [
+              "LM5161",
+              "SiC461",
+              "SiC463",
+              "SiC464"
+            ],
+            "families": [
+              "LM5161",
+              "SiC46x"
+            ],
+            "law": "levels are reported, never merged into one comparable flag",
+            "levels_present": [
+              "same_configuration",
+              "within_device_configuration",
+              "within_family",
+              "cross_family",
+              "cross_manufacturer"
+            ],
+            "manufacturers": [
+              "texas_instruments",
+              "vishay"
+            ]
+          },
+          "condition_matched_entries": [
+            {
+              "adjudication_state": "human_review_pending",
+              "candidate": "cand-28c13e11eb2077fcae114154",
+              "eligibility_verdict": "eligible",
+              "evidence_class": "unspecified",
+              "evidence_id": "curve-214a8be75c0ffc2980cbe42a72230132",
+              "family": "SiC46x",
+              "guarantee": false,
+              "interpolation": {
+                "conditions": {
+                  "vin_v": 48.0,
+                  "vout_v": 5.0
+                },
+                "limitations": [
+                  "typical printed-curve value, not a guarantee",
+                  "vendor evaluation configuration unless the series legend states otherwise"
+                ],
+                "method": "log10_interpolation_on_digitized_polyline",
+                "operating_point": 0.5,
+                "supporting_points": [
+                  {
+                    "x": 0.499766,
+                    "y": 93.94408
+                  },
+                  {
+                    "x": 0.9766,
+                    "y": 94.399067
+                  }
+                ],
+                "uncertainty": {
+                  "distance_to_nearest_sample": 0.00023400000000001198,
+                  "human_signed": false,
+                  "local_sample_spacing": 0.47683400000000004,
+                  "method": "vector_reference",
+                  "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                  "numeric_quality": {
+                    "points_outside_axis_pct": 0.0,
+                    "retained_point_fraction": 1.0,
+                    "x_fit_residual_pct_of_span": 0.010076,
+                    "y_fit_residual_pct_of_span": 0.011728
+                  },
+                  "point_error_pct": null,
+                  "resolution": 0.1122038009017095
+                }
+              },
+              "manufacturer": "vishay",
+              "matched_conditions": {
+                "vin_v": 48.0,
+                "vout_v": 5.0
+              },
+              "part": "SiC461",
+              "series": "VIN = 48 V, L = 10 \u03bcH",
+              "source": {
+                "caption": "Fig. 15 - SiC461 Efficiency vs. Output Current - Light Load,",
+                "document_revision": null,
+                "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                "figure_index": 4,
+                "locator": {
+                  "figure_index": 4,
+                  "page_1based": 14,
+                  "region_bbox": null,
+                  "series_index": 2
+                },
+                "manufacturer": "vishay",
+                "page_1based": 14,
+                "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+              },
+              "thermal": {
+                "candidate": "cand-28c13e11eb2077fcae114154",
+                "electrical_rating_present": false,
+                "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits",
+                "thermal_curve_evidence": 2,
+                "thermal_feasibility": "curve_evidence_advisory"
+              },
+              "unit": "%",
+              "value": 93.94439791602247
+            },
+            {
+              "adjudication_state": "human_review_pending",
+              "candidate": "cand-f267b92f67706abb846053ad",
+              "eligibility_verdict": "eligible",
+              "evidence_class": "unspecified",
+              "evidence_id": "curve-c7b2d232869d82fb1b00a5b2a3477542",
+              "family": "SiC46x",
+              "guarantee": false,
+              "interpolation": {
+                "conditions": {
+                  "vin_v": 48.0,
+                  "vout_v": 5.0
+                },
+                "limitations": [
+                  "typical printed-curve value, not a guarantee",
+                  "vendor evaluation configuration unless the series legend states otherwise"
+                ],
+                "method": "log10_interpolation_on_digitized_polyline",
+                "operating_point": 0.5,
+                "supporting_points": [
+                  {
+                    "x": 0.495223,
+                    "y": 92.939042
+                  },
+                  {
+                    "x": 0.545094,
+                    "y": 93.103949
+                  }
+                ],
+                "uncertainty": {
+                  "distance_to_nearest_sample": 0.004776999999999976,
+                  "human_signed": false,
+                  "local_sample_spacing": 0.04987099999999994,
+                  "method": "vector_reference",
+                  "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                  "numeric_quality": {
+                    "points_outside_axis_pct": 0.0,
+                    "retained_point_fraction": 1.0,
+                    "x_fit_residual_pct_of_span": 0.010071,
+                    "y_fit_residual_pct_of_span": 0.011719
+                  },
+                  "point_error_pct": null,
+                  "resolution": 0.05424504770202576
+                }
+              },
+              "manufacturer": "vishay",
+              "matched_conditions": {
+                "vin_v": 48.0,
+                "vout_v": 5.0
+              },
+              "part": "SiC463",
+              "series": "VIN = 48 V, L = 22 \u03bcH",
+              "source": {
+                "caption": "Fig. 27 - SiC463 Efficiency vs. Output Current - Light Load,",
+                "document_revision": null,
+                "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                "figure_index": 2,
+                "locator": {
+                  "figure_index": 2,
+                  "page_1based": 16,
+                  "region_bbox": null,
+                  "series_index": 2
+                },
+                "manufacturer": "vishay",
+                "page_1based": 16,
+                "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+              },
+              "thermal": {
+                "candidate": "cand-f267b92f67706abb846053ad",
+                "electrical_rating_present": false,
+                "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits",
+                "thermal_curve_evidence": 2,
+                "thermal_feasibility": "curve_evidence_advisory"
+              },
+              "unit": "%",
+              "value": 92.9555411613481
+            },
+            {
+              "adjudication_state": "human_review_pending",
+              "candidate": "cand-ec255579cfbd9bd3d12559b4",
+              "eligibility_verdict": "eligible",
+              "evidence_class": "unspecified",
+              "evidence_id": "curve-29bbf05fc94f0678e06b0d8cf7968914",
+              "family": "SiC46x",
+              "guarantee": false,
+              "interpolation": {
+                "conditions": {
+                  "vin_v": 48.0,
+                  "vout_v": 5.0
+                },
+                "limitations": [
+                  "typical printed-curve value, not a guarantee",
+                  "vendor evaluation configuration unless the series legend states otherwise"
+                ],
+                "method": "log10_interpolation_on_digitized_polyline",
+                "operating_point": 0.5,
+                "supporting_points": [
+                  {
+                    "x": 0.495298,
+                    "y": 92.938593
+                  },
+                  {
+                    "x": 0.545021,
+                    "y": 93.103492
+                  }
+                ],
+                "uncertainty": {
+                  "distance_to_nearest_sample": 0.004701999999999984,
+                  "human_signed": false,
+                  "local_sample_spacing": 0.04972299999999996,
+                  "method": "vector_reference",
+                  "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                  "numeric_quality": {
+                    "points_outside_axis_pct": 0.0,
+                    "retained_point_fraction": 1.0,
+                    "x_fit_residual_pct_of_span": 0.010076,
+                    "y_fit_residual_pct_of_span": 0.011728
+                  },
+                  "point_error_pct": null,
+                  "resolution": 0.05424642664521939
+                }
+              },
+              "manufacturer": "vishay",
+              "matched_conditions": {
+                "vin_v": 48.0,
+                "vout_v": 5.0
+              },
+              "part": "SiC464",
+              "series": "VIN = 48 V, L = 22 \u03bcH",
+              "source": {
+                "caption": "Fig. 33 - SiC464 Efficiency vs. Output Current - Light Load,",
+                "document_revision": null,
+                "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                "figure_index": 4,
+                "locator": {
+                  "figure_index": 4,
+                  "page_1based": 17,
+                  "region_bbox": null,
+                  "series_index": 2
+                },
+                "manufacturer": "vishay",
+                "page_1based": 17,
+                "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+              },
+              "thermal": {
+                "candidate": "cand-ec255579cfbd9bd3d12559b4",
+                "electrical_rating_present": false,
+                "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits",
+                "thermal_curve_evidence": 0,
+                "thermal_feasibility": "unconfirmed"
+              },
+              "unit": "%",
+              "value": 92.95487954326245
+            },
+            {
+              "adjudication_state": "human_review_pending",
+              "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+              "eligibility_verdict": "eligible",
+              "evidence_class": "typical",
+              "evidence_id": "curve-a697319a16d26592db2cc14cf6843bd0",
+              "family": "LM5161",
+              "guarantee": false,
+              "interpolation": {
+                "conditions": {
+                  "vin_v": 48.0,
+                  "vout_v": 5.0
+                },
+                "limitations": [
+                  "typical printed-curve value, not a guarantee",
+                  "vendor evaluation configuration unless the series legend states otherwise"
+                ],
+                "method": "log10_interpolation_on_digitized_polyline",
+                "operating_point": 0.5,
+                "supporting_points": [
+                  {
+                    "x": 0.480276,
+                    "y": 77.544651
+                  },
+                  {
+                    "x": 0.500008,
+                    "y": 77.947666
+                  }
+                ],
+                "uncertainty": {
+                  "distance_to_nearest_sample": 8.000000000008e-06,
+                  "human_signed": false,
+                  "local_sample_spacing": 0.019732000000000027,
+                  "method": "vector_reference",
+                  "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                  "numeric_quality": {
+                    "points_outside_axis_pct": 0.0,
+                    "retained_point_fraction": 1.0,
+                    "x_fit_residual_pct_of_span": 0.010112,
+                    "y_fit_residual_pct_of_span": 0.013837
+                  },
+                  "point_error_pct": null,
+                  "resolution": 0.02606551151802139
+                }
+              },
+              "manufacturer": "texas_instruments",
+              "matched_conditions": {
+                "vin_v": 48.0,
+                "vout_v": 5.0
+              },
+              "part": "LM5161",
+              "series": "VIN = 48 V",
+              "source": {
+                "caption": "Figure 2. Efficiency at 300 kHz",
+                "document_revision": null,
+                "document_sha256": "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2",
+                "figure_index": 0,
+                "locator": {
+                  "figure_index": 0,
+                  "page_1based": 7,
+                  "region_bbox": null,
+                  "series_index": 4
+                },
+                "manufacturer": "texas_instruments",
+                "page_1based": 7,
+                "source_artifact": "dcdc_LM5161.pdf"
+              },
+              "thermal": {
+                "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+                "electrical_rating_present": false,
+                "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits",
+                "thermal_curve_evidence": 0,
+                "thermal_feasibility": "unconfirmed"
+              },
+              "unit": null,
+              "value": 77.94750584892213
+            }
+          ]
+        },
+        "counts": {
+          "candidates_missing_curve_evidence": 10,
+          "candidates_requiring_verification": 11,
+          "candidates_with_comparable_curve_evidence": 4,
+          "candidates_with_noncomparable_evidence": 1,
+          "evidence_rows_attached": 123,
+          "hard_eligible_candidates": 14,
+          "parametrically_compatible_candidates": 14,
+          "total_candidates": 21
+        },
+        "evidence_availability": {
+          "cand-1a9c0f9250056d04853bf98e": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-28c13e11eb2077fcae114154": {
+            "refusals": [
+              {
+                "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+                "reason": "legend_ambiguity"
+              },
+              {
+                "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+                "reason": "legend_ambiguity"
+              },
+              {
+                "evidence_id": "curve-5b73b5ebde8c0fe9db1badda5f73c7a4",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-2f18767e2ea555843e2b9c14defa3f1a",
+                "reason": "condition_mismatch"
+              }
+            ],
+            "rows": 5,
+            "state": "comparable"
+          },
+          "cand-581c8b96deea762c2d21ac1e": {
+            "refusals": [
+              {
+                "evidence_id": "curve-5c807b48ee14995da881785195ec0651",
+                "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model"
+              },
+              {
+                "evidence_id": "curve-29d5ab880c248c38873de631bd685fa1",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-2bb878bfadee6675513e4ae88080aca9",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9",
+                "reason": "condition_mismatch"
+              }
+            ],
+            "rows": 5,
+            "state": "non_comparable"
+          },
+          "cand-65c4c8dd2fa2a90017f0306f": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-8b3602792a4a9cea8d6f1b09": {
+            "refusals": [
+              {
+                "evidence_id": "curve-92906b1690d609b0e0b58a76b47f7da5",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-1215be5628cd6db70dadaeae310a7afd",
+                "reason": "condition_missing"
+              },
+              {
+                "evidence_id": "curve-16f0696c93fa37ccab5576ccdeaaa548",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-89bcff093ad73c461edfb14d5e4b5f17",
+                "reason": "condition_missing"
+              }
+            ],
+            "rows": 9,
+            "state": "comparable"
+          },
+          "cand-9f01b19f8bac807810d3f486": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-a19e455daad09e97917fa99c": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-a9343715e21c9b386f2542ce": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-b50520b51431172ce131ca81": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-ccbcf344bea83a598284c20f": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-ec255579cfbd9bd3d12559b4": {
+            "refusals": [
+              {
+                "evidence_id": "curve-0d872aedf735bb6100a130a276a012b4",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-39e596c63c7b3082eab69d44bd33b955",
+                "reason": "legend_ambiguity"
+              },
+              {
+                "evidence_id": "curve-9dd4ccbd9c8e7c14803d07b29653bef9",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-32e212532aa0c2eded0a92bdfe921d85",
+                "reason": "condition_mismatch"
+              }
+            ],
+            "rows": 6,
+            "state": "comparable"
+          },
+          "cand-ec351f9f3e5555d65e07592b": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-f267b92f67706abb846053ad": {
+            "refusals": [
+              {
+                "evidence_id": "curve-739161096240deb07c3e870c2187eb77",
+                "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model"
+              },
+              {
+                "evidence_id": "curve-87ca0312bf27aaa7bd43014dccb1ab01",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-76d37962f72527efa6004ff8a894639b",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-af486b741d969d2a7fd14f8d6658c772",
+                "reason": "condition_mismatch"
+              }
+            ],
+            "rows": 9,
+            "state": "comparable"
+          },
+          "cand-f283f3935b82163518c1089c": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-f74987515d0df01cd5810778": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          }
+        },
+        "evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+        "hard_eligibility": {
+          "eligible": [
+            "cand-f74987515d0df01cd5810778",
+            "cand-1a9c0f9250056d04853bf98e",
+            "cand-8b3602792a4a9cea8d6f1b09",
+            "cand-b50520b51431172ce131ca81",
+            "cand-a19e455daad09e97917fa99c",
+            "cand-9f01b19f8bac807810d3f486",
+            "cand-a9343715e21c9b386f2542ce",
+            "cand-ec351f9f3e5555d65e07592b",
+            "cand-65c4c8dd2fa2a90017f0306f",
+            "cand-ccbcf344bea83a598284c20f",
+            "cand-28c13e11eb2077fcae114154",
+            "cand-581c8b96deea762c2d21ac1e",
+            "cand-f267b92f67706abb846053ad",
+            "cand-ec255579cfbd9bd3d12559b4"
+          ],
+          "ineligible": [
+            {
+              "candidate": "cand-33525cd39271d045980cfe06",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LMR33610",
+              "rules": [
+                {
+                  "candidate": "cand-33525cd39271d045980cfe06",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR33610",
+                  "rated": 36.0,
+                  "reason": "VIN rating 36.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-fba64e961f6cbe3c473fea6a",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LMR36502",
+              "rules": [
+                {
+                  "candidate": "cand-fba64e961f6cbe3c473fea6a",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR36502",
+                  "rated": 0.15,
+                  "reason": "rated continuous output 0.15 A must be >= required 0.5 A",
+                  "required": 0.5,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS542941",
+              "rules": [
+                {
+                  "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS542941",
+                  "rated": 18.0,
+                  "reason": "VIN rating 18.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS548C26",
+              "rules": [
+                {
+                  "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS548C26",
+                  "rated": 16.0,
+                  "reason": "VIN rating 16.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS563203",
+              "rules": [
+                {
+                  "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS563203",
+                  "rated": 17.0,
+                  "reason": "VIN rating 17.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS628302",
+              "rules": [
+                {
+                  "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS628302",
+                  "rated": 5.5,
+                  "reason": "VIN rating 5.5 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                },
+                {
+                  "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS628302",
+                  "rated": [
+                    0.5,
+                    4.5
+                  ],
+                  "reason": "output capability [0.5, 4.5] must cover required 5.0 V",
+                  "required": 5.0,
+                  "rule": "vout",
+                  "scope": "output voltage capability",
+                  "verdict": "ineligible"
+                }
+              ]
+            }
+          ],
+          "unknown": [
+            {
+              "candidate": "cand-f283f3935b82163518c1089c",
+              "missing_ratings": [
+                "vin_min",
+                "vin_max",
+                "iout_min",
+                "vout"
+              ],
+              "note": "electrically unconfirmed; retained, never eliminated",
+              "part": null
+            }
+          ]
+        },
+        "laws": [
+          "hard eligibility precedes every curve comparison",
+          "missing ratings are unknown, never failure",
+          "typical values never guarantee performance",
+          "interpolation only inside the digitized domain",
+          "approximate scenarios are labeled separately"
+        ],
+        "question": {
+          "conditions": {
+            "vin_v": 48.0,
+            "vout_v": 5.0
+          },
+          "operating_point": {
+            "unit": "A",
+            "x": 0.5
+          },
+          "phenomenon": "efficiency_vs_load",
+          "requirements": {
+            "iout_min": 0.5,
+            "vin_max": 48.0,
+            "vin_min": 48.0,
+            "vout": 5.0
+          }
+        },
+        "schema": "harness.electronics-decision-answer.v1"
+      },
+      "question": {
+        "conditions": {
+          "vin_v": 48.0,
+          "vout_v": 5.0
+        },
+        "operating_point": {
+          "unit": "A",
+          "x": 0.5
+        },
+        "phenomenon": "efficiency_vs_load",
+        "requirements": {
+          "iout_min": 0.5,
+          "vin_max": 48.0,
+          "vin_min": 48.0,
+          "vout": 5.0
+        }
+      }
+    },
+    "B_load_step_3A": {
+      "answer": {
+        "bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+        "comparison": {
+          "approximate_scenario_entries": [],
+          "comparison_level": {
+            "achieved_level": "within_family",
+            "devices": [
+              "SiC462",
+              "SiC463"
+            ],
+            "families": [
+              "SiC46x"
+            ],
+            "law": "levels are reported, never merged into one comparable flag",
+            "levels_present": [
+              "same_configuration",
+              "within_device_configuration",
+              "within_family"
+            ],
+            "manufacturers": [
+              "vishay"
+            ]
+          },
+          "condition_matched_entries": [
+            {
+              "adjudication_state": "human_review_pending",
+              "candidate": "cand-f267b92f67706abb846053ad",
+              "eligibility_verdict": "eligible",
+              "evidence_class": "unspecified",
+              "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8",
+              "family": "SiC46x",
+              "guarantee": false,
+              "interpolation": {
+                "conditions": {
+                  "vin_v": 48.0,
+                  "vout_v": 5.0
+                },
+                "limitations": [
+                  "typical printed-curve value, not a guarantee",
+                  "vendor evaluation configuration unless the series legend states otherwise"
+                ],
+                "method": "linear_interpolation_on_digitized_polyline",
+                "operating_point": 3.0,
+                "supporting_points": [
+                  {
+                    "x": 2.992312,
+                    "y": 93.706908
+                  },
+                  {
+                    "x": 3.999306,
+                    "y": 93.056975
+                  }
+                ],
+                "uncertainty": {
+                  "distance_to_nearest_sample": 0.007687999999999917,
+                  "human_signed": false,
+                  "local_sample_spacing": 1.0069939999999997,
+                  "method": "vector_reference",
+                  "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                  "numeric_quality": {
+                    "points_outside_axis_pct": 0.0,
+                    "retained_point_fraction": 1.0,
+                    "x_fit_residual_pct_of_span": 0.000288,
+                    "y_fit_residual_pct_of_span": 0.000266
+                  },
+                  "point_error_pct": null,
+                  "resolution": 0.05024000000000006
+                }
+              },
+              "manufacturer": "vishay",
+              "matched_conditions": {
+                "vin_v": 48.0,
+                "vout_v": 5.0
+              },
+              "part": "SiC463",
+              "series": "VIN = 48 V, L = 15 \u03bcH",
+              "source": {
+                "caption": "Fig. 23 - SiC463 Efficiency vs. Output Current,",
+                "document_revision": null,
+                "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                "figure_index": 1,
+                "locator": {
+                  "figure_index": 1,
+                  "page_1based": 16,
+                  "region_bbox": null,
+                  "series_index": 1
+                },
+                "manufacturer": "vishay",
+                "page_1based": 16,
+                "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+              },
+              "thermal": {
+                "candidate": "cand-f267b92f67706abb846053ad",
+                "electrical_rating_present": false,
+                "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits",
+                "thermal_curve_evidence": 2,
+                "thermal_feasibility": "curve_evidence_advisory"
+              },
+              "unit": "%",
+              "value": 93.70194601918979
+            },
+            {
+              "adjudication_state": "human_review_pending",
+              "candidate": "cand-581c8b96deea762c2d21ac1e",
+              "eligibility_verdict": "eligible",
+              "evidence_class": "unspecified",
+              "evidence_id": "curve-5c807b48ee14995da881785195ec0651",
+              "family": "SiC46x",
+              "guarantee": false,
+              "interpolation": {
+                "conditions": {
+                  "vin_v": 48.0,
+                  "vout_v": 5.0
+                },
+                "limitations": [
+                  "typical printed-curve value, not a guarantee",
+                  "vendor evaluation configuration unless the series legend states otherwise"
+                ],
+                "method": "linear_interpolation_on_digitized_polyline",
+                "operating_point": 3.0,
+                "supporting_points": [
+                  {
+                    "x": 2.243496,
+                    "y": 87.948243
+                  },
+                  {
+                    "x": 3.754416,
+                    "y": 93.570973
+                  }
+                ],
+                "uncertainty": {
+                  "distance_to_nearest_sample": 0.754416,
+                  "human_signed": false,
+                  "local_sample_spacing": 1.51092,
+                  "method": "vector_reference",
+                  "note": "deterministic geometry from the vector PDF; human sign-off pending",
+                  "numeric_quality": {
+                    "points_outside_axis_pct": 0.0,
+                    "retained_point_fraction": 1.0,
+                    "x_fit_residual_pct_of_span": 0.000155,
+                    "y_fit_residual_pct_of_span": 0.011732
+                  },
+                  "point_error_pct": null,
+                  "resolution": 0.35835100000000075
+                }
+              },
+              "manufacturer": "vishay",
+              "matched_conditions": {
+                "vin_v": 48.0,
+                "vout_v": 5.0
+              },
+              "part": "SiC462",
+              "series": "VIN = 48 V, L = 8.2 \u03bcH",
+              "source": {
+                "caption": "Fig. 17 - SiC462 Efficiency vs. Output Current,",
+                "document_revision": null,
+                "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                "figure_index": 0,
+                "locator": {
+                  "figure_index": 0,
+                  "page_1based": 15,
+                  "region_bbox": null,
+                  "series_index": 0
+                },
+                "manufacturer": "vishay",
+                "page_1based": 15,
+                "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf"
+              },
+              "thermal": {
+                "candidate": "cand-581c8b96deea762c2d21ac1e",
+                "electrical_rating_present": false,
+                "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits",
+                "thermal_curve_evidence": 2,
+                "thermal_feasibility": "curve_evidence_advisory"
+              },
+              "unit": "%",
+              "value": 90.76349313628782
+            }
+          ]
+        },
+        "counts": {
+          "candidates_missing_curve_evidence": 2,
+          "candidates_requiring_verification": 11,
+          "candidates_with_comparable_curve_evidence": 2,
+          "candidates_with_noncomparable_evidence": 1,
+          "evidence_rows_attached": 123,
+          "hard_eligible_candidates": 4,
+          "parametrically_compatible_candidates": 4,
+          "total_candidates": 21
+        },
+        "evidence_availability": {
+          "cand-28c13e11eb2077fcae114154": {
+            "refusals": [
+              {
+                "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+                "reason": "legend_ambiguity"
+              },
+              {
+                "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+                "reason": "legend_ambiguity"
+              },
+              {
+                "evidence_id": "curve-5b73b5ebde8c0fe9db1badda5f73c7a4",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-2f18767e2ea555843e2b9c14defa3f1a",
+                "reason": "condition_mismatch"
+              }
+            ],
+            "rows": 5,
+            "state": "non_comparable"
+          },
+          "cand-581c8b96deea762c2d21ac1e": {
+            "refusals": [
+              {
+                "evidence_id": "curve-29d5ab880c248c38873de631bd685fa1",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-2bb878bfadee6675513e4ae88080aca9",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+                "reason": "legend_ambiguity"
+              }
+            ],
+            "rows": 5,
+            "state": "comparable"
+          },
+          "cand-ccbcf344bea83a598284c20f": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-f267b92f67706abb846053ad": {
+            "refusals": [
+              {
+                "evidence_id": "curve-739161096240deb07c3e870c2187eb77",
+                "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model"
+              },
+              {
+                "evidence_id": "curve-87ca0312bf27aaa7bd43014dccb1ab01",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-76d37962f72527efa6004ff8a894639b",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-af486b741d969d2a7fd14f8d6658c772",
+                "reason": "condition_mismatch"
+              }
+            ],
+            "rows": 9,
+            "state": "comparable"
+          },
+          "cand-f283f3935b82163518c1089c": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          }
+        },
+        "evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+        "hard_eligibility": {
+          "eligible": [
+            "cand-ccbcf344bea83a598284c20f",
+            "cand-28c13e11eb2077fcae114154",
+            "cand-581c8b96deea762c2d21ac1e",
+            "cand-f267b92f67706abb846053ad"
+          ],
+          "ineligible": [
+            {
+              "candidate": "cand-f74987515d0df01cd5810778",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LM2592HV",
+              "rules": [
+                {
+                  "candidate": "cand-f74987515d0df01cd5810778",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LM2592HV",
+                  "rated": 2.0,
+                  "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-1a9c0f9250056d04853bf98e",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LM5005",
+              "rules": [
+                {
+                  "candidate": "cand-1a9c0f9250056d04853bf98e",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LM5005",
+                  "rated": 2.5,
+                  "reason": "rated continuous output 2.5 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LM5161",
+              "rules": [
+                {
+                  "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LM5161",
+                  "rated": 1.0,
+                  "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-b50520b51431172ce131ca81",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LM5161-Q1",
+              "rules": [
+                {
+                  "candidate": "cand-b50520b51431172ce131ca81",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LM5161-Q1",
+                  "rated": 1.0,
+                  "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-a19e455daad09e97917fa99c",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LM5164",
+              "rules": [
+                {
+                  "candidate": "cand-a19e455daad09e97917fa99c",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LM5164",
+                  "rated": 1.0,
+                  "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-9f01b19f8bac807810d3f486",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LM5164-Q1",
+              "rules": [
+                {
+                  "candidate": "cand-9f01b19f8bac807810d3f486",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LM5164-Q1",
+                  "rated": 1.0,
+                  "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-33525cd39271d045980cfe06",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LMR33610",
+              "rules": [
+                {
+                  "candidate": "cand-33525cd39271d045980cfe06",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR33610",
+                  "rated": 36.0,
+                  "reason": "VIN rating 36.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                },
+                {
+                  "candidate": "cand-33525cd39271d045980cfe06",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR33610",
+                  "rated": 1.0,
+                  "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-fba64e961f6cbe3c473fea6a",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LMR36502",
+              "rules": [
+                {
+                  "candidate": "cand-fba64e961f6cbe3c473fea6a",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR36502",
+                  "rated": 0.15,
+                  "reason": "rated continuous output 0.15 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-a9343715e21c9b386f2542ce",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LMR38010",
+              "rules": [
+                {
+                  "candidate": "cand-a9343715e21c9b386f2542ce",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR38010",
+                  "rated": 1.0,
+                  "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-ec351f9f3e5555d65e07592b",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LMR38020",
+              "rules": [
+                {
+                  "candidate": "cand-ec351f9f3e5555d65e07592b",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR38020",
+                  "rated": 2.0,
+                  "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-65c4c8dd2fa2a90017f0306f",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS54160",
+              "rules": [
+                {
+                  "candidate": "cand-65c4c8dd2fa2a90017f0306f",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS54160",
+                  "rated": 1.5,
+                  "reason": "rated continuous output 1.5 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS542941",
+              "rules": [
+                {
+                  "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS542941",
+                  "rated": 18.0,
+                  "reason": "VIN rating 18.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                },
+                {
+                  "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS542941",
+                  "rated": 2.0,
+                  "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS548C26",
+              "rules": [
+                {
+                  "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS548C26",
+                  "rated": 16.0,
+                  "reason": "VIN rating 16.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS563203",
+              "rules": [
+                {
+                  "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS563203",
+                  "rated": 17.0,
+                  "reason": "VIN rating 17.0 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS628302",
+              "rules": [
+                {
+                  "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS628302",
+                  "rated": 5.5,
+                  "reason": "VIN rating 5.5 V must be >= required 48.0 V",
+                  "required": 48.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                },
+                {
+                  "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS628302",
+                  "rated": 2.0,
+                  "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                },
+                {
+                  "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS628302",
+                  "rated": [
+                    0.5,
+                    4.5
+                  ],
+                  "reason": "output capability [0.5, 4.5] must cover required 5.0 V",
+                  "required": 5.0,
+                  "rule": "vout",
+                  "scope": "output voltage capability",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-ec255579cfbd9bd3d12559b4",
+              "family": "SiC46x",
+              "grain": "device",
+              "part": "SiC464",
+              "rules": [
+                {
+                  "candidate": "cand-ec255579cfbd9bd3d12559b4",
+                  "evidence": {
+                    "authority": "datasheet_header_quote",
+                    "grade": "evidence",
+                    "kind": "device_rating",
+                    "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+                  },
+                  "family": "SiC46x",
+                  "part": "SiC464",
+                  "rated": 2.0,
+                  "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+                  "required": 3.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            }
+          ],
+          "unknown": [
+            {
+              "candidate": "cand-f283f3935b82163518c1089c",
+              "missing_ratings": [
+                "vin_min",
+                "vin_max",
+                "iout_min",
+                "vout"
+              ],
+              "note": "electrically unconfirmed; retained, never eliminated",
+              "part": null
+            }
+          ]
+        },
+        "laws": [
+          "hard eligibility precedes every curve comparison",
+          "missing ratings are unknown, never failure",
+          "typical values never guarantee performance",
+          "interpolation only inside the digitized domain",
+          "approximate scenarios are labeled separately"
+        ],
+        "question": {
+          "conditions": {
+            "vin_v": 48.0,
+            "vout_v": 5.0
+          },
+          "operating_point": {
+            "unit": "A",
+            "x": 3.0
+          },
+          "phenomenon": "efficiency_vs_load",
+          "requirements": {
+            "iout_min": 3.0,
+            "vin_max": 48.0,
+            "vin_min": 48.0,
+            "vout": 5.0
+          }
+        },
+        "schema": "harness.electronics-decision-answer.v1"
+      },
+      "question": {
+        "conditions": {
+          "vin_v": 48.0,
+          "vout_v": 5.0
+        },
+        "operating_point": {
+          "unit": "A",
+          "x": 3.0
+        },
+        "phenomenon": "efficiency_vs_load",
+        "requirements": {
+          "iout_min": 3.0,
+          "vin_max": 48.0,
+          "vin_min": 48.0,
+          "vout": 5.0
+        }
+      }
+    },
+    "C_insufficient_comparative": {
+      "answer": {
+        "bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+        "comparison": {
+          "approximate_scenario_entries": [],
+          "comparison_level": {
+            "achieved_level": "same_configuration",
+            "devices": [],
+            "families": [],
+            "law": "levels are reported, never merged into one comparable flag",
+            "levels_present": [
+              "same_configuration"
+            ],
+            "manufacturers": []
+          },
+          "condition_matched_entries": []
+        },
+        "counts": {
+          "candidates_missing_curve_evidence": 11,
+          "candidates_requiring_verification": 11,
+          "candidates_with_comparable_curve_evidence": 0,
+          "candidates_with_noncomparable_evidence": 1,
+          "evidence_rows_attached": 123,
+          "hard_eligible_candidates": 11,
+          "parametrically_compatible_candidates": 11,
+          "total_candidates": 21
+        },
+        "evidence_availability": {
+          "cand-1a9c0f9250056d04853bf98e": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-33525cd39271d045980cfe06": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-65c4c8dd2fa2a90017f0306f": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-8b3602792a4a9cea8d6f1b09": {
+            "refusals": [
+              {
+                "evidence_id": "curve-92906b1690d609b0e0b58a76b47f7da5",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-1215be5628cd6db70dadaeae310a7afd",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-16f0696c93fa37ccab5576ccdeaaa548",
+                "reason": "condition_mismatch"
+              },
+              {
+                "evidence_id": "curve-89bcff093ad73c461edfb14d5e4b5f17",
+                "reason": "condition_mismatch"
+              }
+            ],
+            "rows": 9,
+            "state": "non_comparable"
+          },
+          "cand-9f01b19f8bac807810d3f486": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-a19e455daad09e97917fa99c": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-a9343715e21c9b386f2542ce": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-b50520b51431172ce131ca81": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-ccbcf344bea83a598284c20f": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-ec351f9f3e5555d65e07592b": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-f283f3935b82163518c1089c": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          },
+          "cand-f74987515d0df01cd5810778": {
+            "refusals": [],
+            "rows": 0,
+            "state": "missing"
+          }
+        },
+        "evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+        "hard_eligibility": {
+          "eligible": [
+            "cand-f74987515d0df01cd5810778",
+            "cand-1a9c0f9250056d04853bf98e",
+            "cand-8b3602792a4a9cea8d6f1b09",
+            "cand-b50520b51431172ce131ca81",
+            "cand-a19e455daad09e97917fa99c",
+            "cand-9f01b19f8bac807810d3f486",
+            "cand-33525cd39271d045980cfe06",
+            "cand-a9343715e21c9b386f2542ce",
+            "cand-ec351f9f3e5555d65e07592b",
+            "cand-65c4c8dd2fa2a90017f0306f",
+            "cand-ccbcf344bea83a598284c20f"
+          ],
+          "ineligible": [
+            {
+              "candidate": "cand-fba64e961f6cbe3c473fea6a",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "LMR36502",
+              "rules": [
+                {
+                  "candidate": "cand-fba64e961f6cbe3c473fea6a",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "LMR36502",
+                  "rated": 0.15,
+                  "reason": "rated continuous output 0.15 A must be >= required 1.0 A",
+                  "required": 1.0,
+                  "rule": "iout_min",
+                  "scope": "rated continuous output current",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS542941",
+              "rules": [
+                {
+                  "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS542941",
+                  "rated": 18.0,
+                  "reason": "VIN rating 18.0 V must be >= required 24.0 V",
+                  "required": 24.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS548C26",
+              "rules": [
+                {
+                  "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS548C26",
+                  "rated": 16.0,
+                  "reason": "VIN rating 16.0 V must be >= required 24.0 V",
+                  "required": 24.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS563203",
+              "rules": [
+                {
+                  "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS563203",
+                  "rated": 17.0,
+                  "reason": "VIN rating 17.0 V must be >= required 24.0 V",
+                  "required": 24.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+              "family": "DC/DC converters",
+              "grain": "opn",
+              "part": "TPS628302",
+              "rules": [
+                {
+                  "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+                  "evidence": {},
+                  "family": "DC/DC converters",
+                  "part": "TPS628302",
+                  "rated": 5.5,
+                  "reason": "VIN rating 5.5 V must be >= required 24.0 V",
+                  "required": 24.0,
+                  "rule": "vin_min",
+                  "scope": "maximum input voltage rating",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-28c13e11eb2077fcae114154",
+              "family": "SiC46x",
+              "grain": "device",
+              "part": "SiC461",
+              "rules": [
+                {
+                  "candidate": "cand-28c13e11eb2077fcae114154",
+                  "evidence": {
+                    "authority": "datasheet_header_quote",
+                    "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                    "grade": "evidence",
+                    "kind": "admission_packet",
+                    "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
+                  },
+                  "family": "SiC46x",
+                  "part": "SiC461",
+                  "rated": [
+                    5.0,
+                    5.0
+                  ],
+                  "reason": "output capability [5.0, 5.0] must cover required 3.3 V",
+                  "required": 3.3,
+                  "rule": "vout",
+                  "scope": "output voltage capability",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-581c8b96deea762c2d21ac1e",
+              "family": "SiC46x",
+              "grain": "device",
+              "part": "SiC462",
+              "rules": [
+                {
+                  "candidate": "cand-581c8b96deea762c2d21ac1e",
+                  "evidence": {
+                    "authority": "datasheet_header_quote",
+                    "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                    "grade": "evidence",
+                    "kind": "admission_packet",
+                    "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+                  },
+                  "family": "SiC46x",
+                  "part": "SiC462",
+                  "rated": [
+                    5.0,
+                    5.0
+                  ],
+                  "reason": "output capability [5.0, 5.0] must cover required 3.3 V",
+                  "required": 3.3,
+                  "rule": "vout",
+                  "scope": "output voltage capability",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-f267b92f67706abb846053ad",
+              "family": "SiC46x",
+              "grain": "device",
+              "part": "SiC463",
+              "rules": [
+                {
+                  "candidate": "cand-f267b92f67706abb846053ad",
+                  "evidence": {
+                    "authority": "datasheet_header_quote",
+                    "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                    "grade": "evidence",
+                    "kind": "admission_packet",
+                    "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)"
+                  },
+                  "family": "SiC46x",
+                  "part": "SiC463",
+                  "rated": [
+                    5.0,
+                    5.0
+                  ],
+                  "reason": "output capability [5.0, 5.0] must cover required 3.3 V",
+                  "required": 3.3,
+                  "rule": "vout",
+                  "scope": "output voltage capability",
+                  "verdict": "ineligible"
+                }
+              ]
+            },
+            {
+              "candidate": "cand-ec255579cfbd9bd3d12559b4",
+              "family": "SiC46x",
+              "grain": "device",
+              "part": "SiC464",
+              "rules": [
+                {
+                  "candidate": "cand-ec255579cfbd9bd3d12559b4",
+                  "evidence": {
+                    "authority": "datasheet_header_quote",
+                    "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+                    "grade": "evidence",
+                    "kind": "admission_packet",
+                    "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+                  },
+                  "family": "SiC46x",
+                  "part": "SiC464",
+                  "rated": [
+                    5.0,
+                    5.0
+                  ],
+                  "reason": "output capability [5.0, 5.0] must cover required 3.3 V",
+                  "required": 3.3,
+                  "rule": "vout",
+                  "scope": "output voltage capability",
+                  "verdict": "ineligible"
+                }
+              ]
+            }
+          ],
+          "unknown": [
+            {
+              "candidate": "cand-f283f3935b82163518c1089c",
+              "missing_ratings": [
+                "vin_min",
+                "vin_max",
+                "iout_min",
+                "vout"
+              ],
+              "note": "electrically unconfirmed; retained, never eliminated",
+              "part": null
+            }
+          ]
+        },
+        "laws": [
+          "hard eligibility precedes every curve comparison",
+          "missing ratings are unknown, never failure",
+          "typical values never guarantee performance",
+          "interpolation only inside the digitized domain",
+          "approximate scenarios are labeled separately"
+        ],
+        "question": {
+          "conditions": {
+            "vin_v": 24.0,
+            "vout_v": 3.3
+          },
+          "operating_point": {
+            "unit": "A",
+            "x": 1.0
+          },
+          "phenomenon": "efficiency_vs_load",
+          "requirements": {
+            "iout_min": 1.0,
+            "vin_max": 24.0,
+            "vin_min": 24.0,
+            "vout": 3.3
+          }
+        },
+        "schema": "harness.electronics-decision-answer.v1"
+      },
+      "question": {
+        "conditions": {
+          "vin_v": 24.0,
+          "vout_v": 3.3
+        },
+        "operating_point": {
+          "unit": "A",
+          "x": 1.0
+        },
+        "phenomenon": "efficiency_vs_load",
+        "requirements": {
+          "iout_min": 1.0,
+          "vin_max": 24.0,
+          "vin_min": 24.0,
+          "vout": 3.3
+        }
+      }
+    }
+  },
+  "provenance": {
+    "bundle_file": "curve_evidence_bundle_v3.jsonl",
+    "bundle_id": null,
+    "bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+    "decision_schema": "harness.electronics-decision-answer.v1",
+    "m4_branch": "curve/08-decision-engine",
+    "m4_commit": "23b176343abf836d208680f66295cb30ed4825c6",
+    "m4_repo_root": "/Users/samkim/Harnessv1-curve08",
+    "note": "generated read-only from the M4 worktree; M4 remains sole owner of eligibility and curve mathematics",
+    "regenerated_at": "2026-10-09T08:33:03Z"
+  },
+  "schema": "harness.discovery01-m4-frozen-journeys.v1"
+}

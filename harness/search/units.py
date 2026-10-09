@@ -527,6 +527,45 @@ def _fingerprint(con: sqlite3.Connection, policy_identity: str = "") \
     return digest.hexdigest(), count, active
 
 
+def release_view(con: sqlite3.Connection,
+                 policy_identity: str = "") -> dict:
+    """Release identity for READ-ONLY serving paths.
+
+    Returns the cached release when valid; otherwise computes the
+    fingerprint without persisting (a read-only connection cannot write
+    the cache or the releases ledger). Prime the cache with a writable
+    connection (index_release) after any index mutation.
+    """
+    try:
+        return index_release(con, policy_identity=policy_identity)
+    except sqlite3.OperationalError:
+        stored_policy = con.execute(
+            "SELECT value FROM meta WHERE key='policy_identity'").fetchone()
+        dirty_row = con.execute(
+            "SELECT value FROM meta WHERE key='release_dirty'").fetchone()
+        dirty = dirty_row is not None and dirty_row[0] == "1"
+        cached = con.execute(
+            "SELECT value FROM meta WHERE key='release'").fetchone()
+        if cached and not dirty and stored_policy and \
+                stored_policy[0] == policy_identity:
+            count = int(con.execute(
+                "SELECT value FROM meta WHERE key='release_unit_count'"
+            ).fetchone()[0])
+            active = int(con.execute(
+                "SELECT value FROM meta WHERE key='release_active_count'"
+            ).fetchone()[0])
+            return {"release": cached[0], "schema": SEARCH_SCHEMA,
+                    "unit_count": count, "active_count": active,
+                    "policy_identity": policy_identity,
+                    "vector_identity": vector_identity(con)}
+        fp, count, active = _fingerprint(con, policy_identity)
+        return {"release": f"search-release-v1-{fp[:12]}",
+                "schema": SEARCH_SCHEMA, "unit_count": count,
+                "active_count": active,
+                "policy_identity": policy_identity,
+                "vector_identity": vector_identity(con)}
+
+
 def index_release(con: sqlite3.Connection, force: bool = False,
                   policy_identity: str = "") -> dict:
     """Content fingerprint of the index; cached until the next write.
