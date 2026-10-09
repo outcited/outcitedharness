@@ -151,3 +151,37 @@ def test_no_hits_returns_clean_empty(con):
                      with_interpretations=False)
     assert r["units"] == []
     assert r["provenance"]["release"]
+
+
+def test_query_classification_and_grain_weights(tmp_path):
+    from harness.search import query as q
+    assert q.classify_query("rdson 3.9 milliohm") == "symbolic"
+    assert q.classify_query("VDS 80V") == "symbolic"
+    assert q.classify_query("72 MHz cortex microcontroller") == "mixed"
+    assert q.classify_query("low power wireless industrial sensor node") \
+        == "prose"
+    con = units.connect(str(tmp_path / "s.db"))
+    claim = units.make_unit(
+        doc_sha256="f" * 64, grain="claim",
+        locator={"kind": "table_cell", "row_header": "RDS(on)",
+                 "quote": "3.9"},
+        text_repr="PARTX RDS(ON) = 3.9 mohm @ vgs=10 v",
+        extraction_version="v1", page=2, ident=["PARTX"])
+    section = units.make_unit(
+        doc_sha256="f" * 64, grain="section",
+        locator={"kind": "section", "heading": "Description", "page": 1},
+        text_repr="Description\nPARTX is a device with rds on 3.9 milliohm "
+                  "characteristics for converter designs and more text here",
+        extraction_version="v1", page=1, ident=["PARTX"])
+    units.replace_document(con, [claim, section])
+    r = q.search(con, "rdson 3.9 milliohm", limit=2,
+                 with_interpretations=False)
+    assert r["query"]["classification"] == "symbolic"
+    # weights are neutral (measured-negative experiment, documented in
+    # query.py): no grain_weight rationale entries, ranking is raw score
+    assert not any("grain_weight" in x for u in r["units"]
+                   for x in u["rationale"])
+    assert {u["grain"] for u in r["units"]} == {"claim", "section"}
+    r2 = q.search(con, "device for converter designs", limit=2,
+                  with_interpretations=False)
+    assert r2["query"]["classification"] == "prose"

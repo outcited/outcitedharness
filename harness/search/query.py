@@ -20,6 +20,7 @@ Scoring is deterministic given (index, query, embedder output): same inputs
 
 from __future__ import annotations
 
+import re
 import sqlite3
 import time
 from typing import Any, Callable, Sequence
@@ -32,9 +33,49 @@ RESPONSE_SCHEMA = "harness.search-response.v1"
 # Ranking-policy identity: part of the retrieval release fingerprint. Change
 # the policy -> change this string -> the release id changes. A changed
 # ranking system must never silently keep the same retrieval identity.
-RANKING_POLICY = ("hybrid-v1(sem=0.50,text=0.35,ident=0.35,"
+RANKING_POLICY = ("hybrid-v1.1(sem=0.50,text=0.35,ident=0.35,"
                   "boosts=coverage/state/family,aux=expand4,"
+                  "grain-weights=neutral(measured-negative-20261009),"
                   "vector=brutefloat32-numpy-v1)")
+
+# Grain weighting — MEASURED NEGATIVE RESULT (2026-10-09), reverted to
+# neutral. Two variants tested live (symbolic-boost/section-penalty, then
+# known-symbol-only): all-aisle recall 0.168 -> 0.158 both ways, power
+# never recovered its pre-sections 0.243, mcu regressed 0.265 -> 0.235
+# (prose section boost amplified non-anchor sections). Score-space
+# multiplication is the wrong lever for section dilution; per-field FTS
+# weighting (symbols indexed as their own column) is the untested next
+# hypothesis. Classification is kept as envelope telemetry.
+GRAIN_WEIGHTS_SYMBOLIC = {"claim": 1.0, "figure": 1.0, "application": 1.0,
+                          "family": 1.0, "section": 1.0, "document": 1.0}
+GRAIN_WEIGHTS_PROSE = {"claim": 1.0, "figure": 1.0, "application": 1.0,
+                       "family": 1.0, "section": 1.0, "document": 1.0}
+NEUTRAL_WEIGHTS: dict[str, float] = {}   # mixed queries: no grain steering
+
+_DIGIT_TOKEN = re.compile(r"\d")
+
+
+def classify_query(query: str) -> str:
+    """"symbolic" | "mixed" | "prose" — deterministic, no model.
+
+    symbolic: a RAW token maps to a known spec axis (rdson, vds, qg...).
+    Raw tokens are checked because technical_normalize folds glued symbols
+    ("rdson" -> "rds on") before axis lookup could see them.
+    mixed: numeric/unit tokens but no known symbol ("72 MHz cortex").
+    prose: natural language.
+    """
+    from harness.search.axes import axis_for
+    raw_tokens = re.split(r"\s+", (query or "").strip())
+    if any(axis_for(t) for t in raw_tokens if t):
+        return "symbolic"
+    tokens = units_store.technical_normalize(query).split()
+    if not tokens:
+        return "prose"
+    if any(axis_for(t) for t in tokens):
+        return "symbolic"
+    if any(_DIGIT_TOKEN.search(t) for t in tokens):
+        return "mixed"
+    return "prose"
 
 # Fusion weights (documented contract; benchmark may tune but never silently)
 W_SEMANTIC = 0.5
@@ -202,6 +243,10 @@ def search(con: sqlite3.Connection, query: str, *, limit: int = 10,
     limit = max(1, min(int(limit or 10), 50))
     expansion = expand_intent(query)
     aux = axis_queries(query)
+    q_class = classify_query(query)
+    grain_weights = {"symbolic": GRAIN_WEIGHTS_SYMBOLIC,
+                     "prose": GRAIN_WEIGHTS_PROSE,
+                     "mixed": NEUTRAL_WEIGHTS}[q_class]
 
     text_scores, ident_scores = _candidate_ids(con, query, aux, limit)
     vector_scores: dict[str, float] = {}
@@ -218,7 +263,7 @@ def search(con: sqlite3.Connection, query: str, *, limit: int = 10,
     all_ids = set(text_scores) | set(ident_scores) | set(vector_scores)
     if not all_ids:
         return _envelope(query, expansion, [], started, con,
-                         with_interpretations)
+                         with_interpretations, q_class)
 
     hits = []
     for uid in all_ids:
@@ -261,13 +306,18 @@ def search(con: sqlite3.Connection, query: str, *, limit: int = 10,
             boosts += 0.05
             rationale.append("boost:family-filter-match")
         score += boosts
+        weight = grain_weights.get(unit["grain"], 1.0)
+        if weight != 1.0:
+            score *= weight
+            rationale.append(f"grain_weight:{unit['grain']}x{weight}"
+                             f"({q_class})")
         hits.append({"unit": unit, "score": round(score, 4),
                      "rationale": rationale,
                      "applicability": _applicability_view(unit)})
     hits.sort(key=lambda h: (-h["score"], h["unit"]["unit_id"]))
     hits = hits[:limit]
     return _envelope(query, expansion, hits, started, con,
-                     with_interpretations)
+                     with_interpretations, q_class)
 
 
 def _slim_structured(structured: dict | None) -> dict | None:
@@ -292,13 +342,15 @@ def _slim_structured(structured: dict | None) -> dict | None:
 
 def _envelope(query: str, expansion: dict, hits: list[dict],
               started: float, con: sqlite3.Connection,
-              with_interpretations: bool) -> dict:
+              with_interpretations: bool,
+              q_class: str = "prose") -> dict:
     release = units_store.index_release(con,
                                         policy_identity=RANKING_POLICY)
     return {
         "schema": RESPONSE_SCHEMA,
         "query": {
             "original": (query or "").strip(),
+            "classification": q_class,
             "interpretations": (expansion["interpretations"]
                                 if with_interpretations else []),
         },
