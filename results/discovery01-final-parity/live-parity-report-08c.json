@@ -1,0 +1,196 @@
+{
+  "schema": "harness.discovery01-live-parity.v1",
+  "m4_url": "http://127.0.0.1:8797",
+  "frozen_baseline_release": "curve-evidence-bundle-v3-5875789dcf3f",
+  "journeys": {
+    "A_light_load_0p5A": {
+      "status": "ok",
+      "live_transport": true,
+      "m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+      "eligible": 14,
+      "ineligible": 6,
+      "unknown_retained": 1,
+      "condition_matched": [
+        {
+          "part": "SiC461",
+          "value": 93.94439791602247,
+          "evidence_id": "curve-214a8be75c0ffc2980cbe42a72230132"
+        },
+        {
+          "part": "SiC463",
+          "value": 92.9555411613481,
+          "evidence_id": "curve-c7b2d232869d82fb1b00a5b2a3477542"
+        },
+        {
+          "part": "SiC464",
+          "value": 92.95487954326245,
+          "evidence_id": "curve-29bbf05fc94f0678e06b0d8cf7968914"
+        },
+        {
+          "part": "LM5161",
+          "value": 77.94750584892213,
+          "evidence_id": "curve-a697319a16d26592db2cc14cf6843bd0"
+        }
+      ],
+      "failures": [],
+      "baseline_match": true,
+      "baseline_expected": {
+        "SiC461": 93.94,
+        "SiC463": 92.96,
+        "SiC464": 92.95,
+        "LM5161": 77.95
+      }
+    },
+    "B_load_step_3A": {
+      "status": "ok",
+      "live_transport": true,
+      "m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+      "eligible": 4,
+      "ineligible": 16,
+      "unknown_retained": 1,
+      "condition_matched": [
+        {
+          "part": "SiC463",
+          "value": 93.70194601918979,
+          "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8"
+        },
+        {
+          "part": "SiC462",
+          "value": 90.76349313628782,
+          "evidence_id": "curve-5c807b48ee14995da881785195ec0651"
+        }
+      ],
+      "failures": [],
+      "baseline_match": true,
+      "baseline_expected": {
+        "SiC463": 93.7,
+        "SiC462": 90.76
+      }
+    },
+    "C_insufficient_comparative": {
+      "status": "ok",
+      "live_transport": true,
+      "m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+      "eligible": 11,
+      "ineligible": 9,
+      "unknown_retained": 1,
+      "condition_matched": [],
+      "failures": [],
+      "baseline_match": true,
+      "baseline_expected": {}
+    }
+  },
+  "checks": [
+    {
+      "check": "A_light_load_0p5A:transport_is_http",
+      "pass": true,
+      "detail": "http"
+    },
+    {
+      "check": "A_light_load_0p5A:values_match_frozen_baseline",
+      "pass": true,
+      "detail": "live={'SiC461': 93.94, 'SiC463': 92.96, 'SiC464': 92.95, 'LM5161': 77.95} frozen={'SiC461': 93.94, 'SiC463': 92.96, 'SiC464': 92.95, 'LM5161': 77.95}"
+    },
+    {
+      "check": "A_light_load_0p5A:unknown_retained",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "A_light_load_0p5A:evidence_id_present[SiC461]",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "A_light_load_0p5A:evidence_id_present[SiC463]",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "A_light_load_0p5A:evidence_id_present[SiC464]",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "A_light_load_0p5A:evidence_id_present[LM5161]",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "B_load_step_3A:transport_is_http",
+      "pass": true,
+      "detail": "http"
+    },
+    {
+      "check": "B_load_step_3A:values_match_frozen_baseline",
+      "pass": true,
+      "detail": "live={'SiC463': 93.7, 'SiC462': 90.76} frozen={'SiC463': 93.7, 'SiC462': 90.76}"
+    },
+    {
+      "check": "B:LM5161_ineligible",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "B:SiC464_ineligible",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "B_load_step_3A:unknown_retained",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "B_load_step_3A:evidence_id_present[SiC463]",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "B_load_step_3A:evidence_id_present[SiC462]",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "C_insufficient_comparative:transport_is_http",
+      "pass": true,
+      "detail": "http"
+    },
+    {
+      "check": "C_insufficient_comparative:values_match_frozen_baseline",
+      "pass": true,
+      "detail": "live={} frozen={}"
+    },
+    {
+      "check": "C:zero_comparable_is_success",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "C_insufficient_comparative:unknown_retained",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "crosswalk:no_ambiguous",
+      "pass": true,
+      "detail": "ambiguity would appear as structured failure"
+    },
+    {
+      "check": "release_mismatch:structured_not_silent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "release_mismatch:cohort_preserved",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "verdict": "PASS",
+  "preflight": {
+    "reachable": true,
+    "http_status": 401,
+    "note": "service answered with an error status \u2014 live"
+  }
+}

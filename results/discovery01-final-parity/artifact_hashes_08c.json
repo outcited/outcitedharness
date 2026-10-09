@@ -1,0 +1,17 @@
+{
+  "J-A": {
+    "pre_flip_response_sha256": "34da79d7ea9c41b11dfeb691b8b18d75b8fbd2855a467cd5ebf0f77737b87c1b",
+    "post_flip_response_sha256": "34da79d7ea9c41b11dfeb691b8b18d75b8fbd2855a467cd5ebf0f77737b87c1b",
+    "semantic_identical_pre_post_flip": true
+  },
+  "J-B": {
+    "pre_flip_response_sha256": "63cf8035274cb48e8099ee05e3ed48066e2dde5dacbcba1b64c0fccdc500e6ae",
+    "post_flip_response_sha256": "63cf8035274cb48e8099ee05e3ed48066e2dde5dacbcba1b64c0fccdc500e6ae",
+    "semantic_identical_pre_post_flip": true
+  },
+  "J-C": {
+    "pre_flip_response_sha256": "badcc71d506d6889d53e0c4c348c9a700f39bb6f5aee29b37f14b0631592cbcd",
+    "post_flip_response_sha256": "badcc71d506d6889d53e0c4c348c9a700f39bb6f5aee29b37f14b0631592cbcd",
+    "semantic_identical_pre_post_flip": true
+  }
+}

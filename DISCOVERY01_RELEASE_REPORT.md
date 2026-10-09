@@ -3,14 +3,25 @@
 Branch `discovery/01-facet-decision-integration` @ (this commit).
 Localhost pilot only; feature-flagged; nothing pushed/merged/deployed.
 
-## Classification: **CONTRACT-READY**
+## Classification: **EXPERIMENTAL-INTEGRATED**
 
-Fixtures pass end-to-end; the live M4 service (:8793, CURVE-08B) is
-unavailable from this machine (port closed at implementation time; the
-PRD-reported commit `18893df` is absent from this repo — available engine
-is `23b17634`). Per PRD §14: live integration cannot be declared complete
-without service-to-service verification. **Not production-ready; not
-experimental-integrated.**
+Transition executed 2026-10-09 under owner approval
+`DISCOVERY01-OWNER-APPROVAL-2026-10-09-42644ea`, after M5 independently
+verified M4 remediation commit
+`42644eacd779cd91324215fe48c2cb2a78944587` (remote
+`beargallbladder/outcitedharness` `refs/heads/curve/08c-parity-repair`,
+pushed, no rebase/squash/amend): the unmodified M5 live-parity runner
+returned exit 0 with 21/21 checks (SAME_RELEASE mode; the six
+divergent-mode checks are structurally inapplicable when releases match),
+release relation SAME_RELEASE against bundle v3 `…5875789dcf3f` /
+`0c047e51…`, live ranked values 93.94/92.96/92.95/77.95 at 48 V→5 V
+@0.5 A, cited 3 A exclusions for LM5161 (1.0 A) and SiC464 (2.0 A),
+unknown retained, per-entry interpolation disclosure, 26 labeled
+approximate-scenario entries none ranked, auth 401/403/200 with env-only
+secrets, M4 frozen locks 10/10 at `91e44f04`, M5 runner+fixtures
+byte-unchanged. Still feature-flagged and localhost-only. **Not
+production-ready** (R11 list outstanding). Prior CONTRACT-READY and
+REFUSED records remain in git history, unaltered.
 
 ## Journey results (frozen-contract transport, regenerated from the M4
 evidence bundle — never hardcoded)

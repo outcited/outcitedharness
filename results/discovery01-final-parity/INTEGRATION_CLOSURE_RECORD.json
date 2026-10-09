@@ -1,0 +1,104 @@
+{
+  "schema": "harness.discovery01-integration-closure.v1",
+  "immutable": true,
+  "timestamp_utc": "2026-10-09T17:22:52Z",
+  "owner_approval_reference": "DISCOVERY01-OWNER-APPROVAL-2026-10-09-42644ea",
+  "m4_remediation": {
+    "commit": "42644eacd779cd91324215fe48c2cb2a78944587",
+    "short": "42644ea",
+    "remote_branch": "beargallbladder/outcitedharness refs/heads/curve/08c-parity-repair",
+    "pushed": true,
+    "ancestry": "descends from 23b17634 (CURVE-08) via 18893dfc and 1f163f9e; no rebase/squash/amend vs reviewed commit",
+    "premise_correction": "18893dfc is reachable in the pushed history; the earlier 'phantom' finding applied only to pre-push reachable stores and is superseded by this record",
+    "files_changed_vs_23b17634": [
+      "harness/electronics/decision_api.py",
+      "contracts/engineering-decision-api-v1/openapi.yaml",
+      "contracts/engineering-decision-api-v1/examples/*",
+      "tests/test_curve08b.py",
+      "tests/test_curve08c_parity_repair.py",
+      "curve08b.assignment.json",
+      "uv.lock"
+    ],
+    "m5_parity_artifacts_in_m4_tree": "ABSENT (runner + frozen fixtures not forked or modified)"
+  },
+  "m5_verifier": {
+    "branch": "discovery/01-final-parity",
+    "pre_transition_commit": "fb9f41d2",
+    "transition_commit": "SEE GIT LOG (this record's commit)",
+    "runner": "scripts/discovery01_live_parity.py (byte-identical to 6d809e55)",
+    "fixtures": "tests/fixtures/discovery01/* (byte-identical to 6d809e55)"
+  },
+  "release_identities": {
+    "m5_pinned_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+    "m5_pinned_bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+    "m4_live_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+    "m4_live_health_fingerprint": "comparator fingerprint references harness.electronics curve_evidence @curve/07e-supply",
+    "release_relation": "SAME_RELEASE"
+  },
+  "parity_results": {
+    "runner_exit_code": 0,
+    "verdict": "PASS",
+    "checks_passed": 21,
+    "checks_total": 21,
+    "original_gate_categories": "transport x3, values_match_frozen_baseline x3, unknown_retained x3, evidence_id_present x6, A-exclusions x2, crosswalk no_ambiguous, release_mismatch structured + cohort preserved = all passing; the six divergent-mode checks (release_divergent_flagged/structure_parity x3) are structurally inapplicable under SAME_RELEASE and were not removed or weakened",
+    "extended_result": "21/21 as reported by M4, reproduced independently",
+    "report_artifact": "results/discovery01-final-parity/live-parity-report-08c.json"
+  },
+  "journey_hashes": {
+    "note": "M4-claimed prefixes 7ec66df4/24a427ea/e5e3a3e9 were NOT reproducible from raw or canonical-dialect responses; semantic content verified equal to the frozen baseline by the runner (values_match_frozen_baseline PASS x3) and by direct probe, so the delta is classified non-semantic (hash provenance undisclosed by M4). M5-recorded hashes below are authoritative for this verification.",
+    "J-A_direct_response_sha256_prefix": "34da79d7",
+    "J-B_direct_response_sha256_prefix": "63cf8035",
+    "J-C_direct_response_sha256_prefix": "badcc71d",
+    "J-A_canonical_dialect_prefix": "1e6bebfb",
+    "J-B_canonical_dialect_prefix": "5508ce8a",
+    "J-C_canonical_dialect_prefix": "71b6a62a",
+    "full_hashes": "results/discovery01-final-parity/artifact_hashes_08c.json"
+  },
+  "live_semantic_verification": {
+    "ranked_values_0p5A": {"SiC461": 93.94, "SiC463": 92.96, "SiC464": 92.95, "LM5161": 77.95},
+    "exclusions_3A": [
+      {"part": "LM5161", "rule": "iout_min", "rated": 1.0},
+      {"part": "SiC464", "rule": "iout_min", "rated": 2.0}
+    ],
+    "unknown_retained_3A": 1,
+    "interpolation_disclosure_keys": ["conditions", "limitations", "method", "operating_point", "supporting_points", "uncertainty"],
+    "approximate_entries": 26,
+    "approximate_all_labeled": true,
+    "approximate_in_ranking": 0,
+    "auth": {"no_bearer": 401, "bad_bearer": 403, "valid_bearer": 200},
+    "secrets": "environment-provided only (ENGINEERING_DECISIONS_TOKEN / M4_BEARER_TOKEN); never logged or cached"
+  },
+  "frozen_locks": {
+    "m4_ten_locks_at_91e44f04": "10/10 OK",
+    "m5_parity_locks": "unchanged (git-verified vs 6d809e55)",
+    "guards": "runner semantics unchanged; pytest wrapper unchanged; wrapper stdout-truncation caveat honored and NOT used as a parity signal"
+  },
+  "promotion_gate_evaluation": {
+    "original_live_gates_18_of_18": true,
+    "release_relation_SAME_RELEASE": true,
+    "ranked_observable": true,
+    "exclusions_observable": true,
+    "unknown_retention_observable": true,
+    "interpolation_contract_present": true,
+    "approximate_contract_present": true,
+    "auth_contract_current": true,
+    "frozen_locks_unchanged": true,
+    "guards_unchanged": true,
+    "m4_commit_exact": true,
+    "can_promote": true
+  },
+  "state_transition": {
+    "mechanism": "existing guarded mechanism: DISCOVERY01_RELEASE_REPORT.md classification (handoff section 6), gated on the unmodified live-parity runner passing",
+    "pre": "CONTRACT-READY",
+    "post": "EXPERIMENTAL-INTEGRATED",
+    "scope": "feature-flagged, localhost-only; PRODUCTION-READY still requires the R11 list",
+    "unrelated_state_changes": "none (626 memberships remain proposed; promote() call sites remain zero; bundles v1/v2/v3 byte-identical; flags unchanged)"
+  },
+  "post_flip_verification": {
+    "live_parity_rerun": "21/21 exit 0",
+    "integration_suite": "see closure commit message",
+    "ranking_cohort_unchanged": true,
+    "release_ids_pinned": true,
+    "consumer_observable": "DISCOVERY01_RELEASE_REPORT.md classification + this record + session releases"
+  }
+}
