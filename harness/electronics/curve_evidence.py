@@ -941,6 +941,50 @@ def _interp(points: Sequence[Mapping[str, float]], x: float,
     return None
 
 
+def curve_from_bundle_row(row: Mapping[str, Any]) -> "CurveEvidence":
+    """Rebuild a queryable CurveEvidence from a frozen bundle row — the
+    M4 handoff contract is self-contained, so consumers never need M5
+    databases or the pilot fixtures."""
+
+    prov = row["source"]
+    curve = CurveEvidence(
+        document_sha256=prov["document_sha256"],
+        page_1based=prov["page_1based"],
+        figure_index=prov["figure_index"],
+        series_index=prov["locator"]["series_index"],
+        caption=prov.get("caption"),
+        region_bbox=(prov.get("locator") or {}).get("region_bbox"),
+        figure_revision=prov.get("document_revision"),
+        axes={
+            "x": {"label": row["quantity"]["x"].get("label"),
+                  "unit": row["quantity"]["x"].get("unit"),
+                  "scale": row["quantity"]["x"].get("scale")},
+            "y": {"label": row["quantity"]["y"].get("label"),
+                  "unit": row["quantity"]["y"].get("unit")},
+        },
+        series={"name": row["curve"].get("series_name"),
+                "points": row["curve"].get("points")},
+        conditions_verbatim=(row.get("conditions") or {}).get(
+            "verbatim", []),
+        evidence_class_=row.get("evidence_class") or "unspecified",
+        applies_to={
+            "part": row["applicability"].get("part"),
+            "family_group": row["applicability"].get("family_group"),
+            "category": row["applicability"].get("category"),
+            "manufacturer": row["applicability"].get("manufacturer"),
+        },
+        uncertainty=row.get("uncertainty") or {},
+        verification={"status": "reference"},
+    )
+    curve.conditions = row.get("conditions") or {}
+    curve.x_kind = row["quantity"]["x"].get("kind")
+    curve.y_kind = row["quantity"]["y"].get("kind")
+    curve.supported_region = row.get("supported_region")
+    curve.relevance = ([{"phenomenon": row["phenomenon"]}]
+                       if row.get("phenomenon") else [])
+    return curve
+
+
 def convert_value(value: float, from_unit: str | None,
                   to_unit: str | None) -> float | None:
     """Unit-family-aware conversion (A<->mA, V<->mV, ...). None when the
@@ -1184,6 +1228,7 @@ def evaluate_load_distribution(
 
 __all__ = [
     "CURVE_EVIDENCE_SCHEMA",
+    "curve_from_bundle_row",
     "CurveEvidence",
     "PHENOMENA",
     "compare_at_operating_point",
