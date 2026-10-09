@@ -114,6 +114,24 @@ EXPERIMENTAL-INTEGRATED is refused.**
 - Both source branches untouched: `discovery/01-facet-decision-integration@6d809e55`,
   M4 `curve/08b-decision-api@91e44f04`; this work is a new branch.
 - 626 proposed family memberships: hash-pinned owner packets
+
+> **STATUS CORRECTION (2026-10-09, DISCOVERY-01 B1 remediation).** The
+> statement above was accurate when written and is no longer current.
+> The live identity store
+> (`/Volumes/M5_4TB/extract-results/facet_identity.db`) records **878
+> relationships, all `verified`** — 626 OPN→family, 237 OPN→series, 15
+> series→family — plus 19 verified identity nodes (4 families, 15
+> series) and 23 approval rows. Owner approval references executed the
+> admissions: `FACET03-OWNER-APPROVAL-2026-10-09-961ef951` (626 family
+> memberships), `FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d`
+> (237 series memberships),
+> `FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d` (15
+> family→series edges), via commits `6ba8c66e`, `b76f14be`, `4e4398aa`,
+> `0c23a34d` — **none of which are in this branch's ancestry**. The
+> catalog was NOT populated by this remediation: `parts.family` remains
+> 0/1882 and is not the serving authority. Full record:
+> `results/discovery01-remediation/b1_identity_authority.json` and
+> `DISCOVERY01_IDENTITY_AUTHORITY.md`.
   (OptiMOS `7a65e880`, CoolMOS `071ec975`, CoolSiC `b2e4a60b`, StrongIRFET
   `701c45b6`), decision block awaiting owner signature; `promote()` has
   **zero call sites** (definition + docstring mentions only); catalog

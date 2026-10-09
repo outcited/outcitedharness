@@ -84,6 +84,16 @@ the 626 proposed …") and `FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d`
 
 ## E. Blockers
 
+> **STATUS CORRECTION (2026-10-09, B1 remediation).** Parts of this
+> assessment quoted branch documents that claimed nothing had been
+> promoted, and reported 15 relationships as `proposed`. The live identity
+> store shows 878 relationships, all `verified`, with three owner approval
+> references; the catalog's `parts.family` is intentionally not the serving
+> authority and remains 0/1882. Authoritative record:
+> `results/discovery01-remediation/b1_identity_authority.json`,
+> `DISCOVERY01_IDENTITY_AUTHORITY.md`. The corrected reassessment supersedes
+> this document's B1 section.
+
 Ranked in fix order: cheapest correctness first, owner/data-scope decisions
 last.
 
@@ -196,9 +206,12 @@ Admission decisions **have** been made and are recorded in the live
 identity store (626 family + 237 series `verified`, owner approval refs
 dated 2026-10-09 — see D). What has **not** happened:
 
-- `parts.family` is **0/1882** populated — the verified memberships are not
-  reflected in the catalog the discovery layer serves from.
-- 15 series→family relationships remain `proposed`.
+- `parts.family` is **0/1882** populated. This remediation determined that
+  the catalog column is **not** the serving authority (the discovery cohort
+  reads family exclusively from the identity store), so it was deliberately
+  NOT populated — see `DISCOVERY01_IDENTITY_AUTHORITY.md`.
+- All 878 relationships in the live store are `verified` (the assessment's
+  "15 proposed" reading was a mis-ordered query; corrected here).
 - This branch's documents still assert the opposite: `FACET03_ADMISSION_REVIEW.md`
   ("**Nothing here is approved**"), `FACET03_OWNER_SIGNOFF.md`
   ("no `promote()` called"), `DISCOVERY01_RELEASE_REPORT.md:110` and

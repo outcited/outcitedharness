@@ -4,6 +4,24 @@ Prepared per owner-review directive. **Stop-before-admission honored:** no
 `promote()` called, no catalog altered, no unresolved provenance or
 quote-verification state changed, packets remain `proposed`.
 
+> **STATUS CORRECTION (2026-10-09, DISCOVERY-01 B1 remediation).** The
+> statement above was accurate when written and is no longer current.
+> The live identity store
+> (`/Volumes/M5_4TB/extract-results/facet_identity.db`) records **878
+> relationships, all `verified`** — 626 OPN→family, 237 OPN→series, 15
+> series→family — plus 19 verified identity nodes (4 families, 15
+> series) and 23 approval rows. Owner approval references executed the
+> admissions: `FACET03-OWNER-APPROVAL-2026-10-09-961ef951` (626 family
+> memberships), `FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d`
+> (237 series memberships),
+> `FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d` (15
+> family→series edges), via commits `6ba8c66e`, `b76f14be`, `4e4398aa`,
+> `0c23a34d` — **none of which are in this branch's ancestry**. The
+> catalog was NOT populated by this remediation: `parts.family` remains
+> 0/1882 and is not the serving authority. Full record:
+> `results/discovery01-remediation/b1_identity_authority.json` and
+> `DISCOVERY01_IDENTITY_AUTHORITY.md`.
+
 ## 1. Packet integrity (immutable hashes)
 
 | Packet | SHA-256 | Members |
@@ -91,6 +109,18 @@ Two disclosed passes (both retained on disk):
 No systematic membership defect found; no packet held.
 
 ## 7. Owner decision block (awaiting signature — nothing promoted)
+
+> **STATUS CORRECTION (2026-10-09, DISCOVERY-01 B1 remediation).**
+> This block was subsequently signed and executed on the facet-03 /
+> facet-decision lanes: all four packets are approved and every
+> membership in the live identity store is `verified` (626 family,
+> 237 series, 15 family→series edges), with approval references
+> `FACET03-OWNER-APPROVAL-2026-10-09-961ef951`,
+> `FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d` and
+> `FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d` recorded
+> in the store's `meta` table. The unchecked boxes below are the
+> historical pre-signature form, kept unaltered. Evidence:
+> `results/discovery01-remediation/b1_identity_authority.json`.
 
 - [ ] OptiMOS packet `7a65e880…` — approve / reject / defer: ______
 - [ ] CoolMOS packet `071ec975…` — approve / reject / defer: ______

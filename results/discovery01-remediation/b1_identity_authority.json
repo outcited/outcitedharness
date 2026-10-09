@@ -1,0 +1,192 @@
+{
+  "record": "DISCOVERY-01 identity authority",
+  "generated_by": "scripts/discovery01_identity_authority.py",
+  "generated_at": "2026-10-09T13:21:34-0700",
+  "generated_from_branch": "discovery/01-production-remediation",
+  "generated_from_commit": "c74927b0a34b9579d06ae52c8f0793caf1009439",
+  "authority": {
+    "source_of_truth": "/Volumes/M5_4TB/extract-results/facet_identity.db",
+    "tables": {
+      "identities": "family/series nodes with kind, label, manufacturer_id, authority, status",
+      "relationships": "membership edges (parent_id -> child_id, rel_type='contains') carrying status, authority, source_sha256, source_locator, norm_rule, confidence, conflict_status",
+      "meta": "approval:<identity_id> rows written by identity.promote() — the owner approval reference that authorized each verified node"
+    },
+    "verified_is_only_reachable_via": "harness/search/identity.py::promote(con, identity_id, approval=...) — it requires a non-empty approval reference and records it in meta",
+    "catalog_is_authoritative_for_family": false,
+    "index_is_authoritative_for_family": false
+  },
+  "live_state": {
+    "relationships_total": 878,
+    "relationships_not_verified": 0,
+    "opn_to_family_verified": 626,
+    "opn_to_series_verified": 237,
+    "series_to_family_verified": 15,
+    "relationships_by_kind_status": {
+      "family|opn|verified": 626,
+      "family|series|verified": 15,
+      "series|opn|verified": 237
+    },
+    "identities_by_kind_status": {
+      "family|verified": 4,
+      "series|verified": 15
+    },
+    "verified_family_nodes": 4,
+    "verified_series_nodes": 15,
+    "family_labels": [
+      "CoolMOS",
+      "CoolSiC",
+      "OptiMOS",
+      "StrongIRFET"
+    ]
+  },
+  "approval_references": {
+    "family": "FACET03-OWNER-APPROVAL-2026-10-09-961ef951",
+    "series": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "series_edges": "FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d",
+    "refs_found_in_meta": [
+      "FACET03-OWNER-APPROVAL-2026-10-09-961ef951",
+      "FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d",
+      "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d"
+    ],
+    "approval_rows": 23,
+    "node_approvals": 19,
+    "edge_approvals": 4,
+    "rows_by_reference": {
+      "FACET03-OWNER-APPROVAL-2026-10-09-961ef951": 4,
+      "FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d": 4,
+      "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d": 15
+    },
+    "edge_approval_keys": [
+      "approval:family:mfr:infineon:coolmos:edges:series",
+      "approval:family:mfr:infineon:coolsic:edges:series",
+      "approval:family:mfr:infineon:optimos:edges:series",
+      "approval:family:mfr:infineon:strongirfet:edges:series"
+    ],
+    "approved_nodes": [
+      "family:mfr:infineon:coolmos",
+      "family:mfr:infineon:coolmos:edges:series",
+      "family:mfr:infineon:coolsic",
+      "family:mfr:infineon:coolsic:edges:series",
+      "family:mfr:infineon:optimos",
+      "family:mfr:infineon:optimos:edges:series",
+      "family:mfr:infineon:strongirfet",
+      "family:mfr:infineon:strongirfet:edges:series",
+      "series:mfr:infineon:coolmos-cfd2",
+      "series:mfr:infineon:coolmos-cfd7",
+      "series:mfr:infineon:coolmos-cfd7a",
+      "series:mfr:infineon:coolmos-cfda",
+      "series:mfr:infineon:coolmos-cm8",
+      "series:mfr:infineon:coolmos-cpa",
+      "series:mfr:infineon:coolmos-g7",
+      "series:mfr:infineon:coolsic-g2",
+      "series:mfr:infineon:optimos-2",
+      "series:mfr:infineon:optimos-3",
+      "series:mfr:infineon:optimos-5",
+      "series:mfr:infineon:optimos-6",
+      "series:mfr:infineon:optimos-7",
+      "series:mfr:infineon:optimos-8",
+      "series:mfr:infineon:strongirfet-2"
+    ],
+    "decision_text_sample": "Approve OptiMOS, CoolMOS, CoolSiC, and StrongIRFET FACET-03 membership packets at commit 961ef951. Approval covers exactly the 626 proposed memberships represented by the pinned packet hashes and no additional candidates. Evidence standard is manufacturer-source, byte-verified PDF provenance with page and verbatim family attribution. Independent risk-stratified review: 77/77 supported, 0 unsupported, 0 evidence errors. Known series-level incompleteness is deferred to v2 and does not invalidate family membership."
+  },
+  "serving_path": {
+    "family_membership": "harness/search/cohort.py::_attach_families — SELECT r.child_id, r.status, r.conflict_status, r.authority, r.source_sha256, r.source_locator, i.identity_id, i.label FROM relationships r JOIN identities i ... WHERE r.rel_type='contains' AND i.kind='family'; matches child_id 'opn:<OPN>'; grants family_id only for a single non-conflicting membership; statuses travel with every membership and are never upgraded",
+    "m4_candidate_identity": "harness/search/identity.py::build_identity_snapshot — canonical ids, grain, parents with authority and membership evidence; recorded per session as releases.m5_identity_snapshot (content-addressed, idempotent)",
+    "never_read_for_family": "catalog.parts.family is selected by cohort.build_cohort but is not used to construct a Candidate; the discovery path has no catalog family dependency",
+    "disclosed_in_response": "cohort notes state the catalog gap (family/mpn_base empty in catalog 0/1882, family-grain not fabricated) and the membership counts with statuses"
+  },
+  "materialization": {
+    "catalog_parts_total": 1882,
+    "catalog_parts_with_family": 0,
+    "catalog_parts_family_coverage": "0/1882",
+    "catalog_populated_by_this_remediation": false,
+    "rationale": "parts.family is not the serving authority for DISCOVERY-01, so it was deliberately NOT populated to close a blocker; materializing it would duplicate identity and create a second source of truth",
+    "index_units_active": 356061,
+    "index_units_with_family": 0,
+    "index_family_grain_units": 1882,
+    "index_family_gap": "indexer.family_units() builds family-grain units from catalog.parts.family, so the SEARCH surface has 1,882 family-grain units with empty family labels and 0 units carrying a family value; the DISCOVERY surface does not read units.family",
+    "materializing_the_index_would_change": "the search index release fingerprint (units content), so it requires explicit owner authorization and a re-prime of the policy release cache"
+  },
+  "admission_commits": [
+    {
+      "commit": "6ba8c66e3e4aa3bbd1e50bc7f8fd21095cca94dc",
+      "short": "6ba8c66e",
+      "subject": "facet-03 ADMISSION EXECUTED — owner approval FACET03-OWNER-APPROVAL-2026-10-09-961ef951: all four packets APPROVED (OptiMOS 243, CoolMOS 207, CoolSiC 127, StrongIRFET 49 = exactly the 626 pinned memberships, no additional candidates); promote_packet hardened per owner directive — promotion binds family_id + expected_packet_sha256 + expected_population + approval_ref, fail-closed on packet hash mis",
+      "date": "2026-10-09 09:36:06 -0700",
+      "branches_containing": [
+        "+ facet/03-family-provenance",
+        "  remotes/origin/facet/03-family-provenance"
+      ],
+      "in_this_branch_ancestry": false,
+      "role": "executed the family admission: all four packets approved (626 OPN->family memberships verified)"
+    },
+    {
+      "commit": "b76f14be091157e3abf2b2777be70026bf0c97a4",
+      "short": "b76f14be",
+      "subject": "facet-03 series-grain v2 (autonomous roadmap item 1): series designators extracted from the SAME verified membership quotes (byte-verified sha+page+verbatim, no new sources) — case-sensitive all-caps capture with closed interstitial vocabulary ('CoolSiC MOSFET G1' reachable, prose 'CoolMOS is a revolutionary'/'CoolMOS Power Transistor' never matches); 237/626 memberships carry a printed series (37",
+      "date": "2026-10-09 10:00:56 -0700",
+      "branches_containing": [
+        "+ facet/03-family-provenance",
+        "  remotes/origin/facet/03-family-provenance"
+      ],
+      "in_this_branch_ancestry": false,
+      "role": "series-grain v2: series designators extracted from the same verified membership quotes (237 OPN->series)"
+    },
+    {
+      "commit": "4e4398aa44335e13157a1de70c9ca2f067ab630f",
+      "short": "4e4398aa",
+      "subject": "facet-03 v2 owner decisions executed: 15/15 family->series edges promoted (promote_packet child_kind scoping added + drift-refusal tested; ref FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d; registry 878/878 verified, 626 family memberships untouched); ROHM RSH065N06 re-keyed under printed-OPN-identity rule (2 claims+1ps+1part, quotes byte-identical, backup taken, provenance annotated wit",
+      "date": "2026-10-09 12:17:52 -0700",
+      "branches_containing": [
+        "+ facet/03-family-provenance",
+        "  remotes/origin/facet/03-family-provenance"
+      ],
+      "in_this_branch_ancestry": false,
+      "role": "executed the v2 owner decisions: 15/15 family->series edges promoted (adds promote_packet with child_kind scoping and drift refusal)"
+    },
+    {
+      "commit": "0c23a34dae30e50fb6626eab1686a9292e94e163",
+      "short": "0c23a34d",
+      "subject": "facet-03 series signoff package (owner gate prep): 15 packets / 237 memberships pinned by sha256, independent source-PDF verification of 42 stratified samples (first/middle/last per packet) — byte re-hash + designator-on-recorded-page + OPN-in-front-matter + verbatim quote: 42/42 supported, 0 failures, 0 packet exceptions; risks documented (closed interstitial vocab fails to unknown, numeric-gener",
+      "date": "2026-10-09 10:57:52 -0700",
+      "branches_containing": [
+        "+ facet/03-family-provenance",
+        "  remotes/origin/facet/03-family-provenance"
+      ],
+      "in_this_branch_ancestry": false,
+      "role": "series signoff package: 15 packets / 237 memberships pinned by sha256 (owner gate preparation)"
+    }
+  ],
+  "related_commits_on_other_lanes": [
+    {
+      "commit": "49557b74d365ef2816c8b8d39a5859f188d4ed3d",
+      "short": "49557b74",
+      "subject": "discovery-01/facet: release-keyed cohort cache (roadmap item 2, FACET-02 GA blocker) — build_cohort_cached keyed by catalog fingerprint + identity fingerprint + evidence fingerprint (O(1) meta release+dirty read, falls back to count for test dbs) + aisle-map hash + category/subcategory; deterministic invalidation on any upstream mutation (tested: catalog insert -> miss), bounded FIFO 8 entries, ca",
+      "date": "2026-10-09 10:04:33 -0700",
+      "branches_containing": [
+        "+ discovery/01-facet-decision-integration",
+        "  remotes/origin/discovery/01-facet-decision-integration"
+      ],
+      "in_this_branch_ancestry": false,
+      "role": "release-keyed cohort cache (R11.3 / FACET-02 GA blocker): build_cohort_cached wired into facets + the session orchestrator"
+    },
+    {
+      "commit": "4c1f45a6a99e48fbc85437606e82b7fa5a017548",
+      "short": "4c1f45a6",
+      "subject": "search: grain-weighting experiment — MEASURED NEGATIVE, reverted to neutral (hybrid-v1.1). Two live variants tested (symbolic-boost+section-penalty; known-symbol-only): all-aisle recall 0.168->0.158 both ways, power never recovered 0.243, mcu regressed 0.265->0.235 (prose section boost amplified non-anchor sections). Score-space multiplication is the wrong lever for section dilution; per-field FTS",
+      "date": "2026-10-09 10:21:50 -0700",
+      "branches_containing": [
+        "+ discovery/01-facet-decision-integration",
+        "  remotes/origin/discovery/01-facet-decision-integration"
+      ],
+      "in_this_branch_ancestry": false,
+      "role": "grain-weighting experiment, measured negative, reverted to neutral (hybrid-v1.1)"
+    }
+  ],
+  "reproducibility": {
+    "admission_code_present_in_this_branch": false,
+    "this_branch_identity_api": "add_relationship refuses status='verified' and promote() updates identities only, so this branch can neither fabricate nor reproduce the live verified relationship state",
+    "implication": "the live store is authoritative and the serving path reads it faithfully, but the tooling that produced that state lives on the facet-03 / facet-decision lanes; production promotion must run from a branch that contains those commits, or they must be merged with owner authorization",
+    "verification_performed": "counts, statuses and approval refs were read directly from the live store by this script and are locked by tests/test_discovery01_b1_identity_authority.py"
+  }
+}
