@@ -37,6 +37,14 @@ POWER_WAVE = os.environ.get(
     "SEARCH_POWER_WAVE",
     "/Volumes/M5_4TB/extract-results/power-topology-v1.jsonl")
 
+# Pilot gate (release decision 2026-10-08): only categories whose candidate
+# and taxonomy coverage passed review are served. MCU and connector facets
+# stay disabled until their coverage gates are met — an honestly-empty
+# cohort is correct, but the pilot must not offer aisles it cannot serve.
+FACET_PILOT_CATEGORIES = frozenset(
+    c.strip() for c in os.environ.get(
+        "SEARCH_FACET_CATEGORIES", "power").split(",") if c.strip())
+
 _ALLOWED_FILTERS = ("vendor", "family", "category", "grain",
                     "min_verification", "include_retired", "evidence_grade")
 
@@ -76,6 +84,17 @@ class Handler(BaseHTTPRequestHandler):
         category = qs.get("category")
         if not category:
             return self._json(422, {"error": "category is required"})
+        if category not in FACET_PILOT_CATEGORIES:
+            return self._json(403, {
+                "error": "category_gated",
+                "category": category,
+                "allowed": sorted(FACET_PILOT_CATEGORIES),
+                "notice": (f"category '{category}' is gated out of the "
+                           "facet pilot: candidate/taxonomy coverage does "
+                           "not yet satisfy the release gates (see "
+                           "FACET02_PILOT_HANDOFF.md). Evidence search "
+                           "(/v1/search) is unaffected."),
+            })
         constraints = {}
         for key in qs:
             if key.startswith("c."):
@@ -105,7 +124,16 @@ class Handler(BaseHTTPRequestHandler):
         route = self.path.partition("?")[0]
         qs = self.path_qs_parse()
         if route == "/v1/discovery/facets":
-            return self._discovery_facets(qs)
+            try:
+                return self._discovery_facets(qs)
+            except ValueError as e:
+                return self._json(422, {"error": str(e)})
+            except Exception as e:
+                # fail closed: a broken cohort source must never
+                # masquerade as an empty cohort
+                return self._json(500, {
+                    "error": "cohort_source_unavailable",
+                    "detail": f"{type(e).__name__}: {e}"})
         con = units_store.connect(SEARCH_DB)
         try:
             if route == "/v1/health":

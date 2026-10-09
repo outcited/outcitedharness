@@ -50,6 +50,15 @@ _BUCKETS: dict[str, list[tuple[float | None, float | None, str]]] = {
                         (100, None, ">=100 A")],
     "tj_max_c": [(None, 125, "<125 C"), (125, 150, "125-150 C"),
                  (150, None, ">=150 C")],
+    "vgs_th_v": [(None, 2.0, "<2 V"), (2.0, 3.0, "2-3 V"), (3.0, 4.0, "3-4 V"),
+                 (4.0, 5.0, "4-5 V"), (5.0, None, ">=5 V")],
+    "gate_charge_nc": [(None, 20e-9, "<20 nC"), (20e-9, 50e-9, "20-50 nC"),
+                       (50e-9, 100e-9, "50-100 nC"),
+                       (100e-9, 300e-9, "100-300 nC"),
+                       (300e-9, None, ">=300 nC")],
+    "coss_pf": [(None, 100e-12, "<100 pF"), (100e-12, 500e-12, "100-500 pF"),
+                (500e-12, 1e-9, "0.5-1 nF"), (1e-9, 10e-9, "1-10 nF"),
+                (10e-9, None, ">=10 nF")],
     "thermal_resistance_c_per_w": [(None, 1, "<1 C/W"), (1, 5, "1-5 C/W"),
                                    (5, 20, "5-20 C/W"), (20, None, ">=20 C/W")],
     "output_voltage_v": [(None, 1.2, "<1.2 V"), (1.2, 3.3, "1.2-3.3 V"),
@@ -413,20 +422,43 @@ def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
     # Reduction ranking (R4): an axis is informative when choosing a value
     # removes many candidates AND the axis actually has data. Weighting
     # reduction by coverage stops near-empty axes (high trivial reduction,
-    # 1% coverage) from being recommended. Deterministic tie-break by name.
+    # 1% coverage) from being recommended. A numeric axis below the
+    # coverage floor is never eligible: asking a question 90% of the cohort
+    # cannot answer resolves no uncertainty, it just strands candidates.
+    # Deterministic tie-break by name.
+    COVERAGE_FLOOR = 0.30
+
     def informative(f: dict) -> tuple:
         best = f["values"][0]["reduction"] if f["values"] else 0
-        coverage = f.get("coverage", 1.0) if f["kind"] == "numeric" else 1.0
-        return (-(best * coverage), f["dimension"])
+        if f["kind"] == "numeric":
+            coverage = f.get("coverage", 0.0)
+            if coverage < COVERAGE_FLOOR:
+                return (1, 0.0, f["dimension"])   # never recommended
+            return (0, -(best * coverage), f["dimension"])
+        return (0, -float(best), f["dimension"])
 
     ranked = sorted(facets, key=informative)
-    recommended = ranked[0]["dimension"] if ranked else None
+    recommended = None
+    for facet in ranked:
+        if informative(facet)[0] != 0:
+            break                       # rest are coverage-ineligible
+        if facet["values"] and facet["values"][0]["reduction"] > 0:
+            recommended = facet["dimension"]
+            break
 
     return {
         "schema": COHORT_SCHEMA,
         "category": cat, "subcategory": cohort.get("subcategory"),
         "grain": cohort["grain"],
         "candidate_count": cohort_size,
+        "candidates": [
+            {"opn": c.opn, "vendor": c.vendor_canonical,
+             "evidence_units": len(c.evidence_unit_ids),
+             "evidence_grade_units": c.evidence_grade_units,
+             "evidence_refs": sorted(c.evidence_unit_ids)[:3]}
+            for c in sorted(candidates, key=lambda c: c.opn)[:50]
+        ],
+        "candidates_truncated": cohort_size > 50,
         "evidence_units": evidence_units,
         "evidence_grade_units": graded,
         "discovery_only_units": evidence_units - graded,
