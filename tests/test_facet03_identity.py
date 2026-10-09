@@ -329,3 +329,107 @@ def test_snapshot_builder_fail_closed(tmp_path):
     broken.row_factory = sqlite3.Row
     with pytest.raises(sqlite3.OperationalError):
         identity.build_identity_snapshot(broken, icon, category="power")
+
+# --- owner-grade packet-bound promotion (directive 2026-10-09) --------------
+
+import hashlib
+
+
+def _write_packet(tmp_path, icon, opn_list=("PART-A", "PART-B"),
+                  family="CoolMOS", sha="f" * 64):
+    fam_id = _family_pair(icon, opn=opn_list[0], family=family, sha=sha)
+    for extra in opn_list[1:]:
+        _family_pair(icon, opn=extra, family=family, sha=sha)
+    rows = icon.execute(
+        "SELECT child_id, source_sha256, source_locator FROM relationships"
+        " WHERE parent_id=? ORDER BY child_id", (fam_id,)).fetchall()
+    members = []
+    for r in rows:
+        loc = json.loads(r["source_locator"])
+        members.append({"parent_id": fam_id, "child_id": r["child_id"],
+                        "opn": r["child_id"].split(":", 1)[1],
+                        "status": "proposed",
+                        "norm_rule": "front_matter_vocab_v1",
+                        "confidence": 0.9, "source_sha256": r["source_sha256"],
+                        "page": loc["page"],
+                        "quoted_family_identifier": loc["quote"]})
+    packet = {"schema": "harness.facet03-admission-packet.v1",
+              "family": {"identity_id": fam_id, "label": family,
+                         "manufacturer_id": "mfr:infineon",
+                         "identity_authority": "front matter"},
+              "status_of_all_memberships": "proposed",
+              "member_count": len(members), "members": members,
+              "exceptions": [], "exception_count": 0}
+    path = tmp_path / "packet.json"
+    path.write_bytes(json.dumps(packet, indent=2, sort_keys=True).encode())
+    return fam_id, path, hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_promote_packet_binds_to_signed_bytes(tmp_path):
+    icon = _icon(tmp_path)
+    fam_id, path, sha = _write_packet(tmp_path, icon)
+    # tamper: mutate a quote in the packet after hashing
+    data = json.loads(path.read_text())
+    data["members"][0]["quoted_family_identifier"] += " (mutated)"
+    path.write_text(json.dumps(data, indent=2, sort_keys=True))
+    with pytest.raises(ValueError, match="packet hash mismatch"):
+        identity.promote_packet(
+            icon, family_id=fam_id, packet_path=path,
+            expected_packet_sha256=sha, expected_population=2,
+            approval_ref="FACET03-OWNER-APPROVAL-TEST")
+    # nothing promoted by the failed attempt
+    row = icon.execute("SELECT status FROM identities WHERE identity_id=?",
+                       (fam_id,)).fetchone()
+    assert row["status"] == "proposed"
+
+
+def test_promote_packet_rejects_population_and_drift(tmp_path):
+    icon = _icon(tmp_path)
+    fam_id, path, sha = _write_packet(tmp_path, icon)
+    with pytest.raises(ValueError, match="population mismatch"):
+        identity.promote_packet(icon, family_id=fam_id, packet_path=path,
+                                expected_packet_sha256=sha,
+                                expected_population=3,
+                                approval_ref="REF")
+    # registry drift: an extra proposed relationship not in the packet
+    identity.add_relationship(
+        icon, fam_id, "opn:PART-Z", "contains", authority="late evidence",
+        source_sha256="e" * 64,
+        source_locator={"page": 2, "quote": "CoolMOS late"},
+        norm_rule="front_matter_vocab_v1")
+    with pytest.raises(ValueError, match="drift"):
+        identity.promote_packet(icon, family_id=fam_id, packet_path=path,
+                                expected_packet_sha256=sha,
+                                expected_population=2,
+                                approval_ref="REF")
+
+
+def test_promote_packet_success_is_exact_and_auditable(tmp_path):
+    icon = _icon(tmp_path)
+    fam_id, path, sha = _write_packet(tmp_path, icon)
+    result = identity.promote_packet(
+        icon, family_id=fam_id, packet_path=path,
+        expected_packet_sha256=sha, expected_population=2,
+        approval_ref="FACET03-OWNER-APPROVAL-2026-10-09-TEST",
+        decision_text="Approve exactly these memberships.")
+    assert result["status"] == "verified" and \
+        result["memberships_promoted"] == 2
+    assert icon.execute("SELECT status FROM identities WHERE"
+                        " identity_id=?", (fam_id,)).fetchone()[0] == \
+        "verified"
+    rel = icon.execute("SELECT status FROM relationships WHERE parent_id=?",
+                       (fam_id,)).fetchall()
+    assert all(r["status"] == "verified" for r in rel) and len(rel) == 2
+    approval = json.loads(icon.execute(
+        "SELECT value FROM meta WHERE key=?",
+        (f"approval:{fam_id}",)).fetchone()[0])
+    assert approval["packet_sha256"] == sha
+    assert approval["approval_ref"].startswith("FACET03-OWNER-APPROVAL")
+    # empty approval ref refused
+    fam2, path2, sha2 = _write_packet(tmp_path, icon,
+                                      opn_list=("PART-C",),
+                                      family="CoolSiC")
+    with pytest.raises(ValueError):
+        identity.promote_packet(icon, family_id=fam2, packet_path=path2,
+                                expected_packet_sha256=sha2,
+                                expected_population=1, approval_ref="  ")

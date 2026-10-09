@@ -90,16 +90,31 @@ Two disclosed passes (both retained on disk):
 
 No systematic membership defect found; no packet held.
 
-## 7. Owner decision block (awaiting signature — nothing promoted)
+## 7. Owner decision block — SIGNED 2026-10-09
 
-- [ ] OptiMOS packet `7a65e880…` — approve / reject / defer: ______
-- [ ] CoolMOS packet `071ec975…` — approve / reject / defer: ______
-- [ ] CoolSiC packet `b2e4a60b…` — approve / reject / defer: ______
-- [ ] StrongIRFET packet `701c45b6…` — approve / reject / defer: ______
-- Approval reference (mail/log id): ______
+- [x] OptiMOS packet `7a65e880…` — **APPROVED** (243 memberships)
+- [x] CoolMOS packet `071ec975…` — **APPROVED** (207 memberships)
+- [x] CoolSiC packet `b2e4a60b…` — **APPROVED** (127 memberships)
+- [x] StrongIRFET packet `701c45b6…` — **APPROVED** (49 memberships)
+- Approval reference: `FACET03-OWNER-APPROVAL-2026-10-09-961ef951`
 
-On signature, promotion is mechanical and auditable:
-`identity.promote(con, family_id, approval="<ref>")` — the only code path
-to `verified`. Recommended first action after promotion: re-run
-`facet_journeys.py` and the R6 suite (no code change needed; status flows
-through snapshots automatically).
+Owner decision text (verbatim): "Approve OptiMOS, CoolMOS, CoolSiC, and
+StrongIRFET FACET-03 membership packets at commit 961ef951. Approval
+covers exactly the 626 proposed memberships represented by the pinned
+packet hashes and no additional candidates. Evidence standard is
+manufacturer-source, byte-verified PDF provenance with page and verbatim
+family attribution. Independent risk-stratified review: 77/77 supported,
+0 unsupported, 0 evidence errors. Known series-level incompleteness is
+deferred to v2 and does not invalidate family membership."
+
+**Promotion executed 2026-10-09** via `identity.promote_packet` — the
+owner-hardened path requiring family_id + expected_packet_sha256 +
+expected_population + approval_ref, fail-closed on any packet/registry
+drift (owner directive: the signature binds "exactly these bytes defining
+exactly these memberships"). Result: 4 identities verified, **626/626
+memberships verified, 0 proposed remaining**, 0 conflicts. Decision record:
+`extract-results/facet03-packets/ADMISSION_DECISION_2026-10-09.json`.
+Identity snapshot advanced to `identity-snapshot-v1-7543bb485dee9426`
+(626 verified / 951 unknown — unknowns never fabricated). Facet behavior
+unchanged (CoolSiC cohort 127). Catalog.db untouched; series-grain
+incompleteness deferred to v2 per the decision.

@@ -174,6 +174,90 @@ def promote(con: sqlite3.Connection, identity_id: str, *,
     con.commit()
 
 
+def promote_packet(con: sqlite3.Connection, *, family_id: str,
+                   packet_path, expected_packet_sha256: str,
+                   expected_population: int, approval_ref: str,
+                   decision_text: str = "") -> dict:
+    """Owner-grade promotion: the signature binds to PACKET BYTES.
+
+    Fails closed unless ALL hold at promotion time:
+      1. the packet file re-hashes to expected_packet_sha256;
+      2. the packet's family identity_id == family_id;
+      3. packet member_count == expected_population;
+      4. the packet's member set EXACTLY equals the currently proposed
+         relationships for that family (child id + source sha + page +
+         quote) — no drift, no extras, no missing;
+      5. approval_ref is non-empty.
+
+    Only then are the family identity and exactly those memberships set to
+    `verified`, and the approval (ref + packet hash + population + decision
+    text) is recorded immutably in meta. This converts "I approve this
+    family" into "I approve exactly these bytes defining exactly these
+    memberships" (owner directive 2026-10-09).
+    """
+    import hashlib as _hashlib
+    if not (approval_ref or "").strip():
+        raise ValueError("approval_ref is required")
+    raw = Path(packet_path).read_bytes()
+    actual_sha = _hashlib.sha256(raw).hexdigest()
+    if actual_sha != expected_packet_sha256:
+        raise ValueError(
+            f"packet hash mismatch: expected {expected_packet_sha256[:16]},"
+            f" file hashes {actual_sha[:16]} — refusing to promote bytes"
+            " the owner did not sign")
+    packet = json.loads(raw)
+    if packet["family"]["identity_id"] != family_id:
+        raise ValueError("packet family identity does not match family_id")
+    members = packet["members"]
+    if len(members) != expected_population or \
+            packet.get("member_count") != expected_population:
+        raise ValueError(
+            f"population mismatch: expected {expected_population}, packet"
+            f" carries {len(members)}/{packet.get('member_count')}")
+    rows = con.execute(
+        "SELECT child_id, source_sha256, source_locator, status,"
+        " conflict_status FROM relationships WHERE parent_id=?"
+        " AND rel_type='contains'", (family_id,)).fetchall()
+    db_set = {(r["child_id"], r["source_sha256"],
+               json.dumps(json.loads(r["source_locator"]), sort_keys=True))
+              for r in rows}
+    packet_set = {(m["child_id"], m["source_sha256"],
+                   json.dumps({"page": m["page"],
+                               "quote": m["quoted_family_identifier"]},
+                              sort_keys=True))
+                  for m in members}
+    if db_set != packet_set:
+        missing = packet_set - db_set
+        extra = db_set - packet_set
+        raise ValueError(
+            "packet/registry drift — refusing: "
+            f"{len(missing)} packet members absent from registry,"
+            f" {len(extra)} registry rows not in the signed packet")
+    conflicting = [r["child_id"] for r in rows if r["conflict_status"]]
+    if conflicting:
+        raise ValueError(
+            f"conflicting memberships present for {len(conflicting)}"
+            " children — resolve before promotion")
+    con.execute("UPDATE identities SET status='verified'"
+                " WHERE identity_id=?", (family_id,))
+    con.execute(
+        "UPDATE relationships SET status='verified' WHERE parent_id=?"
+        " AND rel_type='contains'", (family_id,))
+    con.execute(
+        "INSERT INTO meta (key, value) VALUES (?,?)"
+        " ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        (f"approval:{family_id}", json.dumps({
+            "approval_ref": approval_ref,
+            "packet_sha256": actual_sha,
+            "population": expected_population,
+            "decision_text": decision_text,
+            "promoted_at": now()}, sort_keys=True)))
+    con.commit()
+    return {"family_id": family_id, "status": "verified",
+            "memberships_promoted": len(members),
+            "packet_sha256": actual_sha, "approval_ref": approval_ref}
+
+
 def add_relationship(con: sqlite3.Connection, parent_id: str, child_id: str,
                      rel_type: str, *, authority: str, source_sha256: str,
                      source_locator: dict, norm_rule: str,
