@@ -39,8 +39,8 @@ empty-cohort masquerade) ✓.
 | byte verification (re-hash of actual PDF) | — | 1,913 / 1,913, **0 mismatches** |
 | quote cross-check vs substrate content | — | 37,247 / 43,007 (86.6%) |
 | pages recovered (quote-locate) | 0 | **47,131** |
-| evidence-grade active units (index) | 264,343 / 356,061 (74%*) | **315,318 / 346,919 (90.8%)** |
-| discovery-only active units | all 86K claims | 36K→**31.6K** (5 unresolved docs + quote-miss cells) |
+| evidence-grade active units (index) | 264,343 / 356,061 (74%*) | **315,318 / 356,061 (88.6%)** |
+| discovery-only active units | all 86K claims | 36K→**40.7K** (5 unresolved docs + quote-miss cells) |
 | benchmark locator precision | 0.988 | **0.988** (85/86; matched-hit mix shifted to re-keyed claims) |
 | benchmark power recall@10 | 0.176 | **0.216** (grade boosts now apply to claims) |
 

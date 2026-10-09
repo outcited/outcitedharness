@@ -66,16 +66,22 @@ def _opn_of(stem: str, known_opns: set[str]) -> str | None:
 
 def scan_front_matter(pages: list[tuple[int, str]],
                       vocab: tuple[str, ...]) -> dict[str, tuple[int, str]]:
-    """family token -> (page, verbatim line). First printed page wins per
-    family; every capture is a real line from the document."""
+    """family token -> (page, match-centered verbatim excerpt).
+
+    The substrate text is whitespace-normalized per page, so the capture is
+    a window around the actual match (120 chars before, 200 after) — the
+    quoted identifier always CONTAINS the family token it evidences.
+    """
     hits: dict[str, tuple[int, str]] = {}
     for page_no, text in pages[:FRONT_MATTER_PAGES]:
-        for line in text.split("\n"):
-            for token in vocab:
-                if token in hits:
-                    continue
-                if re.search(rf"\b{re.escape(token)}\b", line, re.I):
-                    hits[token] = (page_no, line.strip()[:300])
+        for token in vocab:
+            if token in hits:
+                continue
+            m = re.search(rf"\b{re.escape(token)}\b", text, re.I)
+            if m:
+                start = max(0, m.start() - 120)
+                excerpt = text[start:m.end() + 200].strip()
+                hits[token] = (page_no, excerpt[:340])
     return hits
 
 
