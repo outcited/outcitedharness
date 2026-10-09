@@ -104,9 +104,62 @@ class Candidate:
     evidence_unit_ids: list[str] = field(default_factory=list)
     evidence_grade_units: int = 0
     discovery_only_units: int = 0
+    # family identity — ONLY from recorded relationships (never inferred
+    # from names); status travels with it; ambiguous/conflicting leaves
+    # family_id None with the memberships listed for transparency.
+    family_id: str | None = None
+    family_label: str | None = None
+    family_status: str | None = None
+    family_authority: str | None = None
+    families: list[dict] = field(default_factory=list)
 
     def axis_value(self, axis_name: str) -> dict | None:
         return self.attributes.get(axis_name)
+
+
+def _attach_families(identity_con, candidates: dict[str, Candidate]) -> dict:
+    """Attach family memberships from the identity store.
+
+    Rules: only non-conflicting relationships grant a family_id; multiple
+    distinct non-conflicting families => ambiguous (no single family_id);
+    conflicting => listed, never merged. Nothing propagates attributes:
+    family nodes carry no spec values anywhere in this module.
+    """
+    stats = {"with_family": 0, "ambiguous": 0, "conflicting": 0,
+             "unknown": 0}
+    rows = identity_con.execute(
+        "SELECT r.child_id, r.status, r.conflict_status, r.authority,"
+        " r.source_sha256, r.source_locator, i.identity_id, i.label"
+        " FROM relationships r JOIN identities i"
+        " ON i.identity_id = r.parent_id"
+        " WHERE r.rel_type='contains' AND i.kind='family'").fetchall()
+    by_child: dict[str, list] = {}
+    for row in rows:
+        by_child.setdefault(row["child_id"], []).append(row)
+    for opn, cand in candidates.items():
+        memberships = by_child.get(f"opn:{opn}", [])
+        cand.families = [
+            {"identity_id": m["identity_id"], "label": m["label"],
+             "status": m["status"],
+             "conflict_status": m["conflict_status"],
+             "authority": m["authority"],
+             "source_sha256": m["source_sha256"],
+             "source_locator": json.loads(m["source_locator"])}
+            for m in memberships]
+        clean = [m for m in memberships if not m["conflict_status"]]
+        if len(clean) == 1:
+            cand.family_id = clean[0]["identity_id"]
+            cand.family_label = clean[0]["label"]
+            cand.family_status = clean[0]["status"]
+            cand.family_authority = clean[0]["authority"]
+            stats["with_family"] += 1
+        elif len(clean) > 1:
+            stats["ambiguous"] += 1
+        elif memberships:
+            stats["conflicting"] += 1
+        else:
+            stats["unknown"] += 1
+    return stats
 
 
 def _aisle_category(selector_aisle: str | None) -> tuple[str | None, str | None]:
@@ -205,7 +258,8 @@ def build_cohort(*, catalog_con: sqlite3.Connection,
                  wave_path: str | None = None,
                  category: str | None = None,
                  subcategory: str | None = None,
-                 aisle_map: dict[str, str] | None = None) -> dict:
+                 aisle_map: dict[str, str] | None = None,
+                 identity_con: sqlite3.Connection | None = None) -> dict:
     """Build the candidate set for a category/subcategory.
 
     aisle_map: opn(upper) -> selector_aisle. If absent, candidates are all
@@ -246,12 +300,25 @@ def build_cohort(*, catalog_con: sqlite3.Connection,
     if search_con is not None:
         _attach_evidence(search_con, candidates)
 
+    family_stats = None
+    if identity_con is not None:
+        family_stats = _attach_families(identity_con, candidates)
+
     grain = "opn"
     notes = ["family/mpn_base empty in catalog (0/1882) — candidate grain "
              "is OPN; family-grain not fabricated"]
+    if family_stats is not None:
+        notes.append(
+            "family membership attached from recorded relationships only "
+            f"(with_family={family_stats['with_family']},"
+            f" ambiguous={family_stats['ambiguous']},"
+            f" conflicting={family_stats['conflicting']},"
+            f" unknown={family_stats['unknown']}); statuses travel with"
+            " every membership; nothing propagates attributes")
     return {"schema": COHORT_SCHEMA, "grain": grain,
             "category": category, "subcategory": subcategory,
-            "candidates": candidates, "notes": notes}
+            "candidates": candidates, "notes": notes,
+            "family_stats": family_stats}
 
 
 def _attach_evidence(search_con: sqlite3.Connection,
@@ -329,6 +396,10 @@ def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
             candidates = [c for c in candidates
                           if c.vendor_canonical == want]
             continue
+        if axis_name == "family":
+            candidates = [c for c in candidates
+                          if c.family_label == want]
+            continue
         if axis_name in ("category", "subcategory"):
             candidates = [c for c in candidates
                           if getattr(c, axis_name, None) == want]
@@ -354,15 +425,26 @@ def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
     facets: list[dict] = []
     unknown_all: dict[str, int] = {}
 
-    # categorical structural facets first (category/subcategory/vendor)
-    for dim in ("subcategory", "vendor"):
+    # categorical structural facets first (subcategory/vendor/family).
+    # family exists only when identity relationships were attached; its
+    # counts are DISTINCT CANDIDATES per family — a family and its children
+    # never inflate same-grain counts (the grain stays OPN throughout).
+    family_stats = cohort.get("family_stats")
+    dims = ["subcategory", "vendor"]
+    if family_stats:
+        dims.append("family")
+    for dim in dims:
         if dim in constraints:
             continue
         counts: dict[str, list[Candidate]] = {}
+        dim_unknown = 0
         for c in candidates:
             key = {"vendor": c.vendor_canonical,
-                   "subcategory": c.subcategory}.get(dim)
+                   "subcategory": c.subcategory,
+                   "family": c.family_label}.get(dim)
             if key is None:
+                if dim == "family":
+                    dim_unknown += 1
                 continue
             counts.setdefault(key, []).append(c)
         values = sorted(
@@ -372,9 +454,19 @@ def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
               "reduction": cohort_size - len(v)}
              for k, v in counts.items()),
             key=lambda d: (-d["candidates"], d["value"]))[:max_values]
-        if values:
-            facets.append({"dimension": dim, "kind": "categorical",
-                           "values": values})
+        if values or (dim == "family" and family_stats):
+            facet = {"dimension": dim, "kind": "categorical",
+                     "values": values}
+            if dim == "family":
+                facet["membership_coverage"] = round(
+                    (cohort_size - dim_unknown) / max(1, cohort_size), 4)
+                facet["unknown_candidates"] = dim_unknown
+                facet["status_note"] = (
+                    "memberships are proposed (printed front-matter "
+                    "evidence) until owner admission; status travels per "
+                    "membership; family nodes carry no spec values — no "
+                    "attribute propagation")
+            facets.append(facet)
 
     # numeric spec-axis facets (candidate counts per range, R1/R2)
     for axis in spec_axes:
@@ -451,6 +543,9 @@ def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
         "category": cat, "subcategory": cohort.get("subcategory"),
         "grain": cohort["grain"],
         "candidate_count": cohort_size,
+        "distinct_opns": cohort_size,
+        "distinct_families": len({c.family_label for c in candidates
+                                  if c.family_label}),
         "candidates": [
             {"opn": c.opn, "vendor": c.vendor_canonical,
              "evidence_units": len(c.evidence_unit_ids),

@@ -25,6 +25,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from harness.search import cohort as cohort_mod
+from harness.search import identity as identity_mod
 from harness.search import indexer as indexer_mod
 from harness.search import query as query_service
 from harness.search import units as units_store
@@ -36,6 +37,9 @@ CATALOG = os.environ.get(
 POWER_WAVE = os.environ.get(
     "SEARCH_POWER_WAVE",
     "/Volumes/M5_4TB/extract-results/power-topology-v1.jsonl")
+IDENTITY_DB = os.environ.get(
+    "SEARCH_IDENTITY_DB",
+    "/Volumes/M5_4TB/extract-results/facet_identity.db")
 
 # Pilot gate (release decision 2026-10-08): only categories whose candidate
 # and taxonomy coverage passed review are served. MCU and connector facets
@@ -105,12 +109,15 @@ class Handler(BaseHTTPRequestHandler):
         search = sqlite3.connect(
             f"file:{SEARCH_DB}?mode=ro", uri=True)
         search.row_factory = sqlite3.Row
+        icon = None
         try:
+            if os.path.exists(IDENTITY_DB):
+                icon = identity_mod.connect(IDENTITY_DB)
             aisle_map = indexer_mod.aisle_map_from_wave(POWER_WAVE)
             built = cohort_mod.build_cohort(
                 catalog_con=catalog, search_con=search,
                 category=category, subcategory=qs.get("subcategory"),
-                aisle_map=aisle_map)
+                aisle_map=aisle_map, identity_con=icon)
             result = cohort_mod.facets_for_cohort(
                 built, constraints=constraints)
             result["evidence_policy"] = qs.get(
@@ -119,6 +126,47 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             catalog.close()
             search.close()
+            if icon is not None:
+                icon.close()
+
+    def _identity_snapshot(self, qs: dict):
+        import sqlite3
+        category = qs.get("category")
+        if not category:
+            return self._json(422, {"error": "category is required"})
+        if category not in FACET_PILOT_CATEGORIES:
+            return self._json(403, {
+                "error": "category_gated", "category": category,
+                "allowed": sorted(FACET_PILOT_CATEGORIES),
+                "notice": "identity snapshots follow the facet pilot gate"})
+        catalog = sqlite3.connect(f"file:{CATALOG}?mode=ro", uri=True)
+        catalog.row_factory = sqlite3.Row
+        icon = identity_mod.connect(IDENTITY_DB)
+        try:
+            aisle_map = indexer_mod.aisle_map_from_wave(POWER_WAVE)
+            category_of = {}
+            for opn, aisle in aisle_map.items():
+                cat, _sub = cohort_mod._aisle_category(aisle)
+                if cat:
+                    category_of[opn] = cat
+            payload = identity_mod.build_identity_snapshot(
+                catalog, icon, category=category, category_of=category_of)
+            if qs.get("candidate"):
+                want = f"opn:{qs['candidate']}"
+                payload["candidates"] = [
+                    c for c in payload["candidates"]
+                    if c["canonical_id"] == want]
+            snap = identity_mod.snapshot(icon, payload)
+            return self._json(200, {
+                "snapshot_id": snap["snapshot_id"],
+                "schema": snap["payload"]["schema"],
+                "counts": snap["counts"],
+                "candidates": snap["payload"]["candidates"],
+                "authority_note": snap["payload"]["authority_note"],
+            })
+        finally:
+            catalog.close()
+            icon.close()
 
     def do_GET(self):
         route = self.path.partition("?")[0]
@@ -133,6 +181,15 @@ class Handler(BaseHTTPRequestHandler):
                 # masquerade as an empty cohort
                 return self._json(500, {
                     "error": "cohort_source_unavailable",
+                    "detail": f"{type(e).__name__}: {e}"})
+        if route == "/v1/identity/snapshot":
+            try:
+                return self._identity_snapshot(qs)
+            except ValueError as e:
+                return self._json(422, {"error": str(e)})
+            except Exception as e:
+                return self._json(500, {
+                    "error": "identity_source_unavailable",
                     "detail": f"{type(e).__name__}: {e}"})
         con = units_store.connect(SEARCH_DB)
         try:
