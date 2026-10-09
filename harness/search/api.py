@@ -21,13 +21,21 @@ from __future__ import annotations
 import json
 import os
 import re
+import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+from harness.search import cohort as cohort_mod
+from harness.search import indexer as indexer_mod
 from harness.search import query as query_service
 from harness.search import units as units_store
 
 SEARCH_DB = os.environ.get(
     "SEARCH_DB", "/Volumes/M5_4TB/extract-results/search_index.db")
+CATALOG = os.environ.get(
+    "SEARCH_CATALOG", "/Volumes/M5_4TB/extract-results/catalog.db")
+POWER_WAVE = os.environ.get(
+    "SEARCH_POWER_WAVE",
+    "/Volumes/M5_4TB/extract-results/power-topology-v1.jsonl")
 
 _ALLOWED_FILTERS = ("vendor", "family", "category", "grain",
                     "min_verification", "include_retired", "evidence_grade")
@@ -63,8 +71,41 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _discovery_facets(self, qs: dict):
+        import sqlite3
+        category = qs.get("category")
+        if not category:
+            return self._json(422, {"error": "category is required"})
+        constraints = {}
+        for key in qs:
+            if key.startswith("c."):
+                constraints[key[2:]] = qs[key]
+        catalog = sqlite3.connect(
+            f"file:{CATALOG}?mode=ro", uri=True)
+        catalog.row_factory = sqlite3.Row
+        search = sqlite3.connect(
+            f"file:{SEARCH_DB}?mode=ro", uri=True)
+        search.row_factory = sqlite3.Row
+        try:
+            aisle_map = indexer_mod.aisle_map_from_wave(POWER_WAVE)
+            built = cohort_mod.build_cohort(
+                catalog_con=catalog, search_con=search,
+                category=category, subcategory=qs.get("subcategory"),
+                aisle_map=aisle_map)
+            result = cohort_mod.facets_for_cohort(
+                built, constraints=constraints)
+            result["evidence_policy"] = qs.get(
+                "evidence_quality", "include_all")
+            return self._json(200, result)
+        finally:
+            catalog.close()
+            search.close()
+
     def do_GET(self):
         route = self.path.partition("?")[0]
+        qs = self.path_qs_parse()
+        if route == "/v1/discovery/facets":
+            return self._discovery_facets(qs)
         con = units_store.connect(SEARCH_DB)
         try:
             if route == "/v1/health":
@@ -84,6 +125,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(404, {"error": "unknown route"})
         finally:
             con.close()
+
+    def path_qs_parse(self) -> dict:
+        _, _, qs = self.path.partition("?")
+        out = {}
+        for pair in qs.split("&"):
+            if "=" in pair:
+                k, v = pair.split("=", 1)
+                out[k] = urllib.parse.unquote_plus(v)
+        return out
 
     def do_POST(self):
         if self.path.partition("?")[0] != "/v1/search":

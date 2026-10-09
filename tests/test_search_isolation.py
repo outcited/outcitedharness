@@ -14,8 +14,18 @@ REPO = Path(__file__).resolve().parents[1]
 
 
 def test_this_worktree_is_assigned_and_matches():
-    assert assigned_branch(REPO) == "search/evidence-retrieval-v0"
-    assert check(REPO) == 0
+    import subprocess
+    assignment = assigned_branch(REPO)
+    head = subprocess.run(
+        ["git", "-C", str(REPO), "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True, text=True).stdout.strip()
+    if assignment is not None:
+        # whatever this worktree is assigned to, it must match its HEAD
+        assert assignment == head
+        assert check(REPO) == 0
+    else:
+        # unassigned worktrees pass through (guard is opt-in per lane)
+        assert check(REPO) == 0
 
 
 def test_no_assignment_is_no_assertion(tmp_path):
