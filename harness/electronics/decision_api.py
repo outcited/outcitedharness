@@ -809,11 +809,22 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _authorized(self) -> bool:
+        return self.auth_status() is None
+
+    def auth_status(self) -> Optional[int]:
+        """CURVE-08C remediation #5: distinguish 401 (no bearer presented)
+        from 403 (a bearer was presented but is invalid). Returns None when
+        authorized. No token configured => auth disabled (localhost/flag
+        posture unchanged)."""
         token = os.environ.get("ENGINEERING_DECISIONS_TOKEN")
         if not token:
-            return True
+            return None
         header = self.headers.get("Authorization") or ""
-        return header == f"Bearer {token}"
+        if not header:
+            return 401
+        if header != f"Bearer {token}":
+            return 403
+        return None
 
     def do_GET(self):
         route = self.path.partition("?")[0]
@@ -840,10 +851,13 @@ class Handler(BaseHTTPRequestHandler):
                     "evidence": {"state": "ok", **ident}})
             m = re.match(r"^/v1/engineering/evidence/([\w\-]+)$", route)
             if m:
-                if not self._authorized():
-                    return self._json(401, {"error": {
-                        "code": "unauthorized",
-                        "detail": "bearer token required"}})
+                status = self.auth_status()
+                if status is not None:
+                    return self._json(status, {"error": {
+                        "code": ("unauthorized" if status == 401
+                                 else "forbidden"),
+                        "detail": ("bearer token required" if status == 401
+                                   else "invalid bearer token")}})
                 repo_root = Path(os.environ.get(
                     "HARNESS_REPO_ROOT",
                     str(Path(__file__).resolve().parents[2])))
@@ -869,10 +883,12 @@ class Handler(BaseHTTPRequestHandler):
                 "code": "internal_error", "detail": str(e)}})
 
     def do_POST(self):
-        if not self._authorized():
-            return self._json(401, {"error": {
-                "code": "unauthorized",
-                "detail": "bearer token required"}})
+        auth = self.auth_status()
+        if auth is not None:
+            return self._json(auth, {"error": {
+                "code": ("unauthorized" if auth == 401 else "forbidden"),
+                "detail": ("bearer token required" if auth == 401
+                           else "invalid bearer token")}})
         if not _flag():
             return self._json(404, {"error": {
                 "code": "feature_disabled",

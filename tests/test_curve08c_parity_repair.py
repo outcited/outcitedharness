@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -108,3 +109,53 @@ class NativePathUnchangedTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AuthContractTests(unittest.TestCase):
+    """PRD remediation #5: 401 = missing bearer, 403 = present-but-invalid.
+
+    Exercises the real Handler.auth_status() logic (env token set).
+    Hermetic: saves/restores ENGINEERING_DECISIONS_TOKEN so the env never
+    leaks into sibling suites (order-independence is part of the lock)."""
+
+    def setUp(self):
+        self._saved = os.environ.get("ENGINEERING_DECISIONS_TOKEN")
+        os.environ["ENGINEERING_DECISIONS_TOKEN"] = "k1"
+
+    def tearDown(self):
+        if self._saved is None:
+            os.environ.pop("ENGINEERING_DECISIONS_TOKEN", None)
+        else:
+            os.environ["ENGINEERING_DECISIONS_TOKEN"] = self._saved
+
+    def _handler_status(self, header_value):
+        import harness.electronics.decision_api as svc
+        h = svc.Handler.__new__(svc.Handler)  # no server socket needed
+
+        class H:  # minimal header stub
+            def get(self, k, default=None):
+                return {"Authorization": header_value}.get(k, default)
+        h.headers = H()
+        return h.auth_status()
+
+    def test_missing_bearer_is_401(self):
+        self.assertEqual(self._handler_status(None), 401)
+        self.assertEqual(self._handler_status(""), 401)
+
+    def test_invalid_bearer_is_403(self):
+        self.assertEqual(self._handler_status("Bearer wrong"), 403)
+        self.assertEqual(self._handler_status("Basic k1"), 403)
+
+    def test_valid_bearer_passes(self):
+        self.assertIsNone(self._handler_status("Bearer k1"))
+
+    def test_no_token_configured_disables_auth(self):
+        os.environ.pop("ENGINEERING_DECISIONS_TOKEN", None)
+        import harness.electronics.decision_api as svc  # noqa: F401
+        h = svc.Handler.__new__(svc.Handler)
+
+        class H:
+            def get(self, k, default=None):
+                return None
+        h.headers = H()
+        self.assertIsNone(h.auth_status())
