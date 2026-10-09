@@ -378,18 +378,22 @@ def _candidate_matches(cand: Candidate, axis_name: str, bucket: str) -> bool:
     return value_in_bucket(axis_name, cand.axis_value(axis_name), bucket)
 
 
-def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
-                      max_values: int = 25) -> dict:
-    """Candidate-counted facets + reduction ranking for the current cohort."""
+def select_candidates(cohort: dict, *,
+                      constraints: dict | None = None) -> dict:
+    """The discovery population after category selection and facet
+    filtering (B6).
+
+    This is the exact set DISCOVERY-01 hands to M4 for ranking, so it is a
+    function of its own: the facet renderer and the candidate transport must
+    never disagree about who is in the cohort.
+
+    A candidate whose value is UNKNOWN for a constrained axis is NOT
+    eliminated as unsuitable — it is unplaced and reported separately, so
+    unknown retention survives narrowing. No engineering eligibility is
+    computed here: that stays M4's (policy ``eligibility=m4-only``).
+    """
     constraints = dict(constraints or {})
     candidates = list(cohort["candidates"].values())
-    cat = cohort.get("category")
-    spec_axes = axis_mod.axes_for_category(cat)
-
-    # apply already-chosen constraints. A candidate whose value is UNKNOWN
-    # for the constrained axis is NOT eliminated as unsuitable — it is
-    # unplaced: reported separately so the UI can show "unknown, needs
-    # evidence" rather than "fails the requirement".
     unknown_excluded: dict[str, list[str]] = {}
     for axis_name, want in constraints.items():
         if axis_name == "vendor":
@@ -417,6 +421,23 @@ def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
         candidates = kept
         if unplaced:
             unknown_excluded[axis_name] = unplaced
+    # deterministic ordering: the transported population must be reproducible
+    candidates.sort(key=lambda c: c.opn)
+    return {"candidates": candidates, "unknown_excluded": unknown_excluded,
+            "constraints_applied": sorted(constraints),
+            "count": len(candidates)}
+
+
+def facets_for_cohort(cohort: dict, *, constraints: dict | None = None,
+                      max_values: int = 25) -> dict:
+    """Candidate-counted facets + reduction ranking for the current cohort."""
+    constraints = dict(constraints or {})
+    cat = cohort.get("category")
+    spec_axes = axis_mod.axes_for_category(cat)
+
+    selected = select_candidates(cohort, constraints=constraints)
+    candidates = selected["candidates"]
+    unknown_excluded = selected["unknown_excluded"]
 
     cohort_size = len(candidates)
     evidence_units = sum(len(c.evidence_unit_ids) for c in candidates)

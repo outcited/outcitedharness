@@ -506,7 +506,270 @@ def check_b5():
     return out
 
 
-CHECKS = {"b3": check_b3, "b2": check_b2, "b4": check_b4, "b5": check_b5}
+# --- B6: real candidate transport (8 required journeys) --------------------
+
+B6_JOURNEYS = [
+    ("J1_normal_supported_cohort",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.5}}, {}),
+    ("J2_facet_reduces_cohort",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.5,
+                      "family": "CoolSiC"}}, {}),
+    ("J3_hard_exclusion_in_cohort",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 3.0}}, {}),
+    ("J3b_hard_exclusion_legacy_labeled",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 3.0}},
+     {"ranking_population": "m4_bundle"}),
+    ("J4_unknown_heavy",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.5,
+                      "rds_on_ohm": "<5 mOhm"}}, {}),
+    ("J5_unmapped_identity",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.5,
+                      "vendor": "rohm"}}, {}),
+    ("J6_empty_candidate_set",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.5,
+                      "vendor": "no-such-vendor"}}, {}),
+    ("J7_stale_release_unpinned_warm",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.75,
+                      "subcategory": "ac-dc"}}, {}),
+    ("J7b_stale_release_pinned",
+     {"constraints": {"vin_v": 48.0, "vout_v": 5.0, "iout_a": 0.75,
+                      "subcategory": "ac-dc"},
+      "expected_releases": {"m4_evidence_release": STALE_RELEASE}}, {}),
+]
+
+MAX_RECORDED_IDS = 600
+
+
+def _b6_request(body_extra):
+    req = {"category": "power", "comparison": {"metric": "efficiency"}}
+    req.update(body_extra)
+    return req
+
+
+def _b6_record(label, req, ans, lat, err, replay_same):
+    d = ans or {}
+    rp = d.get("ranking_population") or {}
+    rel = d.get("releases") or {}
+    results = d.get("candidate_results") or []
+    statuses = {}
+    for c in results:
+        k = c.get("engineering_eligibility") or "unset"
+        statuses[k] = statuses.get(k, 0) + 1
+    ids = [c.get("m5_canonical_id") for c in results]
+    return {
+        "journey": label,
+        "request": req,
+        "m5_candidate_count": rp.get("discovery_candidate_count"),
+        "candidates_sent": rp.get("candidates_sent"),
+        "candidate_ids": (ids[:MAX_RECORDED_IDS] if len(ids)
+                          <= MAX_RECORDED_IDS else
+                          (rp.get("candidates_sample") or [])[:25]),
+        "candidate_ids_recorded": min(len(ids), MAX_RECORDED_IDS)
+        if len(ids) <= MAX_RECORDED_IDS else len(
+            (rp.get("candidates_sample") or [])[:25]),
+        "candidate_ids_total": len(ids),
+        "candidates_sha256": rp.get("candidates_sha256"),
+        "m4_received": rp.get("m4_received"),
+        "m4_matched": rp.get("m4_matched"),
+        "identity_mapped": (rp.get("identity_mapping") or {}).get(
+            "coverage", {}).get("mapped") if isinstance(
+                (rp.get("identity_mapping") or {}).get("coverage"), dict)
+        else None,
+        "identity_coverage": (rp.get("identity_mapping") or {}).get(
+            "coverage"),
+        "identity_mapping_source": (rp.get("identity_mapping") or {}).get(
+            "source"),
+        "ranked": rp.get("ranked"),
+        "excluded": rp.get("excluded"),
+        "unknown_retained": rp.get("unknown_retained"),
+        "unresolved_no_evidence": rp.get("unresolved_no_evidence"),
+        "eligible_without_comparable_evidence": rp.get(
+            "eligible_without_comparable_evidence"),
+        "unmapped": rp.get("unmapped"),
+        "eligibility_state_counts": rp.get("eligibility_state_counts"),
+        "unknown_unplaced_included": rp.get("unknown_unplaced_included"),
+        "population_accounting": rp.get("population_accounting"),
+        "candidate_result_statuses": statuses,
+        "disclosure": {
+            "mode": rp.get("mode"), "in_cohort": rp.get("in_cohort"),
+            "out_of_cohort": rp.get("out_of_cohort"),
+            "ranking_strictly_in_cohort": rp.get(
+                "ranking_strictly_in_cohort"),
+            "m4_universe_substituted": rp.get("m4_universe_substituted"),
+            "assertion": rp.get("assertion"),
+            "assertion_holds": rp.get("assertion_holds"),
+            "out_of_population_entries": rp.get("out_of_population_entries"),
+            "promotion_blocked_while_normal_path": rp.get(
+                "promotion_blocked_while_normal_path"),
+            "disclosure_text": rp.get("disclosure"),
+            "match_rule": rp.get("match_rule"),
+        },
+        "release_fingerprints": {
+            "m5_evidence_release": rel.get("m5_evidence_release"),
+            "m5_identity_snapshot": rel.get("m5_identity_snapshot"),
+            "identity_crosswalk_sha256": rel.get(
+                "identity_crosswalk_sha256"),
+            "identity_crosswalk_source": rel.get("identity_crosswalk_source"),
+            "crosswalk_fixture_sha256": rel.get("crosswalk_fixture_sha256"),
+            "m4_evidence_release": rel.get("m4_evidence_release"),
+            "m4_bundle_sha256": rel.get("m4_bundle_sha256"),
+            "comparison_fingerprint": rel.get("comparison_fingerprint"),
+        },
+        "ranked_entries": [
+            {"part": e.get("part"), "value": e.get("value"),
+             "evidence_id": e.get("evidence_id")}
+            for e in ((d.get("comparisons") or {}).get(
+                "condition_matched_entries") or [])],
+        "excluded_parts": [c.get("part") for c in results
+                           if c.get("engineering_eligibility") ==
+                           "ineligible"][:25],
+        "latency_ms": lat,
+        "timings_ms": d.get("timings_ms"),
+        "failures": d.get("failures"),
+        "partial_result": d.get("partial_result"),
+        "deterministic_replay": replay_same,
+        "errors_warnings": err or [],
+    }
+
+
+def check_b6():
+    records = []
+    for label, extra, mode in B6_JOURNEYS:
+        req = _b6_request(extra)
+        req.update(mode)
+        ans, raw, lat, err = post(
+            M5 + "/v1/discovery/engineering-session", req, SESSION_TOKEN)
+        ans2, raw2, _, _ = post(
+            M5 + "/v1/discovery/engineering-session", req, SESSION_TOKEN)
+        records.append(_b6_record(label, req, ans, lat, err,
+                                  semantic(raw) == semantic(raw2)))
+
+    by = {r["journey"]: r for r in records}
+    j1, j2 = by["J1_normal_supported_cohort"], by["J2_facet_reduces_cohort"]
+    j3, j3b = by["J3_hard_exclusion_in_cohort"], \
+        by["J3b_hard_exclusion_legacy_labeled"]
+    j4 = by["J4_unknown_heavy"]
+    j5 = by["J5_unmapped_identity"]
+    j6 = by["J6_empty_candidate_set"]
+    j7, j7b = by["J7_stale_release_unpinned_warm"], \
+        by["J7b_stale_release_pinned"]
+
+    checks = {
+        "j1_transport_matches_disclosure": j1["candidates_sent"] ==
+            j1["m4_received"] == j1["m5_candidate_count"],
+        "j1_strictly_in_cohort": j1["disclosure"][
+            "ranking_strictly_in_cohort"] is True,
+        "j1_accounting_holds": j1["disclosure"]["assertion_holds"] is True,
+        "j1_no_out_of_population_entries": j1["disclosure"][
+            "out_of_population_entries"] == [],
+        "j1_identity_generated_not_fixture": j1["identity_mapping_source"]
+            == "generated:identity-store"
+            and j1["release_fingerprints"]["crosswalk_fixture_sha256"] is None,
+        "j1_every_candidate_accounted": sum(
+            j1["candidate_result_statuses"].values()) ==
+            j1["candidates_sent"],
+        "j2_facet_reduces_population": 0 < j2["candidates_sent"] <
+            j1["candidates_sent"],
+        "j2_deterministic_payload_hash": bool(j2["candidates_sha256"]),
+        "j3_in_cohort_exclusions_disclosed": j3["excluded"] is not None,
+        "j3b_legacy_labeled_out_of_cohort": j3b["disclosure"][
+            "out_of_cohort"] is True
+            and j3b["disclosure"]["promotion_blocked_while_normal_path"]
+            is True,
+        "j3b_legacy_still_excludes_hard": j3b["excluded"] > 0,
+        "j4_unknown_retention_transported": j4[
+            "unknown_unplaced_included"] > 0
+            and j4["eligibility_state_counts"].get(
+                "unknown_attributes_retained", 0) > 0,
+        "j5_unmapped_explicit": j5["identity_coverage"]["unmapped"] ==
+            j5["candidates_sent"] and j5["identity_coverage"]["mapped"] == 0,
+        "j6_empty_population_honest": j6["candidates_sent"] == 0
+            and j6["m4_received"] == 0 and j6["ranked"] == 0
+            and j6["partial_result"] is False,
+        "j7_release_pin_not_bypassed_in_cohort": j7b["partial_result"] is True
+            and any(f.get("error") == "release_mismatch"
+                    for f in (j7b["failures"] or [])),
+        "all_journeys_deterministic_replay": all(
+            r["deterministic_replay"] for r in records),
+        "all_in_cohort_journeys_assertion_holds": all(
+            r["disclosure"]["assertion_holds"] is True for r in records
+            if r["disclosure"]["mode"] == "discovery_cohort"
+            and not (r["failures"] or [])),
+    }
+    out = {
+        "blocker": "B6",
+        "check": "M5 candidate generation explicitly controls the M4 ranking "
+                 "population (owner-approved architecture)",
+        "before": {
+            "crosswalk_source": "tests/fixtures/discovery01/"
+                                "m4_identity_crosswalk_v1.json (21 rows)",
+            "candidate_list_sent_to_m4": False,
+            "identity_mapped_exact": 0,
+            "m4_parts_present_in_m5_catalog": "0/20",
+            "facet_narrowing_influenced_ranking": False,
+            "source": "results/discovery01-production-readiness/"
+                      "identity_reconciliation.json"},
+        "after": {
+            "journeys": records,
+            "checks": checks,
+            "m4_service_commit": subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=M4_REPO,
+                capture_output=True, text=True).stdout.strip(),
+            "m5_service_commit": subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=ROOT,
+                capture_output=True, text=True).stdout.strip(),
+        },
+        "pass": all(checks.values()),
+    }
+    write("b6_candidate_transport", out)
+    return out
+
+
+def check_b6restart():
+    """J8: service restart. Compares the in-cohort journey against the
+    anchor recorded by the b6 check (payload hash, disclosure, releases)."""
+    anchor_file = OUT / "b6_candidate_transport.json"
+    if not anchor_file.exists():
+        return {"blocker": "B6", "check": "restart", "pass": False,
+                "error": "run the b6 check first"}
+    before = json.loads(anchor_file.read_text())
+    j1 = next(j for j in before["after"]["journeys"]
+              if j["journey"] == "J1_normal_supported_cohort")
+    req = j1["request"]
+    ans, raw, lat, err = post(
+        M5 + "/v1/discovery/engineering-session", req, SESSION_TOKEN)
+    after = _b6_record("J8_service_restart", req, ans, lat, err, None)
+    same = {
+        "candidates_sha256": after["candidates_sha256"] ==
+            j1["candidates_sha256"],
+        "release_fingerprints": after["release_fingerprints"] ==
+            j1["release_fingerprints"],
+        "disclosure": after["disclosure"] == j1["disclosure"],
+        "counts": (after["candidates_sent"], after["m4_received"],
+                   after["ranked"], after["unresolved_no_evidence"]) ==
+                  (j1["candidates_sent"], j1["m4_received"], j1["ranked"],
+                   j1["unresolved_no_evidence"]),
+        "semantic_response": semantic(raw) is not None,
+    }
+    out = {"blocker": "B6", "check": "J8 service restart",
+           "before": {k: j1[k] for k in ("candidates_sent", "m4_received",
+                                         "ranked", "unresolved_no_evidence",
+                                         "candidates_sha256",
+                                         "release_fingerprints")},
+           "after": {k: after[k] for k in ("candidates_sent", "m4_received",
+                                           "ranked", "unresolved_no_evidence",
+                                           "candidates_sha256",
+                                           "release_fingerprints",
+                                           "latency_ms")},
+           "identical": same,
+           "pass": all(v for k, v in same.items() if k !=
+                       "semantic_response")}
+    write("b6_restart", out)
+    return out
+
+
+CHECKS = {"b3": check_b3, "b2": check_b2, "b4": check_b4, "b5": check_b5,
+          "b6": check_b6, "b6restart": check_b6restart}
 
 
 def main(argv):

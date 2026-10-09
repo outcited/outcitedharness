@@ -29,6 +29,8 @@ from typing import Any
 CLIENT_SCHEMA = "harness.discovery01-m4-client.v1"
 DECISION_SCHEMA_EXPECTED = "harness.electronics-decision-answer.v1"
 M4_08B_CONTRACT = "fae-engineering-decisions-v1"
+CANDIDATE_SCOPE_SCHEMA = "harness.discovery01-candidate-scope.v1"
+SCOPE_POPULATIONS = ("discovery_cohort",)
 
 
 def project_m4_08b(payload: dict) -> tuple[dict, list[str]]:
@@ -169,8 +171,17 @@ class FrozenTransport:
             json.dumps(j["question"], sort_keys=True): j
             for j in self.fixture["journeys"].values()}
 
-    def decide(self, question: dict) -> DecisionResult:
+    def decide(self, question: dict,
+               candidate_scope: dict | None = None) -> DecisionResult:
         import time
+        if candidate_scope is not None:
+            # Pinned journeys were generated from unscoped questions. The
+            # frozen transport never improvises an answer, and it will not
+            # pretend to honour a candidate population it was never given.
+            raise M4ServiceError(
+                "frozen_transport_no_scope",
+                "pinned journeys are unscoped; a candidate scope requires "
+                "the live M4 service (or newly pinned scoped journeys)")
         t0 = time.time()
         key = json.dumps(question, sort_keys=True)
         journey = self._by_question.get(key)
@@ -215,9 +226,15 @@ class HttpTransport:
             headers["Authorization"] = f"Bearer {token}"
         return headers
 
-    def decide(self, question: dict) -> DecisionResult:
+    def decide(self, question: dict,
+               candidate_scope: dict | None = None) -> DecisionResult:
         import time
-        body = json.dumps({"question": question}).encode()
+        # Without a scope the body is byte-identical to the pre-B6 shape, so
+        # pinned parity journeys and frozen baselines are unaffected.
+        payload = {"question": question}
+        if candidate_scope is not None:
+            payload["candidate_scope"] = candidate_scope
+        body = json.dumps(payload).encode()
         last: M4ServiceError | None = None
         for attempt in range(MAX_RETRIES + 1):
             t0 = time.time()
@@ -301,6 +318,48 @@ def make_transport(mode: str = "frozen", base_url: str | None = None,
     raise M4ServiceError("invalid_request", f"unknown transport {mode!r}")
 
 
-def decide(question: dict, transport) -> DecisionResult:
+def validate_candidate_scope(scope: dict) -> None:
+    """The explicit candidate handoff (B6): M5 owns the population, so the
+    payload must be self-describing, release-bound and per-candidate
+    identified. Validation is structural only — no engineering judgement."""
+    if not isinstance(scope, dict):
+        raise M4ServiceError("invalid_request",
+                             "candidate_scope must be an object")
+    if scope.get("schema") != CANDIDATE_SCOPE_SCHEMA:
+        raise M4ServiceError(
+            "invalid_request",
+            f"candidate_scope schema {scope.get('schema')!r} != "
+            f"{CANDIDATE_SCOPE_SCHEMA!r}")
+    if scope.get("population") not in SCOPE_POPULATIONS:
+        raise M4ServiceError(
+            "invalid_request",
+            f"candidate_scope population {scope.get('population')!r} "
+            f"unsupported; supported: {list(SCOPE_POPULATIONS)}")
+    candidates = scope.get("candidates")
+    if not isinstance(candidates, list):
+        raise M4ServiceError("invalid_request",
+                             "candidate_scope.candidates must be a list")
+    for i, c in enumerate(candidates):
+        if not isinstance(c, dict) or not c.get("canonical_id") \
+                or not c.get("opn"):
+            raise M4ServiceError(
+                "invalid_request",
+                f"candidate_scope.candidates[{i}] needs canonical_id and opn")
+    if not (scope.get("releases") or {}).get("m5_evidence_release"):
+        raise M4ServiceError("invalid_request",
+                             "candidate_scope must be release-bound "
+                             "(releases.m5_evidence_release)")
+
+
+def decide(question: dict, transport,
+           candidate_scope: dict | None = None) -> DecisionResult:
     validate_question(question)
-    return transport.decide(question)
+    if candidate_scope is None:
+        return transport.decide(question)
+    validate_candidate_scope(candidate_scope)
+    try:
+        return transport.decide(question, candidate_scope=candidate_scope)
+    except TypeError as e:
+        raise M4ServiceError(
+            "transport_no_scope_support",
+            f"transport cannot carry an explicit candidate population: {e}")

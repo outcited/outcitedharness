@@ -22,12 +22,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 import time
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
+from harness.search import candidate_transport as transport_mod
 from harness.search import cohort as cohort_mod
 from harness.search import identity as identity_mod
 from harness.search import m4_client
@@ -110,6 +112,14 @@ def canonical_release_pin(expected: dict | None) -> str:
 
 
 def load_crosswalk(path: Path | None = None) -> dict:
+    """TRANSITIONAL ONLY (B6): the pinned 21-row fixture crosswalk.
+
+    The production in-cohort path never calls this — it generates its
+    identity mapping from the identity store
+    (candidate_transport.build_identity_crosswalk). This remains for the
+    explicitly-labeled ``m4_bundle`` legacy population used by the parity
+    locks and the frozen journey fixtures.
+    """
     p = path or CROSSWALK_FIXTURE
     if not p.exists():
         raise m4_client.M4ServiceError(
@@ -408,6 +418,12 @@ def engineering_session(request: dict, *, catalog_con, search_con,
     evidence_policy = request.get("evidence_policy",
                                   "machine_verified_advisory")
     expected = request.get("expected_releases") or {}
+    ranking_population = request.get(
+        "ranking_population", transport_mod.DEFAULT_RANKING_POPULATION)
+    if ranking_population not in transport_mod.RANKING_POPULATIONS:
+        raise ValueError(
+            f"ranking_population {ranking_population!r} unsupported; "
+            f"supported: {list(transport_mod.RANKING_POPULATIONS)}")
 
     # Release identities are computed CHEAPLY first (policy-keyed cache
     # read, B5), so the session cache is consulted before any expensive
@@ -435,6 +451,7 @@ def engineering_session(request: dict, *, catalog_con, search_con,
         evidence_release=evidence_release,
         evidence_policy=evidence_policy,
         release_pin=canonical_release_pin(expected),
+        ranking_population=ranking_population,
         transport="http" if isinstance(transport, m4_client.HttpTransport)
         else "frozen")
     if cache is not None:
@@ -469,34 +486,95 @@ def engineering_session(request: dict, *, catalog_con, search_con,
     facets = cohort_mod.facets_for_cohort(cohort, constraints=m5_constraints)
     timings["cohort_build_ms"] = round((time.time() - t0) * 1000, 1)
 
+    # B6: the ranking population is the discovery population — selected by
+    # the same function the facet renderer uses, so the two can never
+    # disagree about who is in the cohort.
     t0 = time.time()
-    xwalk = crosswalk or load_crosswalk()
-    mapping = crosswalk_map(xwalk, set(cohort["candidates"].keys()))
-    timings["crosswalk_ms"] = round((time.time() - t0) * 1000, 1)
+    selected = cohort_mod.select_candidates(cohort,
+                                            constraints=m5_constraints)
+    population = selected["candidates"]
 
     releases = {
         "m5_evidence_release": evidence_release,
         "m5_identity_snapshot": identity_snapshot_id,
-        "crosswalk_fixture_sha256": hashlib.sha256(
-            json.dumps(xwalk, sort_keys=True).encode()).hexdigest()[:16],
     }
+    failures: list[dict] = []
+    scope = None
+    xwalk = None
+    mapping = None
+    population_too_large = None
+
+    if ranking_population == "discovery_cohort":
+        # Unknown retention survives narrowing: a candidate that is unplaced
+        # on a constrained axis (no typed value) is NOT eliminated by M5. It
+        # travels in the population flagged with the axes it is unknown on,
+        # so M4 can apply its own law ("missing ratings are unknown, never
+        # failure") instead of the candidate silently disappearing.
+        narrowed_ids = {c.opn for c in population}
+        unplaced_opns = sorted({opn for opns in
+                                selected["unknown_excluded"].values()
+                                for opn in opns} - narrowed_ids)
+        population = population + [cohort["candidates"][opn]
+                                   for opn in unplaced_opns
+                                   if opn in cohort["candidates"]]
+        population.sort(key=lambda c: c.opn)
+        xwalk = transport_mod.build_identity_crosswalk(
+            identity_con, population,
+            identity_snapshot_id=identity_snapshot_id,
+            evidence_release=evidence_release, category=category,
+            subcategory=m5_subcategory)
+        scope = transport_mod.build_candidate_scope(
+            population, xwalk, category=category,
+            subcategory=m5_subcategory, constraints=m5_constraints,
+            evidence_release=evidence_release,
+            identity_snapshot_id=identity_snapshot_id,
+            unknown_axes=selected["unknown_excluded"])
+        releases["identity_crosswalk_schema"] = xwalk["schema"]
+        releases["identity_crosswalk_version"] = xwalk["version"]
+        releases["identity_crosswalk_sha256"] = xwalk["sha256"]
+        releases["identity_crosswalk_source"] = "generated:identity-store"
+        if len(scope["candidates"]) > transport_mod.MAX_CANDIDATE_SCOPE:
+            # fail closed: never silently rank a truncated population
+            population_too_large = {
+                "candidates": len(scope["candidates"]),
+                "max_candidate_scope": transport_mod.MAX_CANDIDATE_SCOPE,
+                "action": "narrow the cohort with facets (vendor/family/"
+                          "subcategory/axis buckets) and retry"}
+            failures.append({
+                "error": "candidate_population_too_large",
+                **population_too_large})
+            scope = None
+    else:
+        # Transitional legacy population: M4's own evidence universe, labeled
+        # out_of_cohort in the response (B6). The pinned fixture is used here
+        # and nowhere else.
+        xwalk = crosswalk or load_crosswalk()
+        mapping = crosswalk_map(xwalk, set(cohort["candidates"].keys()))
+        releases["crosswalk_fixture_sha256"] = hashlib.sha256(
+            json.dumps(xwalk, sort_keys=True).encode()).hexdigest()[:16]
+        releases["crosswalk_source"] = "pinned fixture (transitional)"
+    timings["candidate_scope_ms"] = round((time.time() - t0) * 1000, 1)
 
     question = build_m4_question(constraints, comparison)
-    failures: list[dict] = []
     decision = None
-    t0 = time.time()
-    try:
-        decision = m4_client.decide(question, transport)
-    except m4_client.M4ServiceError as e:
-        failures.append(e.structured())
-    timings["m4_decision_ms"] = round((time.time() - t0) * 1000, 1)
+    if scope is not None or ranking_population == "m4_bundle":
+        t0 = time.time()
+        try:
+            decision = m4_client.decide(question, transport,
+                                        candidate_scope=scope)
+        except m4_client.M4ServiceError as e:
+            failures.append(e.structured())
+        timings["m4_decision_ms"] = round((time.time() - t0) * 1000, 1)
 
+    out_of_population: list[str] = []
+    answer = decision.answer if decision is not None else None
     if decision is not None:
-        answer = decision.answer
         releases["m4_decision_contract"] = decision.contract.get(
             "decision_schema")
         releases["m4_evidence_release"] = decision.contract.get(
             "m4_evidence_release")
+        releases["m4_bundle_sha256"] = decision.contract.get(
+            "m4_bundle_sha256")
         releases["m4_transport"] = decision.transport
         releases["comparison_fingerprint"] = hashlib.sha256(
             json.dumps(answer.get("comparison", {}), sort_keys=True,
@@ -509,15 +587,70 @@ def engineering_session(request: dict, *, catalog_con, search_con,
                 "actual": answer.get("evidence_release"),
                 "action": "result marked partial; cohort preserved; "
                           "stale decision data never silently used"})
+        if scope is not None:
+            # M4 may rank, score, compare and exclude within the supplied
+            # population; it may never substitute its own universe. Anything
+            # it returns outside the population is stripped and reported.
+            out_of_population = transport_mod.out_of_population_entries(
+                scope, answer)
+            if out_of_population:
+                answer = transport_mod.strip_out_of_population(answer, scope)
+                failures.append({
+                    "error": "ranking_population_violation",
+                    "out_of_population_entries": out_of_population,
+                    "action": "entries outside the supplied candidate "
+                              "population were removed from the ranking and "
+                              "the result is marked partial; M4 must rank "
+                              "only what M5 sent"})
 
     t0 = time.time()
-    evidence = resolve_evidence_refs(search_con, decision.answer) \
+    evidence = resolve_evidence_refs(search_con, answer) \
         if decision else empty_evidence_block()
     timings["evidence_resolution_ms"] = round((time.time() - t0) * 1000, 1)
 
-    counts = (decision.answer.get("counts", {}) if decision else {})
-    he = (decision.answer.get("hard_eligibility", {}) if decision
-          else {})
+    counts = (answer.get("counts", {}) if decision else {})
+    he = (answer.get("hard_eligibility", {}) if decision else {})
+    disclosure = transport_mod.ranking_disclosure(
+        mode=ranking_population, scope=scope, answer=answer,
+        crosswalk=xwalk if scope is not None else None,
+        discovery_candidate_count=facets["candidate_count"],
+        evidence_release=evidence_release,
+        identity_snapshot_id=identity_snapshot_id,
+        m4_release=releases.get("m4_evidence_release"),
+        out_of_population=out_of_population,
+        population_too_large=population_too_large)
+
+    if scope is not None:
+        candidate_results = transport_mod.scoped_candidate_results(
+            scope, answer or {})
+        identity_counts = {
+            "identity_mapped_exact": (answer or {}).get(
+                "candidate_scope", {}).get("matched"),
+            "identity_ambiguous": xwalk["coverage"]["ambiguous"],
+            "identity_unmapped_m4_only": 0,
+            "identity_unmapped_family_nodes": 0,
+            "identity_unmapped_no_m4_evidence": disclosure[
+                "unresolved_no_evidence"],
+            "identity_mapping_coverage": xwalk["coverage"],
+        }
+        grain_note = ("M5 sent its own discovery population explicitly; M4 "
+                      "ranked only those candidates; grains are never mixed "
+                      "or double-counted")
+    else:
+        candidate_results = _candidate_results(he, mapping or {
+            "exact": {}, "ambiguous": {}, "unmapped": {}, "m4_only": {}})
+        identity_counts = {
+            "identity_mapped_exact": len((mapping or {}).get("exact", {})),
+            "identity_ambiguous": len((mapping or {}).get("ambiguous", {})),
+            "identity_unmapped_m4_only": len((mapping or {}).get(
+                "m4_only", {})),
+            "identity_unmapped_family_nodes": len((mapping or {}).get(
+                "unmapped", {})),
+        }
+        grain_note = ("M5 cohort counts OPNs; M4 counts its own candidate "
+                      "set (opn/device/family grains declared per "
+                      "candidate); grains are never mixed or double-counted")
+
     result = {
         "schema": ORCHESTRATION_SCHEMA,
         "session": {
@@ -549,19 +682,13 @@ def engineering_session(request: dict, *, catalog_con, search_con,
             "m4_eligible": counts.get("hard_eligible_candidates"),
             "m4_ineligible": len(he.get("ineligible", [])),
             "m4_unknown_retained": len(he.get("unknown", [])),
-            "identity_mapped_exact": len(mapping["exact"]),
-            "identity_ambiguous": len(mapping["ambiguous"]),
-            "identity_unmapped_m4_only": len(mapping["m4_only"]),
-            "identity_unmapped_family_nodes": len(mapping["unmapped"]),
+            **identity_counts,
             "active_constraints": constraints,
-            "grain_note": "M5 cohort counts OPNs; M4 counts its own "
-                          "candidate set (opn/device/family grains declared "
-                          "per candidate); grains are never mixed or "
-                          "double-counted",
+            "grain_note": grain_note,
         },
-        "candidate_results": _candidate_results(he, mapping),
-        "comparisons": (decision.answer.get("comparison", {})
-                        if decision else {}),
+        "ranking_population": disclosure,
+        "candidate_results": candidate_results,
+        "comparisons": (answer.get("comparison", {}) if decision else {}),
         "investigation_suggestions": _suggestions(counts, he) if decision
         else [],
         "discovery_guidance": {

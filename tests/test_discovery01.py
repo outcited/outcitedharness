@@ -60,6 +60,10 @@ _DEP_KEYS = {"transport", "cache", "crosswalk", "catalog_con",
 def _session(deps, **req):
     base = {"category": "power", "subcategory": "buck",
             "discovery_grain": "opn",
+            # frozen journeys are unscoped M4-universe answers (B6 labels
+            # this transitional path out_of_cohort); the in-cohort production
+            # path is covered by tests/test_discovery01_b6_*.py
+            "ranking_population": "m4_bundle",
             "constraints": {"vin_v": 48, "vout_v": 5, "iout_a": 0.5},
             "comparison": {"metric": "efficiency",
                            "mode": "condition_matched"},

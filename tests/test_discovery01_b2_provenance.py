@@ -265,6 +265,7 @@ def test_b2_real_journey_resolves_every_cited_evidence_id():
     try:
         r = orchestrator.engineering_session(
             {"category": "power", "subcategory": "buck",
+             "ranking_population": "m4_bundle",
              "constraints": {"vin_v": 48, "vout_v": 5, "iout_a": 0.5},
              "comparison": {"metric": "efficiency",
                             "mode": "condition_matched"}},

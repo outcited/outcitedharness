@@ -42,6 +42,13 @@ WAVE = "/Volumes/M5_4TB/extract-results/power-topology-v1.jsonl"
 FIXTURE = Path(__file__).resolve().parents[1] / \
     "tests/fixtures/discovery01/m4_frozen_journeys_v1.json"
 
+# Parity locks compare M5's projection of M4's own decision answers against
+# the pinned frozen baselines. That is the transitional M4-universe
+# population, requested explicitly since B6 made the discovery cohort the
+# default production population. Nothing about the checks themselves
+# changes: same journeys, same fields, same baselines.
+PARITY_RANKING_POPULATION = "m4_bundle"
+
 JOURNEYS = {
     "A_light_load_0p5A": {"vin_v": 48, "vout_v": 5, "iout_a": 0.5},
     "B_load_step_3A": {"vin_v": 48, "vout_v": 5, "iout_a": 3.0},
@@ -84,6 +91,12 @@ def run_parity(url: str) -> dict:
 
     report = {"schema": "harness.discovery01-live-parity.v1",
               "m4_url": url, "frozen_baseline_release": frozen_release,
+              "ranking_population": PARITY_RANKING_POPULATION,
+              "ranking_population_note": "parity locks compare M4-universe "
+                                         "answers against the pinned frozen "
+                                         "baselines; the in-cohort "
+                                         "production population is verified "
+                                         "separately (B6)",
               "journeys": {}, "checks": [], "verdict": None}
 
     def check(name, ok, detail=""):
@@ -94,7 +107,13 @@ def run_parity(url: str) -> dict:
         req = {"category": "power", "subcategory": "buck",
                "discovery_grain": "opn", "constraints": constraints,
                "comparison": {"metric": "efficiency",
-                              "mode": "condition_matched"}}
+                              "mode": "condition_matched"},
+               # Parity compares M5's projection against M4's OWN universe
+               # answers, so it runs the transitional M4-universe path
+               # explicitly (B6 labels it out_of_cohort). The in-cohort
+               # production path is verified separately by
+               # scripts/discovery01_remediation_evidence.py b6.
+               "ranking_population": PARITY_RANKING_POPULATION}
         try:
             r = orchestrator.engineering_session(
                 req, catalog_con=catalog, search_con=search,
@@ -115,6 +134,10 @@ def run_parity(url: str) -> dict:
             "eligible": r["cohort_state"]["m4_eligible"],
             "ineligible": r["cohort_state"]["m4_ineligible"],
             "unknown_retained": r["cohort_state"]["m4_unknown_retained"],
+            "ranking_population": (r.get("ranking_population") or {}).get(
+                "mode"),
+            "out_of_cohort": (r.get("ranking_population") or {}).get(
+                "out_of_cohort"),
             "condition_matched": [
                 {"part": e.get("part"), "value": e.get("value"),
                  "evidence_id": e.get("evidence_id")}
@@ -176,6 +199,7 @@ def run_parity(url: str) -> dict:
         r = orchestrator.engineering_session(
             {"category": "power", "subcategory": "buck",
              "constraints": JOURNEYS["A_light_load_0p5A"],
+             "ranking_population": PARITY_RANKING_POPULATION,
              "expected_releases": {
                  "m4_evidence_release": "deliberately-wrong-release"}},
             catalog_con=catalog, search_con=search, identity_con=icon,
