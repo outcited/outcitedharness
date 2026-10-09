@@ -198,6 +198,34 @@ ranking still 0 despite full coverage, and 4× units cost 4× latency
 yet; the earlier 91,758 claim vectors were replaced during re-index and
 need re-attach before any further hybrid run (semantic stays off-default).
 
+**Hybrid re-run with updated weights, 2026-10-08 (decision gate #2 —
+FAIL again).** e10b served new weights under the same model name
+(detected via probe fingerprint `fp=19b9f90628f8`; the weight-identity
+fix forced a full purge + re-attach: 356,061 vectors, release
+`search-release-v1-8ce00bbf318b`):
+
+| Metric | FTS+sections | hybrid (new weights) |
+|---|---|---|
+| recall@10 all | 0.154 | 0.140 |
+| recall@10 mcu | 0.265 | **0.275** (+1.0) |
+| recall@10 power | 0.176 | 0.131 (−4.5) |
+| recall@10 connectors | 0.000 | 0.000 |
+| nDCG@10 all | 0.119 | 0.126 |
+| locator precision | 0.988 | 0.990 |
+| p50 / p95 | 164 / 467 ms | **6,273 / 7,054 ms** |
+| invented quotes | 0 | 0 / 34 |
+
+Read: the checkpoint swap moved mcu +1pt and nDCG +0.7pt — not material.
+Power regressed (symbol-dense queries do better on pure FTS). Latency is
+now structurally disqualified: every query loads 1.4 GB of vectors
+(356K × 1024 × f32) for a full scan — an ANN index or resident-memory
+matrix is a prerequisite for ANY semantic serving, and not worth building
+until semantic value is proven. **Standing verdict: FTS+sections remains
+the production default; the vector path stays staged and off.** The
+lever that demonstrably worked is indexing prose (sections), not the
+embedder. Invariants held under hybrid: 0 invented quotes, 0 must_not
+violations.
+
 Coverage: mcu 1.00 / power 1.00 / connectors 0.667. Locator precision 0.80
 (72/90; the 18 imprecise are unhashed burn-wave units, marked
 discovery_only). must_not violations 0.
