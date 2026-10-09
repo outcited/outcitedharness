@@ -1,0 +1,1016 @@
+{
+  "schema": "harness.m4-curve-handoff.v3",
+  "release_id": "curve-evidence-bundle-v3-5875789dcf3f",
+  "supersedes": "curve-evidence-bundle-v2-3b5658b629cc",
+  "bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+  "rows": 123,
+  "coverage_matrix": [
+    {
+      "phenomenon": "case_temperature_vs_load",
+      "vin_v": 48.0,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "vishay": [
+          "SiC46x"
+        ]
+      },
+      "families": [
+        "SiC46x"
+      ],
+      "devices": [
+        "SiC461",
+        "SiC462",
+        "SiC463"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-279c9b584fa37bb6b111a1d42c701ef5",
+        "curve-c51f912deecf71de0fbf73b4c919bcd5",
+        "curve-bdf33617a2723aa5a45e5c25ab700344",
+        "curve-afe9caba4402aa070d9b62512a63262f",
+        "curve-9c22e23de0b7e6978b159d5467fc1587",
+        "curve-ba0c8ccbf1e30b49a885a466afbdfb90"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 3,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 3,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "within_family",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 12.0,
+      "vout_v": 1.1,
+      "manufacturers": {
+        "texas_instruments": [
+          "TPS548C26"
+        ]
+      },
+      "families": [
+        "TPS548C26"
+      ],
+      "devices": [
+        "TPS548C26"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-8ff87c61e3c2aaefec5f02feb5aac6dc",
+        "curve-5d4987051e5f1d3fe0b57209e195629a",
+        "curve-3a1453f3a76cb747f0eda8c55cd6dae1",
+        "curve-45dfa68a3b1ebbd560db11027d6a7d0b",
+        "curve-b620887713e5dd87d43186b0d6ce6f2d",
+        "curve-0140731a6d181c4e874b932de4f91e6f",
+        "curve-6ed828ea26cf5364aec942dfd4b7821c",
+        "curve-01a67edb2cd36f1a75d7c9f5df0a5e43",
+        "curve-6245945fec4898d725d049ca2a64e2e2",
+        "curve-0b92caee20cfe848390ec2e17b2b1b21",
+        "curve-86af295dd7cab8ac16970f9bf6c2cf18",
+        "curve-e88e7d739df90930bcf9c2501e12d956"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 4,
+        "within_device_configurations": 1,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 12.0,
+      "vout_v": 3.3,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR36502"
+        ]
+      },
+      "families": [
+        "LMR36502"
+      ],
+      "devices": [
+        "LMR36502"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-af915a30a3152c0dd49141e9b192285c"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 12.0,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "vishay": [
+          "SiC46x"
+        ]
+      },
+      "families": [
+        "SiC46x"
+      ],
+      "devices": [
+        "SiC462",
+        "SiC463"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-2bb878bfadee6675513e4ae88080aca9",
+        "curve-af486b741d969d2a7fd14f8d6658c772"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 2,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 2,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "within_family",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 24.0,
+      "vout_v": 3.3,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR36502"
+        ]
+      },
+      "families": [
+        "LMR36502"
+      ],
+      "devices": [
+        "LMR36502"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-dd593ae8a55dab7726b8fabd653e67ae"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 24.0,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "vishay": [
+          "SiC448",
+          "SiC46x"
+        ]
+      },
+      "families": [
+        "SiC448",
+        "SiC46x"
+      ],
+      "devices": [
+        "SiC461",
+        "SiC462",
+        "SiC463",
+        "SiC464"
+      ],
+      "family_scoped_devices": 1,
+      "evidence_ids": [
+        "curve-cbc6eda72db8ebd8da32d36732bade1e",
+        "curve-7bdf7658e85b8507777af15b915d18d8",
+        "curve-684eeddaadada3f4157ac413e5350413",
+        "curve-d374208ea0cf98d4878e4e1f5c15fbb3",
+        "curve-e4fe513da7de1d24e71c922323754422",
+        "curve-3387869bff6db2abb00b9cd3d3097ef9",
+        "curve-2f18767e2ea555843e2b9c14defa3f1a",
+        "curve-cc747bc4f891734f992b5540ba49aaf9",
+        "curve-76d37962f72527efa6004ff8a894639b",
+        "curve-5567eca7936b6ea1f2a137025b2b2fce",
+        "curve-32e212532aa0c2eded0a92bdfe921d85"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 8,
+        "within_device_configurations": 1,
+        "within_family_device_comparisons": 4,
+        "cross_family_comparisons": 2,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "cross_family",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 24.0,
+      "vout_v": null,
+      "manufacturers": {
+        "texas_instruments": [
+          "LM5161"
+        ]
+      },
+      "families": [
+        "LM5161"
+      ],
+      "devices": [
+        "LM5161"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-dbfec7a0dbbdc3b4885ed95e6d6a00aa",
+        "curve-bb13db2cc9044118e2086bb88af5eca3"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 36.0,
+      "vout_v": 3.3,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR36502"
+        ]
+      },
+      "families": [
+        "LMR36502"
+      ],
+      "devices": [
+        "LMR36502"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-95eadb208e8e4b37faa0df0e04436112"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 36.0,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "texas_instruments": [
+          "LM5161"
+        ],
+        "vishay": [
+          "SiC46x"
+        ]
+      },
+      "families": [
+        "LM5161",
+        "SiC46x"
+      ],
+      "devices": [
+        "LM5161",
+        "SiC461",
+        "SiC462",
+        "SiC463",
+        "SiC464"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-92906b1690d609b0e0b58a76b47f7da5",
+        "curve-5b73b5ebde8c0fe9db1badda5f73c7a4",
+        "curve-29d5ab880c248c38873de631bd685fa1",
+        "curve-87ca0312bf27aaa7bd43014dccb1ab01",
+        "curve-d2487e7819054a52ad40cc1849443bef",
+        "curve-9d94e70bc85e7243e91aef54817c791c",
+        "curve-0d872aedf735bb6100a130a276a012b4",
+        "curve-9dd4ccbd9c8e7c14803d07b29653bef9"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 7,
+        "within_device_configurations": 2,
+        "within_family_device_comparisons": 4,
+        "cross_family_comparisons": 2,
+        "cross_manufacturer_comparisons": 2
+      },
+      "comparison_availability": "cross_manufacturer",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 48.0,
+      "vout_v": 3.3,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR36502"
+        ]
+      },
+      "families": [
+        "LMR36502"
+      ],
+      "devices": [
+        "LMR36502"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-3f9d5afc541f68bcddacff7613b18969"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 48.0,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "texas_instruments": [
+          "LM5161"
+        ],
+        "vishay": [
+          "SiC46x"
+        ]
+      },
+      "families": [
+        "LM5161",
+        "SiC46x"
+      ],
+      "devices": [
+        "LM5161",
+        "SiC461",
+        "SiC462",
+        "SiC463",
+        "SiC464"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-a697319a16d26592db2cc14cf6843bd0",
+        "curve-214a8be75c0ffc2980cbe42a72230132",
+        "curve-5c807b48ee14995da881785195ec0651",
+        "curve-739161096240deb07c3e870c2187eb77",
+        "curve-f92c2e8c727bb42ac1787ae9800120a8",
+        "curve-c7b2d232869d82fb1b00a5b2a3477542",
+        "curve-50dd207627c7e2b5b070e24f0e464c31",
+        "curve-29bbf05fc94f0678e06b0d8cf7968914"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 7,
+        "within_device_configurations": 2,
+        "within_family_device_comparisons": 4,
+        "cross_family_comparisons": 2,
+        "cross_manufacturer_comparisons": 2
+      },
+      "comparison_availability": "cross_manufacturer",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 48.0,
+      "vout_v": null,
+      "manufacturers": {
+        "texas_instruments": [
+          "LM5161"
+        ]
+      },
+      "families": [
+        "LM5161"
+      ],
+      "devices": [
+        "LM5161"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-ebf916fae9b0236aa43b80cc97a23291"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 60.0,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "texas_instruments": [
+          "LM5161"
+        ]
+      },
+      "families": [
+        "LM5161"
+      ],
+      "devices": [
+        "LM5161"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-16f0696c93fa37ccab5576ccdeaaa548"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": 60.0,
+      "vout_v": null,
+      "manufacturers": {
+        "texas_instruments": [
+          "LM5161"
+        ]
+      },
+      "families": [
+        "LM5161"
+      ],
+      "devices": [
+        "LM5161"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-b14f6273bafcf9496d38cd9261f8567c"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "efficiency_vs_load",
+      "vin_v": null,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "texas_instruments": [
+          "LM5161"
+        ]
+      },
+      "families": [
+        "LM5161"
+      ],
+      "devices": [
+        "LM5161"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-1215be5628cd6db70dadaeae310a7afd",
+        "curve-89bcff093ad73c461edfb14d5e4b5f17"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 2,
+        "within_device_configurations": 1,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "vin_v": null,
+      "vout_v": 0.0,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR33610"
+        ]
+      },
+      "families": [
+        "LMR33610"
+      ],
+      "devices": [
+        "LMR33610"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-66dc98e65c35f9474e3b086f17aa53ab",
+        "curve-752c1feb273f653b3e42e31cd83e8cd4",
+        "curve-4a6edf73b2927b0f2620fc9e6857403d"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 3,
+        "within_device_configurations": 1,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "output_current_capability_vs_input_voltage",
+      "vin_v": null,
+      "vout_v": 5.0,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR33610"
+        ]
+      },
+      "families": [
+        "LMR33610"
+      ],
+      "devices": [
+        "LMR33610"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-6a1d7cf4a38f391829140422f59575bc",
+        "curve-b34210682e2f0d46e6f1d878ea69bb1b",
+        "curve-4411362f846915da13b73796e02d2165"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 3,
+        "within_device_configurations": 1,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "power_dissipation_vs_load",
+      "vin_v": 12.0,
+      "vout_v": 1.1,
+      "manufacturers": {
+        "texas_instruments": [
+          "TPS548C26"
+        ]
+      },
+      "families": [
+        "TPS548C26"
+      ],
+      "devices": [
+        "TPS548C26"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-863312be3ffacb7e8647bac94410d574",
+        "curve-b5688c27e31a85b457f38dcb699e8b3f",
+        "curve-186cc4bf177a85556df222e65848bffb",
+        "curve-693de5b989eb820ce55115eb2b0c1648",
+        "curve-680405535416cb818ea172e13dd0b73a",
+        "curve-1af3f5ed2db8fa1f5dee509a9b233577",
+        "curve-74f91e3fa6ea1dfd391cde6310a306c3",
+        "curve-ff774947a3b1c41459b87063d4d42f52",
+        "curve-20e7752303fc191e54b16ea1758e5bee",
+        "curve-25c7f69f534b7b88b42971fbbb3edf84",
+        "curve-3b6b5d05c176d4e021bd25211367e53d",
+        "curve-3f3fe061b39c8c14dc39c3b577359712"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 4,
+        "within_device_configurations": 1,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "supply_current_vs_input_voltage",
+      "vin_v": null,
+      "vout_v": null,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR33610"
+        ]
+      },
+      "families": [
+        "LMR33610"
+      ],
+      "devices": [
+        "LMR33610"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-bf2a4ce56822bc0e94db4c37884c08ce",
+        "curve-3f7bf1551bbf803bbd303f02d5e297bd",
+        "curve-374453b660e64bef15eae2c0d4a15ed8",
+        "curve-3ac363603af06a5046d42b58f9330c48",
+        "curve-65742e8f5fb479b7ef1837ac5d6b692e",
+        "curve-a4fa3cf122c34b455d07480ff0f089b3"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 3,
+        "within_device_configurations": 1,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    },
+    {
+      "phenomenon": "supply_current_vs_temperature",
+      "vin_v": 13.5,
+      "vout_v": null,
+      "manufacturers": {
+        "texas_instruments": [
+          "LMR36502"
+        ]
+      },
+      "families": [
+        "LMR36502"
+      ],
+      "devices": [
+        "LMR36502"
+      ],
+      "family_scoped_devices": 0,
+      "evidence_ids": [
+        "curve-2b6a908f6f833d626dcf4635b2366058"
+      ],
+      "comparison_levels": {
+        "same_configuration_observations": 1,
+        "within_device_configurations": 0,
+        "within_family_device_comparisons": 1,
+        "cross_family_comparisons": 0,
+        "cross_manufacturer_comparisons": 0
+      },
+      "comparison_availability": "single_device",
+      "adjudication_states": [
+        "human_review_pending"
+      ],
+      "uncertainty_note": "tick-fit residuals ride each evidence row; variant spreads gate significance"
+    }
+  ],
+  "catalog_admission_packets": [
+    {
+      "packet_id": "admit-sic46x-sic461",
+      "schema": "harness.catalog-admission-request.v1",
+      "identity": {
+        "manufacturer": "vishay",
+        "canonical_family": "SiC46x",
+        "series": "SiC461",
+        "device": "SiC461",
+        "orderable_identities": [
+          "SiC461"
+        ],
+        "identity_provenance": {
+          "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+          "title_page_quote": "SiC461, SiC462, SiC463, SiC464 — Vishay Siliconix S25-1437-Rev. S, 17-Nov-2025, Document Number: 65124",
+          "ratings_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
+          "page_1based": 14
+        }
+      },
+      "ratings": {
+        "vin_min_v": 4.5,
+        "vin_max_v": 60.0,
+        "vout_v": 5.0,
+        "iout_max_a": 10.0,
+        "evidence": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
+        "evidence_class": "rated_limit_from_header_quote"
+      },
+      "curve_associations": [
+        "curve-a7993e073641d5033bb5610b6c710abe",
+        "curve-6ea63ddc26932d432a2be4d42e7b610d",
+        "curve-5b73b5ebde8c0fe9db1badda5f73c7a4",
+        "curve-2f18767e2ea555843e2b9c14defa3f1a",
+        "curve-214a8be75c0ffc2980cbe42a72230132",
+        "curve-279c9b584fa37bb6b111a1d42c701ef5",
+        "curve-c51f912deecf71de0fbf73b4c919bcd5"
+      ],
+      "part_vs_family_scope": "ratings are DEVICE-scoped (each device's own header); curves are DEVICE-scoped on the shared family eval board; family-level claims require per-device evidence",
+      "conflicts_unresolved": [
+        "unbound efficiency traces (36V-vs-48V ambiguous) remain refused, never defaulted"
+      ],
+      "request": "admit to power-management aisle via the standard ingestion pipeline; provenance tier: T1_DATASHEET (sha-verified); do NOT assign OPNs beyond the four documented device identities"
+    },
+    {
+      "packet_id": "admit-sic46x-sic462",
+      "schema": "harness.catalog-admission-request.v1",
+      "identity": {
+        "manufacturer": "vishay",
+        "canonical_family": "SiC46x",
+        "series": "SiC462",
+        "device": "SiC462",
+        "orderable_identities": [
+          "SiC462"
+        ],
+        "identity_provenance": {
+          "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+          "title_page_quote": "SiC461, SiC462, SiC463, SiC464 — Vishay Siliconix S25-1437-Rev. S, 17-Nov-2025, Document Number: 65124",
+          "ratings_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)",
+          "page_1based": 15
+        }
+      },
+      "ratings": {
+        "vin_min_v": 4.5,
+        "vin_max_v": 60.0,
+        "vout_v": 5.0,
+        "iout_max_a": 6.0,
+        "evidence": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)",
+        "evidence_class": "rated_limit_from_header_quote"
+      },
+      "curve_associations": [
+        "curve-5c807b48ee14995da881785195ec0651",
+        "curve-29d5ab880c248c38873de631bd685fa1",
+        "curve-2bb878bfadee6675513e4ae88080aca9",
+        "curve-cc747bc4f891734f992b5540ba49aaf9",
+        "curve-ac89f7a44edaab1572c0aa348333f553",
+        "curve-bdf33617a2723aa5a45e5c25ab700344",
+        "curve-afe9caba4402aa070d9b62512a63262f"
+      ],
+      "part_vs_family_scope": "ratings are DEVICE-scoped (each device's own header); curves are DEVICE-scoped on the shared family eval board; family-level claims require per-device evidence",
+      "conflicts_unresolved": [
+        "unbound efficiency traces (36V-vs-48V ambiguous) remain refused, never defaulted"
+      ],
+      "request": "admit to power-management aisle via the standard ingestion pipeline; provenance tier: T1_DATASHEET (sha-verified); do NOT assign OPNs beyond the four documented device identities"
+    },
+    {
+      "packet_id": "admit-sic46x-sic463",
+      "schema": "harness.catalog-admission-request.v1",
+      "identity": {
+        "manufacturer": "vishay",
+        "canonical_family": "SiC46x",
+        "series": "SiC463",
+        "device": "SiC463",
+        "orderable_identities": [
+          "SiC463"
+        ],
+        "identity_provenance": {
+          "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+          "title_page_quote": "SiC461, SiC462, SiC463, SiC464 — Vishay Siliconix S25-1437-Rev. S, 17-Nov-2025, Document Number: 65124",
+          "ratings_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)",
+          "page_1based": 16
+        }
+      },
+      "ratings": {
+        "vin_min_v": 4.5,
+        "vin_max_v": 60.0,
+        "vout_v": 5.0,
+        "iout_max_a": 4.0,
+        "evidence": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)",
+        "evidence_class": "rated_limit_from_header_quote"
+      },
+      "curve_associations": [
+        "curve-739161096240deb07c3e870c2187eb77",
+        "curve-87ca0312bf27aaa7bd43014dccb1ab01",
+        "curve-76d37962f72527efa6004ff8a894639b",
+        "curve-af486b741d969d2a7fd14f8d6658c772",
+        "curve-d2487e7819054a52ad40cc1849443bef",
+        "curve-f92c2e8c727bb42ac1787ae9800120a8",
+        "curve-9d94e70bc85e7243e91aef54817c791c",
+        "curve-5567eca7936b6ea1f2a137025b2b2fce",
+        "curve-c7b2d232869d82fb1b00a5b2a3477542",
+        "curve-9c22e23de0b7e6978b159d5467fc1587",
+        "curve-ba0c8ccbf1e30b49a885a466afbdfb90",
+        "curve-b12391de3abcc357f9fa90d11872e751"
+      ],
+      "part_vs_family_scope": "ratings are DEVICE-scoped (each device's own header); curves are DEVICE-scoped on the shared family eval board; family-level claims require per-device evidence",
+      "conflicts_unresolved": [
+        "unbound efficiency traces (36V-vs-48V ambiguous) remain refused, never defaulted"
+      ],
+      "request": "admit to power-management aisle via the standard ingestion pipeline; provenance tier: T1_DATASHEET (sha-verified); do NOT assign OPNs beyond the four documented device identities"
+    },
+    {
+      "packet_id": "admit-sic46x-sic464",
+      "schema": "harness.catalog-admission-request.v1",
+      "identity": {
+        "manufacturer": "vishay",
+        "canonical_family": "SiC46x",
+        "series": "SiC464",
+        "device": "SiC464",
+        "orderable_identities": [
+          "SiC464"
+        ],
+        "identity_provenance": {
+          "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+          "title_page_quote": "SiC461, SiC462, SiC463, SiC464 — Vishay Siliconix S25-1437-Rev. S, 17-Nov-2025, Document Number: 65124",
+          "ratings_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)",
+          "page_1based": 17
+        }
+      },
+      "ratings": {
+        "vin_min_v": 4.5,
+        "vin_max_v": 60.0,
+        "vout_v": 5.0,
+        "iout_max_a": 2.0,
+        "evidence": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)",
+        "evidence_class": "rated_limit_from_header_quote"
+      },
+      "curve_associations": [
+        "curve-0d872aedf735bb6100a130a276a012b4",
+        "curve-50dd207627c7e2b5b070e24f0e464c31",
+        "curve-39e596c63c7b3082eab69d44bd33b955",
+        "curve-9dd4ccbd9c8e7c14803d07b29653bef9",
+        "curve-32e212532aa0c2eded0a92bdfe921d85",
+        "curve-29bbf05fc94f0678e06b0d8cf7968914",
+        "curve-ed16c61c57576bbea31b90c18bf5f3e5"
+      ],
+      "part_vs_family_scope": "ratings are DEVICE-scoped (each device's own header); curves are DEVICE-scoped on the shared family eval board; family-level claims require per-device evidence",
+      "conflicts_unresolved": [
+        "unbound efficiency traces (36V-vs-48V ambiguous) remain refused, never defaulted"
+      ],
+      "request": "admit to power-management aisle via the standard ingestion pipeline; provenance tier: T1_DATASHEET (sha-verified); do NOT assign OPNs beyond the four documented device identities"
+    }
+  ],
+  "evidence_request_outcomes": {
+    "request_source": "M4 CURVE-06 cross_family_discovery evidence request (48V->5V second family)",
+    "outcomes": [
+      {
+        "request": "second family efficiency curve at 48 V -> 5 V",
+        "status": "satisfied",
+        "evidence": "LM5161 (texas_instruments) Figure 2 p.7: VOUT = 5 V, RON = 169 kOhm, L = 47 uH, 300 kHz; VIN = 36/48/60 V traces legend-bound, VIN-monotonicity physics check passed",
+        "cross_manufacturer_cells_unlocked": [
+          {
+            "phenomenon": "efficiency_vs_load",
+            "vin_v": 36.0,
+            "vout_v": 5.0,
+            "families": [
+              "LM5161",
+              "SiC46x"
+            ]
+          },
+          {
+            "phenomenon": "efficiency_vs_load",
+            "vin_v": 48.0,
+            "vout_v": 5.0,
+            "families": [
+              "LM5161",
+              "SiC46x"
+            ]
+          }
+        ]
+      },
+      {
+        "request": "catalog admission for Vishay SiC46x",
+        "status": "prepared_not_applied",
+        "evidence": "four admission packets attached; only the authorized catalog owner may apply them"
+      },
+      {
+        "request": "human adjudication of curve evidence",
+        "status": "blocked_pending_human",
+        "evidence": "cold-review packets emitted for the 10 highest-value figures; approval pipeline accepts authorized verdicts later without identity change"
+      },
+      {
+        "request": "IR3883/IR3447/ADP5003/LT8292 acquisition",
+        "status": "blocked_source_access",
+        "evidence": "network egress filtered (CURVE-04 challenge manifest); retry from an unfiltered environment"
+      }
+    ]
+  },
+  "cold_review_priority": [
+    {
+      "file": "vishay_sic46x_p15.json",
+      "figure_index": 0,
+      "why": "SiC462 48V efficiency (full range)"
+    },
+    {
+      "file": "vishay_sic46x_p14.json",
+      "figure_index": 4,
+      "why": "SiC461 48V efficiency (light load)"
+    },
+    {
+      "file": "vishay_sic46x_p16.json",
+      "figure_index": 0,
+      "why": "SiC463 48V efficiency"
+    },
+    {
+      "file": "vishay_sic46x_p17.json",
+      "figure_index": 0,
+      "why": "SiC464 48V efficiency"
+    },
+    {
+      "file": "vishay_sic46x_p14.json",
+      "figure_index": 0,
+      "why": "SiC461 efficiency UNBOUND trace (36V-vs-48V ambiguous)"
+    },
+    {
+      "file": "vishay_sic46x_p15.json",
+      "figure_index": 3,
+      "why": "SiC462 efficiency UNBOUND trace (ambiguous)"
+    },
+    {
+      "file": "vishay_sic46x_p17.json",
+      "figure_index": 3,
+      "why": "SiC464 efficiency UNBOUND trace (ambiguous)"
+    },
+    {
+      "file": "lm5161_p7.json",
+      "figure_index": 0,
+      "why": "LM5161 VOUT=5V efficiency (color-cloud + positional binding)"
+    },
+    {
+      "file": "lm5161_p7.json",
+      "figure_index": 2,
+      "why": "LM5161 VOUT=3.3V efficiency"
+    },
+    {
+      "file": "tps548c26_p10.json",
+      "figure_index": 0,
+      "why": "TPS548C26 12V/1.1V efficiency (anchor)"
+    }
+  ],
+  "comparator_fingerprint": "harness.electronics-curve_evidence@curve/07e-supply: condition_compatibility(sweep-law, legend-ambiguity, envelope-resolution) + query_operating_point(bounded linear/log10) + significance(variant-spread law); parity anchor for M4's vendored copy at curve-evidence-bundle-v2-3b5658b629cc",
+  "numeric_evaluation_fixtures": [
+    "tests/test_curve05a_comparison.py (12-case stress suite)",
+    "tests/test_curve_evidence_pilot.py (frozen pilot gates)",
+    "results/curve-05b/corrections_v2.json (within-family demo)"
+  ],
+  "laws": [
+    "typical never guaranteed; no gold promotion without human sign-off",
+    "unbound/ambiguous traces stay refused, never defaulted",
+    "cross-manufacturer claims require distinct canonical families AND aligned conditions AND physics checks"
+  ],
+  "built_at": 1791504509.380399
+}

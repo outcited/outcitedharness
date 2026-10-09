@@ -28,6 +28,48 @@
       },
       "series": [
         {
+          "name": "VIN = 48 V, L = 8.2 μH",
+          "condition": null,
+          "points": [
+            [
+              1.02759,
+              97.573981
+            ],
+            [
+              1.562868,
+              93.407962
+            ],
+            [
+              2.018033,
+              90.812206
+            ],
+            [
+              2.243496,
+              87.948243
+            ],
+            [
+              3.754416,
+              93.570973
+            ],
+            [
+              4.110573,
+              89.85416
+            ],
+            [
+              4.468924,
+              98.400217
+            ],
+            [
+              4.724685,
+              95.810737
+            ]
+          ],
+          "_x_range": [
+            1.02759,
+            4.724685
+          ]
+        },
+        {
           "name": "VIN = 36 V, L = 8.2 μH",
           "condition": null,
           "points": [
@@ -344,119 +386,15 @@
             0.009188,
             5.995705
           ]
-        },
-        {
-          "name": "VIN = 48 V, L = 8.2 μH",
-          "condition": null,
-          "points": [
-            [
-              0.0169,
-              80.236931
-            ],
-            [
-              0.01891,
-              81.156521
-            ],
-            [
-              0.0279,
-              81.85318
-            ],
-            [
-              0.038207,
-              83.052267
-            ],
-            [
-              0.048111,
-              83.698071
-            ],
-            [
-              0.057943,
-              84.197575
-            ],
-            [
-              0.068286,
-              84.605539
-            ],
-            [
-              0.078081,
-              84.813004
-            ],
-            [
-              0.088021,
-              85.021445
-            ],
-            [
-              0.098255,
-              85.191708
-            ],
-            [
-              0.198286,
-              86.691196
-            ],
-            [
-              0.298536,
-              87.100691
-            ],
-            [
-              0.398969,
-              87.434531
-            ],
-            [
-              0.499183,
-              87.796655
-            ],
-            [
-              1.000618,
-              88.822553
-            ],
-            [
-              1.50176,
-              91.475988
-            ],
-            [
-              1.991317,
-              92.296095
-            ],
-            [
-              2.506823,
-              93.062839
-            ],
-            [
-              3.00548,
-              93.407405
-            ],
-            [
-              3.50538,
-              93.57321
-            ],
-            [
-              3.999505,
-              93.627549
-            ],
-            [
-              4.499843,
-              93.589232
-            ],
-            [
-              4.997623,
-              93.448507
-            ],
-            [
-              5.497231,
-              93.242016
-            ],
-            [
-              5.995741,
-              93.060747
-            ]
-          ],
-          "_x_range": [
-            0.0169,
-            5.995741
-          ]
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [
+        "VIN = 12 V, L = 5.6 μH",
+        "VIN = 24 V, L = 6.8 μH",
+        "VIN = 36 V, L = 8.2 μH",
+        "= 48 V, L = 8.2 μH"
+      ],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
       ],
@@ -601,6 +539,10 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [
+        "VIN = 36 V, L = 15 μH",
+        "VIN = 48 V, L = 15 μH"
+      ],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
       ],
@@ -693,6 +635,7 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
       ],
@@ -785,6 +728,7 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
       ],
@@ -799,6 +743,11 @@
     }
   ],
   "skips": [
+    {
+      "figure_index": 0,
+      "reason": "legend_unresolved",
+      "color": "0.940,0.423,0.133"
+    },
     {
       "figure_index": 1,
       "reason": "axis_fit_failed"

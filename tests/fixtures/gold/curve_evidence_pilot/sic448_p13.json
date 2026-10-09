@@ -4,8 +4,367 @@
   "document_sha256": "9b5a65e13b868456c8ab70c89748e8fda72dc07e6fef7937ed14d7e98f2c39c1",
   "page_1based": 13,
   "manufacturer": "vishay",
+  "family_group": "SiC448",
   "section_title": "ELECTRICAL CHARACTERISTICS",
   "plots": [
+    {
+      "_figure_index": 0,
+      "title": "Fig. 11 - Efficiency, Load 0 A to 6 A",
+      "axes": {
+        "x": {
+          "label": "IOUT - Output Current (A)",
+          "unit": "A",
+          "min": 0.0,
+          "max": 6.0,
+          "scale": "linear"
+        },
+        "y": {
+          "label": "eff Efficiency (%)",
+          "unit": "%",
+          "min": 76.0,
+          "max": 100.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "VIN = 500 kHz, L = 4.7 µH",
+          "condition": null,
+          "points": [
+            [
+              0.010987,
+              76.115282
+            ],
+            [
+              0.012694,
+              78.532243
+            ],
+            [
+              0.014563,
+              80.911378
+            ],
+            [
+              0.016392,
+              82.048982
+            ],
+            [
+              0.018301,
+              83.803479
+            ],
+            [
+              0.020129,
+              84.280603
+            ],
+            [
+              0.022039,
+              84.735752
+            ],
+            [
+              0.023989,
+              85.20027
+            ],
+            [
+              0.025858,
+              85.602826
+            ],
+            [
+              0.027849,
+              86.122998
+            ],
+            [
+              0.224708,
+              90.071473
+            ],
+            [
+              0.424126,
+              90.799135
+            ],
+            [
+              0.623788,
+              91.400179
+            ],
+            [
+              0.823693,
+              91.73375
+            ],
+            [
+              1.323457,
+              93.725821
+            ],
+            [
+              1.823343,
+              94.602259
+            ],
+            [
+              2.326723,
+              94.888643
+            ],
+            [
+              2.827544,
+              95.018323
+            ],
+            [
+              3.328405,
+              94.892244
+            ],
+            [
+              3.827722,
+              94.6671
+            ],
+            [
+              4.327647,
+              94.416741
+            ],
+            [
+              4.827005,
+              94.08497
+            ],
+            [
+              5.327582,
+              93.732664
+            ],
+            [
+              5.82694,
+              93.323803
+            ]
+          ],
+          "_x_range": [
+            0.010987,
+            5.82694
+          ]
+        },
+        {
+          "name": "fSW = 300 kHz, L = 8.2 µH",
+          "condition": null,
+          "points": [
+            [
+              0.010987,
+              76.057655
+            ],
+            [
+              0.012694,
+              79.020723
+            ],
+            [
+              0.014563,
+              81.313402
+            ],
+            [
+              0.016392,
+              81.901116
+            ],
+            [
+              0.018301,
+              83.196683
+            ],
+            [
+              0.020129,
+              83.822223
+            ],
+            [
+              0.022039,
+              84.600317
+            ],
+            [
+              0.023989,
+              85.156511
+            ],
+            [
+              0.025858,
+              85.603016
+            ],
+            [
+              0.027849,
+              86.060146
+            ],
+            [
+              0.224708,
+              90.488447
+            ],
+            [
+              0.424126,
+              90.938195
+            ],
+            [
+              0.623788,
+              91.529153
+            ],
+            [
+              0.823693,
+              92.199177
+            ],
+            [
+              1.323457,
+              92.056346
+            ],
+            [
+              1.823343,
+              93.255551
+            ],
+            [
+              2.326723,
+              93.975108
+            ],
+            [
+              2.827544,
+              94.261853
+            ],
+            [
+              3.328405,
+              94.341104
+            ],
+            [
+              3.827722,
+              94.324892
+            ],
+            [
+              4.327647,
+              94.234834
+            ],
+            [
+              4.827005,
+              94.137573
+            ],
+            [
+              5.327582,
+              93.950253
+            ],
+            [
+              5.82694,
+              93.727269
+            ]
+          ],
+          "_x_range": [
+            0.010987,
+            5.82694
+          ]
+        },
+        {
+          "name": "fSW = 1 MHz, L = 2.2 µH",
+          "condition": null,
+          "points": [
+            [
+              0.010987,
+              76.650228
+            ],
+            [
+              0.012694,
+              79.411566
+            ],
+            [
+              0.014563,
+              81.83501
+            ],
+            [
+              0.016392,
+              82.943798
+            ],
+            [
+              0.018301,
+              83.802405
+            ],
+            [
+              0.020129,
+              84.710544
+            ],
+            [
+              0.022039,
+              85.159388
+            ],
+            [
+              0.023989,
+              86.017995
+            ],
+            [
+              0.025858,
+              86.126966
+            ],
+            [
+              0.027849,
+              86.553117
+            ],
+            [
+              0.224708,
+              90.801303
+            ],
+            [
+              0.424126,
+              91.547517
+            ],
+            [
+              0.623788,
+              92.19431
+            ],
+            [
+              0.823693,
+              91.859838
+            ],
+            [
+              1.323457,
+              93.99582
+            ],
+            [
+              1.823343,
+              94.867033
+            ],
+            [
+              2.326723,
+              95.266888
+            ],
+            [
+              2.827544,
+              95.439799
+            ],
+            [
+              3.328405,
+              95.437997
+            ],
+            [
+              3.827722,
+              95.295704
+            ],
+            [
+              4.327647,
+              95.110186
+            ],
+            [
+              4.827005,
+              94.935475
+            ],
+            [
+              5.327582,
+              94.643511
+            ],
+            [
+              5.82694,
+              94.330111
+            ]
+          ],
+          "_x_range": [
+            0.010987,
+            5.82694
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "_legend_rows": [
+        "= 500 kHz, L = 4.7 µH",
+        "fSW = 1 MHz, L = 2.2 µH",
+        "fSW = 300 kHz, L = 8.2 µH"
+      ],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS",
+        "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 1e-06,
+        "y_fit_residual_pct_of_span": 0.000308,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
     {
       "_figure_index": 1,
       "title": "Fig. 14 - Input Current vs. Input Voltage",
@@ -74,12 +433,252 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS",
         "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
       ],
       "_numeric_quality": {
         "x_fit_residual_pct_of_span": 0.00865,
         "y_fit_residual_pct_of_span": 7e-06,
+        "retained_point_fraction": 1.0,
+        "points_outside_axis_pct": 0.0
+      },
+      "_title_axes_note": null,
+      "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
+    },
+    {
+      "_figure_index": 2,
+      "title": "Fig. 12 - Light Load Efficiency, Load < 1 A",
+      "axes": {
+        "x": {
+          "label": "IOUT - Output Current (A)",
+          "unit": "A",
+          "min": 0.01,
+          "max": 1.0,
+          "scale": "log10"
+        },
+        "y": {
+          "label": "eff Efficiency (%)",
+          "unit": "%",
+          "min": 76.0,
+          "max": 100.0,
+          "scale": "linear"
+        }
+      },
+      "series": [
+        {
+          "name": "fSW = 300 kHz, L = 8.2 µH",
+          "condition": null,
+          "points": [
+            [
+              0.01002,
+              80.519089
+            ],
+            [
+              0.010332,
+              80.846899
+            ],
+            [
+              0.012191,
+              81.988106
+            ],
+            [
+              0.014099,
+              83.748363
+            ],
+            [
+              0.015933,
+              84.22693
+            ],
+            [
+              0.017854,
+              84.683703
+            ],
+            [
+              0.0198,
+              85.149661
+            ],
+            [
+              0.021691,
+              85.553473
+            ],
+            [
+              0.023655,
+              86.075266
+            ],
+            [
+              0.220875,
+              90.036712
+            ],
+            [
+              0.420603,
+              90.766895
+            ],
+            [
+              0.62056,
+              91.369742
+            ],
+            [
+              0.820637,
+              91.704395
+            ],
+            [
+              1.00069,
+              92.479425
+            ]
+          ],
+          "_x_range": [
+            0.01002,
+            1.00069
+          ]
+        },
+        {
+          "name": "fSW = 1 MHz, L = 2.2 µH",
+          "condition": null,
+          "points": [
+            [
+              0.01002,
+              80.971173
+            ],
+            [
+              0.010332,
+              81.24981
+            ],
+            [
+              0.012191,
+              81.839328
+            ],
+            [
+              0.014099,
+              83.139393
+            ],
+            [
+              0.015933,
+              83.766914
+            ],
+            [
+              0.017854,
+              84.547529
+            ],
+            [
+              0.0198,
+              85.105704
+            ],
+            [
+              0.021691,
+              85.553649
+            ],
+            [
+              0.023655,
+              86.012044
+            ],
+            [
+              0.220875,
+              90.454932
+            ],
+            [
+              0.420603,
+              90.90612
+            ],
+            [
+              0.62056,
+              91.499056
+            ],
+            [
+              0.820637,
+              92.171067
+            ],
+            [
+              1.00069,
+              92.163322
+            ]
+          ],
+          "_x_range": [
+            0.01002,
+            1.00069
+          ]
+        },
+        {
+          "name": "fSW = 500 kHz, L = 4.7 µH",
+          "condition": null,
+          "points": [
+            [
+              0.01002,
+              81.446679
+            ],
+            [
+              0.010332,
+              81.773945
+            ],
+            [
+              0.012191,
+              82.886338
+            ],
+            [
+              0.014099,
+              83.747825
+            ],
+            [
+              0.015933,
+              84.659023
+            ],
+            [
+              0.017855,
+              85.109129
+            ],
+            [
+              0.0198,
+              85.970621
+            ],
+            [
+              0.021691,
+              86.080131
+            ],
+            [
+              0.023655,
+              86.50754
+            ],
+            [
+              0.220882,
+              90.769594
+            ],
+            [
+              0.420617,
+              91.518151
+            ],
+            [
+              0.62058,
+              92.167104
+            ],
+            [
+              0.820662,
+              91.831555
+            ],
+            [
+              1.000721,
+              92.614692
+            ]
+          ],
+          "_x_range": [
+            0.01002,
+            1.000721
+          ]
+        }
+      ],
+      "conditions_plot": [],
+      "_legend_rows": [
+        "fSW = 500 kHz, L = 4.7 µH",
+        "fSW = 1 MHz, L = 2.2 µH",
+        "fSW = 300 kHz, L = 8.2 µH"
+      ],
+      "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS",
+        "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
+      ],
+      "_numeric_quality": {
+        "x_fit_residual_pct_of_span": 0.010054,
+        "y_fit_residual_pct_of_span": 0.000328,
         "retained_point_fraction": 1.0,
         "points_outside_axis_pct": 0.0
       },
@@ -154,7 +753,9 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS",
         "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
       ],
       "_numeric_quality": {
@@ -226,7 +827,9 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
+        "ELECTRICAL CHARACTERISTICS",
         "(VIN = 24 V, VOUT = 5 V, fsw = 300 kHz, LO = 8.2 μH (IHLP5050FDER8R2M01) unless otherwise noted)"
       ],
       "_numeric_quality": {
@@ -239,37 +842,6 @@
       "source": "vector-reference extraction (deterministic); pending human sign-off per the pilot labeling law"
     }
   ],
-  "skips": [
-    {
-      "figure_index": 0,
-      "reason": "legend_unresolved",
-      "color": "0.078,0.500,0.767"
-    },
-    {
-      "figure_index": 0,
-      "reason": "legend_unresolved",
-      "color": "0.940,0.423,0.133"
-    },
-    {
-      "figure_index": 0,
-      "reason": "legend_unresolved",
-      "color": "0.292,0.719,0.295"
-    },
-    {
-      "figure_index": 2,
-      "reason": "legend_unresolved",
-      "color": "0.078,0.500,0.767"
-    },
-    {
-      "figure_index": 2,
-      "reason": "legend_unresolved",
-      "color": "0.940,0.423,0.133"
-    },
-    {
-      "figure_index": 2,
-      "reason": "legend_unresolved",
-      "color": "0.292,0.720,0.305"
-    }
-  ],
+  "skips": [],
   "source": "vector reference extraction (deterministic geometry); machine reference pending human sign-off"
 }

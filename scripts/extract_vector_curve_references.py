@@ -112,47 +112,61 @@ def _frames(page, words) -> list[tuple[float, float, float, float]]:
 
 
 def _ticks_for_axis(words, box, axis: str) -> tuple[float, list[tuple[float, float]]]:
-    """Ticks share one aligned row (x axis) or column (y axis) just outside
-    the frame; condition numerals printed under the axis (e.g. "PVIN = 12
-    V") sit on different rows and must not pollute the fit. Returns
-    (row_center, [(position, value)]) where position is along the axis."""
+    """Ticks share one aligned row (x axis) or column (y axis). Two
+    layouts exist in the corpus: labels OUTSIDE the frame edge (Vishay,
+    TPS548C26) and labels INSIDE the frame with the axes drawn as bare
+    lines (LM5161-style: the frame rect encloses the labels). Outside
+    first; inside as fallback. Condition numerals on other rows are
+    excluded by the aligned-row + span rules."""
 
-    cands = []
-    for w in words:
-        if not _NUM_TICK.fullmatch(w[4]):
-            continue
-        cx, cy = _center(w)
+    def collect(lo_x, hi_x, lo_y, hi_y):
+        out = []
+        for w in words:
+            if not _NUM_TICK.fullmatch(w[4]):
+                continue
+            cx, cy = _center(w)
+            if lo_x <= cx <= hi_x and lo_y <= cy <= hi_y:
+                out.append((cy if axis == "x" else cx, cx if axis == "x"
+                            else cy, float(w[4])))
+        return out
+
+    def best_row(cands):
+        if len(cands) < 3:
+            return None
+        groups: list[list[tuple[float, float, float]]] = []
+        for c in sorted(cands):
+            if groups and abs(groups[-1][0][0] - c[0]) <= 4.0:
+                groups[-1].append(c)
+            else:
+                groups.append([c])
+        best = max(groups, key=len)
+        if len(best) < 3:
+            return None
         if axis == "x":
-            if box[3] <= cy <= box[3] + _TICK_BAND and box[0] - 8 <= cx <= box[2] + 8:
-                cands.append((cy, cx, float(w[4])))
+            span = max(c[1] for c in best) - min(c[1] for c in best)
+            if span < 0.5 * (box[2] - box[0]):
+                return None
+            pairs = sorted(((c[1], c[2]) for c in best), key=lambda t: t[0])
         else:
-            if box[0] - _TICK_BAND <= cx <= box[0] and box[1] - 8 <= cy <= box[3] + 8:
-                cands.append((cx, cy, float(w[4])))
-    if len(cands) < 3:
-        return (float("nan"), [])
-    groups: list[list[tuple[float, float, float]]] = []
-    for c in sorted(cands):
-        key = c[0]
-        if groups and abs(groups[-1][0][0] - key) <= 4.0:
-            groups[-1].append(c)
-        else:
-            groups.append([c])
-    rows = sorted(groups, key=lambda g: -len(g))
-    best = rows[0]
-    if len(best) < 3:
-        return (float("nan"), [])
-    if axis == "x":
-        span = max(c[1] for c in best) - min(c[1] for c in best)
-        if span < 0.5 * (box[2] - box[0]):
-            return (float("nan"), [])
-        pairs = sorted(((c[1], c[2]) for c in best), key=lambda t: t[0])
-    else:
-        span = max(c[1] for c in best) - min(c[1] for c in best)
-        if span < 0.5 * (box[3] - box[1]):
-            return (float("nan"), [])
-        pairs = sorted(((c[1], c[2]) for c in best), key=lambda t: t[0])
-    row_center = sum(c[0] for c in best) / len(best)
-    return (row_center, pairs)
+            span = max(c[1] for c in best) - min(c[1] for c in best)
+            if span < 0.5 * (box[3] - box[1]):
+                return None
+            pairs = sorted(((c[1], c[2]) for c in best), key=lambda t: t[0])
+        row_center = sum(c[0] for c in best) / len(best)
+        return (row_center, pairs)
+
+    attempts = (
+        [(box[0] - 8, box[2] + 8, box[3], box[3] + _TICK_BAND),
+         (box[0] - 2, box[2] + 2, box[3] - _TICK_BAND, box[3] - 2)]
+        if axis == "x" else
+        [(box[0] - _TICK_BAND, box[0], box[1] - 8, box[3] + 8),
+         (box[0] - 2, box[0] + _TICK_BAND, box[1] + 2, box[3] - 2)]
+    )
+    for band in attempts:
+        found = best_row(collect(*band))
+        if found is not None:
+            return found
+    return (float("nan"), [])
 
 
 def _fit_linear(pairs) -> tuple[float, float, float] | None:
@@ -417,9 +431,16 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                 v = a * pos + b
                 return float(10 ** v) if kind == "log10" else float(v)
 
-            # curves: multi-segment strokes inside the frame
+            # curves: multi-segment strokes inside the frame; PLUS
+            # short-segment clouds per color (TI style draws each trace
+            # as a handful of 1-4 segment paths, and dashed traces as
+            # many 1-segment dashes — both aggregate into one cloud).
+            # Furniture excluded: rects, pure black axis/grid lines
+            # (straight, spanning a large share of the frame).
             curves: dict[str, list[tuple[float, float]]] = {}
             swatches: list[tuple[str, float, float]] = []  # color, x1, ycenter
+            fw = box[2] - box[0]
+            fh = box[3] - box[1]
             for d in page.get_drawings():
                 r = d["rect"]
                 if not _inside(box, r, pad=3.0):
@@ -432,6 +453,31 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                     swatches.append(
                         (_color_key(d.get("color")), r.x1, (r.y0 + r.y1) / 2.0)
                     )
+                elif 1 <= len(d["items"]) <= 4:
+                    # short-segment cloud candidate (CURVE-07E R1/R2)
+                    pts = _chain_points(d)
+                    if len(pts) < 2:
+                        continue
+                    color = d.get("color")
+                    if color is None:
+                        continue
+                    key = _color_key(color)
+                    if key == "0.000,0.000,0.000":
+                        # black: reject straight furniture lines
+                        x0, y0 = pts[0]
+                        x1, y1 = pts[-1]
+                        if abs(x1 - x0) < 0.5 or abs(y1 - y0) < 0.5:
+                            continue  # pure h/v line
+                        if abs(x1 - x0) > 0.4 * fw or abs(y1 - y0) > 0.4 * fh:
+                            continue  # long furniture line
+                    curves.setdefault(f"{key}#cloud", []).extend(pts)
+            # clouds must look like traces: span >= 25% of frame width
+            for key in list(curves):
+                if not key.endswith("#cloud"):
+                    continue
+                xs = [p[0] for p in curves[key]]
+                if max(xs) - min(xs) < 0.25 * fw or len(curves[key]) < 8:
+                    del curves[key]
             if not curves:
                 skips.append({"figure_index": fig, "reason": "no_vector_curves"})
                 continue
@@ -670,6 +716,10 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                 },
                 "series": series,
                 "conditions_plot": cond_rows,
+                "_legend_rows": [
+                    " ".join(w[4] for w in sorted(row, key=lambda w: w[0]))
+                    for row in legend_rows
+                ],
                 "conditions_page": page_conditions,
                 "_numeric_quality": {
                     "x_fit_residual_pct_of_span": round(x_fit[3] * 100.0, 6),

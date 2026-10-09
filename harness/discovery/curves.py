@@ -177,6 +177,8 @@ def query_curve_evidence(
                     "status": "ok",
                     "curve_id": curve.curve_id,
                     "part": curve.applies_to.get("part"),
+                    "family": curve.applies_to.get("family_group"),
+                    "family_scoped": curve.applies_to.get("part") is None,
                     "series_name": curve.series.get("name"),
                     "x": query["x"],
                     "value": query["value"],

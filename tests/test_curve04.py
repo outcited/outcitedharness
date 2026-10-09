@@ -315,7 +315,8 @@ def test_ablation_gates():
     # CURVE-05B correction: vendor 24 V traces are legend-bound now, so
     # SiC46x answers within-family at 24 V -> 5 V (never cross-family)
     assert by_id["Q3-24to5-tradeoff"]["B_comparable"] >= 1
-    assert all(v["part"].startswith("SiC")
+    assert all(str(v["part"]).startswith("SiC")
+               or str(v["part"]).startswith("family:SiC")
                for v in by_id["Q3-24to5-tradeoff"]["B_values"])
     for q in report["questions"]:
         for value in q["B_values"]:

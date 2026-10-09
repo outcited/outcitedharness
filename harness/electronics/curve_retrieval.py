@@ -130,7 +130,8 @@ def build_index(
                             curve.curve_id,
                             None,
                             curve.applies_to.get("category"),
-                            curve.applies_to.get("part"),
+                            curve.applies_to.get("family_group")
+                            or curve.applies_to.get("part"),
                             curve.applies_to.get("part"),
                             curve.applies_to.get("manufacturer"),
                             tag["phenomenon"] if tag else None,
@@ -210,6 +211,8 @@ def search_curves(
         entry: dict[str, Any] = {
             "curve_id": row["curve_id"],
             "part": row["part"],
+            "family": row["family"],
+            "family_scoped": row["part"] is None,
             "phenomenon": row["phenomenon"],
             "supported_region": [row["supported_min"],
                                  row["supported_max"]],

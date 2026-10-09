@@ -92,10 +92,12 @@ def test_intent_c_tradeoff_refuses_every_comparison(ledger):
     # CURVE-05B correction: positional legend binding recovered the
     # vendor's printed 24 V-input traces, so SiC46x genuinely answers at
     # 24 V -> 5 V now; every non-SiC family still refuses
-    ok_parts = {r["part"] for r in eff["ok"]}
-    assert ok_parts and ok_parts <= {"SiC461", "SiC462", "SiC463",
-                                     "SiC464"}, \
-        "only legend-bound SiC46x 24 V traces answer"
+    ok_parts = {r["part"] or f"family:{r.get('family')}"
+                for r in eff["ok"]}
+    assert ok_parts and ok_parts <= {
+        "SiC461", "SiC462", "SiC463", "SiC464", "family:SiC46x",
+        "family:SiC448",
+    }, "only legend-bound Vishay 24 V traces answer"
     assert all(r["citation"]["document_sha256"] for r in eff["ok"])
     assert eff["not_usable"], "refusals still recorded with reasons"
     assert exp["priority_rankings"]["efficiency_first"]

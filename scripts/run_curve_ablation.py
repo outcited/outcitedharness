@@ -169,7 +169,8 @@ def run() -> dict:
             "A_unknown_count": sum(1 for v in a.values() if v == "UNKNOWN"),
             "B_comparable": len(comparable),
             "B_values": [
-                {"part": r["part"], "value": r.get("value"),
+                {"part": r["part"] or f"family:{r.get('family')}",
+                 "value": r.get("value"),
                  "unit": r.get("unit"), "match": r["match_class"],
                  "curve_id": r["curve_id"]}
                 for r in comparable

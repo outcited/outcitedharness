@@ -1,6 +1,6 @@
 {
   "schema": "harness.electronics-cold-review-summary.v1",
-  "vector_series_packets": 81,
+  "vector_series_packets": 123,
   "infineon_raster": {
     "status": "partial_raster_recovery",
     "document_sha256": "14cc7b1af8ba7af289f7bf24d7fda16449a743f3eb611c2502899e36f32e7478",
@@ -30,7 +30,7 @@
           "traces": 1,
           "y_uncertainty_px": 1.5,
           "render": {
-            "path": "/Users/samkim/Harnessv1-curve04/results/curve-05a/cold-review/renders/14cc7b1af8ba7af2-p18-300.png",
+            "path": "/Users/samkim/Harnessv1-curve07e/results/curve-05a/cold-review/renders/14cc7b1af8ba7af2-p18-300.png",
             "sha256": "9754e7d18d5acbe06c01e7510c49d204d79ec9fb313b7313d2aea32fec6bfe25"
           }
         }
@@ -51,7 +51,7 @@
           "traces": 1,
           "y_uncertainty_px": 1.5,
           "render": {
-            "path": "/Users/samkim/Harnessv1-curve04/results/curve-05a/cold-review/renders/14cc7b1af8ba7af2-p18-300.png",
+            "path": "/Users/samkim/Harnessv1-curve07e/results/curve-05a/cold-review/renders/14cc7b1af8ba7af2-p18-300.png",
             "sha256": "9754e7d18d5acbe06c01e7510c49d204d79ec9fb313b7313d2aea32fec6bfe25"
           }
         }

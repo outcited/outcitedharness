@@ -267,6 +267,12 @@ def condition_compatibility(
             "reason": "condition_conflict",
             "detail": cond["conflict"],
         }
+    if cond.get("legend_ambiguity"):
+        return {
+            "status": "not_comparable",
+            "reason": "legend_ambiguity",
+            "detail": cond["legend_ambiguity"],
+        }
     if not req_keys and not req_categorical:
         matched = {}
         mismatched = []
@@ -483,8 +489,11 @@ def quantity_kind(axis: Mapping[str, Any], side: str) -> str | None:
 
 
 def relevance_tags(curve: "CurveEvidence") -> list[dict[str, Any]]:
-    x_kind = quantity_kind(curve.axes.get("x") or {}, "x")
-    y_kind = quantity_kind(curve.axes.get("y") or {}, "y")
+    # use the RESOLVED kinds (caption-inference included), not a re-parse
+    x_kind = getattr(curve, "x_kind", None) or quantity_kind(
+        curve.axes.get("x") or {}, "x")
+    y_kind = getattr(curve, "y_kind", None) or quantity_kind(
+        curve.axes.get("y") or {}, "y")
     tags = []
     for name, spec in PHENOMENA.items():
         if spec["x_kind"] == x_kind and spec["y_kind"] == y_kind:
@@ -552,6 +561,7 @@ class CurveEvidence:
         source_path: str | None = None,
         render_sha256: str | None = None,
         payload: Mapping[str, Any] | None = None,
+        legend_rows: Sequence[str] | None = None,
     ) -> None:
         self.document_sha256 = document_sha256
         self.page_1based = page_1based
@@ -572,6 +582,15 @@ class CurveEvidence:
         self.payload = dict(payload or {})
         self.x_kind = quantity_kind(self.axes.get("x") or {}, "x")
         self.y_kind = quantity_kind(self.axes.get("y") or {}, "y")
+        # caption is printed text and authoritative when an axis label is
+        # garbled (inline-legend layouts): "Figure 2. Efficiency ..." names
+        # the phenomenon. Only overrides generic kinds — never a specific
+        # one the labels already established.
+        _caption = str(caption or "")
+        if self.y_kind in (None, "ratio", "voltage", "current", "power",
+                           "temperature", "frequency") and \
+                re.search(r"efficiency", _caption, re.I):
+            self.y_kind = "efficiency"
         def _pt(p: Any) -> dict[str, float] | None:
             if isinstance(p, Mapping):
                 x, y = p.get("x"), p.get("y")
@@ -648,6 +667,15 @@ class CurveEvidence:
                         "ta_c": {"page_default": overridden,
                                  "series_legend": value},
                     }
+        if not name_text.strip() and len(legend_rows or []) >= 2:
+            vals = []
+            for row in legend_rows or []:
+                m = re.match(r"^\s*(?:VIN)?\s*=?\s*(\d+(?:\.\d+)?)\s*V",
+                             row, re.I)
+                if m and float(m.group(1)) not in vals:
+                    vals.append(float(m.group(1)))
+            if len(vals) >= 2:
+                self._legend_ambiguity["vin_v"] = vals
         if self._legend_ambiguity:
             keys = dict(self.conditions.get("keys") or {})
             for key, values in self._legend_ambiguity.items():
@@ -680,6 +708,8 @@ class CurveEvidence:
         series["_plot_siblings"] = plot.get("series") or []
         axes = plot.get("axes") or {}
         apply = dict(applies_to or {})
+        if not apply.get("part") and record.get("part"):
+            apply.setdefault("part", record.get("part"))
         if not apply.get("part"):
             part_match = re.search(
                 r"\b(SiC\d{3}|TPS\d+[A-Z0-9]*|LM[RFQ]\d+[A-Z0-9\-]*|"
@@ -688,7 +718,10 @@ class CurveEvidence:
             )
             if part_match:
                 apply.setdefault("part", part_match.group(1))
-        if not apply.get("part"):
+        if not apply.get("part") and not record.get("family_group"):
+            # no family context at all: fall back to the document stem;
+            # when a family_group exists, a part-less figure is
+            # family-scoped evidence, never a sha-named "part"
             stem = str(record.get("source_artifact") or "")
             part = re.sub(r"\.(pdf|json)$", "", stem, flags=re.I)
             part = re.sub(r"^(dcdc|battery|gate|isolation|ldo|mosfet)_", "", part)
@@ -705,6 +738,8 @@ class CurveEvidence:
                 "family_group",
                 record.get("family_group") or apply.get("part"),
             )
+        if apply.get("family_group") and not apply.get("part"):
+            apply["coverage_hint"] = "family_scoped"
         if not apply.get("category"):
             stem = str(record.get("source_artifact") or "")
             m = re.match(r"(dcdc|battery|gate|isolation|ldo|mosfet)_", stem, re.I)
@@ -743,6 +778,7 @@ class CurveEvidence:
             source_path=record.get("source_path"),
             render_sha256=record.get("render_sha256"),
             payload=plot,
+            legend_rows=plot.get("_legend_rows"),
         )
 
     @classmethod

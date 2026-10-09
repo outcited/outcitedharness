@@ -4,6 +4,7 @@
   "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
   "page_1based": 19,
   "manufacturer": "vishay",
+  "family_group": "SiC46x",
   "section_title": null,
   "plots": [
     {
@@ -66,6 +67,7 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
       ],
@@ -150,6 +152,7 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
       ],

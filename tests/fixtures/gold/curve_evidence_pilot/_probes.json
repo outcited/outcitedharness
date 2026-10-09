@@ -327,6 +327,18 @@
         "Fig. 45",
         "Fig. 46"
       ]
+    },
+    {
+      "file": "lm5161_p7.json",
+      "title_only": true,
+      "expected_titles": [
+        "Figure 1.",
+        "Figure 2.",
+        "Figure 3.",
+        "Figure 4.",
+        "Figure 5.",
+        "Figure 6."
+      ]
     }
   ],
   "probes": [
@@ -348,7 +360,7 @@
       },
       "expect": {
         "ok": 8,
-        "not_comparable": 33,
+        "not_comparable": 48,
         "out_of_range": 0,
         "insufficient": 0,
         "unpinned_dimensions": [
@@ -375,7 +387,7 @@
       },
       "expect": {
         "ok": 4,
-        "not_comparable": 37,
+        "not_comparable": 52,
         "out_of_range": 0,
         "insufficient": 0
       }
@@ -396,7 +408,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 41,
+        "not_comparable": 56,
         "out_of_range": 0,
         "insufficient": 0,
         "reason": "condition_mismatch"
@@ -419,7 +431,7 @@
         "ok": 0,
         "not_comparable": 0,
         "out_of_range": 0,
-        "insufficient": 41,
+        "insufficient": 56,
         "reason": "condition_missing"
       }
     },
@@ -439,7 +451,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 40,
+        "not_comparable": 55,
         "out_of_range": 1,
         "insufficient": 0
       }
@@ -463,7 +475,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 33,
+        "not_comparable": 48,
         "out_of_range": 8,
         "insufficient": 0
       }
@@ -484,7 +496,7 @@
       },
       "expect": {
         "ok": 0,
-        "not_comparable": 29,
+        "not_comparable": 44,
         "out_of_range": 12,
         "insufficient": 0
       }
@@ -518,7 +530,7 @@
       },
       "expect": {
         "profile_ok": 8,
-        "profile_not_comparable": 33,
+        "profile_not_comparable": 48,
         "ok": 0,
         "insufficient": 0
       }
@@ -574,8 +586,8 @@
         }
       },
       "expect": {
-        "applicable": 41,
-        "listed": 41
+        "applicable": 56,
+        "listed": 56
       }
     },
     {
@@ -682,5 +694,5 @@
       }
     }
   ],
-  "expectations_note": "counts re-derived after CURVE-05B positional legend binding recovered 21 vendor traces (applicable efficiency curves 20 -> 41); refusal semantics unchanged; original v1 expectations preserved in git history at 90800433"
+  "expectations_note": "counts re-derived for CURVE-07E final corpus (123 rows: +LM5161 TI, +SiC448, +SiC46x p18/19); condition-less sic448 efficiency series are not_comparable/insufficient by law, never defaulted; ok-counts unchanged for all mismatch probes"
 }

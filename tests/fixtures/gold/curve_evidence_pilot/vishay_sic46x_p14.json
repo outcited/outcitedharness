@@ -171,6 +171,10 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [
+        "VIN = 36 V, L = 4.7 μH",
+        "VIN = 48 V, L = 4.7 μH"
+      ],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
@@ -275,6 +279,10 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [
+        "VIN = 36 V, L = 4.7 μH",
+        "VIN = 48 V, L = 4.7 μH"
+      ],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
@@ -519,6 +527,11 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [
+        "VIN = 24 V, L = 6.8 μH",
+        "VIN = 36 V, L = 8.2 μH",
+        "VIN = 48 V, L = 10 μH"
+      ],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
@@ -643,6 +656,7 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
@@ -767,6 +781,7 @@
         }
       ],
       "conditions_plot": [],
+      "_legend_rows": [],
       "conditions_page": [
         "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
       ],
