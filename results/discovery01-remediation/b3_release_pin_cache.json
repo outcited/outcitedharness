@@ -1,0 +1,52 @@
+{
+  "blocker": "B3",
+  "check": "stale release pin after an unpinned request warmed the session cache",
+  "sequence": [
+    "unpinned",
+    "stale-pinned (identical constraints)",
+    "valid-pinned",
+    "valid-pinned (repeat)"
+  ],
+  "before": {
+    "source": "results/discovery01-production-readiness/pilot_records.json (scenario P8c_stale_pin_after_unpinned_cache)",
+    "cache_hit": true,
+    "failures": [],
+    "partial_result": false,
+    "defect": "release validation bypassed by cache reuse"
+  },
+  "after": {
+    "unpinned": {
+      "cache_hit": false,
+      "failures": [],
+      "partial_result": false,
+      "latency_ms": 3535.6
+    },
+    "stale_pinned": {
+      "cache_hit": false,
+      "failures": [
+        {
+          "error": "release_mismatch",
+          "expected": "curve-evidence-bundle-v2-3b5658b629cc",
+          "actual": "curve-evidence-bundle-v3-5875789dcf3f",
+          "action": "result marked partial; cohort preserved; stale decision data never silently used"
+        }
+      ],
+      "partial_result": true,
+      "release_mismatch_reported": true,
+      "expected": "curve-evidence-bundle-v2-3b5658b629cc",
+      "actual": "curve-evidence-bundle-v3-5875789dcf3f",
+      "cohort_preserved": 1577,
+      "latency_ms": 3568.8
+    },
+    "valid_pinned_first": {
+      "cache_hit": false,
+      "failures": []
+    },
+    "valid_pinned_repeat": {
+      "cache_hit": true,
+      "failures": []
+    }
+  },
+  "errors": [],
+  "pass": true
+}

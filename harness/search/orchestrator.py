@@ -61,8 +61,10 @@ SUBCATEGORY_CROSSWALK = {
 class SessionCache:
     """Bounded, release-keyed, deterministic-invalidation cache (R8).
 
-    Key identity includes every release that can change the answer; errors
-    are never cached; eviction is LRU with a hard bound.
+    Key identity includes every release that can change the answer AND the
+    client's expected-release pin, so a warm entry can never satisfy a
+    request with different release expectations (B3); errors are never
+    cached; eviction is LRU with a hard bound.
     """
 
     def __init__(self, max_entries: int = 64):
@@ -89,6 +91,22 @@ class SessionCache:
         self._data.move_to_end(key)
         while len(self._data) > self.max_entries:
             self._data.popitem(last=False)
+
+
+def canonical_release_pin(expected: dict | None) -> str:
+    """Canonical identity of a client release pin (B3).
+
+    Absent, empty and all-``None`` pins canonicalise identically so
+    unpinned requests share one cache entry; every distinct pin value
+    produces a distinct key. Key order never matters. The pin is part of
+    session-cache identity so a warm entry can never answer a request
+    whose release expectations differ — release validation cannot be
+    bypassed by cache reuse.
+    """
+    pin = {k: v for k, v in (expected or {}).items() if v is not None}
+    return hashlib.sha256(
+        json.dumps(pin, sort_keys=True, default=str).encode()
+    ).hexdigest()[:16]
 
 
 def load_crosswalk(path: Path | None = None) -> dict:
@@ -262,6 +280,7 @@ def engineering_session(request: dict, *, catalog_con, search_con,
         identity_snapshot=identity_snapshot_id,
         evidence_release=evidence_release,
         evidence_policy=evidence_policy,
+        release_pin=canonical_release_pin(expected),
         transport="http" if isinstance(transport, m4_client.HttpTransport)
         else "frozen")
     if cache is not None:
