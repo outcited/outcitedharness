@@ -78,6 +78,20 @@ _EVIDENCE_POLICIES = {"machine_verified_advisory"}
 # --- auth posture (CURVE-08D / DISCOVERY-01 B4): fail closed ---------------
 _LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "::1")
 _LOOPBACK_CLIENTS = ("127.0.0.1", "::1")
+# --- explicit candidate scope (CURVE-08E / DISCOVERY-01 B6) ----------------
+#
+# M5 owns candidate generation; this service ranks ONLY the population it is
+# given. Candidates it holds no evidence for are reported unresolved - never
+# dropped, never replaced by its own universe.
+CANDIDATE_SCOPE_SCHEMA = "harness.discovery01-candidate-scope.v1"
+_SCOPE_POPULATIONS = {"discovery_cohort"}
+_SCOPE_MATCH_RULE = ("exact candidate id, else exact OPN/device, else "
+                     "case-insensitive exact; never fuzzy, never "
+                     "name-similar")
+_SCOPE_LAW = ("M4 ranks only the candidate population supplied by M5; "
+              "candidates with no held evidence are reported unresolved and "
+              "the frozen universe is never substituted")
+
 _AUTH_ERRORS = {
     401: ("unauthorized", "bearer token required"),
     403: ("forbidden", "invalid bearer token"),
@@ -619,7 +633,12 @@ def handle_decision_request(payload: Mapping[str, Any],
     # the native decision-api.v1 path below is unchanged.
     question = payload.get("question") if isinstance(payload, dict) else None
     if isinstance(question, dict) and question:
-        return 200, answer_question(question, repo_root=repo_root)
+        scope = payload.get("candidate_scope")
+        if scope is None:
+            return 200, answer_question(question, repo_root=repo_root)
+        # CURVE-08E (DISCOVERY-01 B6): an explicit population was supplied,
+        # so the frozen universe is NOT the ranking population.
+        return 200, _answer_scoped_question(question, scope, repo_root)
 
     state = service_state(repo_root)
     norm = normalize_request(payload)
@@ -821,6 +840,97 @@ _LAWS = [
 
 
 # --- HTTP front door (stdlib; feature-flagged; localhost default) ---------
+
+def _resolve_scope(state: "ServiceState", scope: Mapping[str, Any]
+                   ) -> tuple[list, list]:
+    """Match an explicit M5 population against the frozen evidence universe.
+
+    Exact identities only. Returns ``(chosen_candidates, unresolved)``; an
+    unresolved entry names the candidate and the reason, so nothing M5 sent
+    can vanish without an explanation.
+    """
+    if not isinstance(scope, Mapping):
+        raise ApiError(400, "invalid_request",
+                       "candidate_scope must be an object")
+    if scope.get("schema") != CANDIDATE_SCOPE_SCHEMA:
+        raise ApiError(422, "unsupported_scope_schema",
+                       f"candidate_scope schema {scope.get('schema')!r} "
+                       f"unsupported; expected {CANDIDATE_SCOPE_SCHEMA!r}")
+    if scope.get("population") not in _SCOPE_POPULATIONS:
+        raise ApiError(422, "unsupported_scope_population",
+                       f"candidate_scope population "
+                       f"{scope.get('population')!r} unsupported; "
+                       f"supported: {sorted(_SCOPE_POPULATIONS)}")
+    incoming = scope.get("candidates")
+    if not isinstance(incoming, list):
+        raise ApiError(400, "invalid_request",
+                       "candidate_scope.candidates must be a list")
+    by_norm = {str(k).upper(): v for k, v in state.by_part.items()}
+    chosen: list = []
+    seen: set = set()
+    unresolved: list = []
+    for i, cand in enumerate(incoming):
+        if not isinstance(cand, Mapping):
+            raise ApiError(400, "invalid_request",
+                           f"candidate_scope.candidates[{i}] must be an "
+                           "object")
+        cid = str(cand.get("canonical_id") or "")
+        opn = str(cand.get("opn") or "")
+        if not cid or not opn:
+            raise ApiError(400, "invalid_request",
+                           f"candidate_scope.candidates[{i}] needs "
+                           "canonical_id and opn")
+        match = (state.by_id.get(cid) or state.by_part.get(opn)
+                 or by_norm.get(opn.upper()))
+        if match is None:
+            unresolved.append({
+                "canonical_id": cid, "opn": opn,
+                "manufacturer": cand.get("manufacturer"),
+                "reason": "no_evidence_in_bundle",
+                "detail": "the frozen evidence universe holds no candidate "
+                          "with this identity; reported unresolved, never "
+                          "fuzzy-matched and never replaced"})
+        elif match.candidate_id not in seen:
+            seen.add(match.candidate_id)
+            chosen.append(match)
+    return chosen, unresolved
+
+
+def _answer_scoped_question(question: Mapping[str, Any],
+                            scope: Mapping[str, Any],
+                            repo_root: Path) -> dict:
+    """Rank exactly the supplied population, with full accounting."""
+    state = service_state(repo_root)
+    chosen, unresolved = _resolve_scope(state, scope)
+    answer = answer_question(question, repo_root=repo_root,
+                             candidates=chosen, rows=state.rows)
+    crosswalk = scope.get("crosswalk") or {}
+    answer["candidate_scope"] = {
+        "schema": CANDIDATE_SCOPE_SCHEMA,
+        "population": scope.get("population"),
+        "received": len(scope.get("candidates") or []),
+        "matched": len(chosen),
+        "unresolved": len(unresolved),
+        "unresolved_sample": unresolved[:50],
+        "unresolved_reasons": sorted({u["reason"] for u in unresolved}),
+        "unresolved_truncated": max(0, len(unresolved) - 50),
+        "ranking_strictly_in_cohort": True,
+        "m4_universe_substituted": False,
+        "match_rule": _SCOPE_MATCH_RULE,
+        "m5_releases": scope.get("releases") or {},
+        "m5_crosswalk": {"schema": crosswalk.get("schema"),
+                         "version": crosswalk.get("version"),
+                         "sha256": crosswalk.get("sha256"),
+                         "source": crosswalk.get("source"),
+                         "coverage": crosswalk.get("coverage")},
+        "m5_selection": scope.get("selection") or {},
+        "m4_release": {"evidence_release": answer.get("evidence_release"),
+                       "bundle_sha256": answer.get("bundle_sha256")},
+        "candidates_sha256": scope.get("sha256"),
+        "law": _SCOPE_LAW,
+    }
+    return answer
+
 
 def _client_host(handler) -> Optional[str]:
     addr = getattr(handler, "client_address", None)
