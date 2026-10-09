@@ -1,0 +1,11 @@
+{
+  "http_status": 400,
+  "request": {
+    "category": "power",
+    "requirements": {}
+  },
+  "error": {
+    "code": "invalid_request",
+    "detail": "requirements object with at least one numeric requirement is required"
+  }
+}

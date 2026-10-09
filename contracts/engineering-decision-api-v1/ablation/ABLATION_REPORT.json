@@ -1,0 +1,98 @@
+{
+  "schema": "harness.electronics-ablation.v1",
+  "request": {
+    "category": "power",
+    "subcategory": "buck-converters",
+    "requirements": {
+      "vin_v": 48,
+      "vout_v": 5,
+      "iout_a": 0.5
+    },
+    "comparison": {
+      "metric": "efficiency",
+      "mode": "condition_matched"
+    },
+    "evidence_policy": "machine_verified_advisory",
+    "include_unknowns": true
+  },
+  "arms": {
+    "A_parametric_only": {
+      "latency_s": 0.0004,
+      "eligibility_verdicts": {
+        "cand-f74987515d0df01cd5810778": "eligible",
+        "cand-1a9c0f9250056d04853bf98e": "eligible",
+        "cand-8b3602792a4a9cea8d6f1b09": "eligible",
+        "cand-b50520b51431172ce131ca81": "eligible",
+        "cand-a19e455daad09e97917fa99c": "eligible",
+        "cand-9f01b19f8bac807810d3f486": "eligible",
+        "cand-33525cd39271d045980cfe06": "ineligible",
+        "cand-fba64e961f6cbe3c473fea6a": "ineligible",
+        "cand-a9343715e21c9b386f2542ce": "eligible",
+        "cand-ec351f9f3e5555d65e07592b": "eligible",
+        "cand-65c4c8dd2fa2a90017f0306f": "eligible",
+        "cand-d987e7e38bc4cecdeb5845e0": "ineligible",
+        "cand-ccbcf344bea83a598284c20f": "eligible",
+        "cand-d4e66f729e0feb97fdb5eab0": "ineligible",
+        "cand-9420e1ca6851c1cfaea81f5f": "ineligible",
+        "cand-50b3e3cfeb3fc2f4885e8901": "ineligible",
+        "cand-28c13e11eb2077fcae114154": "eligible",
+        "cand-581c8b96deea762c2d21ac1e": "eligible",
+        "cand-f267b92f67706abb846053ad": "eligible",
+        "cand-ec255579cfbd9bd3d12559b4": "eligible",
+        "cand-f283f3935b82163518c1089c": "unknown"
+      },
+      "evidence_attempted": false,
+      "ranking": null
+    },
+    "B_parametrics_plus_curves": {
+      "latency_s": 0.0051,
+      "eligibility_verdicts": {
+        "cand-f74987515d0df01cd5810778": "eligible",
+        "cand-1a9c0f9250056d04853bf98e": "eligible",
+        "cand-8b3602792a4a9cea8d6f1b09": "eligible",
+        "cand-b50520b51431172ce131ca81": "eligible",
+        "cand-a19e455daad09e97917fa99c": "eligible",
+        "cand-9f01b19f8bac807810d3f486": "eligible",
+        "cand-33525cd39271d045980cfe06": "ineligible",
+        "cand-fba64e961f6cbe3c473fea6a": "ineligible",
+        "cand-a9343715e21c9b386f2542ce": "eligible",
+        "cand-ec351f9f3e5555d65e07592b": "eligible",
+        "cand-65c4c8dd2fa2a90017f0306f": "eligible",
+        "cand-d987e7e38bc4cecdeb5845e0": "ineligible",
+        "cand-ccbcf344bea83a598284c20f": "eligible",
+        "cand-d4e66f729e0feb97fdb5eab0": "ineligible",
+        "cand-9420e1ca6851c1cfaea81f5f": "ineligible",
+        "cand-50b3e3cfeb3fc2f4885e8901": "ineligible",
+        "cand-28c13e11eb2077fcae114154": "eligible",
+        "cand-581c8b96deea762c2d21ac1e": "eligible",
+        "cand-f267b92f67706abb846053ad": "eligible",
+        "cand-ec255579cfbd9bd3d12559b4": "eligible",
+        "cand-f283f3935b82163518c1089c": "unknown"
+      },
+      "evidence_attempted": true,
+      "comparable_candidates": 4,
+      "recall_of_eligible_cohort": 0.2667,
+      "unsupported_comparison_refusals": 20
+    }
+  },
+  "measures": {
+    "candidate_recall_gain": 4,
+    "eligibility_correctness": "identical between arms (curves never participate)",
+    "ranking_changes": "arm A ranks nothing; arm B ranks 4 parts at cross_manufacturer level",
+    "unknown_handling": "identical between arms",
+    "expert_review": "pending \u2014 0/123 rows human-approved; not fabricated"
+  },
+  "release": {
+    "evidence_release_id": "curve-evidence-bundle-v3-5875789dcf3f",
+    "candidate_catalog_release": {
+      "source": "outcited.com services/fae-query/data/aisle_parts/power-management/records.jsonl",
+      "source_sha256": "9b5d85603b69e884239595d263087fea84ba1b3756ed249ecc9ee8a03a4a17e4",
+      "frozen_at": "CURVE-08 R1",
+      "rows": 16
+    },
+    "comparator_fingerprint": "harness.electronics-curve_evidence@curve/07e-supply: condition_compatibility(sweep-law, legend-ambiguity, envelope-resolution) + query_operating_point(bounded linear/log10) + significance(variant-spread law); parity anchor for M4's vendored copy at curve-evidence-bundle-v2-3b5658b629cc",
+    "bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+    "decision_contract_version": "1.0.0",
+    "decision_schema": "harness.electronics-decision-api.v1"
+  }
+}

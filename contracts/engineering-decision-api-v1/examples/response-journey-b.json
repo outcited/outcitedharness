@@ -1,0 +1,4257 @@
+{
+  "schema": "harness.electronics-decision-api.v1",
+  "decision_contract_version": "1.0.0",
+  "request_id": "b14308c81e3ff594",
+  "release": {
+    "evidence_release_id": "curve-evidence-bundle-v3-5875789dcf3f",
+    "candidate_catalog_release": {
+      "source": "outcited.com services/fae-query/data/aisle_parts/power-management/records.jsonl",
+      "source_sha256": "9b5d85603b69e884239595d263087fea84ba1b3756ed249ecc9ee8a03a4a17e4",
+      "frozen_at": "CURVE-08 R1",
+      "rows": 16
+    },
+    "comparator_fingerprint": "harness.electronics-curve_evidence@curve/07e-supply: condition_compatibility(sweep-law, legend-ambiguity, envelope-resolution) + query_operating_point(bounded linear/log10) + significance(variant-spread law); parity anchor for M4's vendored copy at curve-evidence-bundle-v2-3b5658b629cc",
+    "bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+    "decision_contract_version": "1.0.0",
+    "decision_schema": "harness.electronics-decision-api.v1"
+  },
+  "question": {
+    "category": "power",
+    "subcategory": "buck",
+    "requirements": {
+      "vin_min": 48.0,
+      "vin_max": 48.0,
+      "vout": 5.0,
+      "iout_min": 3.0
+    },
+    "comparison_conditions": {
+      "vin_v": 48.0,
+      "vout_v": 5.0
+    },
+    "metric": "efficiency",
+    "operating_point": {
+      "x": 3.0,
+      "unit": "A"
+    },
+    "evidence_policy": "machine_verified_advisory",
+    "evidence_mode": "parametrics_plus_curves",
+    "include_unknowns": true
+  },
+  "counts": {
+    "total_candidates": 21,
+    "hard_eligible": 4,
+    "hard_ineligible": 16,
+    "hard_unknown": 1,
+    "with_comparable_evidence": 2,
+    "with_noncomparable_evidence": 1,
+    "missing_evidence": 2,
+    "pending_human_verification": 11,
+    "evidence_rows_attached": 123,
+    "partitions": "mutually exclusive: hard_eligible | hard_ineligible | hard_unknown (one verdict per candidate at one grain). Overlapping evidence status counters (with_comparable_evidence, with_noncomparable_evidence, missing_evidence, pending_human_verification) describe evidence attachment and review state and MAY coincide with any verdict; a candidate can be comparable and still pending human review",
+    "evidence_attempted": true
+  },
+  "candidates": [
+    {
+      "candidate_id": "cand-f74987515d0df01cd5810778",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LM2592",
+      "device": "LM2592HV",
+      "opn": "LM2592HV",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 60.0,
+            "candidate": "cand-f74987515d0df01cd5810778",
+            "part": "LM2592HV",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM2592HV",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm2592hv",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-f74987515d0df01cd5810778",
+            "part": "LM2592HV",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM2592HV",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm2592hv",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 57.0,
+            "candidate": "cand-f74987515d0df01cd5810778",
+            "part": "LM2592HV",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM2592HV",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm2592hv",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 2.0,
+            "candidate": "cand-f74987515d0df01cd5810778",
+            "part": "LM2592HV",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM2592HV",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm2592hv",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 2.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LM2592HV",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-1a9c0f9250056d04853bf98e",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LM5005",
+      "device": "LM5005",
+      "opn": "LM5005",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 75.0,
+            "candidate": "cand-1a9c0f9250056d04853bf98e",
+            "part": "LM5005",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5005",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5005",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 7.0,
+            "candidate": "cand-1a9c0f9250056d04853bf98e",
+            "part": "LM5005",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5005",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5005",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 70.0,
+            "candidate": "cand-1a9c0f9250056d04853bf98e",
+            "part": "LM5005",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5005",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5005",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 2.5,
+            "candidate": "cand-1a9c0f9250056d04853bf98e",
+            "part": "LM5005",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 2.5 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5005",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5005",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 2.5 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LM5005",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-8b3602792a4a9cea8d6f1b09",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LM5161",
+      "device": "LM5161",
+      "opn": "LM5161",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 100.0,
+            "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+            "part": "LM5161",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+            "part": "LM5161",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 92.0,
+            "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+            "part": "LM5161",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 1.0,
+            "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+            "part": "LM5161",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 1.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 15,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LM5161",
+            "authority": "catalog_T3"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-92906b1690d609b0e0b58a76b47f7da5",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-1215be5628cd6db70dadaeae310a7afd",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-16f0696c93fa37ccab5576ccdeaaa548",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-89bcff093ad73c461edfb14d5e4b5f17",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-a697319a16d26592db2cc14cf6843bd0",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-dbfec7a0dbbdc3b4885ed95e6d6a00aa",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-bb13db2cc9044118e2086bb88af5eca3",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-b14f6273bafcf9496d38cd9261f8567c",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-ebf916fae9b0236aa43b80cc97a23291",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-14f99cc341caf8aa21510060a1c9fd93",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-37d669688ae8071fc77676730b5bf620",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-957457e0f8ced4d376b5bd93cfb29a69",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-5fb10c460c14465ce963712c7ecfc9be",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-4d9c4a937dbccd6b0f99e80eaaf3b319",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-4f5ade4cd8044665c797a482b7c5ebc5",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-b50520b51431172ce131ca81",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LM5161",
+      "device": "LM5161-Q1",
+      "opn": "LM5161-Q1",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 100.0,
+            "candidate": "cand-b50520b51431172ce131ca81",
+            "part": "LM5161-Q1",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-b50520b51431172ce131ca81",
+            "part": "LM5161-Q1",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 92.0,
+            "candidate": "cand-b50520b51431172ce131ca81",
+            "part": "LM5161-Q1",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 1.0,
+            "candidate": "cand-b50520b51431172ce131ca81",
+            "part": "LM5161-Q1",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5161-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5161-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 1.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LM5161-Q1",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-a19e455daad09e97917fa99c",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LM5164",
+      "device": "LM5164",
+      "opn": "LM5164",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 100.0,
+            "candidate": "cand-a19e455daad09e97917fa99c",
+            "part": "LM5164",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 6.0,
+            "candidate": "cand-a19e455daad09e97917fa99c",
+            "part": "LM5164",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 90.0,
+            "candidate": "cand-a19e455daad09e97917fa99c",
+            "part": "LM5164",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 1.0,
+            "candidate": "cand-a19e455daad09e97917fa99c",
+            "part": "LM5164",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 1.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LM5164",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-9f01b19f8bac807810d3f486",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LM5164",
+      "device": "LM5164-Q1",
+      "opn": "LM5164-Q1",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 100.0,
+            "candidate": "cand-9f01b19f8bac807810d3f486",
+            "part": "LM5164-Q1",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 6.0,
+            "candidate": "cand-9f01b19f8bac807810d3f486",
+            "part": "LM5164-Q1",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 90.0,
+            "candidate": "cand-9f01b19f8bac807810d3f486",
+            "part": "LM5164-Q1",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 1.0,
+            "candidate": "cand-9f01b19f8bac807810d3f486",
+            "part": "LM5164-Q1",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LM5164-Q1",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lm5164-q1",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 1.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LM5164-Q1",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-33525cd39271d045980cfe06",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LMR3361",
+      "device": "LMR33610",
+      "opn": "LMR33610",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 36.0,
+            "candidate": "cand-33525cd39271d045980cfe06",
+            "part": "LMR33610",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "VIN rating 36.0 V must be >= required 48.0 V",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR33610",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr33610",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 3.8,
+            "candidate": "cand-33525cd39271d045980cfe06",
+            "part": "LMR33610",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR33610",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr33610",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 24.0,
+            "candidate": "cand-33525cd39271d045980cfe06",
+            "part": "LMR33610",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR33610",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr33610",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 1.0,
+            "candidate": "cand-33525cd39271d045980cfe06",
+            "part": "LMR33610",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR33610",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr33610",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "VIN rating 36.0 V must be >= required 48.0 V; rated continuous output 1.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 12,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LMR33610",
+            "authority": "catalog_T3"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-bf2a4ce56822bc0e94db4c37884c08ce",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3f7bf1551bbf803bbd303f02d5e297bd",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-374453b660e64bef15eae2c0d4a15ed8",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3ac363603af06a5046d42b58f9330c48",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-65742e8f5fb479b7ef1837ac5d6b692e",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-a4fa3cf122c34b455d07480ff0f089b3",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-66dc98e65c35f9474e3b086f17aa53ab",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "output_current_capability_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-752c1feb273f653b3e42e31cd83e8cd4",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "output_current_capability_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-4a6edf73b2927b0f2620fc9e6857403d",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "output_current_capability_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-6a1d7cf4a38f391829140422f59575bc",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "output_current_capability_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-b34210682e2f0d46e6f1d878ea69bb1b",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "output_current_capability_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-4411362f846915da13b73796e02d2165",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "output_current_capability_vs_input_voltage"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-fba64e961f6cbe3c473fea6a",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LMR3650",
+      "device": "LMR36502",
+      "opn": "LMR36502",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 65.0,
+            "candidate": "cand-fba64e961f6cbe3c473fea6a",
+            "part": "LMR36502",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR36502",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr36502",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 3.0,
+            "candidate": "cand-fba64e961f6cbe3c473fea6a",
+            "part": "LMR36502",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR36502",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr36502",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 16.0,
+            "candidate": "cand-fba64e961f6cbe3c473fea6a",
+            "part": "LMR36502",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR36502",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr36502",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 0.15,
+            "candidate": "cand-fba64e961f6cbe3c473fea6a",
+            "part": "LMR36502",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 0.15 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR36502",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr36502",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 0.15 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 5,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LMR36502",
+            "authority": "catalog_T3"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-af915a30a3152c0dd49141e9b192285c",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-95eadb208e8e4b37faa0df0e04436112",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3f9d5afc541f68bcddacff7613b18969",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-dd593ae8a55dab7726b8fabd653e67ae",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-2b6a908f6f833d626dcf4635b2366058",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_temperature"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-a9343715e21c9b386f2542ce",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LMR3801",
+      "device": "LMR38010",
+      "opn": "LMR38010",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 80.0,
+            "candidate": "cand-a9343715e21c9b386f2542ce",
+            "part": "LMR38010",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38010",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38010",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.2,
+            "candidate": "cand-a9343715e21c9b386f2542ce",
+            "part": "LMR38010",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38010",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38010",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 75.0,
+            "candidate": "cand-a9343715e21c9b386f2542ce",
+            "part": "LMR38010",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38010",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38010",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 1.0,
+            "candidate": "cand-a9343715e21c9b386f2542ce",
+            "part": "LMR38010",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38010",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38010",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 1.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LMR38010",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-ec351f9f3e5555d65e07592b",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "LMR3802",
+      "device": "LMR38020",
+      "opn": "LMR38020",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 80.0,
+            "candidate": "cand-ec351f9f3e5555d65e07592b",
+            "part": "LMR38020",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38020",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38020",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.2,
+            "candidate": "cand-ec351f9f3e5555d65e07592b",
+            "part": "LMR38020",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38020",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38020",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 75.0,
+            "candidate": "cand-ec351f9f3e5555d65e07592b",
+            "part": "LMR38020",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38020",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38020",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 2.0,
+            "candidate": "cand-ec351f9f3e5555d65e07592b",
+            "part": "LMR38020",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:LMR38020",
+              "datasheet_url": "https://www.ti.com/lit/gpn/lmr38020",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 2.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:LMR38020",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-65c4c8dd2fa2a90017f0306f",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "TPS5416",
+      "device": "TPS54160",
+      "opn": "TPS54160",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 60.0,
+            "candidate": "cand-65c4c8dd2fa2a90017f0306f",
+            "part": "TPS54160",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54160",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54160",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 3.5,
+            "candidate": "cand-65c4c8dd2fa2a90017f0306f",
+            "part": "TPS54160",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54160",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54160",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 58.0,
+            "candidate": "cand-65c4c8dd2fa2a90017f0306f",
+            "part": "TPS54160",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54160",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54160",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 1.5,
+            "candidate": "cand-65c4c8dd2fa2a90017f0306f",
+            "part": "TPS54160",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 1.5 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54160",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54160",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 1.5 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:TPS54160",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-d987e7e38bc4cecdeb5845e0",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "TPS5429",
+      "device": "TPS542941",
+      "opn": "TPS542941",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 18.0,
+            "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+            "part": "TPS542941",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "VIN rating 18.0 V must be >= required 48.0 V",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS542941",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps542941",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+            "part": "TPS542941",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS542941",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps542941",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 7.0,
+            "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+            "part": "TPS542941",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS542941",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps542941",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 2.0,
+            "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+            "part": "TPS542941",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS542941",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps542941",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "VIN rating 18.0 V must be >= required 48.0 V; rated continuous output 2.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 3,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:TPS542941",
+            "authority": "catalog_T3"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-1a1c7e0e0b90ffe0d3e1fa67bfee92f2",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-f7aa4378a7ad3c983989ac74463111ab",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-1251cb131c17477866b43fd44010e51d",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-ccbcf344bea83a598284c20f",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "TPS5436",
+      "device": "TPS54360",
+      "opn": "TPS54360",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "eligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 60.0,
+            "candidate": "cand-ccbcf344bea83a598284c20f",
+            "part": "TPS54360",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54360",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54360",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-ccbcf344bea83a598284c20f",
+            "part": "TPS54360",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54360",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54360",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 58.8,
+            "candidate": "cand-ccbcf344bea83a598284c20f",
+            "part": "TPS54360",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54360",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54360",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 3.5,
+            "candidate": "cand-ccbcf344bea83a598284c20f",
+            "part": "TPS54360",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS54360",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps54360",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": true
+      },
+      "explanation": "all 4 stated hard rules satisfied by ratings evidence",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:TPS54360",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "missing",
+        "rows": 0,
+        "refusals": []
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-d4e66f729e0feb97fdb5eab0",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "TPS548",
+      "device": "TPS548C26",
+      "opn": "TPS548C26",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 16.0,
+            "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+            "part": "TPS548C26",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "VIN rating 16.0 V must be >= required 48.0 V",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS548C26",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps548c26",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.0,
+            "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+            "part": "TPS548C26",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS548C26",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps548c26",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 5.5,
+            "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+            "part": "TPS548C26",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS548C26",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps548c26",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 35.0,
+            "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+            "part": "TPS548C26",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS548C26",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps548c26",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "VIN rating 16.0 V must be >= required 48.0 V",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 24,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:TPS548C26",
+            "authority": "catalog_T3"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-8ff87c61e3c2aaefec5f02feb5aac6dc",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-5d4987051e5f1d3fe0b57209e195629a",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3a1453f3a76cb747f0eda8c55cd6dae1",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-45dfa68a3b1ebbd560db11027d6a7d0b",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-863312be3ffacb7e8647bac94410d574",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-b5688c27e31a85b457f38dcb699e8b3f",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-186cc4bf177a85556df222e65848bffb",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-693de5b989eb820ce55115eb2b0c1648",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-b620887713e5dd87d43186b0d6ce6f2d",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-0140731a6d181c4e874b932de4f91e6f",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-6ed828ea26cf5364aec942dfd4b7821c",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-01a67edb2cd36f1a75d7c9f5df0a5e43",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-680405535416cb818ea172e13dd0b73a",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-1af3f5ed2db8fa1f5dee509a9b233577",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-74f91e3fa6ea1dfd391cde6310a306c3",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-ff774947a3b1c41459b87063d4d42f52",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-6245945fec4898d725d049ca2a64e2e2",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-0b92caee20cfe848390ec2e17b2b1b21",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-86af295dd7cab8ac16970f9bf6c2cf18",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-e88e7d739df90930bcf9c2501e12d956",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-20e7752303fc191e54b16ea1758e5bee",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-25c7f69f534b7b88b42971fbbb3edf84",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3b6b5d05c176d4e021bd25211367e53d",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3f3fe061b39c8c14dc39c3b577359712",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "power_dissipation_vs_load"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-9420e1ca6851c1cfaea81f5f",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "TPS5632",
+      "device": "TPS563203",
+      "opn": "TPS563203",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 17.0,
+            "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+            "part": "TPS563203",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "VIN rating 17.0 V must be >= required 48.0 V",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS563203",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps563203",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.2,
+            "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+            "part": "TPS563203",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS563203",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps563203",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 7.0,
+            "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+            "part": "TPS563203",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS563203",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps563203",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 3.0,
+            "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+            "part": "TPS563203",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS563203",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps563203",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "VIN rating 17.0 V must be >= required 48.0 V",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [],
+        "human_approved": false,
+        "curve_evidence_rows": 0,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:TPS563203",
+            "authority": "catalog_T3"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-50b3e3cfeb3fc2f4885e8901",
+      "manufacturer": "ti",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "DC/DC converters",
+      "series": "TPS6283",
+      "device": "TPS628302",
+      "opn": "TPS628302",
+      "grain": "opn",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 5.5,
+            "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+            "part": "TPS628302",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "VIN rating 5.5 V must be >= required 48.0 V",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS628302",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps628302",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 2.25,
+            "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+            "part": "TPS628302",
+            "family": "DC/DC converters",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS628302",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps628302",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": [
+              0.5,
+              4.5
+            ],
+            "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+            "part": "TPS628302",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "output capability [0.5, 4.5] must cover required 5.0 V",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS628302",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps628302",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 2.0,
+            "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+            "part": "TPS628302",
+            "family": "DC/DC converters",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "catalog_T3",
+              "record_id": "part:ti.com:TPS628302",
+              "datasheet_url": "https://www.ti.com/lit/gpn/tps628302",
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "VIN rating 5.5 V must be >= required 48.0 V; output capability [0.5, 4.5] must cover required 5.0 V; rated continuous output 2.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "catalog_T3",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 16,
+        "evidence_refs": [
+          {
+            "kind": "catalog",
+            "grade": "evidence",
+            "record_id": "part:ti.com:TPS628302",
+            "authority": "catalog_T3"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-27fa5a6cd465147f23d04be65b893762",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-d78a3d644a137b6dccc340683c23e4a9",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-4aad27281b8f6e67fda029fb3ab92514",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-047d6898c91067bfdae076536c4ee12a",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-a4b211e26897e27e9d84be8d7f335d06",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-d75bfa330068f2e24b3b4bdae0ba731a",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-35162d0d8058deef0a1e40da37f29857",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-42e39f50be112beba7e9aba9e03e826f",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-7d6a19a705374eede80c087a8ac17e91",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-f13b8dcf9539101fcca7089b0bc98904",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3ea856250e843a3419bc4fb43e0c9ab4",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-59fa4b1e2dafc1ef29e795e7f57505da",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-825cae7ddcb37885b457240efddc40d9",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-5d11773e9f108df421c6c5799ca8318c",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-f067164591d2c0b7468cab6c22bdcf4c",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-46f183da0ee509eb018e2ec11df381ab",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "supply_current_vs_input_voltage"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-28c13e11eb2077fcae114154",
+      "manufacturer": "vishay",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "SiC46x",
+      "series": "SiC461",
+      "device": "SiC461",
+      "opn": null,
+      "grain": "device",
+      "hard_eligibility": {
+        "verdict": "eligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 60.0,
+            "candidate": "cand-28c13e11eb2077fcae114154",
+            "part": "SiC461",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-28c13e11eb2077fcae114154",
+            "part": "SiC461",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 5.0,
+            "candidate": "cand-28c13e11eb2077fcae114154",
+            "part": "SiC461",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 10.0,
+            "candidate": "cand-28c13e11eb2077fcae114154",
+            "part": "SiC461",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "device_rating",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
+            }
+          }
+        ],
+        "parametric_ok": true
+      },
+      "explanation": "all 4 stated hard rules satisfied by ratings evidence",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "datasheet_header_quote",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 7,
+        "evidence_refs": [
+          {
+            "kind": "admission_packet",
+            "grade": "evidence",
+            "authority": "datasheet_header_quote",
+            "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-5b73b5ebde8c0fe9db1badda5f73c7a4",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-2f18767e2ea555843e2b9c14defa3f1a",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-214a8be75c0ffc2980cbe42a72230132",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-279c9b584fa37bb6b111a1d42c701ef5",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "case_temperature_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-c51f912deecf71de0fbf73b4c919bcd5",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "case_temperature_vs_load"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "non_comparable",
+        "rows": 5,
+        "refusals": [
+          {
+            "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+            "reason": "legend_ambiguity"
+          },
+          {
+            "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+            "reason": "legend_ambiguity"
+          },
+          {
+            "evidence_id": "curve-5b73b5ebde8c0fe9db1badda5f73c7a4",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-2f18767e2ea555843e2b9c14defa3f1a",
+            "reason": "condition_mismatch"
+          }
+        ]
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-581c8b96deea762c2d21ac1e",
+      "manufacturer": "vishay",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "SiC46x",
+      "series": "SiC462",
+      "device": "SiC462",
+      "opn": null,
+      "grain": "device",
+      "hard_eligibility": {
+        "verdict": "eligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 60.0,
+            "candidate": "cand-581c8b96deea762c2d21ac1e",
+            "part": "SiC462",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-581c8b96deea762c2d21ac1e",
+            "part": "SiC462",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 5.0,
+            "candidate": "cand-581c8b96deea762c2d21ac1e",
+            "part": "SiC462",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 6.0,
+            "candidate": "cand-581c8b96deea762c2d21ac1e",
+            "part": "SiC462",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "device_rating",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+            }
+          }
+        ],
+        "parametric_ok": true
+      },
+      "explanation": "all 4 stated hard rules satisfied by ratings evidence",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "datasheet_header_quote",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 7,
+        "evidence_refs": [
+          {
+            "kind": "admission_packet",
+            "grade": "evidence",
+            "authority": "datasheet_header_quote",
+            "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-5c807b48ee14995da881785195ec0651",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-29d5ab880c248c38873de631bd685fa1",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-2bb878bfadee6675513e4ae88080aca9",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-bdf33617a2723aa5a45e5c25ab700344",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "case_temperature_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-afe9caba4402aa070d9b62512a63262f",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "case_temperature_vs_load"
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "comparable",
+        "rows": 5,
+        "refusals": [
+          {
+            "evidence_id": "curve-29d5ab880c248c38873de631bd685fa1",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-2bb878bfadee6675513e4ae88080aca9",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-cc747bc4f891734f992b5540ba49aaf9",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-ac89f7a44edaab1572c0aa348333f553",
+            "reason": "legend_ambiguity"
+          }
+        ]
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-f267b92f67706abb846053ad",
+      "manufacturer": "vishay",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "SiC46x",
+      "series": "SiC463",
+      "device": "SiC463",
+      "opn": null,
+      "grain": "device",
+      "hard_eligibility": {
+        "verdict": "eligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 60.0,
+            "candidate": "cand-f267b92f67706abb846053ad",
+            "part": "SiC463",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-f267b92f67706abb846053ad",
+            "part": "SiC463",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 5.0,
+            "candidate": "cand-f267b92f67706abb846053ad",
+            "part": "SiC463",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 4.0,
+            "candidate": "cand-f267b92f67706abb846053ad",
+            "part": "SiC463",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "device_rating",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)"
+            }
+          }
+        ],
+        "parametric_ok": true
+      },
+      "explanation": "all 4 stated hard rules satisfied by ratings evidence",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "datasheet_header_quote",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 12,
+        "evidence_refs": [
+          {
+            "kind": "admission_packet",
+            "grade": "evidence",
+            "authority": "datasheet_header_quote",
+            "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-739161096240deb07c3e870c2187eb77",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-87ca0312bf27aaa7bd43014dccb1ab01",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-76d37962f72527efa6004ff8a894639b",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-af486b741d969d2a7fd14f8d6658c772",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-d2487e7819054a52ad40cc1849443bef",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-9d94e70bc85e7243e91aef54817c791c",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-5567eca7936b6ea1f2a137025b2b2fce",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-c7b2d232869d82fb1b00a5b2a3477542",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-9c22e23de0b7e6978b159d5467fc1587",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "case_temperature_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-ba0c8ccbf1e30b49a885a466afbdfb90",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "case_temperature_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-b12391de3abcc357f9fa90d11872e751",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "comparable",
+        "rows": 9,
+        "refusals": [
+          {
+            "evidence_id": "curve-739161096240deb07c3e870c2187eb77",
+            "reason": "x outside the plotted support; extrapolation requires a separately approved engineering model"
+          },
+          {
+            "evidence_id": "curve-87ca0312bf27aaa7bd43014dccb1ab01",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-76d37962f72527efa6004ff8a894639b",
+            "reason": "condition_mismatch"
+          },
+          {
+            "evidence_id": "curve-af486b741d969d2a7fd14f8d6658c772",
+            "reason": "condition_mismatch"
+          }
+        ]
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-ec255579cfbd9bd3d12559b4",
+      "manufacturer": "vishay",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "SiC46x",
+      "series": "SiC464",
+      "device": "SiC464",
+      "opn": null,
+      "grain": "device",
+      "hard_eligibility": {
+        "verdict": "ineligible",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": 60.0,
+            "candidate": "cand-ec255579cfbd9bd3d12559b4",
+            "part": "SiC464",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": 4.5,
+            "candidate": "cand-ec255579cfbd9bd3d12559b4",
+            "part": "SiC464",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": 5.0,
+            "candidate": "cand-ec255579cfbd9bd3d12559b4",
+            "part": "SiC464",
+            "family": "SiC46x",
+            "verdict": "eligible",
+            "evidence": {
+              "kind": "admission_packet",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": 2.0,
+            "candidate": "cand-ec255579cfbd9bd3d12559b4",
+            "part": "SiC464",
+            "family": "SiC46x",
+            "verdict": "ineligible",
+            "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+            "evidence": {
+              "kind": "device_rating",
+              "grade": "evidence",
+              "authority": "datasheet_header_quote",
+              "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "rated continuous output 2.0 A must be >= required 3.0 A",
+      "missing_ratings": [],
+      "evidence_quality": {
+        "source_authority": "datasheet_header_quote",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 7,
+        "evidence_refs": [
+          {
+            "kind": "admission_packet",
+            "grade": "evidence",
+            "authority": "datasheet_header_quote",
+            "datasheet_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+            "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-0d872aedf735bb6100a130a276a012b4",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-50dd207627c7e2b5b070e24f0e464c31",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-39e596c63c7b3082eab69d44bd33b955",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-9dd4ccbd9c8e7c14803d07b29653bef9",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-32e212532aa0c2eded0a92bdfe921d85",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-29bbf05fc94f0678e06b0d8cf7968914",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-ed16c61c57576bbea31b90c18bf5f3e5",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "not_evaluated",
+        "reason": "ineligible candidates never consult curves"
+      },
+      "membership": null
+    },
+    {
+      "candidate_id": "cand-f283f3935b82163518c1089c",
+      "manufacturer": "texas_instruments",
+      "category": "power",
+      "subcategory": "buck",
+      "family": "TPS563206",
+      "series": null,
+      "device": null,
+      "opn": null,
+      "grain": "family",
+      "hard_eligibility": {
+        "verdict": "unknown",
+        "rules": [
+          {
+            "rule": "vin_min",
+            "scope": "maximum input voltage rating",
+            "required": 48.0,
+            "rated": null,
+            "candidate": "cand-f283f3935b82163518c1089c",
+            "part": null,
+            "family": "TPS563206",
+            "verdict": "unknown",
+            "reason": "rating absent \u2014 unknown is never elimination",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "curve_evidence",
+              "record_id": null,
+              "datasheet_url": null,
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vin_max",
+            "scope": "minimum input operating voltage",
+            "required": 48.0,
+            "rated": null,
+            "candidate": "cand-f283f3935b82163518c1089c",
+            "part": null,
+            "family": "TPS563206",
+            "verdict": "unknown",
+            "reason": "rating absent \u2014 unknown is never elimination",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "curve_evidence",
+              "record_id": null,
+              "datasheet_url": null,
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "vout",
+            "scope": "output voltage capability",
+            "required": 5.0,
+            "rated": null,
+            "candidate": "cand-f283f3935b82163518c1089c",
+            "part": null,
+            "family": "TPS563206",
+            "verdict": "unknown",
+            "reason": "rating absent \u2014 unknown is never elimination",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "curve_evidence",
+              "record_id": null,
+              "datasheet_url": null,
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          },
+          {
+            "rule": "iout_min",
+            "scope": "rated continuous output current",
+            "required": 3.0,
+            "rated": null,
+            "candidate": "cand-f283f3935b82163518c1089c",
+            "part": null,
+            "family": "TPS563206",
+            "verdict": "unknown",
+            "reason": "rating absent \u2014 unknown is never elimination",
+            "evidence": {
+              "kind": "catalog_slice",
+              "grade": "evidence",
+              "authority": "curve_evidence",
+              "record_id": null,
+              "datasheet_url": null,
+              "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+            }
+          }
+        ],
+        "parametric_ok": false
+      },
+      "explanation": "electrically unconfirmed \u2014 missing ratings: vin_min, vin_max, vout, iout_min (unknown is never elimination)",
+      "missing_ratings": [
+        "vin_min",
+        "vin_max",
+        "vout",
+        "iout_min"
+      ],
+      "evidence_quality": {
+        "source_authority": "curve_evidence",
+        "adjudication_states": [
+          "human_review_pending"
+        ],
+        "human_approved": false,
+        "curve_evidence_rows": 15,
+        "evidence_refs": [
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-362aac6cc99b65d0042ed7d6605f9f5a",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-5e31e857042843c9541d0778fcb76313",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-a698afc3cab2254b1f8da9ccd422549b",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-cbc6eda72db8ebd8da32d36732bade1e",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-7bdf7658e85b8507777af15b915d18d8",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-684eeddaadada3f4157ac413e5350413",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-2b305ae71860b051ac2df73534b064a0",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-d374208ea0cf98d4878e4e1f5c15fbb3",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-e4fe513da7de1d24e71c922323754422",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-3387869bff6db2abb00b9cd3d3097ef9",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": "efficiency_vs_load"
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-f5cc718ec3e138c3e37c89f64e48183c",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-96ad668dabfd0df3a624c34510c02d4e",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-b29b1ef6b190df440c4341ea89240250",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-e573dc6519ec6e72cde8b06566f3078f",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          },
+          {
+            "kind": "curve",
+            "grade": "evidence",
+            "evidence_id": "curve-f7a2cc3df2be77812b80894f6e5df8ac",
+            "authority": "curve_evidence",
+            "adjudication_state": "human_review_pending",
+            "phenomenon": null
+          }
+        ]
+      },
+      "evidence_availability": {
+        "state": "missing",
+        "rows": 0,
+        "refusals": []
+      },
+      "membership": {
+        "devices": [
+          "TPS563206"
+        ]
+      }
+    }
+  ],
+  "ineligible": [
+    {
+      "candidate_id": "cand-f74987515d0df01cd5810778",
+      "part": "LM2592HV",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 2.0,
+          "candidate": "cand-f74987515d0df01cd5810778",
+          "part": "LM2592HV",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LM2592HV",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lm2592hv",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-1a9c0f9250056d04853bf98e",
+      "part": "LM5005",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 2.5,
+          "candidate": "cand-1a9c0f9250056d04853bf98e",
+          "part": "LM5005",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 2.5 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LM5005",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lm5005",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-8b3602792a4a9cea8d6f1b09",
+      "part": "LM5161",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 1.0,
+          "candidate": "cand-8b3602792a4a9cea8d6f1b09",
+          "part": "LM5161",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LM5161",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lm5161",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-b50520b51431172ce131ca81",
+      "part": "LM5161-Q1",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 1.0,
+          "candidate": "cand-b50520b51431172ce131ca81",
+          "part": "LM5161-Q1",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LM5161-Q1",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lm5161-q1",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-a19e455daad09e97917fa99c",
+      "part": "LM5164",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 1.0,
+          "candidate": "cand-a19e455daad09e97917fa99c",
+          "part": "LM5164",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LM5164",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lm5164",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-9f01b19f8bac807810d3f486",
+      "part": "LM5164-Q1",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 1.0,
+          "candidate": "cand-9f01b19f8bac807810d3f486",
+          "part": "LM5164-Q1",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LM5164-Q1",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lm5164-q1",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-33525cd39271d045980cfe06",
+      "part": "LMR33610",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "vin_min",
+          "scope": "maximum input voltage rating",
+          "required": 48.0,
+          "rated": 36.0,
+          "candidate": "cand-33525cd39271d045980cfe06",
+          "part": "LMR33610",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "VIN rating 36.0 V must be >= required 48.0 V",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LMR33610",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lmr33610",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        },
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 1.0,
+          "candidate": "cand-33525cd39271d045980cfe06",
+          "part": "LMR33610",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LMR33610",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lmr33610",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-fba64e961f6cbe3c473fea6a",
+      "part": "LMR36502",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 0.15,
+          "candidate": "cand-fba64e961f6cbe3c473fea6a",
+          "part": "LMR36502",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 0.15 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LMR36502",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lmr36502",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-a9343715e21c9b386f2542ce",
+      "part": "LMR38010",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 1.0,
+          "candidate": "cand-a9343715e21c9b386f2542ce",
+          "part": "LMR38010",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 1.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LMR38010",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lmr38010",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-ec351f9f3e5555d65e07592b",
+      "part": "LMR38020",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 2.0,
+          "candidate": "cand-ec351f9f3e5555d65e07592b",
+          "part": "LMR38020",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:LMR38020",
+            "datasheet_url": "https://www.ti.com/lit/gpn/lmr38020",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-65c4c8dd2fa2a90017f0306f",
+      "part": "TPS54160",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 1.5,
+          "candidate": "cand-65c4c8dd2fa2a90017f0306f",
+          "part": "TPS54160",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 1.5 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS54160",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps54160",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-d987e7e38bc4cecdeb5845e0",
+      "part": "TPS542941",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "vin_min",
+          "scope": "maximum input voltage rating",
+          "required": 48.0,
+          "rated": 18.0,
+          "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+          "part": "TPS542941",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "VIN rating 18.0 V must be >= required 48.0 V",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS542941",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps542941",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        },
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 2.0,
+          "candidate": "cand-d987e7e38bc4cecdeb5845e0",
+          "part": "TPS542941",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS542941",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps542941",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-d4e66f729e0feb97fdb5eab0",
+      "part": "TPS548C26",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "vin_min",
+          "scope": "maximum input voltage rating",
+          "required": 48.0,
+          "rated": 16.0,
+          "candidate": "cand-d4e66f729e0feb97fdb5eab0",
+          "part": "TPS548C26",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "VIN rating 16.0 V must be >= required 48.0 V",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS548C26",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps548c26",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-9420e1ca6851c1cfaea81f5f",
+      "part": "TPS563203",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "vin_min",
+          "scope": "maximum input voltage rating",
+          "required": 48.0,
+          "rated": 17.0,
+          "candidate": "cand-9420e1ca6851c1cfaea81f5f",
+          "part": "TPS563203",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "VIN rating 17.0 V must be >= required 48.0 V",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS563203",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps563203",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-50b3e3cfeb3fc2f4885e8901",
+      "part": "TPS628302",
+      "family": "DC/DC converters",
+      "grain": "opn",
+      "rules": [
+        {
+          "rule": "vin_min",
+          "scope": "maximum input voltage rating",
+          "required": 48.0,
+          "rated": 5.5,
+          "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+          "part": "TPS628302",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "VIN rating 5.5 V must be >= required 48.0 V",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS628302",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps628302",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        },
+        {
+          "rule": "vout",
+          "scope": "output voltage capability",
+          "required": 5.0,
+          "rated": [
+            0.5,
+            4.5
+          ],
+          "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+          "part": "TPS628302",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "output capability [0.5, 4.5] must cover required 5.0 V",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS628302",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps628302",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        },
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 2.0,
+          "candidate": "cand-50b3e3cfeb3fc2f4885e8901",
+          "part": "TPS628302",
+          "family": "DC/DC converters",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "catalog_slice",
+            "grade": "evidence",
+            "authority": "catalog_T3",
+            "record_id": "part:ti.com:TPS628302",
+            "datasheet_url": "https://www.ti.com/lit/gpn/tps628302",
+            "note": "rating from the frozen provenance-stamped catalog slice (no datasheet quote captured for this axis yet)"
+          }
+        }
+      ]
+    },
+    {
+      "candidate_id": "cand-ec255579cfbd9bd3d12559b4",
+      "part": "SiC464",
+      "family": "SiC46x",
+      "grain": "device",
+      "rules": [
+        {
+          "rule": "iout_min",
+          "scope": "rated continuous output current",
+          "required": 3.0,
+          "rated": 2.0,
+          "candidate": "cand-ec255579cfbd9bd3d12559b4",
+          "part": "SiC464",
+          "family": "SiC46x",
+          "verdict": "ineligible",
+          "reason": "rated continuous output 2.0 A must be >= required 3.0 A",
+          "evidence": {
+            "kind": "device_rating",
+            "grade": "evidence",
+            "authority": "datasheet_header_quote",
+            "quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)"
+          }
+        }
+      ]
+    }
+  ],
+  "unknowns": [
+    {
+      "candidate_id": "cand-f283f3935b82163518c1089c",
+      "part": null,
+      "family": "TPS563206",
+      "grain": "family",
+      "missing_ratings": [
+        "vin_min",
+        "vin_max",
+        "vout",
+        "iout_min"
+      ],
+      "note": "electrically unconfirmed; retained, never eliminated"
+    }
+  ],
+  "comparisons": {
+    "condition_matched": [
+      {
+        "candidate_id": "cand-f267b92f67706abb846053ad",
+        "part": "SiC463",
+        "family": "SiC46x",
+        "manufacturer": "vishay",
+        "series": "VIN = 48 V, L = 15 \u03bcH",
+        "result": {
+          "value": 93.70194601918979,
+          "unit": "%",
+          "metric": "efficiency",
+          "guarantee": false,
+          "typical": true
+        },
+        "operating_conditions": {
+          "x": 3.0,
+          "matched": {
+            "vin_v": 48.0,
+            "vout_v": 5.0
+          }
+        },
+        "eligibility": {
+          "verdict": "eligible",
+          "confirmed_eligible": true
+        },
+        "human_review": {
+          "adjudication_state": "human_review_pending",
+          "advisory": true
+        },
+        "evidence": {
+          "schema": "harness.electronics-evidence-ref.v1",
+          "evidence_id": "curve-f92c2e8c727bb42ac1787ae9800120a8",
+          "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+          "page_1based": 16,
+          "figure_index": 1,
+          "caption": "Fig. 23 - SiC463 Efficiency vs. Output Current,",
+          "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+          "manufacturer": "vishay",
+          "locator": {
+            "page_1based": 16,
+            "figure_index": 1,
+            "series_index": 1
+          },
+          "series_name": "VIN = 48 V, L = 15 \u03bcH",
+          "phenomenon": "efficiency_vs_load",
+          "matched_conditions": {
+            "vin_v": 48.0,
+            "vout_v": 5.0
+          },
+          "evidence_class": "unspecified",
+          "adjudication_state": "human_review_pending",
+          "advisory": true,
+          "guarantee": false,
+          "note": "supporting points for THIS query ride interpolation.supporting_points"
+        },
+        "interpolation": {
+          "method": "linear_interpolation_on_digitized_polyline",
+          "supporting_points": [
+            {
+              "x": 2.992312,
+              "y": 93.706908
+            },
+            {
+              "x": 3.999306,
+              "y": 93.056975
+            }
+          ],
+          "uncertainty": {
+            "method": "vector_reference",
+            "point_error_pct": null,
+            "note": "deterministic geometry from the vector PDF; human sign-off pending",
+            "numeric_quality": {
+              "x_fit_residual_pct_of_span": 0.000288,
+              "y_fit_residual_pct_of_span": 0.000266,
+              "retained_point_fraction": 1.0,
+              "points_outside_axis_pct": 0.0
+            },
+            "human_signed": false,
+            "resolution": 0.05024000000000006,
+            "local_sample_spacing": 1.0069939999999997,
+            "distance_to_nearest_sample": 0.007687999999999917
+          },
+          "limitations": [
+            "typical printed-curve value, not a guarantee",
+            "vendor evaluation configuration unless the series legend states otherwise"
+          ],
+          "source_curve_id": "curve-f92c2e8c727bb42ac1787ae9800120a8"
+        },
+        "comparability": {
+          "level_achieved": "within_family",
+          "levels_present": [
+            "same_configuration",
+            "within_device_configuration",
+            "within_family"
+          ],
+          "families": [
+            "SiC46x"
+          ],
+          "manufacturers": [
+            "vishay"
+          ],
+          "devices": [
+            "SiC462",
+            "SiC463"
+          ]
+        },
+        "thermal": {
+          "candidate": "cand-f267b92f67706abb846053ad",
+          "electrical_rating_present": false,
+          "thermal_curve_evidence": 2,
+          "thermal_feasibility": "curve_evidence_advisory",
+          "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits"
+        }
+      },
+      {
+        "candidate_id": "cand-581c8b96deea762c2d21ac1e",
+        "part": "SiC462",
+        "family": "SiC46x",
+        "manufacturer": "vishay",
+        "series": "VIN = 48 V, L = 8.2 \u03bcH",
+        "result": {
+          "value": 90.76349313628782,
+          "unit": "%",
+          "metric": "efficiency",
+          "guarantee": false,
+          "typical": true
+        },
+        "operating_conditions": {
+          "x": 3.0,
+          "matched": {
+            "vin_v": 48.0,
+            "vout_v": 5.0
+          }
+        },
+        "eligibility": {
+          "verdict": "eligible",
+          "confirmed_eligible": true
+        },
+        "human_review": {
+          "adjudication_state": "human_review_pending",
+          "advisory": true
+        },
+        "evidence": {
+          "schema": "harness.electronics-evidence-ref.v1",
+          "evidence_id": "curve-5c807b48ee14995da881785195ec0651",
+          "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+          "page_1based": 15,
+          "figure_index": 0,
+          "caption": "Fig. 17 - SiC462 Efficiency vs. Output Current,",
+          "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+          "manufacturer": "vishay",
+          "locator": {
+            "page_1based": 15,
+            "figure_index": 0,
+            "series_index": 0
+          },
+          "series_name": "VIN = 48 V, L = 8.2 \u03bcH",
+          "phenomenon": "efficiency_vs_load",
+          "matched_conditions": {
+            "vin_v": 48.0,
+            "vout_v": 5.0
+          },
+          "evidence_class": "unspecified",
+          "adjudication_state": "human_review_pending",
+          "advisory": true,
+          "guarantee": false,
+          "note": "supporting points for THIS query ride interpolation.supporting_points"
+        },
+        "interpolation": {
+          "method": "linear_interpolation_on_digitized_polyline",
+          "supporting_points": [
+            {
+              "x": 2.243496,
+              "y": 87.948243
+            },
+            {
+              "x": 3.754416,
+              "y": 93.570973
+            }
+          ],
+          "uncertainty": {
+            "method": "vector_reference",
+            "point_error_pct": null,
+            "note": "deterministic geometry from the vector PDF; human sign-off pending",
+            "numeric_quality": {
+              "x_fit_residual_pct_of_span": 0.000155,
+              "y_fit_residual_pct_of_span": 0.011732,
+              "retained_point_fraction": 1.0,
+              "points_outside_axis_pct": 0.0
+            },
+            "human_signed": false,
+            "resolution": 0.35835100000000075,
+            "local_sample_spacing": 1.51092,
+            "distance_to_nearest_sample": 0.754416
+          },
+          "limitations": [
+            "typical printed-curve value, not a guarantee",
+            "vendor evaluation configuration unless the series legend states otherwise"
+          ],
+          "source_curve_id": "curve-5c807b48ee14995da881785195ec0651"
+        },
+        "comparability": {
+          "level_achieved": "within_family",
+          "levels_present": [
+            "same_configuration",
+            "within_device_configuration",
+            "within_family"
+          ],
+          "families": [
+            "SiC46x"
+          ],
+          "manufacturers": [
+            "vishay"
+          ],
+          "devices": [
+            "SiC462",
+            "SiC463"
+          ]
+        },
+        "thermal": {
+          "candidate": "cand-581c8b96deea762c2d21ac1e",
+          "electrical_rating_present": false,
+          "thermal_curve_evidence": 2,
+          "thermal_feasibility": "curve_evidence_advisory",
+          "note": "advisory case-temperature curves are measurements on a vendor eval setup, not guaranteed thermal limits"
+        }
+      }
+    ],
+    "comparison_level": {
+      "achieved_level": "within_family",
+      "levels_present": [
+        "same_configuration",
+        "within_device_configuration",
+        "within_family"
+      ],
+      "families": [
+        "SiC46x"
+      ],
+      "manufacturers": [
+        "vishay"
+      ],
+      "devices": [
+        "SiC462",
+        "SiC463"
+      ],
+      "law": "levels are reported, never merged into one comparable flag"
+    },
+    "approximate_scenarios": [],
+    "ranking_note": "entries are ordered by measured value; unknown-eligibility entries are labeled and never counted as confirmed eligible"
+  },
+  "investigation": [
+    {
+      "candidate_id": "cand-ccbcf344bea83a598284c20f",
+      "part": "TPS54360",
+      "situation": "no_curve_evidence_held",
+      "suggestion": "parametrically eligible but no digitized efficiency curve is held for this part; acquisition target for the evidence factory"
+    },
+    {
+      "candidate_id": "cand-28c13e11eb2077fcae114154",
+      "part": "SiC461",
+      "situation": "evidence_not_comparable",
+      "evidence_id": "curve-a7993e073641d5033bb5610b6c710abe",
+      "suggestion": "held curve refused: trace legend ambiguous \u2014 needs cold human review before it can support any comparison"
+    },
+    {
+      "candidate_id": "cand-28c13e11eb2077fcae114154",
+      "part": "SiC461",
+      "situation": "evidence_not_comparable",
+      "evidence_id": "curve-6ea63ddc26932d432a2be4d42e7b610d",
+      "suggestion": "held curve refused: trace legend ambiguous \u2014 needs cold human review before it can support any comparison"
+    },
+    {
+      "candidate_id": "cand-f283f3935b82163518c1089c",
+      "part": null,
+      "situation": "ratings_unknown",
+      "suggestion": "missing ratings keep this candidate unknown \u2014 it is retained for investigation, never eliminated; a datasheet ratings pass would resolve it"
+    }
+  ],
+  "laws": [
+    "hard eligibility precedes every curve comparison; curves never eliminate and never rescue",
+    "missing ratings are unknown, never failure",
+    "typical values never guarantee performance",
+    "interpolation only inside the digitized domain; extrapolation refused with reason",
+    "five comparison levels reported, never merged",
+    "approximate scenarios labeled separately from condition-matched evidence",
+    "candidate identity is independent of document count; evidence rows never inflate candidate counts",
+    "every value is machine-verified advisory until a human approves it",
+    "missing or tampered evidence fails closed; it never masquerades as an empty cohort"
+  ]
+}

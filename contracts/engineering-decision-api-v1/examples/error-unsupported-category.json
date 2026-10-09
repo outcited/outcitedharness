@@ -1,0 +1,14 @@
+{
+  "http_status": 422,
+  "request": {
+    "category": "mcu",
+    "subcategory": "buck-converters",
+    "requirements": {
+      "vin_v": 48
+    }
+  },
+  "error": {
+    "code": "unsupported_category",
+    "detail": "category 'mcu' is not served; supported: ['power']"
+  }
+}

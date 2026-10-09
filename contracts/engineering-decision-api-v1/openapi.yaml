@@ -1,0 +1,315 @@
+openapi: 3.1.0
+info:
+  title: Engineering Decision API (CURVE-08B)
+  version: 1.0.0
+  description: >
+    Evidence-grounded engineering decisions over the frozen CURVE-07E
+    evidence bundle. Hard eligibility is evaluated from datasheet
+    ratings BEFORE any typical curve is consulted; every returned value
+    is machine-verified advisory until a human approves it; every claim
+    resolves to immutable evidence (sha + page + figure + series).
+    Feature-flagged (ENGINEERING_DECISIONS_ENABLED), localhost only.
+    Deterministic: request_id is a hash of the request + release
+    identity; responses carry no wall-clock time.
+servers:
+  - url: http://127.0.0.1:8793
+    description: local harness host (default port; ENGINEERING_DECISIONS_PORT overrides)
+paths:
+  /v1/engineering/decisions:
+    post:
+      summary: Answer one engineering decision question
+      operationId: decide
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DecisionRequest'}
+            examples:
+              journeyA:
+                $ref: '#/components/examples/JourneyA'
+      responses:
+        '200':
+          description: >
+            Decision answer. A zero-candidate or zero-comparison result
+            is a legitimate answer, never an infrastructure error.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DecisionResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/FeatureDisabled'}
+        '422': {$ref: '#/components/responses/Unprocessable'}
+        '500': {$ref: '#/components/responses/FailClosed'}
+  /v1/engineering/evidence/{evidence_id}:
+    get:
+      summary: Resolve one frozen evidence reference to its full row
+      operationId: resolveEvidence
+      parameters:
+        - name: evidence_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Frozen evidence row (locator, points, conditions, status)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/EvidenceResolution'}
+        '404':
+          description: evidence_not_found
+  /v1/engineering/health:
+    get:
+      summary: Feature flag + release identity
+      operationId: health
+      responses:
+        '200':
+          description: service state (never fails on evidence state; reports it)
+components:
+  responses:
+    BadRequest:
+      description: invalid_json | invalid_request | operating_point_required
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    Unauthorized:
+      description: unauthorized (bearer token mismatch)
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    FeatureDisabled:
+      description: feature_disabled | unknown_route
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    Unprocessable:
+      description: >
+        unsupported_category | unsupported_metric | unsupported_condition |
+        unsupported_comparison_mode | unsupported_evidence_policy |
+        unknown_candidate
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+    FailClosed:
+      description: >
+        evidence_source_unavailable | evidence_bundle_tampered |
+        internal_error. A broken source NEVER returns an empty cohort.
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ApiError'}
+  schemas:
+    ApiError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code]
+          properties:
+            code: {type: string}
+            detail: {type: string}
+    DecisionRequest:
+      type: object
+      required: [category, requirements]
+      properties:
+        category:
+          type: string
+          enum: [power]
+        subcategory:
+          type: string
+          description: buck-converters | buck | dc-dc | step-down (normalized to buck)
+        requirements:
+          type: object
+          description: >
+            Physical keys: vin_v (span demand: rated max >= V AND rated
+            min <= V), vout_v, iout_a, temp_max_c. Native rule keys
+            (vin_min, vin_max, iout_min, vout, temp_max) also accepted.
+          additionalProperties: {type: number}
+        comparison:
+          type: object
+          description: >
+            Omit entirely for parametric-only mode (R9 arm A). Present
+            => condition-matched curve evaluation.
+          properties:
+            metric: {type: string, enum: [efficiency]}
+            mode:
+              type: string
+              enum: [condition_matched, approximate, condition_matched+approximate]
+              default: condition_matched
+            operating_point:
+              type: object
+              properties:
+                x: {type: number}
+                unit: {type: string, default: A}
+            conditions:
+              type: object
+              additionalProperties: {type: number}
+        evidence_policy:
+          type: string
+          enum: [machine_verified_advisory]
+          default: machine_verified_advisory
+        include_unknowns: {type: boolean, default: true}
+        cohort:
+          type: array
+          items: {type: string}
+          description: restrict to part names / candidate ids; unknown names are a 422
+    DecisionResponse:
+      type: object
+      required: [schema, decision_contract_version, request_id, release, question, counts, candidates, laws]
+      properties:
+        schema: {const: harness.electronics-decision-api.v1}
+        decision_contract_version: {type: string}
+        request_id: {type: string, description: sha256(canonical request + release identity)[:16]}
+        release: {$ref: '#/components/schemas/ReleaseIdentity'}
+        question: {type: object}
+        counts: {$ref: '#/components/schemas/CandidateCounts'}
+        candidates:
+          type: array
+          items: {$ref: '#/components/schemas/CandidateRecord'}
+        ineligible: {type: array, items: {type: object}}
+        unknowns: {type: array, items: {type: object}}
+        comparisons:
+          type: object
+          description: null in parametric-only mode
+          properties:
+            condition_matched:
+              type: array
+              items: {$ref: '#/components/schemas/ComparisonRecord'}
+            comparison_level:
+              type: object
+              description: five-level vocabulary, never merged
+            approximate_scenarios: {type: array}
+        investigation: {type: array}
+        laws: {type: array, items: {type: string}}
+    ReleaseIdentity:
+      type: object
+      required: [evidence_release_id, bundle_sha256, comparator_fingerprint, decision_contract_version]
+      properties:
+        evidence_release_id: {type: string}
+        candidate_catalog_release:
+          type: object
+          description: frozen provenance-stamped catalog slice identity
+        comparator_fingerprint: {type: string}
+        bundle_sha256: {type: string}
+        decision_contract_version: {type: string}
+    CandidateCounts:
+      type: object
+      description: >
+        hard_eligible | hard_ineligible | hard_unknown are MUTUALLY
+        EXCLUSIVE (one verdict per candidate per grain). Evidence-status
+        counters (with_comparable_evidence, with_noncomparable_evidence,
+        missing_evidence, pending_human_verification) OVERLAP verdicts
+        and each other. Null in parametric-only mode (not attempted).
+      properties:
+        total_candidates: {type: integer}
+        hard_eligible: {type: integer}
+        hard_ineligible: {type: integer}
+        hard_unknown: {type: integer}
+        with_comparable_evidence: {type: [integer, "null"]}
+        with_noncomparable_evidence: {type: [integer, "null"]}
+        missing_evidence: {type: [integer, "null"]}
+        pending_human_verification: {type: [integer, "null"]}
+        evidence_rows_attached: {type: integer}
+        evidence_attempted: {type: boolean}
+        partitions: {type: string}
+    CandidateRecord:
+      type: object
+      required: [candidate_id, grain, hard_eligibility, explanation, evidence_quality]
+      properties:
+        candidate_id: {type: string}
+        manufacturer: {type: [string, "null"]}
+        family: {type: [string, "null"]}
+        device: {type: [string, "null"]}
+        opn: {type: [string, "null"]}
+        grain: {type: string, enum: [opn, device, series, family, category]}
+        hard_eligibility:
+          type: object
+          properties:
+            verdict: {type: string, enum: [eligible, ineligible, unknown]}
+            rules: {type: array}
+            parametric_ok: {type: boolean}
+        explanation: {type: string}
+        missing_ratings: {type: array, items: {type: string}}
+        evidence_quality:
+          type: object
+          properties:
+            source_authority: {type: string}
+            adjudication_states: {type: array}
+            human_approved: {type: boolean}
+            curve_evidence_rows: {type: integer}
+        evidence_availability:
+          type: object
+          description: state not_evaluated for ineligible candidates (curves never consulted)
+        membership:
+          type: [object, "null"]
+          description: family candidates list member devices
+    ComparisonRecord:
+      type: object
+      required: [candidate_id, result, operating_conditions, eligibility, human_review, evidence, interpolation, comparability]
+      properties:
+        candidate_id: {type: string}
+        part: {type: [string, "null"]}
+        result:
+          type: object
+          properties:
+            value: {type: number}
+            unit: {type: [string, "null"]}
+            metric: {type: string}
+            guarantee: {const: false}
+            typical: {const: true}
+        operating_conditions: {type: object}
+        eligibility:
+          type: object
+          description: verdict + confirmed_eligible flag; unknown-eligibility comparisons are always labeled, never counted as confirmed eligible
+        human_review:
+          type: object
+          properties:
+            adjudication_state: {type: string}
+            advisory: {const: true}
+        evidence: {$ref: '#/components/schemas/EvidenceRef'}
+        interpolation:
+          type: object
+          description: method, supporting points, uncertainty, limitations, source curve id
+        comparability:
+          type: object
+          description: achieved level + levels present + families/manufacturers/devices
+    EvidenceRef:
+      type: object
+      description: >
+        Versioned evidence-reference contract. Locators exist only where
+        the frozen row carries them — never manufactured. No filesystem
+        paths cross the wire.
+      required: [evidence_id, document_sha256]
+      properties:
+        schema: {const: harness.electronics-evidence-ref.v1}
+        evidence_id: {type: string}
+        document_sha256: {type: string}
+        document_revision: {type: [string, "null"]}
+        page_1based: {type: integer}
+        figure_index: {type: integer}
+        series_index: {type: [integer, "null"]}
+        caption: {type: [string, "null"]}
+        source_artifact: {type: [string, "null"]}
+        series_name: {type: [string, "null"]}
+        phenomenon: {type: string}
+        original_conditions: {type: object}
+        evidence_class: {type: string}
+        adjudication_state: {type: [string, "null"]}
+        advisory: {const: true}
+        guarantee: {const: false}
+    EvidenceResolution:
+      type: object
+      properties:
+        schema: {const: harness.electronics-evidence-ref.v1}
+        evidence: {$ref: '#/components/schemas/EvidenceRef'}
+        supported_region: {type: object}
+        binding: {type: object}
+        operating_point_query: {type: object}
+  examples:
+    JourneyA:
+      value:
+        category: power
+        subcategory: buck-converters
+        requirements: {vin_v: 48, vout_v: 5, iout_a: 0.5}
+        comparison: {metric: efficiency, mode: condition_matched}
+        evidence_policy: machine_verified_advisory
+        include_unknowns: true

@@ -1,0 +1,14 @@
+{
+  "category": "power",
+  "subcategory": "buck-converters",
+  "requirements": {
+    "vin_v": 24,
+    "vout_v": 3.3,
+    "iout_a": 1.0
+  },
+  "comparison": {
+    "metric": "efficiency"
+  },
+  "evidence_policy": "machine_verified_advisory",
+  "include_unknowns": true
+}

@@ -1,0 +1,20 @@
+{
+  "http_status": 422,
+  "request": {
+    "category": "power",
+    "requirements": {
+      "vin_v": 48
+    },
+    "cohort": [
+      "SiC461",
+      "NOT_A_PART"
+    ]
+  },
+  "error": {
+    "code": "unknown_candidate",
+    "detail": "cohort names candidates that do not exist in the frozen candidate universe",
+    "unknown": [
+      "NOT_A_PART"
+    ]
+  }
+}

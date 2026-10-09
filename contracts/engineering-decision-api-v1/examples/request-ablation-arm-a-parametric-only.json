@@ -1,0 +1,10 @@
+{
+  "category": "power",
+  "subcategory": "buck-converters",
+  "requirements": {
+    "vin_v": 48,
+    "vout_v": 5,
+    "iout_a": 0.5
+  },
+  "evidence_policy": "machine_verified_advisory"
+}

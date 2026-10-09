@@ -1,0 +1,13 @@
+{
+  "lane": "curve-08b-decision-api",
+  "branch": "curve/08b-decision-api",
+  "base_commit": "23b176343abf836d208680f66295cb30ed4825c6",
+  "owner": "M4",
+  "prd": "PRD-CURVE-08B",
+  "worktree": "/Users/samsonkim/Dev/Harnessv1-curve08b",
+  "rules": [
+    "feature-flagged; localhost only; no production routing changes",
+    "no push, no merge until separately authorized",
+    "FACET-02 (harness/search) stays foreign; never imported here"
+  ]
+}
