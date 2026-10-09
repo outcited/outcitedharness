@@ -459,3 +459,58 @@ def test_series_extraction_cases():
         is None
     # unknown family label -> None
     assert extract_series("NoSuchFamily", "X C7") is None
+
+
+def test_promote_packet_child_kind_scoping(tmp_path):
+    """Edge packets promote ONLY the scoped child kind: family->series
+    edges verify while the family's 2 opn memberships stay untouched."""
+    icon = _icon(tmp_path)
+    # family with one opn membership and one series edge
+    fam = _family_pair(icon, opn="PART-A", family="CoolMOS")
+    sid = identity.ensure_identity(icon, "series", "CoolMOS C7",
+                                   manufacturer_id="mfr:infineon",
+                                   authority="designator in quote")
+    icon.execute("INSERT OR IGNORE INTO identities VALUES"
+                 " ('opn:PART-A','opn','PART-A',NULL,'catalog','proposed',1.0)")
+    identity.add_relationship(
+        icon, fam, sid, "contains", authority="C7 printed",
+        source_sha256="f" * 64,
+        source_locator={"page": 1, "quote": "600V CoolMOS C7 Power Device"},
+        norm_rule="series_designator_v1")
+    # build an edges-only packet
+    packet = {
+        "schema": "harness.facet03-admission-packet.v1",
+        "family": {"identity_id": fam, "label": "CoolMOS",
+                   "manufacturer_id": "mfr:infineon",
+                   "identity_authority": "edges"},
+        "status_of_all_memberships": "proposed",
+        "member_count": 1,
+        "members": [{"parent_id": fam, "child_id": sid,
+                     "series_label": "CoolMOS C7", "status": "proposed",
+                     "norm_rule": "series_designator_v1", "confidence": 0.85,
+                     "source_sha256": "f" * 64, "page": 1,
+                     "quoted_family_identifier":
+                         "600V CoolMOS C7 Power Device"}],
+        "exceptions": [], "exception_count": 0}
+    path = tmp_path / "edges.json"
+    path.write_bytes(json.dumps(packet, indent=2, sort_keys=True).encode())
+    import hashlib as hl
+    sha = hl.sha256(path.read_bytes()).hexdigest()
+    # unscoped would drift-refuse (opn membership not in packet)
+    with pytest.raises(ValueError, match="drift"):
+        identity.promote_packet(icon, family_id=fam, packet_path=path,
+                                expected_packet_sha256=sha,
+                                expected_population=1, approval_ref="REF")
+    # scoped promotes exactly the edge
+    r = identity.promote_packet(icon, family_id=fam, packet_path=path,
+                                expected_packet_sha256=sha,
+                                expected_population=1, approval_ref="REF",
+                                child_kind="series")
+    assert r["memberships_promoted"] == 1
+    edge = icon.execute("SELECT status FROM relationships WHERE child_id=?",
+                        (sid,)).fetchone()
+    assert edge["status"] == "verified"
+    memb = icon.execute(
+        "SELECT status FROM relationships WHERE child_id='opn:PART-A'"
+    ).fetchone()
+    assert memb["status"] == "proposed"   # membership untouched

@@ -56,3 +56,34 @@ Blocked on: owner decision to open the dimension + vocabulary review.
 1. Printed-OPN-identity as alternative content linkage for re-key (item 2).
 2. OCR-substrate queue census for needs_ocr documents with vision-extracted
    claims (sizes the IPP034NE7N3 G class across the corpus).
+
+## Docket state after owner decisions 2026-10-09 (executed)
+
+- **Item 1 DONE**: 15/15 family→series edges promoted via hash-bound
+  `promote_packet(child_kind="series")` — scoped variant added + tested
+  (unscoped promotion drift-refuses edge packets; family memberships
+  untouched: 626 verified before and after). Ref
+  `FACET03-SERIES-EDGES-OWNER-APPROVAL-2026-10-09-a56e177d`. Registry:
+  878 relationships, all verified, 0 proposed. Decision record:
+  `ADMISSION_DECISION_SERIES_EDGES_2026-10-09.json`.
+- **Item 2 split by owner ruling**:
+  - `rohm-RSH065N06` **RE-KEYED** under the printed-OPN-identity rule
+    (owner-approved one-liner): 2 claims + 1 part_source + 1 part onto
+    fdfe0721…, quote integrity byte-identical, backup
+    `catalog.db.bak-pre-rohm-rekey-20261009T191554Z`; provenance_map
+    annotated `pairs_manifest+printed_opn_identity`, quote counts NOT
+    falsified (still 0/2 — the rule is identity linkage, not quote
+    verification). Search index aligned (3 units → real sha under
+    `+prov2-opnid`; 1 page-graded, 2 honestly discovery-only).
+    Remaining unhashed claims: 328.
+  - `infineon-IPP034NE7N3 G` **NOT re-keyed** (owner: repair first).
+    OCR/vision repair STAGED as
+    `facet03-packets/REPAIR_SPEC_infineon-IPP034NE7N3-G.json` (bounded:
+    1 document, 4 claims; needs vision-lane job submission approval).
+    Hygiene finding: catalog already clean (`IPP034NE7N3`); the trailing
+    " G" lives only in the filename-derived doc stem — no catalog mutation
+    performed or needed.
+- Modeling gap noted (tidiness, unactioned): OPN children exist as
+  relationship child_ids without `identities` rows; snapshot/crosswalk
+  unaffected. v2 candidate.
+- Items 3 (BQ reacquisition) and M4 parity: unchanged, waiting external.

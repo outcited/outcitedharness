@@ -179,23 +179,23 @@ def promote(con: sqlite3.Connection, identity_id: str, *,
 def promote_packet(con: sqlite3.Connection, *, family_id: str,
                    packet_path, expected_packet_sha256: str,
                    expected_population: int, approval_ref: str,
-                   decision_text: str = "") -> dict:
+                   decision_text: str = "",
+                   child_kind: str | None = None) -> dict:
     """Owner-grade promotion: the signature binds to PACKET BYTES.
+
+    child_kind scopes the drift check and the promotion to relationships
+    whose CHILD identity has that kind (e.g. "series" for family->series
+    hierarchy-edge packets, so the 626 opn memberships of the same parent
+    are neither compared nor touched). None = all contains-relationships
+    (the original membership-packet behavior).
 
     Fails closed unless ALL hold at promotion time:
       1. the packet file re-hashes to expected_packet_sha256;
       2. the packet's family identity_id == family_id;
       3. packet member_count == expected_population;
       4. the packet's member set EXACTLY equals the currently proposed
-         relationships for that family (child id + source sha + page +
-         quote) — no drift, no extras, no missing;
+         in-scope relationships (child id + source sha + locator);
       5. approval_ref is non-empty.
-
-    Only then are the family identity and exactly those memberships set to
-    `verified`, and the approval (ref + packet hash + population + decision
-    text) is recorded immutably in meta. This converts "I approve this
-    family" into "I approve exactly these bytes defining exactly these
-    memberships" (owner directive 2026-10-09).
     """
     import hashlib as _hashlib
     if not (approval_ref or "").strip():
@@ -216,10 +216,18 @@ def promote_packet(con: sqlite3.Connection, *, family_id: str,
         raise ValueError(
             f"population mismatch: expected {expected_population}, packet"
             f" carries {len(members)}/{packet.get('member_count')}")
-    rows = con.execute(
-        "SELECT child_id, source_sha256, source_locator, status,"
-        " conflict_status FROM relationships WHERE parent_id=?"
-        " AND rel_type='contains'", (family_id,)).fetchall()
+    if child_kind is not None:
+        rows = con.execute(
+            "SELECT r.child_id, r.source_sha256, r.source_locator, r.status,"
+            " r.conflict_status FROM relationships r"
+            " JOIN identities ci ON ci.identity_id = r.child_id"
+            " WHERE r.parent_id=? AND r.rel_type='contains' AND ci.kind=?",
+            (family_id, child_kind)).fetchall()
+    else:
+        rows = con.execute(
+            "SELECT child_id, source_sha256, source_locator, status,"
+            " conflict_status FROM relationships WHERE parent_id=?"
+            " AND rel_type='contains'", (family_id,)).fetchall()
     db_set = {(r["child_id"], r["source_sha256"],
                json.dumps(json.loads(r["source_locator"]), sort_keys=True))
               for r in rows}
@@ -240,22 +248,31 @@ def promote_packet(con: sqlite3.Connection, *, family_id: str,
         raise ValueError(
             f"conflicting memberships present for {len(conflicting)}"
             " children — resolve before promotion")
-    con.execute("UPDATE identities SET status='verified'"
-                " WHERE identity_id=?", (family_id,))
-    con.execute(
-        "UPDATE relationships SET status='verified' WHERE parent_id=?"
-        " AND rel_type='contains'", (family_id,))
+    if child_kind is not None:
+        con.execute(
+            "UPDATE relationships SET status='verified' WHERE parent_id=?"
+            " AND rel_type='contains' AND child_id IN (SELECT identity_id"
+            " FROM identities WHERE kind=?)", (family_id, child_kind))
+    else:
+        con.execute("UPDATE identities SET status='verified'"
+                    " WHERE identity_id=?", (family_id,))
+        con.execute(
+            "UPDATE relationships SET status='verified' WHERE parent_id=?"
+            " AND rel_type='contains'", (family_id,))
+    approval_key = (f"approval:{family_id}" if child_kind is None
+                    else f"approval:{family_id}:edges:{child_kind}")
     con.execute(
         "INSERT INTO meta (key, value) VALUES (?,?)"
         " ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-        (f"approval:{family_id}", json.dumps({
+        (approval_key, json.dumps({
             "approval_ref": approval_ref,
             "packet_sha256": actual_sha,
             "population": expected_population,
             "decision_text": decision_text,
             "promoted_at": now()}, sort_keys=True)))
     con.commit()
-    return {"family_id": family_id, "status": "verified",
+    return {"family_id": family_id, "child_kind": child_kind or "all",
+            "status": "verified",
             "memberships_promoted": len(members),
             "packet_sha256": actual_sha, "approval_ref": approval_ref}
 
