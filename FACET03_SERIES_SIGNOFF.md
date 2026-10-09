@@ -86,3 +86,34 @@ On signature: promotion runs through `promote_packet` per packet (hash +
 population + drift-bound), identity snapshot advances, facets gain the
 series dimension automatically, and the admission record lands in
 `ADMISSION_DECISION` style beside the family one.
+
+## EXECUTED 2026-10-09 — owner decision recorded
+
+Approval reference: `FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d`
+(scope: exactly the 237 memberships in the 15 pinned packets; 387 unknowns
+and 2 ambiguous untouched).
+
+- [x] All 15 packets promoted via hash-bound `promote_packet` — every
+      packet re-hashed at promotion time, population asserted, drift-checked
+- **15 series identities verified; 237/237 series→OPN memberships verified**
+- 626 family memberships unchanged (still verified)
+- 15 family→series structural edges remain `proposed` — outside the signed
+  scope (they are hierarchy edges, not memberships); flagged for a future
+  owner decision or v2 packet
+- Decision record: `facet03-packets/ADMISSION_DECISION_SERIES_2026-10-09.json`
+
+## Catalog re-key EXECUTED 2026-10-09 (owner GO)
+
+- Backup: `catalog.db.bak-pre-rekey-20261009T181224Z` (auto, pre-write)
+- Moved to verified shas: **86,406 claims + 1,874 part_sources + 1,874
+  parts** — exactly the prepared/tested counts
+- Quote integrity: checksum over all 86,736 provenance quotes PRE == POST
+  (`3e4f3022ca86…`) — **byte-identical**; identity-only as specified; no
+  page injection
+- Residual unhashed: **330 claims across 7 stems** =
+  the 5 unresolved BQ stems (NULL sha, 324 claims) PLUS 2 stems that are
+  sha-resolved + byte-verified but **quote-unverified** (IPP034NE7N3 G:
+  0/4 quotes matched substrate; RSH065N06: 0/2) — the conservative
+  eligibility bar (quote_verified>0) correctly withheld identity re-key
+  where content linkage failed. Both stay discovery-only; investigation
+  candidates (missing substrate text or revision drift).
