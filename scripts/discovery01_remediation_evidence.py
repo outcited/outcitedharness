@@ -394,7 +394,119 @@ def check_b4():
     return out
 
 
-CHECKS = {"b3": check_b3, "b2": check_b2, "b4": check_b4}
+# --- B5: release lookup cost and request latency ---------------------------
+
+def check_b5():
+    """Cold/warm/cache-hit latency plus the release-identity lookup cost,
+    measured on a freshly spawned M5 process (so 'cold' is genuinely cold)
+    against the already-running M4 service."""
+    port = os.environ.get("PILOT_B5_PORT", "8801")
+    base = f"http://127.0.0.1:{port}"
+    env = {"SEARCH_ENABLE_ENGINEERING_SESSION": "1",
+           "SEARCH_SESSION_TOKEN": SESSION_TOKEN,
+           "SEARCH_M4_URL": M4, "M4_BEARER_TOKEN": TOKEN,
+           "SEARCH_HOST": "127.0.0.1", "SEARCH_PORT": port}
+    proc = _spawn(env, "harness.search.api", ROOT, "/tmp/m5_b5.log")
+    samples = []
+    try:
+        for _ in range(60):
+            if _http_code(base + "/v1/discovery/engineering-session",
+                          body={"category": "power"}, token="wrong") == 403:
+                break
+            time.sleep(0.5)
+        seq = [("cold_first_request", journey(0.5)),
+               ("session_cache_hit", journey(0.5)),
+               ("warm_process_new_constraints", journey(1.75)),
+               ("warm_process_new_constraints_2", journey(2.25))]
+        for label, body in seq:
+            ans, raw, lat, err = session(body, token=SESSION_TOKEN)                 if False else post(base + "/v1/discovery/engineering-session",
+                                   body, SESSION_TOKEN)
+            d = ans or {}
+            samples.append({
+                "label": label,
+                "latency_ms": lat,
+                "total_ms": d.get("total_ms"),
+                "timings_ms": d.get("timings_ms"),
+                "session_cache_hit": (d.get("cache") or {}).get("hit"),
+                "release_identity_cache": (d.get("cache") or {}).get(
+                    "release_identity_cache"),
+                "m5_release": (d.get("releases") or {}).get(
+                    "m5_evidence_release"),
+                "m4_release": (d.get("releases") or {}).get(
+                    "m4_evidence_release"),
+                "errors_warnings": err or [],
+            })
+        # deterministic replay across the primed path
+        _, raw_a, _, _ = post(base + "/v1/discovery/engineering-session",
+                              journey(0.5), SESSION_TOKEN)
+        _, raw_b, _, _ = post(base + "/v1/discovery/engineering-session",
+                              journey(3.25), SESSION_TOKEN)
+        _, raw_b2, _, _ = post(base + "/v1/discovery/engineering-session",
+                               journey(3.25), SESSION_TOKEN)
+        replay_ok = semantic(raw_b) == semantic(raw_b2)
+    finally:
+        proc.terminate()
+        proc.wait(timeout=20)
+
+    priming = {}
+    pf = OUT / "b5_release_priming.json"
+    if pf.exists():
+        rep = json.loads(pf.read_text())
+        priming = {"verdict": rep.get("verdict"),
+                   "before_lookup_cost_ms": rep["before"]["lookup_cost_ms"],
+                   "after_lookup_cost_ms": rep["after"]["lookup_cost_ms"],
+                   "prime_cost_ms": (rep.get("primed") or {}).get(
+                       "prime_cost_ms"),
+                   "invariants_held": rep.get("invariants_held"),
+                   "releases_ledger_rows_added":
+                       rep.get("releases_ledger_rows_added"),
+                   "discovery_release": rep["after"]["discovery_release"]}
+
+    cold = samples[0]["latency_ms"]
+    hit = samples[1]["latency_ms"]
+    warm = samples[2]["latency_ms"]
+    rel_ms = [s["timings_ms"].get("release_identity_ms") for s in samples
+              if s.get("timings_ms")]
+    out = {
+        "blocker": "B5",
+        "check": "release identity lookup is O(1) and no longer dominates "
+                 "request latency",
+        "before": {
+            "session_latency_ms_range": [2843.5, 3493.2],
+            "release_fingerprint_cost_ms_per_request": [2814.3, 2929.6],
+            "cache_hit_latency_ms_p50": 2897.3,
+            "instrumented": False,
+            "root_cause": "two full fingerprint passes per request "
+                          "(index_release recompute plus the read-only "
+                          "fallback recompute) because meta holds a single, "
+                          "different policy identity",
+            "source": "results/discovery01-production-readiness/"
+                      "performance_observations.json"},
+        "after": {
+            "samples": samples,
+            "cold_request_latency_ms": cold,
+            "session_cache_hit_latency_ms": hit,
+            "warm_process_new_constraints_latency_ms": warm,
+            "release_identity_lookup_ms": rel_ms,
+            "release_identity_lookup_max_ms": max(
+                x for x in rel_ms if x is not None) if rel_ms else None,
+            "deterministic_replay_after_priming": replay_ok,
+            "priming": priming,
+            "note": "release id is unchanged by priming; the served "
+                    "discovery release is now recorded in the append-only "
+                    "releases ledger",
+        },
+        "pass": bool(
+            priming.get("verdict") == "PRIMED"
+            and all(priming.get("invariants_held", {}).values())
+            and max(x for x in rel_ms if x is not None) < 250
+            and hit < 1000 and cold < 2000 and replay_ok),
+    }
+    write("b5_release_fingerprint_latency", out)
+    return out
+
+
+CHECKS = {"b3": check_b3, "b2": check_b2, "b4": check_b4, "b5": check_b5}
 
 
 def main(argv):

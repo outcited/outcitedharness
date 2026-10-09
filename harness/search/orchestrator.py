@@ -409,8 +409,10 @@ def engineering_session(request: dict, *, catalog_con, search_con,
                                   "machine_verified_advisory")
     expected = request.get("expected_releases") or {}
 
-    # Release identities are computed CHEAPLY first (meta reads), so the
-    # cache is consulted before any expensive cohort build.
+    # Release identities are computed CHEAPLY first (policy-keyed cache
+    # read, B5), so the session cache is consulted before any expensive
+    # cohort build. The lookup cost is instrumented: it used to dominate
+    # request latency while being invisible in timings_ms.
     identity_snapshot_id = None
     if identity_con is not None:
         t0 = time.time()
@@ -419,8 +421,12 @@ def engineering_session(request: dict, *, catalog_con, search_con,
         identity_snapshot_id = identity_mod.snapshot(
             identity_con, payload)["snapshot_id"]
         timings["identity_snapshot_ms"] = round((time.time() - t0) * 1000, 1)
-    evidence_release = units_store.release_view(
-        search_con, policy_identity=DISCOVERY_POLICY)["release"]
+    t0 = time.time()
+    release_view = units_store.release_view(
+        search_con, policy_identity=DISCOVERY_POLICY)
+    evidence_release = release_view["release"]
+    timings["release_identity_ms"] = round((time.time() - t0) * 1000, 1)
+    release_cache_state = release_view.get("release_cache")
 
     cache_key = SessionCache.key(
         category=category, subcategory=subcategory, grain=grain,
@@ -435,7 +441,18 @@ def engineering_session(request: dict, *, catalog_con, search_con,
         hit = cache.get(cache_key)
         if hit is not None:
             out = dict(hit)
-            out["cache"] = {"hit": True, "key": cache_key}
+            out["cache"] = {"hit": True, "key": cache_key,
+                            "release_identity_cache": release_cache_state}
+            # Honest timings (B5/OB1): a hit performs only the release
+            # lookup, so it must not present the original miss's stage
+            # timings as its own work.
+            out["timings_ms"] = {
+                **timings,
+                "cached_stage_timings_ms": dict(hit.get("timings_ms") or {}),
+                "note": "served from the session cache; the stage timings "
+                        "under cached_stage_timings_ms belong to the "
+                        "original miss, not to this request",
+            }
             out["total_ms"] = round((time.time() - t_start) * 1000, 1)
             return out
 
@@ -564,9 +581,11 @@ def engineering_session(request: dict, *, catalog_con, search_con,
         "evidence_policy": evidence_policy,
         "failures": failures,
         "partial_result": bool(failures) or decision is None,
-        "timings_ms": timings,
+        "timings_ms": {**timings,
+                       "release_identity_cache": release_cache_state},
         "total_ms": round((time.time() - t_start) * 1000, 1),
-        "cache": {"hit": False, "key": cache_key},
+        "cache": {"hit": False, "key": cache_key,
+                  "release_identity_cache": release_cache_state},
     }
     if cache is not None and not failures:
         cache.put(cache_key, result)

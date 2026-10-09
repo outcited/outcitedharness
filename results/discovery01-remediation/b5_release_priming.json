@@ -1,0 +1,73 @@
+{
+  "operation": "prime_discovery_release_cache",
+  "db": "/Volumes/M5_4TB/extract-results/search_index.db",
+  "policy_identity": "discovery01-v1(facets=reduction-x-coverage-floor-0.30;eligibility=m4-only;curves=m4-only)",
+  "dry_run": false,
+  "before": {
+    "units_total": 443607,
+    "units_active": 356061,
+    "vectors": 356061,
+    "releases_ledger_rows": 349,
+    "meta": {
+      "embed_model_fingerprint": "19b9f90628f8",
+      "policy_identity": "",
+      "release": "search-release-v1-4afe4e77da5e",
+      "release_active_count": "356061",
+      "release_dirty": "0",
+      "release_unit_count": "443607"
+    },
+    "meta_sha256": "2d91966754865be5166e53e0d148e143f6d5f5f1c801788b2336077af851d257",
+    "release_cache_rows": "table absent",
+    "discovery_release": "search-release-v1-d95199aecb45",
+    "lookup_cost_ms": 1436.9,
+    "release_cache_state": "miss"
+  },
+  "after": {
+    "units_total": 443607,
+    "units_active": 356061,
+    "vectors": 356061,
+    "releases_ledger_rows": 350,
+    "meta": {
+      "embed_model_fingerprint": "19b9f90628f8",
+      "policy_identity": "",
+      "release": "search-release-v1-4afe4e77da5e",
+      "release_active_count": "356061",
+      "release_dirty": "0",
+      "release_unit_count": "443607"
+    },
+    "meta_sha256": "2d91966754865be5166e53e0d148e143f6d5f5f1c801788b2336077af851d257",
+    "release_cache_rows": [
+      {
+        "policy_identity": "discovery01-v1(facets=reduction-x-coverage-floor-0.30;eligibility=m4-only;curves=m4-only)",
+        "release": "search-release-v1-d95199aecb45",
+        "dirty": 0,
+        "unit_count": 443607,
+        "active_count": 356061
+      }
+    ],
+    "discovery_release": "search-release-v1-d95199aecb45",
+    "lookup_cost_ms": 0.2,
+    "release_cache_state": "hit"
+  },
+  "primed": {
+    "release": "search-release-v1-d95199aecb45",
+    "schema": "harness.search-evidence-index.v1",
+    "unit_count": 443607,
+    "active_count": 356061,
+    "policy_identity": "discovery01-v1(facets=reduction-x-coverage-floor-0.30;eligibility=m4-only;curves=m4-only)",
+    "vector_identity": "brutefloat32-v1;models=bge-m3-cr-tapes-v1:356061",
+    "release_cache": "miss",
+    "prime_cost_ms": 1440.3
+  },
+  "invariants_held": {
+    "units_total": true,
+    "units_active": true,
+    "vectors": true,
+    "meta_sha256": true,
+    "discovery_release": true
+  },
+  "releases_ledger_rows_added": 1,
+  "steady_state_lookup_cost_ms": 0.2,
+  "verdict": "PRIMED",
+  "recorded_at": "2026-10-09T13:06:12-0700"
+}

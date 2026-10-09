@@ -129,6 +129,21 @@ def _session_enabled() -> bool:
     return os.environ.get("SEARCH_ENABLE_ENGINEERING_SESSION") == "1"
 
 
+def _read_only_connect(db_path: str | None = None):
+    """Read-only connection over the index (no schema side effects).
+
+    ``units.connect`` runs the schema script and can persist release
+    metadata, which is wrong for serving and probe routes: those must be
+    side-effect free. If the database predates a table a route needs, the
+    resulting OperationalError surfaces as the fail-closed 500 the route
+    already produces.
+    """
+    import sqlite3
+    con = sqlite3.connect(f"file:{db_path or SEARCH_DB}?mode=ro", uri=True)
+    con.row_factory = sqlite3.Row
+    return con
+
+
 def _embed():
     """Optional semantic path: activates only when SEARCH_EMBED_URL is
     configured (serving-qualified fleet embedders) and the index carries
@@ -265,13 +280,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(500, {
                     "error": "identity_source_unavailable",
                     "detail": f"{type(e).__name__}: {e}"})
-        con = units_store.connect(SEARCH_DB)
+        # Read-only routes must not write (B5): an unauthenticated health
+        # probe used to recompute the release fingerprint and persist it
+        # under an EMPTY policy identity, clobbering the stored policy and
+        # invalidating every other policy's cache.
+        con = _read_only_connect()
         try:
             if route == "/v1/health":
-                release = units_store.index_release(con)
+                release = units_store.release_view(con)
                 return self._json(200, {"ok": True, **release})
             if route == "/v1/release":
-                return self._json(200, units_store.index_release(con))
+                return self._json(200, units_store.release_view(con))
             m = re.match(r"^/v1/units/([0-9a-f]{32})$", route)
             if m:
                 unit = units_store.get_unit(con, m.group(1))

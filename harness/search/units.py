@@ -110,6 +110,22 @@ CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+-- Policy-keyed release cache (B5). The meta cache above holds a single
+-- policy identity, so a second serving policy invalidated it on every
+-- request and re-hashed the whole index each time. One immutable row per
+-- policy identity makes steady-state release lookup O(1); rows are marked
+-- dirty by every unit/vector write path and recomputed on next read.
+CREATE TABLE IF NOT EXISTS release_cache (
+    policy_identity TEXT PRIMARY KEY,
+    release TEXT NOT NULL,
+    fingerprint TEXT NOT NULL,
+    unit_count INTEGER NOT NULL,
+    active_count INTEGER NOT NULL,
+    vector_identity TEXT NOT NULL DEFAULT '',
+    dirty INTEGER NOT NULL DEFAULT 0,
+    computed_at REAL NOT NULL
+);
 """
 
 
@@ -382,6 +398,23 @@ def _insert_unit(con: sqlite3.Connection, unit: dict, ts: float) -> None:
             (rid, technical_normalize(unit["ident"]), unit["unit_id"]))
 
 
+def _mark_release_dirty(con: sqlite3.Connection) -> None:
+    """Invalidate BOTH release caches after any content mutation (B5).
+
+    The legacy single-row meta cache and every policy-keyed row are marked
+    dirty in the same transaction as the write, so a cached release id can
+    never outlive the content it fingerprinted. The policy table may not
+    exist on a pre-migration database; that is not an error.
+    """
+    con.execute(
+        "INSERT INTO meta (key, value) VALUES ('release_dirty','1')"
+        " ON CONFLICT(key) DO UPDATE SET value='1'")
+    try:
+        con.execute("UPDATE release_cache SET dirty=1")
+    except sqlite3.OperationalError:
+        pass
+
+
 def replace_document(con: sqlite3.Connection, units: list[dict],
                      *, doc_sha256: str | None = None,
                      extraction_version: str | None = None,
@@ -418,9 +451,7 @@ def replace_document(con: sqlite3.Connection, units: list[dict],
         if u["unit_id"] in existing:
             _delete_unit_rows(con, u["unit_id"])
         _insert_unit(con, u, ts)
-    con.execute(
-        "INSERT INTO meta (key, value) VALUES ('release_dirty','1')"
-        " ON CONFLICT(key) DO UPDATE SET value='1'")
+    _mark_release_dirty(con)
     if commit:
         con.commit()
     return {"doc_sha256": doc, "extraction_version": version,
@@ -436,9 +467,7 @@ def retire_document(con: sqlite3.Connection, doc_sha256: str,
         "UPDATE units SET retired=1, retired_reason=? WHERE doc_sha256=?"
         " AND retired=0", (reason, doc_sha256))
     if cur.rowcount:
-        con.execute(
-            "INSERT INTO meta (key, value) VALUES ('release_dirty','1')"
-            " ON CONFLICT(key) DO UPDATE SET value='1'")
+        _mark_release_dirty(con)
     con.commit()
     return cur.rowcount
 
@@ -450,6 +479,9 @@ def attach_vector(con: sqlite3.Connection, unit_id: str, model: str,
         " ON CONFLICT(unit_id) DO UPDATE SET model=excluded.model,"
         " dim=excluded.dim, vec=excluded.vec",
         (unit_id, model, len(values), pack_vector(values)))
+    # vector_identity is part of the release fingerprint, so a vector write
+    # invalidates the cached release too (B5; the meta-only path never did).
+    _mark_release_dirty(con)
     con.commit()
 
 
@@ -527,15 +559,100 @@ def _fingerprint(con: sqlite3.Connection, policy_identity: str = "") \
     return digest.hexdigest(), count, active
 
 
+def _policy_cache_row(con: sqlite3.Connection, policy_identity: str):
+    """The valid policy-keyed release row, or None (absent/dirty/legacy db).
+
+    Never raises on a database that predates the release_cache table.
+    """
+    try:
+        return con.execute(
+            "SELECT release, fingerprint, unit_count, active_count,"
+            " vector_identity FROM release_cache"
+            " WHERE policy_identity=? AND dirty=0",
+            (policy_identity,)).fetchone()
+    except sqlite3.OperationalError:
+        return None
+
+
+def policy_release(con: sqlite3.Connection, policy_identity: str, *,
+                   force: bool = False, persist: bool = False) -> dict:
+    """Release identity for ONE serving policy (B5): O(1) in steady state.
+
+    The legacy meta cache stores a single policy identity, so any second
+    policy (DISCOVERY-01 serves ``discovery01-v1(...)`` over an index whose
+    meta row belongs to ``hybrid-v1.1(...)``) forced a full re-fingerprint
+    of every unit row on every request. This keeps one immutable row per
+    policy identity instead:
+
+      * a valid row for this policy is returned without hashing anything;
+      * a dirty or absent row recomputes the fingerprint, and persists it
+        when the connection is writable and ``persist`` is set (read-only
+        serving connections compute without writing, which is why priming
+        is a writable-path operation — see
+        scripts/prime_discovery_release.py);
+      * invalidation is the same dirty-flag mechanism the meta cache uses,
+        set by every unit/vector write path.
+
+    Determinism is unchanged: the release id is still a pure function of
+    index content plus policy identity, so primed and unprimed lookups
+    agree and the id survives restarts.
+    """
+    if policy_identity and not force:
+        row = _policy_cache_row(con, policy_identity)
+        if row is not None:
+            return {"release": row["release"], "schema": SEARCH_SCHEMA,
+                    "unit_count": row["unit_count"],
+                    "active_count": row["active_count"],
+                    "policy_identity": policy_identity,
+                    "vector_identity": row["vector_identity"] or
+                    vector_identity(con),
+                    "release_cache": "hit"}
+    fp, count, active = _fingerprint(con, policy_identity)
+    release = f"search-release-v1-{fp[:12]}"
+    vectors = vector_identity(con)
+    if policy_identity and persist:
+        try:
+            con.execute(
+                "INSERT INTO release_cache (policy_identity, release,"
+                " fingerprint, unit_count, active_count, vector_identity,"
+                " dirty, computed_at) VALUES (?,?,?,?,?,?,0,?)"
+                " ON CONFLICT(policy_identity) DO UPDATE SET"
+                " release=excluded.release,"
+                " fingerprint=excluded.fingerprint,"
+                " unit_count=excluded.unit_count,"
+                " active_count=excluded.active_count,"
+                " vector_identity=excluded.vector_identity,"
+                " dirty=0, computed_at=excluded.computed_at",
+                (policy_identity, release, fp, count, active, vectors,
+                 now()))
+            # append-only ledger, same as index_release: two restores of
+            # different content must stay distinguishable
+            con.execute("INSERT INTO releases (release, built_at, unit_count,"
+                        " fingerprint) VALUES (?,?,?,?)",
+                        (release, now(), count, fp))
+            con.commit()
+        except sqlite3.OperationalError:
+            pass        # read-only connection: computed, not persisted
+    return {"release": release, "schema": SEARCH_SCHEMA, "unit_count": count,
+            "active_count": active, "policy_identity": policy_identity,
+            "vector_identity": vectors, "release_cache": "miss"}
+
+
 def release_view(con: sqlite3.Connection,
                  policy_identity: str = "") -> dict:
     """Release identity for READ-ONLY serving paths.
 
-    Returns the cached release when valid; otherwise computes the
-    fingerprint without persisting (a read-only connection cannot write
-    the cache or the releases ledger). Prime the cache with a writable
-    connection (index_release) after any index mutation.
+    With a policy identity this is the policy-keyed lookup (B5): a primed
+    row is O(1), an unprimed one computes the fingerprint without
+    persisting (a read-only connection cannot write the cache or the
+    releases ledger). Prime with a writable connection
+    (scripts/prime_discovery_release.py) after any index mutation.
+
+    Without a policy identity the legacy behaviour is unchanged: return the
+    cached meta release when valid, otherwise compute it.
     """
+    if policy_identity:
+        return policy_release(con, policy_identity, persist=True)
     try:
         return index_release(con, policy_identity=policy_identity)
     except sqlite3.OperationalError:

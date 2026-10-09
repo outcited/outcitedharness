@@ -1,0 +1,131 @@
+{
+  "blocker": "B5",
+  "check": "release identity lookup is O(1) and no longer dominates request latency",
+  "before": {
+    "session_latency_ms_range": [
+      2843.5,
+      3493.2
+    ],
+    "release_fingerprint_cost_ms_per_request": [
+      2814.3,
+      2929.6
+    ],
+    "cache_hit_latency_ms_p50": 2897.3,
+    "instrumented": false,
+    "root_cause": "two full fingerprint passes per request (index_release recompute plus the read-only fallback recompute) because meta holds a single, different policy identity",
+    "source": "results/discovery01-production-readiness/performance_observations.json"
+  },
+  "after": {
+    "samples": [
+      {
+        "label": "cold_first_request",
+        "latency_ms": 652.2,
+        "total_ms": 627.3,
+        "timings_ms": {
+          "identity_snapshot_ms": 8.9,
+          "release_identity_ms": 0.4,
+          "cohort_build_ms": 609.4,
+          "crosswalk_ms": 0.3,
+          "m4_decision_ms": 7.9,
+          "evidence_resolution_ms": 0.2,
+          "release_identity_cache": "hit"
+        },
+        "session_cache_hit": false,
+        "release_identity_cache": null,
+        "m5_release": "search-release-v1-d95199aecb45",
+        "m4_release": "curve-evidence-bundle-v3-5875789dcf3f",
+        "errors_warnings": []
+      },
+      {
+        "label": "session_cache_hit",
+        "latency_ms": 28.6,
+        "total_ms": 8.4,
+        "timings_ms": {
+          "identity_snapshot_ms": 8.0,
+          "release_identity_ms": 0.4,
+          "cached_stage_timings_ms": {
+            "identity_snapshot_ms": 8.9,
+            "release_identity_ms": 0.4,
+            "cohort_build_ms": 609.4,
+            "crosswalk_ms": 0.3,
+            "m4_decision_ms": 7.9,
+            "evidence_resolution_ms": 0.2,
+            "release_identity_cache": "hit"
+          },
+          "note": "served from the session cache; the stage timings under cached_stage_timings_ms belong to the original miss, not to this request"
+        },
+        "session_cache_hit": true,
+        "release_identity_cache": "hit",
+        "m5_release": "search-release-v1-d95199aecb45",
+        "m4_release": "curve-evidence-bundle-v3-5875789dcf3f",
+        "errors_warnings": []
+      },
+      {
+        "label": "warm_process_new_constraints",
+        "latency_ms": 644.2,
+        "total_ms": 621.8,
+        "timings_ms": {
+          "identity_snapshot_ms": 7.6,
+          "release_identity_ms": 0.4,
+          "cohort_build_ms": 607.4,
+          "crosswalk_ms": 0.3,
+          "m4_decision_ms": 5.9,
+          "evidence_resolution_ms": 0.1,
+          "release_identity_cache": "hit"
+        },
+        "session_cache_hit": false,
+        "release_identity_cache": null,
+        "m5_release": "search-release-v1-d95199aecb45",
+        "m4_release": "curve-evidence-bundle-v3-5875789dcf3f",
+        "errors_warnings": []
+      },
+      {
+        "label": "warm_process_new_constraints_2",
+        "latency_ms": 646.2,
+        "total_ms": 624.0,
+        "timings_ms": {
+          "identity_snapshot_ms": 7.7,
+          "release_identity_ms": 0.4,
+          "cohort_build_ms": 606.9,
+          "crosswalk_ms": 0.3,
+          "m4_decision_ms": 8.4,
+          "evidence_resolution_ms": 0.1,
+          "release_identity_cache": "hit"
+        },
+        "session_cache_hit": false,
+        "release_identity_cache": null,
+        "m5_release": "search-release-v1-d95199aecb45",
+        "m4_release": "curve-evidence-bundle-v3-5875789dcf3f",
+        "errors_warnings": []
+      }
+    ],
+    "cold_request_latency_ms": 652.2,
+    "session_cache_hit_latency_ms": 28.6,
+    "warm_process_new_constraints_latency_ms": 644.2,
+    "release_identity_lookup_ms": [
+      0.4,
+      0.4,
+      0.4,
+      0.4
+    ],
+    "release_identity_lookup_max_ms": 0.4,
+    "deterministic_replay_after_priming": true,
+    "priming": {
+      "verdict": "PRIMED",
+      "before_lookup_cost_ms": 1436.9,
+      "after_lookup_cost_ms": 0.2,
+      "prime_cost_ms": 1440.3,
+      "invariants_held": {
+        "units_total": true,
+        "units_active": true,
+        "vectors": true,
+        "meta_sha256": true,
+        "discovery_release": true
+      },
+      "releases_ledger_rows_added": 1,
+      "discovery_release": "search-release-v1-d95199aecb45"
+    },
+    "note": "release id is unchanged by priming; the served discovery release is now recorded in the append-only releases ledger"
+  },
+  "pass": true
+}
