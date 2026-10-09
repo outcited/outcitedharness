@@ -321,6 +321,99 @@ def build_cohort(*, catalog_con: sqlite3.Connection,
             "family_stats": family_stats}
 
 
+def _catalog_fingerprint(con: sqlite3.Connection) -> str:
+    row = con.execute(
+        "SELECT COUNT(*), COALESCE(MAX(first_seen),0) FROM parts").fetchone()
+    claims = con.execute(
+        "SELECT COUNT(*), COALESCE(MAX(created_at),0)"
+        " FROM claims_canonical").fetchone()
+    return f"{row[0]}:{row[1]:.0f}:{claims[0]}:{claims[1]:.0f}"
+
+
+def _identity_fingerprint(con) -> str:
+    if con is None:
+        return "none"
+    rel = con.execute(
+        "SELECT COUNT(*), COALESCE(MAX(created_at),0)"
+        " FROM relationships").fetchone()
+    ident = con.execute(
+        "SELECT COUNT(*), COALESCE(MAX(created_at),0)"
+        " FROM identities").fetchone()
+    return f"{rel[0]}:{rel[1]:.0f}:{ident[0]}:{ident[1]:.0f}"
+
+
+def _evidence_fingerprint(con) -> str:
+    """O(1) evidence identity: the index's own cached content-hash release
+    plus its dirty flag (dirty => treat as changed => cache miss). Falls
+    back to counting only for stores without the meta table (test dbs)."""
+    if con is None:
+        return "none"
+    try:
+        rows = {r[0]: r[1] for r in con.execute(
+            "SELECT key, value FROM meta WHERE key IN"
+            " ('release','release_dirty')")}
+        if "release" in rows:
+            return f"{rows['release']}:{rows.get('release_dirty', '0')}"
+    except sqlite3.OperationalError:
+        pass
+    row = con.execute(
+        "SELECT COUNT(*), COALESCE(MAX(created_at),0) FROM units"
+        " WHERE retired=0").fetchone()
+    return f"{row[0]}:{row[1]:.0f}"
+
+
+_COHORT_CACHE: dict[str, dict] = {}
+_COHORT_CACHE_MAX = 8
+COHORT_CACHE_STATS = {"hits": 0, "misses": 0, "evictions": 0}
+
+
+def build_cohort_cached(*, catalog_con: sqlite3.Connection,
+                        search_con: sqlite3.Connection | None = None,
+                        category: str | None = None,
+                        subcategory: str | None = None,
+                        aisle_map: dict[str, str] | None = None,
+                        identity_con: sqlite3.Connection | None = None
+                        ) -> dict:
+    """Release-keyed cohort cache (FACET-02 GA blocker / DISCOVERY-01 R8).
+
+    Key = every release that can change the result: catalog fingerprint
+    (parts+claims counts/max timestamps), identity fingerprint
+    (relationships+identities), evidence fingerprint (active units),
+    category/subcategory, and the aisle-map hash. Any upstream mutation
+    changes a fingerprint and invalidates deterministically — stale cohorts
+    cannot survive a release change. Bounded (8 entries, FIFO eviction).
+    Cached cohorts are READ-ONLY for callers.
+    """
+    import hashlib as _hashlib
+    aisle_key = _hashlib.sha256(
+        json.dumps(aisle_map or {}, sort_keys=True).encode()
+    ).hexdigest()[:12]
+    key = "|".join([
+        str(category), str(subcategory),
+        _catalog_fingerprint(catalog_con),
+        _identity_fingerprint(identity_con),
+        _evidence_fingerprint(search_con),
+        aisle_key])
+    hit = _COHORT_CACHE.get(key)
+    if hit is not None:
+        COHORT_CACHE_STATS["hits"] += 1
+        out = dict(hit)
+        out["cache"] = {"hit": True, "key_fingerprint": key[:64]}
+        return out
+    COHORT_CACHE_STATS["misses"] += 1
+    cohort = build_cohort(
+        catalog_con=catalog_con, search_con=search_con,
+        category=category, subcategory=subcategory,
+        aisle_map=aisle_map, identity_con=identity_con)
+    while len(_COHORT_CACHE) >= _COHORT_CACHE_MAX:
+        _COHORT_CACHE.pop(next(iter(_COHORT_CACHE)))
+        COHORT_CACHE_STATS["evictions"] += 1
+    _COHORT_CACHE[key] = cohort
+    out = dict(cohort)
+    out["cache"] = {"hit": False, "key_fingerprint": key[:64]}
+    return out
+
+
 def _attach_evidence(search_con: sqlite3.Connection,
                      candidates: dict[str, Candidate]) -> None:
     for row in search_con.execute(

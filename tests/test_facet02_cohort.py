@@ -289,3 +289,37 @@ def test_deterministic_rebuild(tmp_path):
     f2 = cohort.facets_for_cohort(_cohort(tmp_path))
     assert f1 == f2
     assert json.dumps(f1, sort_keys=True) == json.dumps(f2, sort_keys=True)
+
+def test_cohort_cache_hits_and_invalidates(tmp_path):
+    import sqlite3 as _sq
+    from harness.search import cohort as _cohort
+    _cohort._COHORT_CACHE.clear()
+    con = _cohort  # alias for readability
+    cat = _sq.connect(tmp_path / "cat.db")
+    cat.row_factory = _sq.Row
+    cat.executescript(
+        "CREATE TABLE parts (opn TEXT PRIMARY KEY, mpn_base TEXT, vendor TEXT,"
+        " family TEXT, package TEXT, first_seen REAL, source_doc_shas TEXT);"
+        "CREATE TABLE claims_canonical (id INTEGER PRIMARY KEY, opn TEXT,"
+        " symbol TEXT, qualifier TEXT, condition_norm TEXT, value REAL,"
+        " unit TEXT, value_text TEXT, provenance TEXT, extractor TEXT,"
+        " extractor_version TEXT, doc_sha256 TEXT, created_at REAL);")
+    cat.execute("INSERT INTO parts VALUES ('P1','','infineon','','',1.0,'[]')")
+    cat.commit()
+    c1 = _cohort.build_cohort_cached(catalog_con=cat, category="power",
+                                     aisle_map={"P1": "discrete-mosfets"})
+    assert c1["cache"]["hit"] is False
+    c2 = _cohort.build_cohort_cached(catalog_con=cat, category="power",
+                                     aisle_map={"P1": "discrete-mosfets"})
+    assert c2["cache"]["hit"] is True
+    assert len(c2["candidates"]) == len(c1["candidates"]) == 1
+    # catalog mutation changes the fingerprint -> deterministic miss
+    cat.execute("INSERT INTO parts VALUES ('P2','','infineon','','',2.0,'[]')")
+    cat.commit()
+    c3 = _cohort.build_cohort_cached(catalog_con=cat, category="power",
+                                     aisle_map={"P1": "discrete-mosfets",
+                                                "P2": "discrete-mosfets"})
+    assert c3["cache"]["hit"] is False
+    assert len(c3["candidates"]) == 2
+    # bounded
+    assert len(_cohort._COHORT_CACHE) <= _cohort._COHORT_CACHE_MAX

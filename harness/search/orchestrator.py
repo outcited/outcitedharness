@@ -275,7 +275,7 @@ def engineering_session(request: dict, *, catalog_con, search_con,
     t0 = time.time()
     m5_subcategory = SUBCATEGORY_CROSSWALK.get(subcategory, subcategory) \
         if subcategory else None
-    cohort = cohort_mod.build_cohort(
+    cohort = cohort_mod.build_cohort_cached(
         catalog_con=catalog_con, search_con=search_con,
         category=category, subcategory=m5_subcategory,
         aisle_map=aisle_map or {}, identity_con=identity_con)

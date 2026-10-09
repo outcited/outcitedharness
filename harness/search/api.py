@@ -115,7 +115,7 @@ class Handler(BaseHTTPRequestHandler):
             if os.path.exists(IDENTITY_DB):
                 icon = identity_mod.connect(IDENTITY_DB)
             aisle_map = indexer_mod.aisle_map_from_wave(POWER_WAVE)
-            built = cohort_mod.build_cohort(
+            built = cohort_mod.build_cohort_cached(
                 catalog_con=catalog, search_con=search,
                 category=category, subcategory=qs.get("subcategory"),
                 aisle_map=aisle_map, identity_con=icon)
