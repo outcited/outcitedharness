@@ -127,6 +127,30 @@ embedder on e10b.** The extraction worker on asus2 was left running.
 
 **Standing rule is unchanged and now permanent: e10b is serving-only. Never train
 on it.** What was retired is the *experiment* that was going to soften that rule.
+**Update later on 2026-10-09: Sam ordered the two-trainer architecture, so this
+rule is suspended pending the liger-free qualification run — see the map above.**
+
+### Two crash suspects, both real (recorded 2026-10-09 after Sam's report)
+
+1. **Liger — documented.** All three Oct 6-7 freezes ran
+   `use_liger_kernel: true`. That correlation is recorded below and stands.
+2. **HDMI hotplug — Sam's report, previously unrecorded.** Sam states the box
+   crashes when the HDMI plug is pulled (observed directly), and believes HDMI
+   may have been associated with the Oct 6-7 crashes. He stated this before; it
+   was never written down anywhere in the repo or agent mail until now. The
+   retained journal cannot confirm or refute it: the freeze-era logs rotated
+   away, and the boots that remain all ended *cleanly* (no Xid, no oops).
+   Mechanism is plausible: on GB10 the GPU is the display adapter, and the
+   shipped GNOME/GDM session reacts to connector hotplug.
+
+These are confounded, not competing. The qualification run isolates one variable
+(liger OFF, nobody touching the desk). A separate idle test isolates the other:
+**after the qual run completes, pull HDMI with the box idle and see if it
+crashes.** If it does, the fix is a $7 EDID dummy plug + disabling the GUI
+(`systemctl set-default multi-user.target`, mask gdm) — both queued for e10b
+after the verdict, and worth doing to asus2/asus4 regardless. Until the dummy
+plug is in: **do not unplug HDMI from a DGX Spark that is doing anything you
+care about.**
 
 History: e10b froze three times under training on Oct 6-7, every config with
 `use_liger_kernel: true` — journal ends mid-line, no OOM, no Xid, no panic, i.e.
@@ -201,6 +225,19 @@ indefinitely.
    so new signals go into the free-text `alerts` column (see `EXTRA_ALERTS`),
    never into a new column — a new column misaligns every historical row.
    10 tests in `tests/test_soak_sample.py` hold both rules.
+10. **docker logs lie about training progress**: python's stdout is
+   block-buffered without a TTY, so `docker logs` shows the trainer banner and
+   then *silence* while training proceeds normally. Cost us a healthy 80-minute
+   run on 2026-10-09 (killed on a wrong diagnosis) plus three relaunches. The
+   truth is on disk: `<output_dir>/trainer_log.jsonl` gets a JSON line per
+   `logging_steps` — monitor that, never docker logs. Related: launch with the
+   fleet's proven recipe (see `deploy/training/` and
+   `~/harness-training/scripts/training_launch_*`): ENTRYPOINT `llamafactory-cli`
+   + args `train <yaml>` + `FORCE_TORCHRUN=1`, `--ipc host`, `--network host`,
+   `--ulimit memlock=-1`, `--ulimit stack=67108864`,
+   `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`. Plain
+   `torchrun --entrypoint /bin/bash` variants exited 0 silently twice — do not
+   rediscover this.
 
 ## Single points of failure (verified 2026-10-09)
 
