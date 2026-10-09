@@ -119,7 +119,8 @@ class M4ServiceError(RuntimeError):
         super().__init__(f"{reason}: {detail}" if detail else reason)
         self.reason = reason          # connection_refused | timeout |
         # http_error | contract_mismatch | unsupported_category |
-        # release_mismatch | no_frozen_answer | invalid_request | m4_internal
+        # release_mismatch | no_frozen_answer | invalid_request |
+        # auth_failure | auth_not_configured | m4_internal
         self.detail = detail
         self.http_status = http_status
 
@@ -235,6 +236,12 @@ class HttpTransport:
                     pass
                 if e.code == 401 or e.code == 403:
                     raise M4ServiceError("auth_failure", detail, e.code)
+                if e.code == 503:
+                    # M4 fails closed when its bearer secret is missing:
+                    # surface that as its own structured reason rather than
+                    # a generic server error.
+                    raise M4ServiceError("auth_not_configured", detail,
+                                         e.code)
                 if e.code == 422 or e.code == 400:
                     raise M4ServiceError("invalid_request", detail, e.code)
                 if e.code == 404:

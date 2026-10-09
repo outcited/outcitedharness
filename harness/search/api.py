@@ -14,10 +14,19 @@ evidence is never widened to OPN evidence).
 
 Read-only over search_index.db. Served by harness.search.api:main —
 stdlib only, same shape as the discovery front door (:8791).
+
+POST /v1/discovery/engineering-session is feature-flagged
+(SEARCH_ENABLE_ENGINEERING_SESSION=1) and protected: it requires
+``Authorization: Bearer $SEARCH_SESSION_TOKEN``. With no token configured
+the route answers 503 auth_not_configured rather than serving decisions
+unauthenticated (B4); loopback development requires the explicit
+SEARCH_ALLOW_LOCAL_NOAUTH=1 opt-in together with a loopback bind and a
+loopback client. Secrets come from the environment only.
 """
 
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import re
@@ -54,6 +63,70 @@ _ALLOWED_FILTERS = ("vendor", "family", "category", "grain",
 
 _EMBEDDER = None
 _SESSION_CACHE = None
+
+# --- authentication posture (B4: fail closed) -------------------------------
+#
+# The engineering-session route is a protected route: it returns engineering
+# decisions with provenance. A missing secret must never open it, so the
+# default posture when SEARCH_SESSION_TOKEN is unset is 503
+# auth_not_configured. Loopback development stays possible only behind an
+# explicit opt-in AND a loopback bind AND a loopback client — never by
+# accident, and never by leaving a variable unset.
+SESSION_TOKEN_ENV = "SEARCH_SESSION_TOKEN"
+LOCAL_NOAUTH_ENV = "SEARCH_ALLOW_LOCAL_NOAUTH"
+_LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "::1")
+_LOOPBACK_CLIENTS = ("127.0.0.1", "::1")
+
+AUTH_ERRORS = {
+    401: ("unauthorized", "bearer token required"),
+    403: ("forbidden", "invalid bearer token"),
+    503: ("auth_not_configured",
+          f"the engineering-session route is protected but "
+          f"{SESSION_TOKEN_ENV} is not set; auth fails closed rather than "
+          f"serving decisions unauthenticated — configure a bearer token, "
+          f"or for loopback development only set {LOCAL_NOAUTH_ENV}=1"),
+}
+
+
+def _env_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes")
+
+
+def _bind_host() -> str:
+    return os.environ.get("SEARCH_HOST", "127.0.0.1")
+
+
+def _local_noauth_allowed(client_host: str | None) -> bool:
+    """Explicit loopback development posture (never the default)."""
+    if not _env_flag(LOCAL_NOAUTH_ENV):
+        return False
+    if _bind_host() not in _LOOPBACK_HOSTS:
+        return False
+    return client_host in _LOOPBACK_CLIENTS
+
+
+def session_auth_status(headers, client_host: str | None = None):
+    """Authorization decision for the protected session route.
+
+    Returns ``(None, reason)`` when authorized, otherwise
+    ``(http_status, code)``. Comparison is constant-time. A configured token
+    always wins over the development opt-in.
+    """
+    token = (os.environ.get(SESSION_TOKEN_ENV) or "").strip()
+    header = headers.get("Authorization") or ""
+    if not token:
+        if _local_noauth_allowed(client_host):
+            return None, "local_development_noauth"
+        return 503, "auth_not_configured"
+    if not header:
+        return 401, "unauthorized"
+    if not hmac.compare_digest(header, f"Bearer {token}"):
+        return 403, "forbidden"
+    return None, "authorized"
+
+
+def _session_enabled() -> bool:
+    return os.environ.get("SEARCH_ENABLE_ENGINEERING_SESSION") == "1"
 
 
 def _embed():
@@ -266,8 +339,16 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/v1/discovery/engineering-session":
             # feature flag (R9/R10.20): off => route does not exist;
             # existing API behavior is untouched
-            if os.environ.get("SEARCH_ENABLE_ENGINEERING_SESSION") != "1":
+            if not _session_enabled():
                 return self._json(404, {"error": "unknown route"})
+            # B4: authorization is decided BEFORE any store is opened or any
+            # orchestration runs — an unauthorized request does no work.
+            status, code = session_auth_status(
+                self.headers, (self.client_address or (None,))[0])
+            if status is not None:
+                err, detail = AUTH_ERRORS[status]
+                return self._json(status, {"error": err, "detail": detail,
+                                           "code": code})
             return self._engineering_session()
         if route != "/v1/search":
             return self._json(404, {"error": "unknown route"})
@@ -301,12 +382,21 @@ def main(listen=None):
     port = int(os.environ.get("SEARCH_PORT", "8791"))
     # Localhost-only until auth, network policy, and cross-machine clients
     # are explicitly configured (review directive 2026-10-08).
-    if host not in ("127.0.0.1", "localhost") and \
+    if host not in _LOOPBACK_HOSTS and \
             os.environ.get("SEARCH_ALLOW_REMOTE") != "1":
         raise SystemExit(
             "refusing to bind non-localhost by default: set "
             "SEARCH_ALLOW_REMOTE=1 only after authentication and network "
             "access policy are configured")
+    # B4: exposing the protected session route beyond loopback additionally
+    # requires a configured bearer — the loopback development opt-in does
+    # not travel with the socket.
+    if host not in _LOOPBACK_HOSTS and _session_enabled() and \
+            not (os.environ.get(SESSION_TOKEN_ENV) or "").strip():
+        raise SystemExit(
+            f"refusing to bind non-localhost with the engineering-session "
+            f"route enabled and no {SESSION_TOKEN_ENV}: auth fails closed; "
+            f"configure a bearer token before cross-machine exposure")
     ThreadingHTTPServer((host, port), Handler).serve_forever()
 
 

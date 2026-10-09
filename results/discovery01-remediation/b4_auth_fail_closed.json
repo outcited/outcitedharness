@@ -1,0 +1,40 @@
+{
+  "blocker": "B4",
+  "check": "auth fails closed on both hops",
+  "before": {
+    "m5_session_without_credentials": 200,
+    "m4_auth_when_token_unset": "authorized (fail open)",
+    "m4_nonlocal_bind_guard": false,
+    "m4_constant_time_compare": false,
+    "source": "results/discovery01-production-readiness/security_posture.json"
+  },
+  "after": {
+    "m4_no_bearer": 401,
+    "m4_wrong_bearer": 403,
+    "m4_correct_bearer": 200,
+    "m4_evidence_route_no_bearer": 401,
+    "m5_session_no_bearer": 401,
+    "m5_session_wrong_bearer": 403,
+    "m5_session_correct_bearer": 200,
+    "m5_no_token_session": 503,
+    "m4_dev_noauth_health": 200,
+    "m4_dev_noauth_decisions": 400,
+    "m4_startup_refusal_no_token": {
+      "returncode": 1,
+      "message": "refusing to serve engineering decisions without ENGINEERING_DECISIONS_TOKEN: auth fails closed. Configure a bearer token, or for loopback development only set ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH=1 with a loopback bind"
+    },
+    "m4_startup_refusal_nonlocal_bind": {
+      "returncode": 1,
+      "message": "refusing to bind non-localhost by default: set ENGINEERING_DECISIONS_ALLOW_REMOTE=1 only after authentication and network access policy are configured"
+    },
+    "m5_startup_refusal_nonlocal_no_token": {
+      "returncode": 1,
+      "message": "refusing to bind non-localhost with the engineering-session route enabled and no SEARCH_SESSION_TOKEN: auth fails closed; configure a bearer token before cross-machine exposure"
+    },
+    "m5_flag_off_is_404": 404,
+    "m5_flag_on_with_token_is_200": 200,
+    "m4_sha": "3c183d49d2806d7aa09303ae56c23c29d7cdef6f",
+    "m5_sha": "324e542c8f19221f962acf5db05a8da138aab0f9"
+  },
+  "pass": true
+}

@@ -202,7 +202,199 @@ def check_b2():
     return out
 
 
-CHECKS = {"b3": check_b3, "b2": check_b2}
+# --- B4: auth fails closed on both hops ------------------------------------
+
+M4_REPO = Path(os.environ.get(
+    "READINESS_M4_REPO", "/Users/samkim/Harnessv1-m4-08c"))
+
+
+def _spawn(env, module, cwd, log):
+    proc = subprocess.Popen(
+        [str(Path(cwd) / ".venv/bin/python"), "-u", "-m", module],
+        cwd=str(cwd), env={**os.environ, **env},
+        stdout=open(log, "wb"), stderr=subprocess.STDOUT)
+    return proc
+
+
+def _wait_http(url, want=200, tries=40):
+    for _ in range(tries):
+        try:
+            with urllib.request.urlopen(url, timeout=3) as r:
+                if r.status == want:
+                    return True
+        except urllib.error.HTTPError as e:
+            if e.code == want:
+                return True
+        except Exception:  # noqa: BLE001
+            pass
+        time.sleep(0.5)
+    return False
+
+
+def _refusal(env, module, cwd):
+    """Start a service that must REFUSE to come up; capture the message."""
+    proc = subprocess.run(
+        [str(Path(cwd) / ".venv/bin/python"), "-m", module],
+        cwd=str(cwd), env={**os.environ, **env},
+        capture_output=True, text=True, timeout=60)
+    return {"returncode": proc.returncode,
+            "message": (proc.stderr or proc.stdout).strip()[-300:]}
+
+
+def _http_code(url, body=None, token=None, method=None):
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(url, data=data, headers=headers,
+                                 method=method or ("POST" if data else "GET"))
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.status
+    except urllib.error.HTTPError as e:
+        return e.code
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def check_b4():
+    out = {"blocker": "B4", "check": "auth fails closed on both hops",
+           "before": {
+               "m5_session_without_credentials": 200,
+               "m4_auth_when_token_unset": "authorized (fail open)",
+               "m4_nonlocal_bind_guard": False,
+               "m4_constant_time_compare": False,
+               "source": "results/discovery01-production-readiness/"
+                         "security_posture.json"},
+           "after": {}}
+    a = out["after"]
+
+    # --- M4 with a token: 401 / 403 / 200 ---
+    a["m4_no_bearer"] = _http_code(M4 + "/v1/engineering/decisions",
+                                   body={"question": {}})
+    a["m4_wrong_bearer"] = _http_code(M4 + "/v1/engineering/decisions",
+                                      body={"question": {}}, token="wrong")
+    a["m4_correct_bearer"] = _http_code(
+        M4 + "/v1/engineering/decisions",
+        body={"question": {"requirements": {"vin_min": 48, "vin_max": 48,
+                                            "iout_min": 0.5, "vout": 5},
+                           "conditions": {"vin_v": 48, "vout_v": 5},
+                           "operating_point": {"x": 0.5, "unit": "A"},
+                           "phenomenon": "efficiency_vs_load"}},
+        token=TOKEN)
+    a["m4_evidence_route_no_bearer"] = _http_code(
+        M4 + "/v1/engineering/evidence/curve-nonexistent")
+
+    # --- M5 session route with a token: 401 / 403 / 200 ---
+    a["m5_session_no_bearer"] = _http_code(
+        M5 + "/v1/discovery/engineering-session",
+        body={"category": "power"})
+    a["m5_session_wrong_bearer"] = _http_code(
+        M5 + "/v1/discovery/engineering-session",
+        body={"category": "power"}, token="wrong")
+    a["m5_session_correct_bearer"] = _http_code(
+        M5 + "/v1/discovery/engineering-session",
+        body=journey(0.5), token=SESSION_TOKEN)
+
+    # --- M5 with no token configured: 503, never open ---
+    proc = _spawn({"SEARCH_ENABLE_ENGINEERING_SESSION": "1",
+                   "SEARCH_M4_URL": M4, "M4_BEARER_TOKEN": TOKEN,
+                   "SEARCH_PORT": "8795", "SEARCH_HOST": "127.0.0.1"},
+                  "harness.search.api", ROOT, "/tmp/m5_notoken.log")
+    try:
+        _wait_http("http://127.0.0.1:8795/v1/health")
+        a["m5_no_token_session"] = _http_code(
+            "http://127.0.0.1:8795/v1/discovery/engineering-session",
+            body={"category": "power"})
+    finally:
+        proc.terminate()
+        proc.wait(timeout=20)
+
+    # --- M4 loopback development posture still works (explicit opt-in) ---
+    proc = _spawn({"ENGINEERING_DECISIONS_ENABLED": "1",
+                   "ENGINEERING_DECISIONS_PORT": "8799",
+                   "ENGINEERING_DECISIONS_HOST": "127.0.0.1",
+                   "ENGINEERING_DECISIONS_ALLOW_LOCAL_NOAUTH": "1"},
+                  "harness.electronics.decision_api", M4_REPO,
+                  "/tmp/m4_devnoauth.log")
+    try:
+        _wait_http("http://127.0.0.1:8799/v1/engineering/health")
+        a["m4_dev_noauth_health"] = _http_code(
+            "http://127.0.0.1:8799/v1/engineering/health")
+        a["m4_dev_noauth_decisions"] = _http_code(
+            "http://127.0.0.1:8799/v1/engineering/decisions",
+            body={"question": {}})
+    finally:
+        proc.terminate()
+        proc.wait(timeout=20)
+
+    # --- M4 without a token and without the opt-in refuses to start ---
+    a["m4_startup_refusal_no_token"] = _refusal(
+        {"ENGINEERING_DECISIONS_ENABLED": "1",
+         "ENGINEERING_DECISIONS_PORT": "8794",
+         "ENGINEERING_DECISIONS_HOST": "127.0.0.1"},
+        "harness.electronics.decision_api", M4_REPO)
+    a["m4_startup_refusal_nonlocal_bind"] = _refusal(
+        {"ENGINEERING_DECISIONS_ENABLED": "1",
+         "ENGINEERING_DECISIONS_PORT": "8794",
+         "ENGINEERING_DECISIONS_HOST": "0.0.0.0",
+         "ENGINEERING_DECISIONS_TOKEN": TOKEN},
+        "harness.electronics.decision_api", M4_REPO)
+    a["m5_startup_refusal_nonlocal_no_token"] = _refusal(
+        {"SEARCH_ENABLE_ENGINEERING_SESSION": "1", "SEARCH_HOST": "0.0.0.0",
+         "SEARCH_ALLOW_REMOTE": "1", "SEARCH_PORT": "8795"},
+        "harness.search.api", ROOT)
+
+    # --- rollback still removes the route entirely (flag off) ---
+    proc = _spawn({"SEARCH_SESSION_TOKEN": SESSION_TOKEN,
+                   "SEARCH_M4_URL": M4, "M4_BEARER_TOKEN": TOKEN,
+                   "SEARCH_PORT": "8794", "SEARCH_HOST": "127.0.0.1"},
+                  "harness.search.api", ROOT, "/tmp/m5_flagoff_b4.log")
+    try:
+        time.sleep(6)
+        a["m5_flag_off_is_404"] = _http_code(
+            "http://127.0.0.1:8794/v1/discovery/engineering-session",
+            body={"category": "power"}, token=SESSION_TOKEN)
+        a["m5_flag_on_with_token_is_200"] = _http_code(
+            M5 + "/v1/discovery/engineering-session",
+            body=journey(0.5), token=SESSION_TOKEN)
+    finally:
+        proc.terminate()
+        proc.wait(timeout=20)
+
+    a["m4_sha"] = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=M4_REPO, capture_output=True,
+        text=True).stdout.strip()
+    a["m5_sha"] = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
+        text=True).stdout.strip()
+
+    out["pass"] = bool(
+        a["m4_no_bearer"] == 401 and a["m4_wrong_bearer"] == 403
+        and a["m4_correct_bearer"] == 200
+        and a["m4_evidence_route_no_bearer"] == 401
+        and a["m5_session_no_bearer"] == 401
+        and a["m5_session_wrong_bearer"] == 403
+        and a["m5_session_correct_bearer"] == 200
+        and a["m5_no_token_session"] == 503
+        and a["m4_dev_noauth_health"] == 200
+        and a["m4_dev_noauth_decisions"] not in (401, 403, 503)
+        and a["m4_startup_refusal_no_token"]["returncode"] != 0
+        and "ENGINEERING_DECISIONS_TOKEN" in
+        a["m4_startup_refusal_no_token"]["message"]
+        and a["m4_startup_refusal_nonlocal_bind"]["returncode"] != 0
+        and "refusing to bind non-localhost" in
+        a["m4_startup_refusal_nonlocal_bind"]["message"]
+        and a["m5_startup_refusal_nonlocal_no_token"]["returncode"] != 0
+        and "SEARCH_SESSION_TOKEN" in
+        a["m5_startup_refusal_nonlocal_no_token"]["message"]
+        and a["m5_flag_off_is_404"] == 404
+        and a["m5_flag_on_with_token_is_200"] == 200)
+    write("b4_auth_fail_closed", out)
+    return out
+
+
+CHECKS = {"b3": check_b3, "b2": check_b2, "b4": check_b4}
 
 
 def main(argv):
