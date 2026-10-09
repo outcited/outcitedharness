@@ -179,6 +179,17 @@ def check_b2():
             "every_cited_id_resolved": bool(cited) and not unresolved,
             "sample_document_view": (
                 {k: docs[k] for k in list(docs)[:1]} if docs else {}),
+            "per_evidence_id_resolution": {
+                eid: {k: v.get(k) for k in (
+                    "resolved", "reason", "resolution_path",
+                    "document_sha256", "sha_path", "page_1based",
+                    "figure_index", "series_index", "caption",
+                    "source_artifact", "indexed_units", "index_pages",
+                    "evidence_grades", "verification_states",
+                    "m4_page_present_in_index", "parts")}
+                for eid, v in (ev.get("evidence_ids") or {}).items()},
+            "resolution_summary": ev.get("resolution"),
+            "precedence": ev.get("precedence"),
             "provenance_conflicts": ev.get("provenance_conflicts"),
             "latency_ms": lat,
             "semantic_sha256": semantic(raw),

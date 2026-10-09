@@ -181,32 +181,110 @@ def build_m4_question(constraints: dict, comparison: dict | None) -> dict:
     }
 
 
+def entry_provenance(entry: dict) -> dict:
+    """Explicit provenance extraction from one M4 comparison entry (B2).
+
+    Authoritative representation (M4 08C live schema): provenance is nested
+    under ``entry.source``. Legacy representation (the 08B projection and
+    older frozen fixtures): top-level ``document_sha256`` /
+    ``datasheet_sha256``.
+
+    Precedence is deterministic and narrow — only these two documented
+    locations are read, never arbitrary paths:
+
+      1. ``source.document_sha256`` when present;
+      2. otherwise top-level ``document_sha256``, then ``datasheet_sha256``;
+      3. if a nested and a top-level sha are BOTH present and disagree, the
+         entry is not resolved at all: it is reported as an explicit
+         ``provenance_conflict`` (fail closed) rather than silently picking
+         a winner.
+    """
+    src = entry.get("source") or {}
+    nested = src.get("document_sha256")
+    top_document = entry.get("document_sha256")
+    top_datasheet = entry.get("datasheet_sha256")
+    legacy = top_document or top_datasheet
+    conflict = bool(nested) and bool(legacy) and nested != legacy
+    if conflict:
+        sha, path = None, None
+    elif nested:
+        sha, path = nested, "source.document_sha256"
+    elif top_document:
+        sha, path = top_document, "document_sha256"
+    elif top_datasheet:
+        sha, path = top_datasheet, "datasheet_sha256"
+    else:
+        sha, path = None, None
+    locator = src.get("locator") or {}
+    return {
+        "document_sha256": sha,
+        "sha_path": path,
+        "document_revision": src.get("document_revision"),
+        "page_1based": src.get("page_1based"),
+        "figure_index": src.get("figure_index"),
+        "series_index": locator.get("series_index"),
+        "caption": src.get("caption"),
+        "source_artifact": src.get("source_artifact"),
+        "conflict": ({"nested_source_sha256": nested,
+                      "top_level_sha256": legacy} if conflict else None),
+    }
+
+
 def resolve_evidence_refs(search_con: sqlite3.Connection,
                           answer: dict) -> dict:
     """R7: resolve M4 evidence references through the M5 index.
 
-    Returns per-sha provenance views: document sha, page(s), locator kinds,
-    verification states, evidence grades, human-review state (from M4's own
-    fields when present). Never filesystem paths; never upgrades a
-    verification state; discovery-only stays discovery-only.
+    Returns per-sha document views (sha, indexed unit count, pages, locator
+    grades, verification states) and per-evidence-id resolution records
+    carrying M4's own locator (page/figure/series, caption, held artifact
+    name) so provenance can be followed from a ranked value to the source
+    document. Never filesystem paths; never upgrades a verification state;
+    discovery-only stays discovery-only; anything that cannot be resolved is
+    reported explicitly with a reason rather than disappearing.
     """
     shas: set[str] = set()
-    evidence_ids: set[str] = set()
+    per_id: dict[str, dict] = {}
+    conflicts: list[dict] = []
+
     for entry in answer.get("hard_eligibility", {}).get("ineligible", []):
         for rule in entry.get("rules", []):
             ev = rule.get("evidence") or {}
-            if ev.get("datasheet_sha256"):
-                shas.add(ev["datasheet_sha256"])
+            sha = ev.get("datasheet_sha256") or ev.get("document_sha256")
+            if sha:
+                shas.add(sha)
+
     comp = answer.get("comparison", {})
     for entry in comp.get("condition_matched_entries", []) + \
             comp.get("approximate_scenario_entries", []):
-        if entry.get("evidence_id"):
-            evidence_ids.add(entry["evidence_id"])
-        for key in ("datasheet_sha256", "document_sha256"):
-            if entry.get(key):
-                shas.add(entry[key])
-    resolved = {}
-    for sha in shas:
+        prov = entry_provenance(entry)
+        eid = entry.get("evidence_id")
+        if prov["conflict"]:
+            conflicts.append({
+                "evidence_id": eid, "part": entry.get("part"),
+                **prov["conflict"],
+                "action": "entry not resolved; conflicting provenance "
+                          "locations fail closed rather than picking one"})
+        if prov["document_sha256"]:
+            shas.add(prov["document_sha256"])
+        if not eid:
+            continue
+        view = per_id.setdefault(eid, {
+            "evidence_id": eid, "parts": [], "document_sha256": None,
+            "sha_path": None, "document_revision": None, "page_1based": None,
+            "figure_index": None, "series_index": None, "caption": None,
+            "source_artifact": None, "conflict": None})
+        if entry.get("part") and entry["part"] not in view["parts"]:
+            view["parts"].append(entry["part"])
+        for key in ("document_sha256", "sha_path", "document_revision",
+                    "page_1based", "figure_index", "series_index", "caption",
+                    "source_artifact"):
+            if view[key] is None and prov[key] is not None:
+                view[key] = prov[key]
+        if prov["conflict"] and view["conflict"] is None:
+            view["conflict"] = prov["conflict"]
+
+    documents: dict[str, dict] = {}
+    for sha in sorted(shas):
         rows = search_con.execute(
             "SELECT page, locator, verification_state, retired FROM units"
             " WHERE doc_sha256=? AND retired=0 LIMIT 50", (sha,)).fetchall()
@@ -216,7 +294,7 @@ def resolve_evidence_refs(search_con: sqlite3.Connection,
             loc = json.loads(r["locator"])
             grades.add(units_store.evidence_grade(
                 doc_sha256=sha, page=r["page"], locator=loc))
-        resolved[sha] = {
+        documents[sha] = {
             "document_sha256": sha,
             "indexed_units": len(rows),
             "pages": pages[:12],
@@ -226,12 +304,82 @@ def resolve_evidence_refs(search_con: sqlite3.Connection,
             "note": "sha presence does not verify any individual quote; "
                     "per-quote states live on the units",
         }
-    return {"documents": resolved,
-            "curve_evidence_ids": sorted(evidence_ids),
-            "resolver": "m5-search-index",
-            "unresolved_evidence_ids": sorted(
-                eid for eid in evidence_ids
-                if not _evidence_id_known(search_con, eid))}
+
+    evidence_ids: dict[str, dict] = {}
+    unresolved: list[str] = []
+    unresolved_detail: list[dict] = []
+    for eid in sorted(per_id):
+        view = dict(per_id[eid])
+        sha = view["document_sha256"]
+        doc = documents.get(sha) if sha else None
+        view["resolution_path"] = "m4_source_document" if doc else None
+        view["indexed_units"] = (doc or {}).get("indexed_units", 0)
+        view["index_pages"] = (doc or {}).get("pages", [])
+        view["evidence_grades"] = (doc or {}).get("evidence_grades", [])
+        view["verification_states"] = (doc or {}).get(
+            "verification_states", [])
+        view["m4_page_present_in_index"] = (
+            view["page_1based"] in view["index_pages"]
+            if view["page_1based"] is not None and view["index_pages"]
+            else None)
+        if view["conflict"]:
+            view["resolved"], view["reason"] = False, "provenance_conflict"
+        elif doc and doc["indexed_units"] > 0:
+            view["resolved"], view["reason"] = True, None
+        elif sha:
+            view["resolved"] = False
+            view["reason"] = "document_not_in_m5_index"
+        elif _evidence_id_known(search_con, eid):
+            # the id is itself an M5 unit id (other namespaces) — resolved
+            # directly, without inventing a document link
+            view["resolved"], view["reason"] = True, None
+            view["resolution_path"] = "m5_unit_id"
+        else:
+            view["resolved"] = False
+            view["reason"] = "no_source_sha256"
+        if not view["resolved"]:
+            unresolved.append(eid)
+            unresolved_detail.append({
+                "evidence_id": eid, "reason": view["reason"],
+                "parts": view["parts"],
+                "document_sha256": view["document_sha256"]})
+        view.pop("conflict", None)
+        evidence_ids[eid] = view
+
+    resolved = len(per_id) - len(unresolved)
+    return {
+        "documents": documents,
+        "curve_evidence_ids": sorted(per_id),
+        "evidence_ids": evidence_ids,
+        "resolution": {"cited": len(per_id), "resolved": resolved,
+                       "unresolved": len(unresolved),
+                       "conflicts": len(conflicts)},
+        "provenance_conflicts": conflicts,
+        "resolver": "m5-search-index",
+        "precedence": "entry.source.document_sha256 is authoritative; "
+                      "legacy top-level document_sha256/datasheet_sha256 is "
+                      "used only when the nested source is absent; a "
+                      "disagreement between the two fails closed as "
+                      "provenance_conflict and is never silently resolved",
+        "unresolved_evidence_ids": unresolved,
+        "unresolved_detail": unresolved_detail,
+    }
+
+
+
+def empty_evidence_block() -> dict:
+    """Schema-stable evidence block for the no-decision (partial) path."""
+    return {"documents": {}, "curve_evidence_ids": [], "evidence_ids": {},
+            "resolution": {"cited": 0, "resolved": 0, "unresolved": 0,
+                           "conflicts": 0},
+            "provenance_conflicts": [], "resolver": "m5-search-index",
+            "precedence": "entry.source.document_sha256 is authoritative; "
+                          "legacy top-level document_sha256/"
+                          "datasheet_sha256 is used only when the nested "
+                          "source is absent; a disagreement between the two "
+                          "fails closed as provenance_conflict and is never "
+                          "silently resolved",
+            "unresolved_evidence_ids": [], "unresolved_detail": []}
 
 
 def _evidence_id_known(search_con: sqlite3.Connection,
@@ -347,9 +495,7 @@ def engineering_session(request: dict, *, catalog_con, search_con,
 
     t0 = time.time()
     evidence = resolve_evidence_refs(search_con, decision.answer) \
-        if decision else {"documents": {}, "curve_evidence_ids": [],
-                          "resolver": "m5-search-index",
-                          "unresolved_evidence_ids": []}
+        if decision else empty_evidence_block()
     timings["evidence_resolution_ms"] = round((time.time() - t0) * 1000, 1)
 
     counts = (decision.answer.get("counts", {}) if decision else {})

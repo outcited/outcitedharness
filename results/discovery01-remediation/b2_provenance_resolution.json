@@ -1,0 +1,193 @@
+{
+  "blocker": "B2",
+  "check": "M4 nested source provenance resolves through the M5 index",
+  "before": {
+    "documents_resolved": 0,
+    "unresolved_evidence_ids": 4,
+    "cited_evidence_ids": 4,
+    "source": "results/discovery01-production-readiness/provenance_probe.json"
+  },
+  "after": {
+    "cited_evidence_ids": [
+      "curve-214a8be75c0ffc2980cbe42a72230132",
+      "curve-29bbf05fc94f0678e06b0d8cf7968914",
+      "curve-a697319a16d26592db2cc14cf6843bd0",
+      "curve-c7b2d232869d82fb1b00a5b2a3477542"
+    ],
+    "documents_resolved": [
+      "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2",
+      "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175"
+    ],
+    "documents_resolved_count": 2,
+    "unresolved_evidence_ids": [],
+    "entry_source_sha256": [
+      "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2",
+      "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175"
+    ],
+    "every_cited_id_resolved": true,
+    "sample_document_view": {
+      "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2": {
+        "document_sha256": "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2",
+        "indexed_units": 9,
+        "pages": [
+          1,
+          3,
+          11,
+          15
+        ],
+        "evidence_grades": [
+          "evidence_grade"
+        ],
+        "verification_states": [
+          "unverified"
+        ],
+        "note": "sha presence does not verify any individual quote; per-quote states live on the units"
+      }
+    },
+    "per_evidence_id_resolution": {
+      "curve-214a8be75c0ffc2980cbe42a72230132": {
+        "resolved": true,
+        "reason": null,
+        "resolution_path": "m4_source_document",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "sha_path": "source.document_sha256",
+        "page_1based": 14,
+        "figure_index": 4,
+        "series_index": 2,
+        "caption": "Fig. 15 - SiC461 Efficiency vs. Output Current - Light Load,",
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+        "indexed_units": 22,
+        "index_pages": [
+          1,
+          2,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          25
+        ],
+        "evidence_grades": [
+          "evidence_grade"
+        ],
+        "verification_states": [
+          "unverified"
+        ],
+        "m4_page_present_in_index": true,
+        "parts": [
+          "SiC461"
+        ]
+      },
+      "curve-29bbf05fc94f0678e06b0d8cf7968914": {
+        "resolved": true,
+        "reason": null,
+        "resolution_path": "m4_source_document",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "sha_path": "source.document_sha256",
+        "page_1based": 17,
+        "figure_index": 4,
+        "series_index": 2,
+        "caption": "Fig. 33 - SiC464 Efficiency vs. Output Current - Light Load,",
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+        "indexed_units": 22,
+        "index_pages": [
+          1,
+          2,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          25
+        ],
+        "evidence_grades": [
+          "evidence_grade"
+        ],
+        "verification_states": [
+          "unverified"
+        ],
+        "m4_page_present_in_index": true,
+        "parts": [
+          "SiC464"
+        ]
+      },
+      "curve-a697319a16d26592db2cc14cf6843bd0": {
+        "resolved": true,
+        "reason": null,
+        "resolution_path": "m4_source_document",
+        "document_sha256": "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2",
+        "sha_path": "source.document_sha256",
+        "page_1based": 7,
+        "figure_index": 0,
+        "series_index": 4,
+        "caption": "Figure 2. Efficiency at 300 kHz",
+        "source_artifact": "dcdc_LM5161.pdf",
+        "indexed_units": 9,
+        "index_pages": [
+          1,
+          3,
+          11,
+          15
+        ],
+        "evidence_grades": [
+          "evidence_grade"
+        ],
+        "verification_states": [
+          "unverified"
+        ],
+        "m4_page_present_in_index": false,
+        "parts": [
+          "LM5161"
+        ]
+      },
+      "curve-c7b2d232869d82fb1b00a5b2a3477542": {
+        "resolved": true,
+        "reason": null,
+        "resolution_path": "m4_source_document",
+        "document_sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+        "sha_path": "source.document_sha256",
+        "page_1based": 16,
+        "figure_index": 2,
+        "series_index": 2,
+        "caption": "Fig. 27 - SiC463 Efficiency vs. Output Current - Light Load,",
+        "source_artifact": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+        "indexed_units": 22,
+        "index_pages": [
+          1,
+          2,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          25
+        ],
+        "evidence_grades": [
+          "evidence_grade"
+        ],
+        "verification_states": [
+          "unverified"
+        ],
+        "m4_page_present_in_index": true,
+        "parts": [
+          "SiC463"
+        ]
+      }
+    },
+    "resolution_summary": {
+      "cited": 4,
+      "resolved": 4,
+      "unresolved": 0,
+      "conflicts": 0
+    },
+    "precedence": "entry.source.document_sha256 is authoritative; legacy top-level document_sha256/datasheet_sha256 is used only when the nested source is absent; a disagreement between the two fails closed as provenance_conflict and is never silently resolved",
+    "provenance_conflicts": [],
+    "latency_ms": 2832.2,
+    "semantic_sha256": "b9ebda1de21268e9c8db452c2bedcf406b9c4ee65ad8e4696d35636941c73ac0"
+  },
+  "errors": [],
+  "pass": true
+}
