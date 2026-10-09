@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 import urllib.error
 import urllib.parse
@@ -14,6 +15,16 @@ PRODUCTION_ENCODER_URL = "http://127.0.0.1:8800/v1/embeddings"
 MAX_ENCODER_BATCH = 16
 EMBED_DIM = 1024
 
+# The encoder is pinned to localhost because GCI must talk to the embedder that
+# holds the fine-tuned weights: a stock bge-m3 answers the same route with the
+# same 1024 dims and different vectors, which silently invalidates the index.
+# Relocating is an explicit, audited act — name the host:port in this env var
+# (comma-separated) and nothing else changes. Empty by default, so the historic
+# localhost-only policy is what you get unless someone deliberately widens it.
+ENCODER_ALLOWLIST_ENV = "HARNESS_GCI_ENCODER_ALLOWLIST"
+DEFAULT_ENCODER_HOSTS = frozenset({"127.0.0.1:8800", "localhost:8800"})
+LOCALHOST_CANONICAL = "127.0.0.1:8800"
+
 
 class EncoderPolicyError(RuntimeError):
     pass
@@ -24,20 +35,35 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         raise EncoderPolicyError(f"encoder redirect refused: HTTP {code}")
 
 
+def allowed_encoder_hosts() -> frozenset[str]:
+    """host:port pairs the encoder may talk to. Exact match only, no wildcards."""
+    hosts = set(DEFAULT_ENCODER_HOSTS)
+    for entry in os.environ.get(ENCODER_ALLOWLIST_ENV, "").split(","):
+        entry = entry.strip()
+        if entry:
+            hosts.add(entry)
+    return frozenset(hosts)
+
+
 def validate_encoder_url(url: str) -> str:
     parsed = urllib.parse.urlsplit(url)
+    host = parsed.hostname or ""
+    netloc = f"{host}:{parsed.port}" if parsed.port else host
     if (
         parsed.scheme != "http"
-        or parsed.hostname not in {"127.0.0.1", "localhost"}
-        or parsed.port != 8800
+        or netloc not in allowed_encoder_hosts()
         or parsed.path != "/v1/embeddings"
         or parsed.query
         or parsed.fragment
     ):
+        allowed = ", ".join(sorted(allowed_encoder_hosts()))
         raise EncoderPolicyError(
-            "GCI encoder must be exactly http://127.0.0.1:8800/v1/embeddings"
+            "GCI encoder must be http://<host>:<port>/v1/embeddings with "
+            f"<host>:<port> in the allowlist (default {LOCALHOST_CANONICAL}; "
+            f"currently allowed: {allowed}); got {url!r}"
         )
-    return PRODUCTION_ENCODER_URL
+    canonical = LOCALHOST_CANONICAL if netloc == "localhost:8800" else netloc
+    return f"http://{canonical}/v1/embeddings"
 
 
 @dataclass(frozen=True)

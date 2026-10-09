@@ -118,7 +118,7 @@ workers:
       - review
       - tool_calling
       - long_context
-    notes: gx10-0309 samkimasus3; Nemotron 3.5 Lightning 30B-A3B NVFP4; primary local critic and researcher/tester ONLY — never foreman. With obsolete thinking retries removed it scored 7/7 in 3.78s alone and 7/7 in 5.47s or less across four concurrent grades; not a coder and not in the coding failover ladder.
+    notes: gx10-0309 samkimasus3; Nemotron 3.5 Lightning 30B-A3B NVFP4; primary local critic and researcher/tester ONLY — never foreman. With obsolete thinking retries removed it scored 7/7 in 3.78s alone and 7/7 in 5.47s or less across four concurrent grades; not a coder and not in the coding failover ladder. 2026-10-09 VERIFIED DARK — asus3 is alive as TP4 rank 3 (container dsv41-worker) but nothing listens on :8900, so this lane refuses connection in ~11 ms (cheap, not a hang) and the ladder falls through to the next critic. Kept enabled:true on purpose because it is meant to return when asus3 leaves the TP4 set. Two things to know while it is dark — (a) Worker.status() derives "healthy" from config alone with no liveness probe (harness/workers/registry.py:32), so this lane reports healthy while unreachable, and the fleet probe is the only thing that tells the truth (endpoint key asus3_nemotron); (b) the only other enabled critic is dsv41_flash on the same TP4 endpoint that does the work, so proposer == critic on review lanes. Adjudication is unaffected — canon (asus4:8900 + dgx1:8901) is a different model with REJECT authority. Whether to flip enabled:false or give asus3 its GPU back is Sam's call.
 
   glm_critic:
     enabled: false
@@ -150,7 +150,7 @@ workers:
     capabilities:
       - embedding
       - semantic_search
-    notes: spark-e10b :8800; owners confirmed FAE v4 weights behind a legacy bge-m3-cr-tapes-v1 API label since 2026-08-22. Never use as the Tapes v1 baseline or retag CR foundation data. Routes /v1/embeddings /embed /encode /semantic-search; DO NOT restart, flip the symlink, or repurpose.
+    notes: spark-e10b :8800; owners confirmed FAE v4 weights behind a legacy bge-m3-cr-tapes-v1 API label since 2026-08-22. Never use as the Tapes v1 baseline or retag CR foundation data. Routes /v1/embeddings /embed /encode /semantic-search; DO NOT restart, flip the symlink, or repurpose. Verified 2026-10-09 — systemd bge-m3-embed.service (Restart=always, enabled), weights resolve through models/bge-m3-cr-tapes-v1/latest -> models/bge-m3-fae-search-v4/checkpoints_20260822T045420Z; health route is GET /healthz (/v1/models 404s and a 404 is NOT a failure); :8804 is retired and not listening. Backed up to /Volumes/M5_4TB/harness-training/models/bge-m3-fae-search-v4 (sha256-verified, see BACKUP-bge-m3-fae-search-v4.md). Sole continuous consumer is GCI on the same box (100.81.201.24:8810), pinned to 127.0.0.1:8800 by harness/gci/encoder.py — the two must be relocated together. WARNING — asus2 runs a vanilla BAAI/bge-m3 on its own :8800 (~/embedder, @reboot cron); same port number and same 1024 dims but DIFFERENT vectors. Never repoint this lane at 100.68.133.1:8800.
 
   asus2_foreman:
     enabled: true

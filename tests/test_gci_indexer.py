@@ -9,6 +9,8 @@ from pathlib import Path
 import pytest
 
 from harness.gci.encoder import (
+    allowed_encoder_hosts,
+    ENCODER_ALLOWLIST_ENV,
     EncoderPolicyError,
     EncoderResponse,
     MAX_ENCODER_BATCH,
@@ -268,3 +270,77 @@ def test_worker_start_fails_jobs_whose_payload_was_lost_on_restart(tmp_path: Pat
     row = store.job(stale)
     assert row["state"] == "failed"
     assert "restarted" in row["error"]
+
+
+def test_encoder_allowlist_is_empty_by_default_and_localhost_only():
+    # The historic policy: localhost:8800 normalizes, anything remote is refused.
+    assert (
+        validate_encoder_url("http://localhost:8800/v1/embeddings")
+        == "http://127.0.0.1:8800/v1/embeddings"
+    )
+    assert allowed_encoder_hosts() == frozenset({"127.0.0.1:8800", "localhost:8800"})
+    for url in (
+        "http://100.81.201.24:8800/v1/embeddings",
+        "http://10.77.0.5:8801/v1/embeddings",
+    ):
+        with pytest.raises(EncoderPolicyError):
+            validate_encoder_url(url)
+
+
+def test_encoder_allowlist_admits_an_explicit_standby(monkeypatch):
+    monkeypatch.setenv(ENCODER_ALLOWLIST_ENV, "10.77.0.5:8801")
+    assert (
+        validate_encoder_url("http://10.77.0.5:8801/v1/embeddings")
+        == "http://10.77.0.5:8801/v1/embeddings"
+    )
+    # widening is additive: the default still works
+    assert (
+        validate_encoder_url("http://127.0.0.1:8800/v1/embeddings")
+        == "http://127.0.0.1:8800/v1/embeddings"
+    )
+
+
+def test_encoder_allowlist_is_exact_host_and_port(monkeypatch):
+    monkeypatch.setenv(ENCODER_ALLOWLIST_ENV, "10.77.0.5:8801")
+    for url in (
+        "http://10.77.0.5:8800/v1/embeddings",   # right host, wrong port
+        "http://10.77.0.6:8801/v1/embeddings",   # right port, wrong host
+        "http://10.77.0.5/v1/embeddings",        # no port
+    ):
+        with pytest.raises(EncoderPolicyError):
+            validate_encoder_url(url)
+
+
+def test_encoder_allowlist_does_not_loosen_scheme_path_or_query(monkeypatch):
+    monkeypatch.setenv(ENCODER_ALLOWLIST_ENV, "10.77.0.5:8801")
+    for url in (
+        "https://10.77.0.5:8801/v1/embeddings",
+        "http://10.77.0.5:8801/semantic-search",
+        "http://10.77.0.5:8801/encode",
+        "http://10.77.0.5:8801/v1/embeddings?model=x",
+        "http://10.77.0.5:8801/v1/embeddings#frag",
+    ):
+        with pytest.raises(EncoderPolicyError):
+            validate_encoder_url(url)
+
+
+def test_encoder_allowlist_ignores_blank_entries(monkeypatch):
+    monkeypatch.setenv(ENCODER_ALLOWLIST_ENV, " , 10.77.0.5:8801 , ")
+    assert "10.77.0.5:8801" in allowed_encoder_hosts()
+    assert "" not in allowed_encoder_hosts()
+    assert allowed_encoder_hosts() == frozenset(
+        {"127.0.0.1:8800", "localhost:8800", "10.77.0.5:8801"})
+
+
+def test_strict_encoder_accepts_an_allowlisted_standby(monkeypatch):
+    monkeypatch.setenv(ENCODER_ALLOWLIST_ENV, "10.77.0.5:8801")
+    encoder = StrictEncoder("http://10.77.0.5:8801/v1/embeddings")
+    assert encoder.url == "http://10.77.0.5:8801/v1/embeddings"
+
+
+def test_policy_error_names_the_allowlist_so_the_fix_is_obvious():
+    with pytest.raises(EncoderPolicyError) as exc:
+        validate_encoder_url("http://10.9.9.9:8800/v1/embeddings")
+    message = str(exc.value)
+    assert ENCODER_ALLOWLIST_ENV in message or "allowlist" in message
+    assert "127.0.0.1:8800" in message

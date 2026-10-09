@@ -64,12 +64,28 @@ bounded repair, durable state, and verification. SGLang serves inference only.
   API label. Never use it as a Tapes v1 baseline, flip its symlink, restart,
   or repurpose it. All CategoryRank and Tapes processing is suspended pending
   new owner guidance.
+  **2026-10-09 verification:** these two are a single welded pair and the only
+  copy of either. `harness/gci/encoder.py:28` refuses any encoder URL that is
+  not exactly `http://127.0.0.1:8800/v1/embeddings`, so GCI can only run on the
+  box that hosts the embedder. The served checkpoint is
+  `bge-m3-fae-search-v4/checkpoints_20260822T045420Z` behind the
+  `bge-m3-cr-tapes-v1/latest` symlink — now backed up to the NAS
+  (sha256-verified); v2/v3/v31 remain single-copy. Health is `GET /healthz`
+  (`/v1/models` 404s by design). GCI fails soft: `orch.py:1153` catches the
+  error and logs, so an outage degrades semantic expansion rather than stopping
+  the factory.
 - DGX2, ASUS1, DGX3, ASUS3, ASUS2, and ASUS4 form a qualified six-rank NCCL
   training pool over the switched 200G fabric. A 256 MiB six-rank all-reduce
   completed at 23.25 Gb/s bus bandwidth. DGX2 owns immutable datasets,
   checkpoints, manifests, and evaluation records; the other nodes provide
   disposable compute. Serving roles are drained and restored around training
   windows according to current utility.
+  **(2026-10-09 correction: that pool no longer exists as described. ASUS4 gave
+  its switch port to `spark-e10b` on 2026-10-04 and is Tailscale-only, so the
+  fabric pool is at most five ranks — DGX2, ASUS1, DGX3, ASUS3, ASUS2 — and
+  DGX1 is on the fabric but training-ineligible. DGX2/ASUS1/DGX3/ASUS3 are also
+  committed to V4.1 TP4 serving, so the only free fabric rank today is ASUS2,
+  which is at 96% disk. Re-qualify before claiming any rank count.)**
   This fabric qualification does not authorize vanilla Qwen3.8 ZeRO-3:
   its 95.37 GiB runtime PLE must remain tensor-sharded or file-backed.
   The four-node native-TP path passed load, a 32-token forward, and one

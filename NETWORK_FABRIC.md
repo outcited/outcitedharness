@@ -1,12 +1,24 @@
 # DGX Spark 200G network fabric
 
-Evidence date: 2026-08-31
+Evidence date: 2026-08-31 · membership corrected 2026-10-09
 
 ## Scope and current state
 
-The MikroTik `CRS812-8DS-2DQ-2DDQ` is the shared high-speed fabric for the six
-non-protected DGX Spark/GX10 systems. `DGX1`/`spark-e10b` remains outside this
-fabric and must not be recabled, restarted, or repurposed.
+The MikroTik `CRS812-8DS-2DQ-2DDQ` is the shared high-speed fabric for the
+non-protected DGX Spark/GX10 systems.
+
+**2026-10-04 membership change (verified on the nodes 2026-10-09):** `DGX1`/
+`spark-e10b` **joined** the fabric at `10.77.0.7`, taking `ASUS4`'s switch port.
+`ASUS4`/`gx10-33af` is therefore **off-fabric and Tailscale-only**
+(`100.100.116.82`); `10.77.0.6` no longer routes to anything, and a probe that
+still relays through it reports a permanent false `SSH_FAIL` (this hid asus4 for
+four days, 2026-10-04 → 10-09, while it was up and serving canon). The port
+mapping below is the 2026-08-31 record and is stale for those two nodes.
+
+The protection on `spark-e10b` is now scoped, not absolute: it hosts the
+production embedder (`bge-m3-embed.service`, :8800) and GCI (:8810) and must not
+be repurposed or trained on (2026-10-07 liger verdict), but it is an active
+serving node and rebooted itself clean on 2026-10-08 21:13Z.
 
 The switch runs RouterOS 7.24.1 and currently receives `192.168.4.50/22` by
 DHCP on its management bridge through `ether2`. Treat that address as a lease
@@ -26,7 +38,8 @@ All six non-protected nodes are connected and operational:
 - `qsfp56-dd-2-1` → ASUS2 (`gx10-26b6`), Tensor Juice breakout leg 1, forced
   `200G-baseCR4` with `fec91`.
 - `qsfp56-dd-2-5` → ASUS4 (`gx10-33af`), Tensor Juice breakout leg 2, forced
-  `200G-baseCR4` with `fec91`.
+  `200G-baseCR4` with `fec91`. **(2026-10-04: this port was reassigned to
+  `DGX1`/`spark-e10b` at `10.77.0.7`; ASUS4 is off-fabric, Tailscale-only.)**
 
 The switch comments record this physical mapping. All six active masters are
 forwarding in the same bridge with Marvell hardware offload.

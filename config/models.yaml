@@ -157,6 +157,12 @@ models:
     # The unit still requires/advertises this legacy request label, but owners
     # confirmed its immutable loaded weights are FAE v4 since 2026-08-22.
     # Never use this route as the Tapes v1 baseline.
+    # Verified 2026-10-09: the served checkpoint is
+    # bge-m3-fae-search-v4/checkpoints_20260822T045420Z, reached through the
+    # bge-m3-cr-tapes-v1/latest symlink; GET /healthz reports it. A backup of
+    # those weights is on the NAS (see BACKUP-bge-m3-fae-search-v4.md). Do not
+    # confuse this with the vanilla BAAI/bge-m3 on asus2:8800 — different model,
+    # same port number, incompatible vectors.
     model: bge-m3-cr-tapes-v1
     temperature: 0
     timeout_s: 60
