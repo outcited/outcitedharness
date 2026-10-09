@@ -146,7 +146,7 @@ workers:
     enabled: true
     role: embedder
     model_key: spark_embed
-    endpoint: http://100.81.201.24:8800/v1
+    endpoint: http://100.100.116.82:8800/v1
     capabilities:
       - embedding
       - semantic_search

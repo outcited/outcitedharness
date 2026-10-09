@@ -1,13 +1,17 @@
-# FLEET RUNBOOK — the 3am document (v1.1, 2026-10-09)
+# FLEET RUNBOOK — the 3am document (v2, 2026-10-09)
 
 If something is dead at 3am, this is the order of operations. Everything here
 was learned live on 2026-10-02. Verify with the probe BEFORE ssh-ing around.
 
-v1.1 (2026-10-09): the probe was reporting three falsehoods — asus4 as
-`SSH_FAIL` for four days (stale fabric relay target), the embedder as `[]`
-(it 404s on `/v1/models`, and an empty list looked like "healthy, no models"),
-and GCI not at all. All three are fixed in `scripts/fleet_state.py`; the map
-below now matches what the probe can actually see.
+**v2 (2026-10-09, Sam's architecture):** TP4 = 4 boxes (dgx2/asus1/dgx3/asus3)
+· **asus2 = trainer 1** (running the first real v2 student run) ·
+**e10b = trainer 2, pending liger-free qualification** ·
+**asus4 = embedder + GCI + canon primary**. The embedder+GCI pair moved off
+e10b to asus4 this day, bit-identity-verified before cutover; e10b's copy is
+stopped+disabled and kept as rollback. v1.1's observability fixes still apply:
+the probe was reporting three falsehoods — asus4 as `SSH_FAIL` for four days
+(stale fabric relay target), the embedder as `[]` (it 404s on `/v1/models`),
+and GCI not at all.
 
 ## First move, always
 
@@ -28,8 +32,7 @@ ls -t /Volumes/M5_4TB/fleet-state/snapshots | head -1   # when last seen healthy
 | LoRA training | asus2, docker `lora-power-v1` | `docker logs lora-power-v1` | see deploy/lora-v1/RUNBOOK.md |
 | Fleet probe (hourly) | this Mac, launchd `com.harness.fleetstate` | `tail ~/Logs/fleetstate.log` | kickstart same way |
 | Soak vitals (hourly) | this Mac, `scripts/soak_sample.py` → `/Volumes/M5_4TB/extract-results/soak.csv` | `tail -1` the CSV; the `alerts` column | kickstart `com.harness.soak` |
-| Protected embedder | dgx1/e10b `bge-m3-embed.service` (systemd, `Restart=always`, enabled) on **:8800 only** — :8804 is retired and not listening. Serves the FAE **v4** fine-tune under the legacy API label `bge-m3-cr-tapes-v1`: `models/bge-m3-cr-tapes-v1/latest` → `models/bge-m3-fae-search-v4/checkpoints_20260822T045420Z`. RECLASSIFIED 2026-10-04: CategoryRank retired, embedder legacy-retained. On fabric since 2026-10-04 at 10.77.0.7 (took asus4's switch port). **2026-10-07 VERDICT: SERVING-QUALIFIED, TRAINING-INELIGIBLE.** Three userspace freezes under training (Oct 6-7), all configs with `use_liger_kernel: true`; journal ends mid-line, no OOM/Xid/panic — CUDA-context device-hang signature. Kernel 6.17.0-1031-nvid, driver 580.173.02. The proven 1,020-step v1 run and the Oct-7 8B v2 retrain both ran liger-free on asus2. Never train on this box until a controlled liger-free/controlled-liger repro clears it. Also the ONE node that missed the 2026-09-07 fleet CX7 power-drain (was off-fabric then) — optional unplug-drain hygiene at next physical touch. | `curl 100.81.201.24:8800/healthz` → `{ready, model, model_path, device, routes}`. **Never probe `/v1/models` — it 404s and the 404 is not a failure.** | serving only; `systemctl restart bge-m3-embed` (survives reboot on its own) |
-| GCI (Global Code Intelligence) | dgx1/e10b `harness-gci.service` on 100.81.201.24:8810; index 343M at `/data/harness-gci`; `gci_enabled: true` in config/settings.yaml, refreshed every 300 s | `curl -o /dev/null -w '%{http_code}' 100.81.201.24:8810/health` → **401 = alive** (bearer-guarded). The probe records `ALIVE_AUTH_REQUIRED`. **Gotcha: it binds only to the Tailscale address** (`ss -ltn` shows `100.81.201.24:8810`, not `0.0.0.0`), so `127.0.0.1:8810` and the fabric IP both give HTTP 000 even when the service is perfectly healthy — probe it from the Mac, or use the Tailscale address on-box. | `sudo systemctl restart harness-gci` |
+| Production embedder + GCI | **asus4** since 2026-10-09 (moved off e10b so e10b can train). `bge-m3-embed.service` on **100.100.116.82:8800** (systemd, `Restart=always`, enabled) — same FAE **v4** weights under the legacy label `bge-m3-cr-tapes-v1`, path `~/embedder/weights/bge-m3-fae-search-v4/checkpoints_20260822T045420Z` (no symlink indirection — /healthz shows the real path now). `harness-gci.service` on **100.100.116.82:8810**, same token (clients unchanged), index at `~/harness-gci-data/code-intel.sqlite`, release symlink `~/harness-gci/app -> releases/20260828T184119Z`. **Cutover gate passed**: verify_equivalence 8/8 bit-identical vs e10b before repointing. Rollback = e10b's pair (stopped+disabled, assets on disk: `/data/categoryrank/cr-finetune`, `/data/harness-gci`, `/home/samkim/harness-gci`) + repoint 4 config values. | embedder: `curl 100.100.116.82:8800/healthz` (**never `/v1/models`** — it 404s). GCI: `curl -o /dev/null -w '%{http_code}' 100.100.116.82:8810/health` → **401 = alive**. GCI binds only its Tailscale address — `127.0.0.1:8810` gives HTTP 000 even when healthy. | `sudo systemctl restart bge-m3-embed` / `harness-gci` on asus4. Both self-heal (`Restart=always`, enabled). |
 | Embedder weights backup | NAS `/Volumes/M5_4TB/harness-training/models/` — **all four generations** as of 2026-10-09: `bge-m3-fae-search-v4` (live, 15G), `bge-m3-cr-tapes-v2` (15G), `bge-m3-fae-search-v3` (15G), `bge-m3-fae-search-v31` (5.7G), plus the pre-existing April `bge-m3-cr-tapes-v1` (21G). Manifest + restore steps: `BACKUP-bge-m3-fae-search-v4.md` beside them | `du -sh` each dir; verification was file-count + sha256 + `rsync -an` clean | re-rsync from e10b; the NAS is Mac-attached, so this one transfer legitimately rides the M5 |
 | Embedder standby (cold) | asus2 `~/embedder-rehearsal/` — verified weight copy (15G) + venv + `bge_m3_service.py`. **Not running, no cron.** Recipe + scripts: `deploy/embedder-standby/` | `./start-standby.sh 8801` (binds 127.0.0.1 only, refuses :8800), then `python3 verify_equivalence.py --candidate http://127.0.0.1:8801/v1/embeddings` → must print `VERDICT: IDENTICAL` | proved 2026-10-09: 8/8 vectors **bit-identical** to production, max abs diff 0.000e+00, production undisturbed (uptime kept climbing). A stock bge-m3 clone fails this test — that is the point. |
 

@@ -19,7 +19,7 @@ code_index_repos:
   - /Users/samkim/locationlocationlocation
   - /Volumes/M5_4TB/DigiKey_Reference_Designs
 gci_enabled: true
-gci_url: http://100.81.201.24:8810
+gci_url: http://100.100.116.82:8810
 gci_token_env: HARNESS_GCI_TOKEN
 gci_timeout_s: 8
 gci_refresh:

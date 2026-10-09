@@ -1,0 +1,46 @@
+### Power/parametric table extraction v2 — full run, asus2, 2026-10-09.
+### Data: results/lora-v2-pairs (1713 train / 190 holdout, quote-native from
+### catalog.db claims_canonical; built by scripts/build_lora_pairs_v2.py).
+### v1 hyperparameters carried over unchanged (proven 1020-step run).
+### Expected: 1713 x 3 / 8 = ~643 steps, ~14h on one Spark.
+### Gate before promotion: scripts/gate_v2.py (f1 >= 0.90, precision >= 0.95).
+### NOTE: this is the first run that has ever existed for v2. The Oct 5 merge
+### labelled "power-tables-student-v2" loaded the v1 adapter (see
+### results/lora-v2-pairs/GATE-BLOCKED-no-v2-model.md).
+
+model_name_or_path: /training/models/Qwen3-VL-8B-Instruct
+trust_remote_code: true
+
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_target: all
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+freeze_vision_tower: true
+freeze_multi_modal_projector: true
+freeze_language_model: false
+
+dataset: power_tables_v2_train
+dataset_dir: /training/datasets/power-tables-v2
+template: qwen3_vl_nothink
+cutoff_len: 16384
+preprocessing_num_workers: 8
+dataloader_num_workers: 2
+
+output_dir: /training/checkpoints/power-tables-qwen3-vl-8b-v2
+logging_steps: 10
+save_steps: 200
+save_total_limit: 2
+plot_loss: true
+overwrite_output_dir: false
+report_to: none
+
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 8
+gradient_checkpointing: true
+learning_rate: 0.0001
+num_train_epochs: 3.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.03

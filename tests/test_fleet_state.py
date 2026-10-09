@@ -63,7 +63,9 @@ def test_embedder_is_probed_on_the_route_it_implements() -> None:
 
 def test_gci_is_probed() -> None:
     url, kind = fleet_state.ENDPOINTS["harness_gci"]
-    assert url == "http://100.81.201.24:8810/health"
+    # GCI moved with the embedder to asus4 on 2026-10-09 (dgx1 became a
+    # training box); the pair is welded by harness/gci/encoder.py.
+    assert url == "http://100.100.116.82:8810/health"
     assert kind == "gci"
 
 

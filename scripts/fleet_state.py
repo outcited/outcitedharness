@@ -34,12 +34,14 @@ ENDPOINTS = {
     # 8901. Probed so a replica that is running-but-not-serving is visible:
     # "container up" and "judge answers" are different facts.
     "dgx1_canon_replica": ("http://100.81.201.24:8901/v1/models", "models"),
-    # Production embedder: FAE v4 weights behind the bge-m3-cr-tapes-v1 label.
+    # Production embedder since 2026-10-09: RELOCATED off dgx1/e10b to asus4
+    # (dgx1 is now a training box). Same weights (FAE v4 behind the
+    # bge-m3-cr-tapes-v1 label), verified bit-identical before cutover.
     # /healthz is the route it actually implements; /v1/models 404s.
-    "spark_embedder": ("http://100.81.201.24:8800/healthz", "embedder"),
-    # GCI is the embedder's only continuous consumer (300 s refresh) and feeds
-    # orch.py semantic expansion. It was never probed before.
-    "harness_gci": ("http://100.81.201.24:8810/health", "gci"),
+    "spark_embedder": ("http://100.100.116.82:8800/healthz", "embedder"),
+    # GCI moved with the embedder (they are welded by harness/gci/encoder.py).
+    # It binds only to its Tailscale address; 401 = alive, bearer-guarded.
+    "harness_gci": ("http://100.100.116.82:8810/health", "gci"),
 }
 
 # asus4 is Tailscale-only: it gave its fabric switch port to dgx1 on 2026-10-04,

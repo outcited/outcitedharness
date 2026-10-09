@@ -1,0 +1,48 @@
+### e10b liger-free TRAINING QUALIFICATION — 2026-10-09.
+### Purpose: answer "is dgx1/e10b safe to train on with liger OFF", the condition
+### the 2026-10-07 verdict left open. All three Oct 6-7 freezes ran with
+### use_liger_kernel: true; liger runs died by ~step 42. This run goes to 120
+### steps liger-free — ~3x past the known death zone — with artifacts on
+### persistent disk (never /tmp; that is how the last attempt's evidence vanished).
+### Prerequisites enforced before launch: embedder+GCI relocated to asus4 and
+### stopped on e10b; canon-replica stopped for the window; timers swept.
+### PASS = 120 steps complete, no userspace freeze.
+### FAIL = freeze/hang -> e10b is serving-only permanently, restore the pair.
+
+model_name_or_path: /training/models/Qwen3-VL-8B-Instruct
+trust_remote_code: true
+
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_target: all
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+freeze_vision_tower: true
+freeze_multi_modal_projector: true
+freeze_language_model: false
+use_liger_kernel: false
+
+dataset: power_tables_v2_train
+dataset_dir: /training/datasets/power-tables-v2
+template: qwen3_vl_nothink
+cutoff_len: 16384
+preprocessing_num_workers: 8
+dataloader_num_workers: 2
+
+output_dir: /training/checkpoints/e10b-ligerfree-qual-20261009
+logging_steps: 5
+save_steps: 60
+save_total_limit: 2
+plot_loss: true
+overwrite_output_dir: true
+report_to: none
+max_steps: 120
+
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 8
+gradient_checkpointing: true
+learning_rate: 0.0001
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
