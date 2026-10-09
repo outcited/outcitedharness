@@ -1,0 +1,114 @@
+{
+  "request": {
+    "category": "power",
+    "constraints": {
+      "vin_v": 48.0,
+      "vout_v": 5.0,
+      "iout_a": 1.25
+    },
+    "comparison": {
+      "metric": "efficiency"
+    }
+  },
+  "cache_miss": {
+    "n": 1,
+    "min_ms": 3493.2,
+    "p50_ms": 3493.2,
+    "max_ms": 3493.2
+  },
+  "cache_hit": {
+    "n": 5,
+    "min_ms": 2879.4,
+    "p50_ms": 2897.3,
+    "max_ms": 2972.0
+  },
+  "samples": [
+    {
+      "request_index": 0,
+      "latency_ms": 3493.2,
+      "cache_hit": false,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.2,
+        "cohort_build_ms": 604.5,
+        "crosswalk_ms": 0.3,
+        "m4_decision_ms": 6.1,
+        "evidence_resolution_ms": 0.0
+      },
+      "total_ms": 3470.7,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 1,
+      "latency_ms": 2897.5,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.2,
+        "cohort_build_ms": 604.5,
+        "crosswalk_ms": 0.3,
+        "m4_decision_ms": 6.1,
+        "evidence_resolution_ms": 0.0
+      },
+      "total_ms": 2874.7,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 2,
+      "latency_ms": 2885.8,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.2,
+        "cohort_build_ms": 604.5,
+        "crosswalk_ms": 0.3,
+        "m4_decision_ms": 6.1,
+        "evidence_resolution_ms": 0.0
+      },
+      "total_ms": 2865.8,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 3,
+      "latency_ms": 2879.4,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.2,
+        "cohort_build_ms": 604.5,
+        "crosswalk_ms": 0.3,
+        "m4_decision_ms": 6.1,
+        "evidence_resolution_ms": 0.0
+      },
+      "total_ms": 2858.2,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 4,
+      "latency_ms": 2897.3,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.2,
+        "cohort_build_ms": 604.5,
+        "crosswalk_ms": 0.3,
+        "m4_decision_ms": 6.1,
+        "evidence_resolution_ms": 0.0
+      },
+      "total_ms": 2876.8,
+      "errors_warnings": []
+    },
+    {
+      "request_index": 5,
+      "latency_ms": 2972.0,
+      "cache_hit": true,
+      "timings_ms": {
+        "identity_snapshot_ms": 8.2,
+        "cohort_build_ms": 604.5,
+        "crosswalk_ms": 0.3,
+        "m4_decision_ms": 6.1,
+        "evidence_resolution_ms": 0.0
+      },
+      "total_ms": 2951.8,
+      "errors_warnings": []
+    }
+  ],
+  "cohort_build_ms_on_miss": 604.5,
+  "m4_decision_ms_on_miss": 6.1,
+  "cohort_candidate_count": 1577
+}

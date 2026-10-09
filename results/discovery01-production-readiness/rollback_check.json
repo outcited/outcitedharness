@@ -1,0 +1,13 @@
+{
+  "scenario": "rollback_feature_flag_off",
+  "mechanism": "restart M5 search API without SEARCH_ENABLE_ENGINEERING_SESSION",
+  "engineering_session_http": "404",
+  "discovery_facets_http": "200",
+  "m4_service_health_http": "200",
+  "session_route_removed": true,
+  "rest_of_api_unaffected": true,
+  "m4_unaffected": true,
+  "verdict": "PASS",
+  "note": "flag-off removes the integrated route entirely; no partial or stale decision path remains reachable; re-enabling the flag restores service (verified in the restart check)",
+  "recorded_at": "2026-10-09T11:22:33-0700"
+}

@@ -1,0 +1,271 @@
+{
+  "assessment": "DISCOVERY-01 production readiness",
+  "mode": "assessment_only_no_state_transition",
+  "assessed_at": "2026-10-09T11:45:00-0700",
+  "current_state": "EXPERIMENTAL-INTEGRATED",
+  "shas": {
+    "m4_remediation_repo": "beargallbladder/outcitedharness",
+    "m4_remediation_branch": "curve/08c-parity-repair",
+    "m4_remediation_sha": "42644eacd779cd91324215fe48c2cb2a78944587",
+    "m4_sha_verified_live": true,
+    "m5_integration_branch": "discovery/01-final-parity",
+    "m5_integration_sha": "4198e5cd6df92d388474e738113be9820c0e112b",
+    "curve08_in_ancestry": true,
+    "facet03_family_signoff_961ef951_in_ancestry": true,
+    "facet03_series_signoff_0c23a34d_in_ancestry": false,
+    "facet03_series_branch": "discovery/01-facet-decision-integration",
+    "m4_bundle_sha256_live": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+    "m4_evidence_release_live": "curve-evidence-bundle-v3-5875789dcf3f",
+    "m5_evidence_release_served": "search-release-v1-3f8b74ece642",
+    "identity_snapshot_served": "identity-snapshot-v1-872f0c3b0442869c"
+  },
+  "r11_criteria_source": [
+    "DISCOVERY01_LIVE_PARITY_HANDOFF.md#6 (admission decisions, provenance backfill completion, cohort caching, auth policy)",
+    "DISCOVERY01_ARCHITECTURE.md (family-grain population, auth before cross-machine, localhost-only, flag gating)",
+    "FACET02_REPORT.md GA blockers (family-grain upstream, evidence-grade provenance backfill, cohort caching; do not expose mcu/connector facets)"
+  ],
+  "r11_status": {
+    "admission_decisions": "LARGELY DONE AT IDENTITY LAYER, STALE IN THIS BRANCH - 626 family + 237 series verified with recorded owner approvals; 15 series->family links still proposed; branch docs still assert nothing was promoted",
+    "provenance_backfill_completion": "OPEN - resolver field-path defect plus residual unhashed/pageless data",
+    "cohort_caching": "OPEN - in-memory only; dominant cost is an uncached per-request release fingerprint",
+    "auth_policy": "OPEN - session route unauthenticated; M4 auth fails open without a token; no non-local bind guard on M4",
+    "family_grain_population": "OPEN - parts.family 0/1882 despite 626 verified memberships",
+    "facet_exposure_restriction": "HONOURED - served facets are subcategory/aisle only; no mcu/connector exposure observed"
+  },
+  "live_admission_evidence": {
+    "relationships_by_kind_status": {"family|verified": 626, "series|verified": 237, "family|proposed": 15},
+    "approval_refs": [
+      "FACET03-OWNER-APPROVAL-2026-10-09-961ef951",
+      "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d"
+    ],
+    "approval_keys_in_meta": 19,
+    "verified_children_are_catalog_opns": true,
+    "catalog_parts_with_family": "0/1882",
+    "source": "results/discovery01-production-readiness/identity_reconciliation.json"
+  },
+  "blockers": [
+    {
+      "id": "B3",
+      "title": "Stale-release pinning silently bypassed on session-cache hits (new, found by this assessment)",
+      "category": "BLOCKER",
+      "evidence": {
+        "cache_miss_behaviour": {"failures": ["release_mismatch"], "partial_result": true, "cohort_preserved": 1577},
+        "repeat_pinned_behaviour": {"failures": ["release_mismatch"], "partial_result": true, "note": "failure results are never cached"},
+        "cache_hit_behaviour": {"cache_hit": true, "failures": [], "partial_result": false, "release_served": "curve-evidence-bundle-v3-5875789dcf3f", "release_pinned_by_client": "curve-evidence-bundle-v2-3b5658b629cc"},
+        "root_cause": "SessionCache.key omits expected_releases (harness/search/orchestrator.py:259-266) while cache.put stores only failure-free results (harness/search/orchestrator.py:406)",
+        "contract_violated": "tests/test_discovery01.py::test_release_mismatch_is_structured_not_silent",
+        "scenario": "P8c_stale_pin_after_unpinned_cache",
+        "sources": ["results/discovery01-production-readiness/pilot_records.json", "results/discovery01-production-readiness/pilot_summary.json"]
+      },
+      "why_blocker": "Correctness defect in a fail-closed safety path: a client that pins an old release can be served newer decision data with partial_result false and no failure, contradicting the recorded action 'stale decision data never silently used'.",
+      "smallest_safe_remediation": "Include a canonical hash of expected_releases among the SessionCache.key inputs, then add a regression test for the unpinned-then-pinned-stale sequence asserting release_mismatch and partial_result true on a cache hit."
+    },
+    {
+      "id": "B2",
+      "title": "Provenance unresolvable end-to-end (R11.2) - resolver reads the wrong field path",
+      "category": "BLOCKER",
+      "evidence": {
+        "cited_evidence_ids": 4,
+        "documents_resolved_by_m5": 0,
+        "unresolved_evidence_ids": 4,
+        "those_source_sha256_exist_in_m5_index": {"023354480de7...": 9, "0cef2db3d1a1...": 22},
+        "resolver_reads": ["entry.document_sha256", "entry.datasheet_sha256"],
+        "actual_location": "entry.source.document_sha256 (with page_1based, figure_index, locator, caption, source_artifact)",
+        "code_ref": "harness/search/orchestrator.py:189-191",
+        "residual_data_gaps": {
+          "catalog_unhashed_distinct_docs": "7/1617",
+          "evidence_grade_active_units": "315318/356061 (88.6%)",
+          "quotes_absent_in_substrate": 58,
+          "quotes_unverifiable_stems": 120,
+          "unresolved_stems": ["BQ2000T", "BQ24003", "BQ24008", "BQ24071", "BQ24401"],
+          "active_units_verification_state_unverified": "356061/356061"
+        },
+        "sources": ["results/discovery01-production-readiness/provenance_probe.json"]
+      },
+      "why_blocker": "A ranked number cannot be navigated to its datasheet page through the integrated path even though the underlying evidence rows exist in the M5 index. R11 requires provenance backfill completion before production.",
+      "smallest_safe_remediation": "Extend resolve_evidence_refs to read source.document_sha256 / source.page_1based / source.locator in addition to the top-level keys, plus a regression test asserting documents non-empty and unresolved_evidence_ids empty for a supported journey. Keep the 5 unresolved stems and pageless units discovery-only."
+    },
+    {
+      "id": "B5",
+      "title": "Per-request latency dominated by an uncached, uninstrumented release fingerprint (R11.3 cohort caching is necessary but not sufficient)",
+      "category": "BLOCKER",
+      "evidence": {
+        "session_latency_ms_range": [2843.5, 3493.2],
+        "instrumented_stage_total_ms": 621.0,
+        "cohort_build_ms": 604.6,
+        "m4_decision_ms": 7.0,
+        "release_fingerprint_cost_ms_per_request": [2814.3, 2929.6],
+        "cache_hit_latency_ms_p50": 2897.3,
+        "root_cause": "meta.policy_identity is 'hybrid-v1.1(...)' while DISCOVERY-01 serves 'discovery01-v1(...)', so the cached release never matches and all 443,604 unit rows are re-fingerprinted per request; a read-only serving connection cannot persist the result",
+        "served_release_equals_db_cached_release": false,
+        "served_m5_evidence_release": "search-release-v1-3f8b74ece642",
+        "db_meta_cached_release": "search-release-v1-76d6e320c492",
+        "cohort_cache": "in-memory LRU max_entries=64, lost on restart",
+        "code_ref": "harness/search/units.py:530-566",
+        "sources": ["results/discovery01-production-readiness/performance_observations.json", "results/discovery01-production-readiness/release_identity.json"]
+      },
+      "why_blocker": "R11 lists cohort caching as a production criterion. Measured behaviour is worse than the cohort lever implies: even a full session-cache hit costs ~2.9s because the fingerprint is recomputed every request, and the served discovery release id is never persisted anywhere.",
+      "smallest_safe_remediation": "Make the release cache policy-identity-keyed (or memoise release_view per serving process with invalidation on index mutation) so the discovery fingerprint is computed once; then add persistent cohort caching. Do not simply prime the single-row meta cache: that would overwrite the hybrid search path's policy identity and invalidate its release."
+    },
+    {
+      "id": "B4",
+      "title": "Auth policy not production-grade beyond localhost (R11.4)",
+      "category": "BLOCKER",
+      "evidence": {
+        "m5_session_route_without_credentials_http": 200,
+        "m4_no_bearer_http": 401,
+        "m4_bad_bearer_http": 403,
+        "m4_auth_disabled_when_token_unset": true,
+        "m4_token_comparison_constant_time": false,
+        "m4_nonlocal_bind_guard_present": false,
+        "m5_nonlocal_bind_guard_present": true,
+        "tls_present": false,
+        "rate_limiting_present": false,
+        "request_body_size_limit_present": false,
+        "audit_log_present": false,
+        "token_literal_committed_in_repo": 0,
+        "code_ref": "harness/search/api.py:299-310",
+        "sources": ["results/discovery01-production-readiness/security_posture.json"]
+      },
+      "why_blocker": "R11 requires an auth policy before cross-machine production. The session route serves decisions with no credentials, M4 auth fails OPEN when ENGINEERING_DECISIONS_TOKEN is unset, and M4 lacks the non-local bind guard M5 has - one host variable away from an unauthenticated public decisions endpoint.",
+      "smallest_safe_remediation": "Fail closed: refuse to start (or refuse non-local bind) when no token is configured; add the SEARCH_ALLOW_REMOTE-style guard to M4; use hmac.compare_digest. Then define per-client credentials, TLS and an audit trail before any non-localhost exposure."
+    },
+    {
+      "id": "B1",
+      "title": "Family grain not propagated to the catalog (R11.5) and this branch's records contradict the live data",
+      "category": "BLOCKER",
+      "evidence": {
+        "identity_layer": {"family_verified": 626, "series_verified": 237, "family_proposed": 15, "owner_approvals_recorded": true},
+        "catalog_layer": {"parts_with_family": "0/1882", "family_coverage_of_power_cohort": 0.397},
+        "stale_documents": ["FACET03_ADMISSION_REVIEW.md ('Nothing here is approved')", "FACET03_OWNER_SIGNOFF.md ('no promote() called')", "DISCOVERY01_RELEASE_REPORT.md:110", "DISCOVERY01_LIVE_PARITY_HANDOFF.md:89"],
+        "series_promotion_commit_absent_from_branch": "0c23a34d",
+        "sources": ["results/discovery01-production-readiness/identity_reconciliation.json", "results/discovery01-production-readiness/data_quality.json"]
+      },
+      "why_blocker": "R11.5 requires family-grain population. The admissions exist and are owner-approved in the live identity store, but the catalog that discovery serves from still has no family values, 15 series->family links remain undecided, and this branch's documents assert the opposite of the live data - so promotion could be decided from paperwork that contradicts the databases.",
+      "smallest_safe_remediation": "Propagate verified memberships into parts.family (or serve family grain from the identity store), decide the 15 outstanding series->family links, then reconcile the branch (merge/rebase discovery/01-facet-decision-integration or re-issue the admission records here) and correct the four stale documents."
+    },
+    {
+      "id": "B6",
+      "title": "M4 ranking population and M5 discovery cohort are disjoint; the crosswalk is a test fixture (new, found by this assessment)",
+      "category": "BLOCKER",
+      "evidence": {
+        "m5_cohort_candidates": 1577,
+        "m5_catalog_character": "Infineon-family OPNs (AIMBG120R040M1, 2N7002L, ...)",
+        "m4_bundle_distinct_parts": 20,
+        "m4_bundle_character": "TI LM*/TPS* plus Vishay SiC46x",
+        "m4_parts_present_in_m5_catalog": 0,
+        "m4_parts_present_in_identity_db": 0,
+        "identity_mapped_exact": 0,
+        "identity_unmapped_m4_only": 20,
+        "identity_unmapped_family_nodes": 1,
+        "crosswalk_source": "tests/fixtures/discovery01/m4_identity_crosswalk_v1.json",
+        "crosswalk_is_test_fixture": true,
+        "crosswalk_fixture_candidates": 21,
+        "crosswalk_fixture_bytes": 8777,
+        "question_sent_to_m4_includes_candidate_list": false,
+        "top_ranked_entry": {"part": "SiC461", "value": 93.94439791602247, "in_catalog": false, "adjudication_state": "human_review_pending", "evidence_class": "unspecified", "guarantee": false},
+        "disclosure_present": {"cohort_state_identity_counts": true, "grain_note": true, "per_entry_adjudication_fields": true, "explicit_out_of_cohort_statement": false, "discovery_guidance_identity_disclosure": false},
+        "code_ref": "harness/search/orchestrator.py:40-41, 137-163, 289",
+        "sources": ["results/discovery01-production-readiness/identity_reconciliation.json"]
+      },
+      "why_blocker": "The session returns a 1,577-part cohort with facets and guidance alongside a ranking of parts that cohort does not contain and the catalog cannot identify. Facet narrowing cannot influence the ranking, no ranked part links to catalog identity or family, and the retained unknown has part null. Disclosed via cohort_state counts, but never stated plainly, so a consumer can read the ranking as covering the cohort.",
+      "smallest_safe_remediation": "Replace the fixture with a crosswalk generated from the identity store, and resolve the population mismatch as an owner data-scope decision: extend M4 curve extraction to catalog (Infineon) parts, or admit the M4 bundle's TI/Vishay parts into catalog and identity. In the meantime add an explicit 'ranked parts are outside the discovery cohort' disclosure to every response."
+    }
+  ],
+  "non_blocker_items": {
+    "OPERATIONAL HARDENING": [
+      {"id": "OH1", "item": "No supervision or auto-restart; stdlib services can terminate with an empty log (observed during this assessment) and buffered stdout loses diagnostics", "remediation": "run under launchd/systemd with unbuffered output and restart-on-failure"},
+      {"id": "OH2", "item": "approximate/scenario mode is unreachable through the integrated path: build_m4_question never emits M4's 'mode', so comparison.approximate=true is silently ignored (0 approximate entries, no warning)", "remediation": "propagate mode to M4 or reject unsupported request fields; noted as an M4 gap in DISCOVERY01_FINAL_PARITY.md:47,130"},
+      {"id": "OH3", "item": "Unknown or unsupported request fields are silently ignored (no request schema validation, no 422)", "remediation": "validate the session request against a schema and fail closed on unknown comparison options"},
+      {"id": "OH4", "item": "Serving depends on an external volume (/Volumes/M5_4TB/extract-results) opened per request with no mount guard; a missing volume surfaces as a generic 500 orchestration_failed", "remediation": "preflight the data dir at startup and emit a distinct dependency-unavailable error"},
+      {"id": "OH5", "item": "No request body size limit and no rate limiting", "remediation": "bound Content-Length and add per-client throttling before exposure"},
+      {"id": "OH6", "item": "Three sqlite connections opened per request; no pooling", "remediation": "reuse read-only connections per process"}
+    ],
+    "OBSERVABILITY": [
+      {"id": "OB1", "item": "timings_ms omits the dominant ~2.9s release fingerprint, and on cache hits it replays stale timings copied from the original miss", "remediation": "instrument release_view and report real per-request stage timings"},
+      {"id": "OB2", "item": "M4's evidence_availability (per-candidate missing/comparable states and refusals with reasons) and counts (21 considered, 4 rankable, 10 missing evidence) are dropped from the session envelope", "remediation": "project coverage accounting and refusal reasons into the session response"},
+      {"id": "OB3", "item": "m4_client's contract field_mismatches (including the absent approximate mode) are not exposed in the session releases block", "remediation": "surface field_mismatches so known projection gaps are visible per response"},
+      {"id": "OB4", "item": "No structured logs, metrics endpoint, alerting, or decision audit trail", "remediation": "add JSON request/decision logs with release ids plus counters for partial results, mismatches and refusals"},
+      {"id": "OB5", "item": "The served discovery release id is deterministic but never persisted to a releases ledger; meta holds the hybrid policy's release instead", "remediation": "record the discovery-policy release alongside served responses"}
+    ],
+    "SCALE / PERFORMANCE": [
+      {"id": "SP1", "item": "2.84-3.49s per session request with no defined SLO; single-process ThreadingHTTPServer; no concurrency or load test performed", "remediation": "define an SLO and run a concurrency/load test before promotion"},
+      {"id": "SP2", "item": "Cohort build 604ms for 1,577 candidates is in-memory only (LRU 64) and lost on restart", "remediation": "persist cohorts keyed by identity snapshot + release"},
+      {"id": "SP3", "item": "Release fingerprint cost is O(unit rows) per request (443,604 rows) and grows with the index", "remediation": "see B5"}
+    ],
+    "SECURITY / ACCESS": [
+      {"id": "SA1", "item": "No TLS on either hop; bearer token travels in clear text (acceptable on loopback only)", "remediation": "terminate TLS before any cross-machine use"},
+      {"id": "SA2", "item": "Single shared static token; no rotation, per-client identity, or revocation", "remediation": "issue per-client credentials with rotation"},
+      {"id": "SA3", "item": "No audit log of who requested which decision under which release", "remediation": "add an append-only decision audit trail"},
+      {"id": "SA4", "item": "Token compared with != rather than hmac.compare_digest", "remediation": "constant-time compare"}
+    ],
+    "DATA / MODEL QUALITY": [
+      {"id": "DQ1", "item": "Only 4 of 21 M4 candidates are rankable (0.1905); 10 have no curve evidence; 11 require verification", "remediation": "extend curve extraction coverage before widening claims"},
+      {"id": "DQ2", "item": "The retained unknown candidate is unidentifiable (part null, identity_class unmapped) though correctly never eliminated", "remediation": "surface a resolvable identifier or the M4 candidate label for unknowns"},
+      {"id": "DQ3", "item": "Zero exact crosswalk matches: all 20 M4 parts are absent from catalog and identity store", "remediation": "see B6"},
+      {"id": "DQ4", "item": "Family grain unpopulated in catalog (0/1882); mcu/connector facets must stay unexposed per FACET-02", "remediation": "see B1"},
+      {"id": "DQ5", "item": "All 356,061 active units remain verification_state='unverified'; evidence-grade share 88.6%; 58 quotes absent from substrate and 120 unverifiable across 5 unresolved stems", "remediation": "keep the machine_verified_advisory posture; grade-promote only via verification, never on sha alone"},
+      {"id": "DQ6", "item": "No approximate-scenario entries exist in the M4 bundle", "remediation": "publish an approximate/scenario mode (DISCOVERY01_FINAL_PARITY.md:130)"},
+      {"id": "DQ7", "item": "Top-ranked entry carries adjudication_state=human_review_pending, evidence_class=unspecified, guarantee=false; flags are present in the payload but no consumer surface displays them", "remediation": "require any consumer to render adjudication state alongside the value"}
+    ],
+    "DOCUMENTATION / RUNBOOK": [
+      {"id": "DR1", "item": "No single production runbook covering start order (M4 then M5), env vars, release priming, flag-off rollback, restart behaviour, the M4-unavailable partial-result path, and the external-volume dependency", "remediation": "write DISCOVERY01_PRODUCTION_RUNBOOK.md consolidating the verified steps"},
+      {"id": "DR2", "item": "Production criteria are spread across handoff section 6, ARCHITECTURE and FACET02_REPORT with no single authoritative checklist artifact", "remediation": "publish one R11 checklist with per-item evidence links"},
+      {"id": "DR3", "item": "No documented latency SLO or capacity plan", "remediation": "define an SLO after B5 is fixed and a load test exists"},
+      {"id": "DR4", "item": "No documented owner workflow for turning proposed memberships into admissions, and no record in this branch of the approvals that the live data shows", "remediation": "document the packet review, promote() authorisation and where approval refs are stored"},
+      {"id": "DR5", "item": "Known gaps (approximate absence, 5 unresolved stems, unhashed docs, out-of-cohort ranking) are in internal reports but not in a client-facing contract note", "remediation": "add a served-contract limitations note"},
+      {"id": "DR6", "item": "Four branch documents contradict the live admission state", "remediation": "see B1 remediation"}
+    ]
+  },
+  "already_satisfied": [
+    {"item": "18/18 original gates and 21/21 extended parity checks", "source": "results/discovery01-final-parity/INTEGRATION_CLOSURE_RECORD.json"},
+    {"item": "Release identity stable and ranked values byte-identical across a full service restart (P9 PASS)", "source": "results/discovery01-production-readiness/restart_check.json"},
+    {"item": "Deterministic replay: identical semantic hash across repeated live calls (P1 true)", "source": "results/discovery01-production-readiness/pilot_summary.json"},
+    {"item": "Rollback verified: flag off removes the session route (404) while facets stay 200 and M4 is unaffected; re-enabling restores service", "source": "results/discovery01-production-readiness/rollback_check.json"},
+    {"item": "Fail closed with no fabricated values when no defensible comparison exists (P6 empty ranking)", "source": "results/discovery01-production-readiness/pilot_records.json"},
+    {"item": "Hard exclusions correct with rated/required/reason (P2, 16 parts)", "source": "results/discovery01-production-readiness/pilot_records.json"},
+    {"item": "Unknowns retained and never eliminated (P3)", "source": "results/discovery01-production-readiness/pilot_records.json"},
+    {"item": "Interpolation disclosed with supporting points (P1, P5)", "source": "results/discovery01-production-readiness/pilot_records.json"},
+    {"item": "Per-entry honesty fields present (adjudication_state, evidence_class, guarantee)", "source": "results/discovery01-production-readiness/identity_reconciliation.json"},
+    {"item": "Identity and grain accounting disclosed in cohort_state (identity_mapped_exact, identity_unmapped_m4_only, grain_note)", "source": "results/discovery01-production-readiness/identity_reconciliation.json"},
+    {"item": "M4 bearer auth 401/403/200, tokens env-only, no token literals committed", "source": "results/discovery01-production-readiness/security_posture.json"},
+    {"item": "M5 refuses non-local bind unless SEARCH_ALLOW_REMOTE=1 (fail-closed guard)", "source": "harness/search/api.py:299-310"},
+    {"item": "Cohort preserved (1,577) on release mismatch and M4 failure paths", "source": "results/discovery01-production-readiness/pilot_records.json"},
+    {"item": "Identity snapshots content-addressed and idempotent (same payload yields same snapshot_id across restarts)", "source": "harness/search/identity.py:280-300"},
+    {"item": "Facet-exposure restriction honoured (no mcu/connector facets served)", "source": "pilot discovery_guidance inspection"},
+    {"item": "46 readiness-adjacent tests pass; full harness previously 1479 passed + 1 guarded skip", "source": "pytest run 2026-10-09"}
+  ],
+  "tests_run": [
+    {"name": "pytest tests/test_discovery01.py tests/test_discovery01_m4_projection.py tests/test_search_isolation.py tests/test_facet02_cohort.py tests/test_facet02_axes.py", "result": "46 passed in 61.09s"},
+    {"name": "scripts/discovery01_production_pilot.py (P1-P8c live integrated path)", "result": "10 scenarios recorded"},
+    {"name": "scripts/discovery01_production_pilot.py --perf", "result": "miss 3493.2ms, hit p50 2897.3ms"},
+    {"name": "scripts/discovery01_production_pilot.py --post-restart", "result": "PASS - release identity stable, semantics identical"},
+    {"name": "rollback flag-off probe", "result": "PASS - session 404, facets 200, M4 health 200, restore 200"},
+    {"name": "scripts/discovery01_readiness_probes.py", "result": "data_quality, provenance_probe, release_identity, security_posture, identity_reconciliation captured"},
+    {"name": "git merge-base --is-ancestor for curve08 (23b17634) and facet03 family signoff (961ef951)", "result": "both in ancestry; series signoff 0c23a34d is not"}
+  ],
+  "pilot_scenarios": [
+    "P1_normal_supported_ranking", "P2_hard_exclusion", "P3_unknown_retention",
+    "P4_approximate_scenario", "P5_interpolation",
+    "P6_no_defensible_comparison", "P7_auth_failure",
+    "P8a_stale_release_cache_miss", "P8b_stale_release_cache_hit",
+    "P8c_stale_pin_after_unpinned_cache", "P9_service_restart"
+  ],
+  "pilot_failures": ["P8c_stale_pin_after_unpinned_cache (B3)", "P4_approximate_scenario degraded (OH2/DQ6)"],
+  "production_state_changed": false,
+  "state_hygiene_note": "Catalog and search index were opened read-only (mode=ro) throughout; no flag, release, admission or index mutation was performed. The serving path performs one by-design write: a content-addressed identity snapshot row in facet_identity.db.releases (idempotent, ON CONFLICT DO NOTHING), inherent to exercising the integrated endpoint. All three databases are WAL-mode; catalog.db mtime moved with a 0-byte WAL and unchanged size (WAL/shared-memory housekeeping, not an assessment write).",
+  "gate_evaluation": {
+    "all_blockers_pass": false,
+    "no_unresolved_correctness_or_security_defect": false,
+    "rollback_verified": true,
+    "release_identity_durable_and_observable": "PARTIAL - deterministic, observable per response and stable across restart, but never persisted for the discovery policy and not equal to the db-cached release",
+    "deterministic_replay_acceptable": true,
+    "production_auth_acceptable": false,
+    "failure_modes_fail_closed": "PARTIAL - correct on cache miss, M4 failure and no-comparison paths; release pinning fails open on cache hits (B3); M4 auth fails open with no token configured (B4)",
+    "real_pilot_completed": true,
+    "required_ops_docs_exist": false
+  },
+  "blocker_fix_order": ["B3", "B2", "B5", "B4", "B1", "B6"],
+  "verdict": "NOT PRODUCTION-READY — BLOCKERS REMAIN",
+  "verdict_rationale": "Three of the four repository-defined R11 criteria are open outright (provenance completion, cohort caching, auth policy) and the fourth - admission decisions - is satisfied in the live identity store (626 family + 237 series verified with recorded owner approvals) but not propagated to the catalog (parts.family 0/1882), not present in this branch, and contradicted by four of this branch's documents. This assessment also found three items not previously recorded: the stale-pin cache bypass (B3), the uncached per-request release fingerprint that dominates latency (B5), and the disjoint M4/M5 part populations served through a test-fixture crosswalk (B6). Parity being green is necessary but not sufficient. Fix order puts the two small correctness/latency defects first (B3, B2), then latency (B5), then auth (B4), then catalog propagation and branch reconciliation (B1), leaving B6 last because it requires an owner data-scope decision."
+}

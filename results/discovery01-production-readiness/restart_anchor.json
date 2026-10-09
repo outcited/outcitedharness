@@ -1,0 +1,24 @@
+{
+  "request": {
+    "category": "power",
+    "constraints": {
+      "vin_v": 48.0,
+      "vout_v": 5.0,
+      "iout_a": 0.5
+    },
+    "comparison": {
+      "metric": "efficiency"
+    }
+  },
+  "semantic_sha256": "6000c77b24ad3859517ad9aa376e8708fe65c292db58ae4de987a187e8420f32",
+  "release_ids": {
+    "m5_evidence_release": "search-release-v1-3f8b74ece642",
+    "m5_identity_snapshot": "identity-snapshot-v1-872f0c3b0442869c",
+    "m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+    "m4_bundle_sha256": null,
+    "m4_decision_contract": "harness.electronics-decision-answer.v1",
+    "m4_transport": "http",
+    "comparison_fingerprint": "36c343f15e559cb8"
+  },
+  "captured_at": "2026-10-09T11:17:24-0700"
+}

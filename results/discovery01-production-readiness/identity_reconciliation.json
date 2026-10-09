@@ -1,0 +1,108 @@
+{
+  "m4_bundle_distinct_parts": 20,
+  "m4_parts_present_in_m5_catalog": 0,
+  "m4_parts_present_in_identity_db": 0,
+  "m4_parts": [
+    "LM2592HV",
+    "LM5005",
+    "LM5161",
+    "LM5161-Q1",
+    "LM5164",
+    "LM5164-Q1",
+    "LMR33610",
+    "LMR36502",
+    "LMR38010",
+    "LMR38020",
+    "SiC461",
+    "SiC462",
+    "SiC463",
+    "SiC464",
+    "TPS54160",
+    "TPS542941",
+    "TPS54360",
+    "TPS548C26",
+    "TPS563203",
+    "TPS628302"
+  ],
+  "cohort_state": {
+    "m5_candidate_count": 1577,
+    "m5_distinct_families": 4,
+    "subcategory_vocabulary": {
+      "request": null,
+      "m5_mapped": null,
+      "crosswalk": "passthrough"
+    },
+    "m4_total_candidates": 21,
+    "m4_eligible": 14,
+    "m4_ineligible": 6,
+    "m4_unknown_retained": 1,
+    "identity_mapped_exact": 0,
+    "identity_ambiguous": 0,
+    "identity_unmapped_m4_only": 20,
+    "identity_unmapped_family_nodes": 1,
+    "active_constraints": {
+      "vin_v": 48.0,
+      "vout_v": 5.0,
+      "iout_a": 0.5
+    },
+    "grain_note": "M5 cohort counts OPNs; M4 counts its own candidate set (opn/device/family grains declared per candidate); grains are never mixed or double-counted"
+  },
+  "crosswalk_source": "tests/fixtures/discovery01/m4_identity_crosswalk_v1.json (test fixture)",
+  "crosswalk_is_test_fixture": true,
+  "crosswalk_fixture_candidates": 21,
+  "crosswalk_fixture_bytes": 8777,
+  "identity_relationships_by_kind_status": {
+    "family|proposed": 15,
+    "family|verified": 626,
+    "series|verified": 237
+  },
+  "identity_approval_refs": {
+    "approval:family:mfr:infineon:optimos": "FACET03-OWNER-APPROVAL-2026-10-09-961ef951",
+    "approval:family:mfr:infineon:coolmos": "FACET03-OWNER-APPROVAL-2026-10-09-961ef951",
+    "approval:family:mfr:infineon:coolsic": "FACET03-OWNER-APPROVAL-2026-10-09-961ef951",
+    "approval:family:mfr:infineon:strongirfet": "FACET03-OWNER-APPROVAL-2026-10-09-961ef951",
+    "approval:series:mfr:infineon:coolmos-cfd2": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:coolmos-cfd7": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:coolmos-cfd7a": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:coolmos-cfda": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:coolmos-cm8": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:coolmos-cpa": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:coolmos-g7": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:coolsic-g2": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:optimos-2": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:optimos-3": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:optimos-5": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:optimos-6": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:optimos-7": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:optimos-8": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d",
+    "approval:series:mfr:infineon:strongirfet-2": "FACET03-SERIES-OWNER-APPROVAL-2026-10-09-0c23a34d"
+  },
+  "identity_total_identities": 19,
+  "catalog_parts_with_family": "0/1882",
+  "top_ranked_entry_flags": [
+    {
+      "part": "SiC461",
+      "adjudication_state": "human_review_pending",
+      "evidence_class": "unspecified",
+      "guarantee": false
+    },
+    {
+      "part": "SiC463",
+      "adjudication_state": "human_review_pending",
+      "evidence_class": "unspecified",
+      "guarantee": false
+    },
+    {
+      "part": "SiC464",
+      "adjudication_state": "human_review_pending",
+      "evidence_class": "unspecified",
+      "guarantee": false
+    },
+    {
+      "part": "LM5161",
+      "adjudication_state": "human_review_pending",
+      "evidence_class": "typical",
+      "guarantee": false
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "ranked_entries": 4,
+  "evidence_ids_cited": [
+    "curve-214a8be75c0ffc2980cbe42a72230132",
+    "curve-29bbf05fc94f0678e06b0d8cf7968914",
+    "curve-a697319a16d26592db2cc14cf6843bd0",
+    "curve-c7b2d232869d82fb1b00a5b2a3477542"
+  ],
+  "documents_resolved_by_m5": {},
+  "unresolved_evidence_ids": [
+    "curve-214a8be75c0ffc2980cbe42a72230132",
+    "curve-29bbf05fc94f0678e06b0d8cf7968914",
+    "curve-a697319a16d26592db2cc14cf6843bd0",
+    "curve-c7b2d232869d82fb1b00a5b2a3477542"
+  ],
+  "resolver": "m5-search-index",
+  "entry_provenance_location": "entry.source.document_sha256",
+  "resolver_reads": [
+    "entry.document_sha256",
+    "entry.datasheet_sha256"
+  ],
+  "source_document_sha256_present_on_entries": 2,
+  "those_shas_active_units_in_m5_index": {
+    "023354480de7bf3ed3ce37cbd048326a750873da92a613100e5a69818a8b4ad2": 9,
+    "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175": 22
+  },
+  "provenance_data_exists_but_unresolved": true,
+  "catalog_unhashed_claims": "330/86736",
+  "catalog_unhashed_distinct_docs": "7/1617",
+  "facet03_evidence_grade_active_units": "315318/356061 (88.6%)",
+  "facet03_quote_absent_in_substrate": 58,
+  "facet03_quote_unverifiable_stems": 120,
+  "facet03_unresolved_stems": [
+    "BQ2000T",
+    "BQ24003",
+    "BQ24008",
+    "BQ24071",
+    "BQ24401"
+  ],
+  "m4_bundle_sha256": "0c047e516c10c489134efe226d12e2422651665c4e394379108e9ec10ea4b16f",
+  "m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f"
+}

@@ -1,0 +1,39 @@
+{
+  "catalog_parts_total": 1882,
+  "catalog_parts_with_family": 0,
+  "catalog_family_coverage": 0.0,
+  "cohort_candidate_count": 1577,
+  "m4_candidates_considered": 21,
+  "m4_hard_eligible": 14,
+  "m4_with_comparable_curve_evidence": 4,
+  "m4_missing_curve_evidence": 10,
+  "m4_requiring_verification": 11,
+  "m4_evidence_rows_attached": 123,
+  "rankable_share_of_m4_candidates": 0.1905,
+  "identity_class_counts": {
+    "m4_only": 20,
+    "unmapped": 1
+  },
+  "crosswalk_exact_matches": 0,
+  "unknown_candidates": [
+    {
+      "part": null,
+      "m4_candidate_id": "cand-f283f3935b82163518c1089c",
+      "identity_class": "unmapped",
+      "missing_ratings": [
+        "vin_min",
+        "vin_max",
+        "vout",
+        "iout_min"
+      ],
+      "note": "electrically unconfirmed; retained, never eliminated"
+    }
+  ],
+  "unknown_candidate_identifiable": false,
+  "facet03_family_memberships_proposed": 626,
+  "facet03_family_memberships_promoted": 0,
+  "facet03_power_cohort_family_coverage": 0.397,
+  "active_units_verification_states": {
+    "unverified": 356061
+  }
+}

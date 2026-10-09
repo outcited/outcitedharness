@@ -1,0 +1,41 @@
+{
+  "scenario": "P9_service_restart",
+  "pre_restart_semantic_sha256": "6000c77b24ad3859517ad9aa376e8708fe65c292db58ae4de987a187e8420f32",
+  "post_restart_semantic_sha256": "6000c77b24ad3859517ad9aa376e8708fe65c292db58ae4de987a187e8420f32",
+  "release_identity_stable": true,
+  "release_ids_post_restart": {
+    "m5_evidence_release": "search-release-v1-3f8b74ece642",
+    "m5_identity_snapshot": "identity-snapshot-v1-872f0c3b0442869c",
+    "m4_evidence_release": "curve-evidence-bundle-v3-5875789dcf3f",
+    "m4_bundle_sha256": null,
+    "m4_decision_contract": "harness.electronics-decision-answer.v1",
+    "m4_transport": "http",
+    "comparison_fingerprint": "36c343f15e559cb8"
+  },
+  "semantics_identical_after_restart": true,
+  "ranked_candidates_post_restart": [
+    {
+      "part": "SiC461",
+      "value": 93.94439791602247,
+      "evidence_id": "curve-214a8be75c0ffc2980cbe42a72230132"
+    },
+    {
+      "part": "SiC463",
+      "value": 92.9555411613481,
+      "evidence_id": "curve-c7b2d232869d82fb1b00a5b2a3477542"
+    },
+    {
+      "part": "SiC464",
+      "value": 92.95487954326245,
+      "evidence_id": "curve-29bbf05fc94f0678e06b0d8cf7968914"
+    },
+    {
+      "part": "LM5161",
+      "value": 77.94750584892213,
+      "evidence_id": "curve-a697319a16d26592db2cc14cf6843bd0"
+    }
+  ],
+  "latency_ms": 3448.2,
+  "errors_warnings": [],
+  "verdict": "PASS"
+}
