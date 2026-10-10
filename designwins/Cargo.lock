@@ -212,6 +212,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-release"
+version = "0.1.0"
+dependencies = [
+ "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-truth"
 version = "0.1.0"
 dependencies = [

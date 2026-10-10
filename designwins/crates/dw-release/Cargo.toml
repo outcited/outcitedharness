@@ -1,0 +1,19 @@
+[package]
+name = "dw-release"
+description = "Immutable releases: ReleaseId resolves to a manifest naming its corpus, vocabularies, embedder, engine, and code. 16.2 no duplicate truth, 16.4 no lost lineage."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+dw-types = { path = "../dw-types" }
+
+[dev-dependencies]
+
+[lints]
+workspace = true
