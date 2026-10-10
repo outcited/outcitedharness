@@ -1,0 +1,13 @@
+error[E0451]: fields `value`, `quote`, `source` and `condition_verbatim` of struct `dw_types::Claim` are private
+  --> tests/compile_fail/claim_struct_literal.rs:16:9
+   |
+15 |     let _claim = Claim {
+   |                  ----- in this type
+16 |         value: "600".into(),
+   |         ^^^^^ private field
+17 |         quote,
+   |         ^^^^^ private field
+18 |         source,
+   |         ^^^^^^ private field
+19 |         condition_verbatim: None,
+   |         ^^^^^^^^^^^^^^^^^^ private field

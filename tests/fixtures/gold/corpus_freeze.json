@@ -1,0 +1,170 @@
+{
+ "generated_at": "2026-10-10T18:09:17+00:00",
+ "member_count": 32,
+ "members": [
+  {
+   "bytes": 28330,
+   "path": "condition_model_v1.jsonl",
+   "sha256": "a8031fb012cd2ef4025cf1879c4369710ed98efc5132818ec5bfe2c397c9cce8"
+  },
+  {
+   "bytes": 12771,
+   "path": "curve_evidence_pilot/LMR36502_p10.json",
+   "sha256": "79f8b32ca3cc4b48794dca9bb9d2ee9834f61717aad486f75d04d5b469fcc2bf"
+  },
+  {
+   "bytes": 15418,
+   "path": "curve_evidence_pilot/TPS542941_p9.json",
+   "sha256": "bee7c277795c1267c8f245c7f78eb79f22e449a72cc1e45ae7080424a07a3a22"
+  },
+  {
+   "bytes": 5481,
+   "path": "curve_evidence_pilot/TPS563206_p7.json",
+   "sha256": "6aac1eba6bdfbc2e2f792b70e35be69d93dd7233ee36358a484cae11206c716d"
+  },
+  {
+   "bytes": 15364,
+   "path": "curve_evidence_pilot/TPS628302_p7.json",
+   "sha256": "9ad17848c8899e8005f637b4c226f999b1e25fbde5a3624654feeb50dc6ea675"
+  },
+  {
+   "bytes": 4590,
+   "path": "curve_evidence_pilot/_cohort.json",
+   "sha256": "2febb4d42f44d365ad0b6208fe717831ca76b52f4f7b4552e6181c6f78dc0d3c"
+  },
+  {
+   "bytes": 16141,
+   "path": "curve_evidence_pilot/_probes.json",
+   "sha256": "418fbbdda47e87109efcf8fb748fa473f00850f09eef8409e0e8fe7b60297295"
+  },
+  {
+   "bytes": 11494,
+   "path": "curve_evidence_pilot/_sample_manifest.json",
+   "sha256": "ff3f994abb4c0843ec167eddfc241a9ff8c6173718e1cf31fa4ed3ffda704957"
+  },
+  {
+   "bytes": 16858,
+   "path": "curve_evidence_pilot/lmr33610_p8.json",
+   "sha256": "d8ffb5e316413775df97e0e31398de093e83e5b93a1b745ccc863cedb8eabcde"
+  },
+  {
+   "bytes": 6693,
+   "path": "curve_evidence_pilot/sic448_p13.json",
+   "sha256": "1dba74a665fadccb1ad17a565248b0a00078ff9e0fc0f2d0b33677aba1ca0ce1"
+  },
+  {
+   "bytes": 104488,
+   "path": "curve_evidence_pilot/tps548c26_p10.json",
+   "sha256": "b9968e0d97a2658ac48c91b0957b2cb94a28ef2aebd023222a87d89b91163080"
+  },
+  {
+   "bytes": 13557,
+   "path": "curve_evidence_pilot/vishay_sic46x_p14.json",
+   "sha256": "20b2defbbe7ac5d7f9cf0b85cde62b20a37780e9e5696e197b3b0f4b72bea9bd"
+  },
+  {
+   "bytes": 8652,
+   "path": "curve_evidence_pilot/vishay_sic46x_p15.json",
+   "sha256": "659acda9a0244d8b77000b40a9a5817e9fbf7e89b5f4c1d5f7a88fde200310e9"
+  },
+  {
+   "bytes": 5689,
+   "path": "curve_evidence_pilot/vishay_sic46x_p16.json",
+   "sha256": "a8d4da977078cdebea01302e257af51d9a376e100f08e3bec2e5aff4ddd82101"
+  },
+  {
+   "bytes": 5170,
+   "path": "curve_evidence_pilot/vishay_sic46x_p17.json",
+   "sha256": "44f7fd59c2c2996073f8236009d9d6dd547c5e3b96361aadcddaf8063990a495"
+  },
+  {
+   "bytes": 5892,
+   "path": "curve_evidence_pilot/vishay_sic46x_p18.json",
+   "sha256": "a13f716141270df6a0ed49f446510f82b2ca6f41c9250ff234f4fb4ce1263161"
+  },
+  {
+   "bytes": 4425,
+   "path": "curve_evidence_pilot/vishay_sic46x_p19.json",
+   "sha256": "7dda0f6f862e9c7e7c265a6718c652eb26eb9d9af8b1d7569369da6b6479bdbd"
+  },
+  {
+   "bytes": 2997,
+   "path": "key_features_efm32jg1.json",
+   "sha256": "d4075d090b20fac110aaf8ebef07671f5ca00d822cdd3316e36dc0e0d72a35de"
+  },
+  {
+   "bytes": 1886,
+   "path": "key_features_gd32f403.json",
+   "sha256": "4a19787cb31e62606e65e5aba17a10a85fd144c7e03dd6240e4eec2695c4992f"
+  },
+  {
+   "bytes": 2926,
+   "path": "key_features_kl25_rm.json",
+   "sha256": "f9f5885ec4982e4acc07359fcf5b0a53d3c403166eb958293bfeb1a58e586314"
+  },
+  {
+   "bytes": 3641,
+   "path": "key_features_ra4c1.json",
+   "sha256": "3a5c3c3e5d0d497ef0a59fc20fb17adce97fed20e122a797741b0e8c579c8d48"
+  },
+  {
+   "bytes": 3218,
+   "path": "key_features_samd10.json",
+   "sha256": "29b180bbd1982f937b799f8c1a1e4b1abbc4783e785142b125054d27a28cafc1"
+  },
+  {
+   "bytes": 3225,
+   "path": "key_features_stm32f103x4.json",
+   "sha256": "4a3871e7803fdf3111c363b8c7bc6dd6926f454b30d243e88af6c5ea06df78b8"
+  },
+  {
+   "bytes": 2042,
+   "path": "key_features_tm4c123gh6pm.json",
+   "sha256": "845e6b0f8bb805ddb80ed37eb921b9db051504b917e930cfb5ae824163ec33b8"
+  },
+  {
+   "bytes": 184221,
+   "path": "pdf_engine_segments_v1.json",
+   "sha256": "73e84712e3a2e70c2014e43f32f95b696c5a1671b42e38773791daddaedaeda0"
+  },
+  {
+   "bytes": 192876,
+   "path": "power_topology_v1.jsonl",
+   "sha256": "bcc3839413be05c35ba9b76df0f5bda89e1e5c259444d140580e5f4985d6a6bc"
+  },
+  {
+   "bytes": 20840,
+   "path": "rating_class_v1.jsonl",
+   "sha256": "30376f1f5ca06159b2dc47e7cb573d75af4374c125b8cf9223f68e1a2efaaefd"
+  },
+  {
+   "bytes": 998,
+   "path": "typical_curves/_schema_example.json",
+   "sha256": "63ce8174a8c587254ee4fabf28b144a4f254f6b72a7604d3b70a30808a6776c5"
+  },
+  {
+   "bytes": 3812,
+   "path": "typical_curves/msp430fr6005_p29.json",
+   "sha256": "fc1430b9384671e9183abfecae314d48de9a5cb6a517eba60332fc9fea8f7d57"
+  },
+  {
+   "bytes": 4309,
+   "path": "typical_curves/msp430g2744_p15.json",
+   "sha256": "d7904fbe697569f383713d276f0b9d817f3dfda0418dc51ef0bf482158c5e368"
+  },
+  {
+   "bytes": 3587848,
+   "path": "typical_curves/pdfs/msp430fr6005.pdf",
+   "sha256": "d01f23dc1457b06733f53ea42358e36397c1d16e059d81758c4a788f0b570e5b"
+  },
+  {
+   "bytes": 2727374,
+   "path": "typical_curves/pdfs/msp430g2744.pdf",
+   "sha256": "053f4bee6b6bed619410b249ec2f5bf223a4a8fbd3631c8746a8f274873bd39f"
+  }
+ ],
+ "release": "designwins-2026-W46-freeze-0",
+ "root": "/Users/samkim/Harnessv1/tests/fixtures/gold",
+ "schema_version": "harness.dw-parity-corpus.v1",
+ "total_bytes": 7023226
+}

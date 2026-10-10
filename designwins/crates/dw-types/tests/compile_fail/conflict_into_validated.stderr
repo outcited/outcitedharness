@@ -1,0 +1,7 @@
+error[E0277]: the trait bound `dw_types::Validated: From<dw_types::Conflict>` is not satisfied
+  --> tests/compile_fail/conflict_into_validated.rs:21:41
+   |
+21 |     let validated: Validated = conflict.into();
+   |                                         ^^^^ the trait `From<dw_types::Conflict>` is not implemented for `dw_types::Validated`
+   |
+   = note: required for `dw_types::Conflict` to implement `Into<dw_types::Validated>`

@@ -1,0 +1,19 @@
+[package]
+name = "dw-pdf"
+description = "STAGE 0 substrate: PDF parse, geometry, path segments. Replaces harness/electronics/{word_columns,regions,locator,page_evidence}.py PDF access. Engine choice is governed by D1 in docs/DECISIONS.md."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+pdfium-render = "0.9.4"
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

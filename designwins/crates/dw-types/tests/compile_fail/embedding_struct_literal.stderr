@@ -1,0 +1,9 @@
+error[E0451]: fields `vector` and `fingerprint` of struct `dw_types::Embedding` are private
+  --> tests/compile_fail/embedding_struct_literal.rs:11:9
+   |
+10 |     let _embedding = Embedding {
+   |                      --------- in this type
+11 |         vector: vec![0.0, 1.0],
+   |         ^^^^^^ private field
+12 |         fingerprint: WeightFingerprint::new("bge-large-en-v1.5").unwrap(),
+   |         ^^^^^^^^^^^ private field

@@ -1,0 +1,20 @@
+[package]
+name = "dw-parity"
+description = "The parity harness. Runs the Python reference and the Rust candidate over a frozen corpus and writes a discrepancy ledger. The Week 0 gate is: the ledger runs empty. D2 classifies every diff."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "dw-parity"
+path = "src/main.rs"
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

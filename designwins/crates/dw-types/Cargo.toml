@@ -1,0 +1,19 @@
+[package]
+name = "dw-types"
+description = "THE LAW as types. Replaces the invariants that lived in comments across harness/electronics/{claims,admission,condition_model,rating_class,curve_atoms}.py"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+trybuild = "1"
+
+[lints]
+workspace = true
