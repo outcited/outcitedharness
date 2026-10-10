@@ -1,0 +1,20 @@
+[package]
+name = "dw-evidence"
+description = "Resolvable provenance: page render @ 144 DPI + row-band crop, content-addressed, engine-pinned. C13. The difference between typed provenance and real provenance."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+dw-types = { path = "../dw-types" }
+dw-pdf = { path = "../dw-pdf" }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

@@ -53,6 +53,59 @@ pub enum PdfError {
     /// The requested page does not exist.
     #[error("page {0} out of range")]
     PageOutOfRange(u32),
+    /// The bitmap could not be produced.
+    #[error("cannot render page: {0}")]
+    Render(String),
+}
+
+/// A rendered page: raw RGBA pixels.
+///
+/// Deliberately not a `Vec<u8>` with a comment. The dimensions are part of the
+/// value so a crop cannot silently assume the wrong raster.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RenderedPage {
+    /// Width in pixels.
+    pub width_px: u32,
+    /// Height in pixels.
+    pub height_px: u32,
+    /// Row-major RGBA, 4 bytes per pixel.
+    pub rgba: Vec<u8>,
+}
+
+impl RenderedPage {
+    /// Bytes per pixel.
+    pub const BPP: usize = 4;
+
+    /// Crop a pixel rectangle. Clamps to the page.
+    ///
+    /// Returns `None` when the rectangle is empty after clamping — an empty
+    /// crop is not evidence.
+    #[must_use]
+    pub fn crop(&self, bbox: [u32; 4]) -> Option<RenderedPage> {
+        let [x, y, w, h] = bbox;
+        let x0 = x.min(self.width_px);
+        let y0 = y.min(self.height_px);
+        let x1 = x.saturating_add(w).min(self.width_px);
+        let y1 = y.saturating_add(h).min(self.height_px);
+        if x1 <= x0 || y1 <= y0 {
+            return None;
+        }
+        let cw = x1 - x0;
+        let ch = y1 - y0;
+        let mut rgba = Vec::with_capacity((cw * ch) as usize * Self::BPP);
+        for row in y0..y1 {
+            let start = ((row * self.width_px + x0) as usize) * Self::BPP;
+            let end = ((row * self.width_px + x1) as usize) * Self::BPP;
+            if let Some(slice) = self.rgba.get(start..end) {
+                rgba.extend_from_slice(slice);
+            }
+        }
+        Some(RenderedPage {
+            width_px: cw,
+            height_px: ch,
+            rgba,
+        })
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -229,6 +282,39 @@ impl Document<'_> {
         let top: Vec<PdfPageObject<'_>> = page.objects().iter().collect();
         collect_paths(top, PdfMatrix::identity(), height, &mut out);
         Ok(out)
+    }
+
+    /// Render a page to RGBA pixels at a given scale.
+    ///
+    /// This is the **provenance snapshot** path (`C13`). The renderer is
+    /// engine-pinned: the pixels, and therefore the content-addressed hash of
+    /// anything derived from them, are a function of `engine_id()`. Re-rendering
+    /// under a different engine is *supposed* to change the hash — that is what
+    /// makes provenance break loudly rather than silently.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PdfError::PageOutOfRange`] if the page does not exist, or
+    /// [`PdfError::Render`] if the bitmap cannot be produced.
+    pub fn render_rgba(
+        &self,
+        page_1based: u32,
+        width_px: u32,
+        height_px: u32,
+    ) -> Result<RenderedPage, PdfError> {
+        let page = self.page(page_1based)?;
+        let bitmap = page
+            .render(
+                i32::try_from(width_px).unwrap_or(1),
+                i32::try_from(height_px).unwrap_or(1),
+                None,
+            )
+            .map_err(|e| PdfError::Render(e.to_string()))?;
+        Ok(RenderedPage {
+            width_px,
+            height_px,
+            rgba: bitmap.as_rgba_bytes(),
+        })
     }
 
     fn page(&self, page_1based: u32) -> Result<PdfPage<'_>, PdfError> {

@@ -145,6 +145,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-evidence"
+version = "0.1.0"
+dependencies = [
+ "dw-pdf",
+ "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-funnel"
 version = "0.1.0"
 dependencies = [
