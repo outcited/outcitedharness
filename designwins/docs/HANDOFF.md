@@ -101,8 +101,8 @@ scripts/
   fetch_pdfium.sh                pinned PDFium 7881, checksum-verified
 ```
 
-**10 crates · 32 Rust files · 9,217 lines · 82 tests passing.** G7 is the one
-intentional failure.
+**10 crates · 33 Rust files · ~9,400 lines · 84 tests passing.** G7 is the one
+intentional failure. Gate N4a is green at 9,551/9,551 against `catalog.db`.
 
 Dependency graph is acyclic and each layer has one job:
 
@@ -140,6 +140,8 @@ let answer = dw_funnel::accept(
 | N2 property tests | units round-trip, coverage reflexivity, margin explicitness | **green** |
 | Week 0 parity | ledger runs empty, `cutover_permitted` | **green** |
 | **Trust gate** | evidence resolves · releases resolve · unresolvable ⇒ `Unknown` | **green** (see `PROVENANCE.md` §9) |
+| **N4a condition corpus** | `catalog.db::conditions_typed`, **9,551/9,551** | **green** |
+| N4b claim diff | `claims_canonical`, 86,736 claims | **next** |
 | D1 G7 path segments | PDFium vs MuPDF | **OPEN — expected** |
 
 The commands are in §0 above.
@@ -169,9 +171,10 @@ of.
 
 ### Tier 2 — an answer can be relied on at scale
 
-| # | work | unlocks | blocker |
+| # | work | unlocks | state |
 |---|---|---|---|
-| 2.1 | **Gate N4: the 87K claim diff** | proof the port did not drift | **corpus location unknown — see §5** |
+| ~~2.1~~ | ~~**Gate N4a: condition corpus**~~ | proof the port did not drift on conditions | **DONE** — 9,551/9,551 against `catalog.db::conditions_typed` |
+| 2.1 | **Gate N4b: the 86,736 claim diff** | proof the port did not drift on claims | `claims_canonical` is readable and is the actual "87K". Diff `dw-normalize` output against it |
 | 2.2 | **Phrase-layer gate** against the query telemetry, count-weighted (1,485 rows / 8,653 searches) | proof the colloquial mapping is right | — |
 
 ### Tier 3 — an answer is useful
@@ -196,6 +199,11 @@ of.
 | **yosemiteraid5** | `/Users/samkim/mnt/yosemiteraid5/{Public,Home}` | **local NVMe NAS, fast, writable.** SMB `tapes@yosemiteraid5.local`, `nobrowse` so it does **not** appear in `/Volumes` — you have to know the path | the work target. `Public/m5-opencode/` is a clean landing zone |
 | **M5_4TB** | `/Volumes/M5_4TB` | spinning-disk NAS, bulk data. **Unmounts without warning** | read-only source. Never a build or store target (`PLAN` §10) |
 | **Electronicdataassets** | `/Users/samkim/Volumes/Electronicdataassets` | SMB `harness@192.168.4.54`, contains `m5-4tb/` and `tapes4tb/` mirrors + `backups/m5/` | cross-checking; some files are readable here that are denied on the mount |
+
+**SQLite on these mounts needs `?mode=ro&immutable=1`.** Plain `connect()`
+fails with "unable to open database file" because SQLite wants to create a
+WAL/journal and is denied. `catalog.db` copies to `yosemiteraid5` in ~2.7s
+(58 MB) and reads fine there.
 
 `yosemiteraid5` is the one to build against. The evidence store (`dw-evidence`)
 and release store (`dw-release`) already refuse the NAS by design; point them
