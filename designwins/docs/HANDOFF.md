@@ -94,28 +94,48 @@ unlinked; the session created them). Export it or add it to `~/.zshrc`.
 
 ---
 
-## 2. Definition of done is not yet met. Here is exactly what is missing.
+## 2. Definition of done is not yet met. Critical path, trust-first.
 
-Ranked by how much of the §0 sentence each one unlocks.
+**Read `PROVENANCE.md` before this section.** It reorders everything below by
+what makes an answer *believable* rather than by what completes the acceptance
+sentence, and it says honestly which links in the trust chain are typed but not
+real.
 
-| # | missing | unlocks | notes |
+Two of the acceptance sentence's clauses — "every number opens to the page it
+came from" and "I can reproduce this" — are the trust links, and they are the
+two that are **not real today**. Building the other clauses first produces a UI
+that looks accountable and is not. That is the failure mode worth being afraid
+of.
+
+### Tier 1 — an answer can be believed. **Do this first. Stop here until it is done.**
+
+| # | work | unlocks |
+|---|---|---|
+| 1.1 | **`dw-evidence`**: page render @ 144 DPI + row-band crop, content-addressed, engine-pinned, stored locally, served inline | "every number opens to the page it came from" |
+| 1.2 | **`dw-release`**: `ReleaseId` resolves to an immutable manifest (corpus freeze sha, vocab versions, embedder fingerprint, engine identity, code sha, `previous` for lineage) | "I can reproduce this" |
+| 1.3 | **One rule in `dw-decide::judge`**: unresolvable evidence ⇒ `Unknown`, never `Pass` | provenance failure refuses an answer instead of silently passing |
+
+### Tier 2 — an answer can be relied on at scale
+
+| # | work | unlocks | blocker |
 |---|---|---|---|
-| ~~1~~ | ~~`dw-knives` phrase layer (D4)~~ | ~~"types one sentence … returns a cohort"~~ | **done.** `phrase::bind` + `unknowns_from_residue`, seeded from `holes.json` with measured stamps |
-| 1 | **question ranking by measured reduction** | "suggests the next question that would narrow it most" | currently ranks by `affected` count as an honest proxy. The real ranking is `harness/discovery/service.py::next_question` (1,881 parts / 86,736 claims verified) |
-| 2 | **evidence deep links** | "every number opens to the page it came from" | `SourceRef`/`CropRef` exist (C13). Missing: content-addressed page render at 144 DPI + row-band crop |
-| 3 | **evidence deep links** | "every number opens to the page it came from" | `SourceRef`/`CropRef` exist (C13). Missing: content-addressed page render at 144 DPI + row-band crop |
-| 4 | **`dw-search` (D4)** | the front door | FTS5 + the binding layer. Eval is the query telemetry xlsx |
-| 5 | **`dw-coverage`** | "lists what it could not evaluate" at corpus scale | coverage cube + gap ledger. `20260814_yellow_scorecard` is the measured substrate |
-| 6 | **`dw-knives` axis registry** | generalising past 5 power axes | `evaluator::AXES` is 5 axes for all of electronics (QA finding F-03) |
-| 7 | **Gate N4: 87K claim diff** | proof the port is faithful at corpus scale | **blocked**: corpus location unresolved. See §5 |
-| 8 | **G7 closure** | `dw-pdf` unblocks | one Form XObject transform case + decomposition normalization |
-| 9 | `dw-structure` / `dw-recon` / `dw-graph` | ingest side | Week 2-3 |
-| 10 | `dw-extract` / `dw-queue` / `dw-release` / `dw-model` / `dw-learn` | plumbing | Week 3-5 |
-| 11 | `dw-api` / `dw-controller` | D7 delivery gate | Week 5-6 |
+| 2.1 | **Gate N4: the 87K claim diff** | proof the port did not drift | **corpus location unknown — see §5** |
+| 2.2 | **Phrase-layer gate** against the query telemetry, count-weighted (1,485 rows / 8,653 searches) | proof the colloquial mapping is right | — |
 
-**Do #1 first.** It is the difference between a text matcher and the product.
+### Tier 3 — an answer is useful
 
----
+| # | work | unlocks |
+|---|---|---|
+| 3.1 | **Question ranking** — port `next_question` (verified over 1,881 parts / 86,736 claims). Current ranking by `affected` is an honest proxy, not the real thing | "the next question that would narrow it most" |
+| 3.2 | **`dw-search`** (D4: the colloquial front door; FTS is the residue path) | — |
+| 3.3 | **`dw-coverage`** — cube + gap ledger. `20260814_yellow_scorecard` is the measured substrate | "lists what it could not evaluate" at corpus scale |
+| 3.4 | **`dw-knives` axis registry** — generalise past 5 power axes (QA finding F-03) | — |
+
+### Tier 4 — it runs
+
+`dw-structure` / `dw-recon` / `dw-graph` (Week 2-3) · `dw-extract` / `dw-queue` /
+`dw-release` / `dw-model` / `dw-learn` (Week 3-5) · `dw-api` (D7 delivery gate)
+· `dw-controller` · cutover.
 
 ## 3. Ground truth — where the answers already are
 
