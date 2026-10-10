@@ -44,7 +44,13 @@ answer into a *defensible* one.
 
 ---
 
-## 3. The gap, precisely
+## 3. The gap, precisely *(closed 2026-10-10 — kept so the reasoning is visible)*
+
+> **This section describes a gap that has since been closed.** `dw-evidence` and
+> `dw-release` landed on 2026-10-10 and `dw-decide::judge` now refuses an answer
+> whose evidence does not resolve. It is kept verbatim because *why* the gap was
+> dangerous is the useful part, and because §6 explains what the work taught us.
+> The live state is §2 and §9.
 
 ### 3.1 A `SourceRef` today is a number with no picture
 
@@ -143,16 +149,15 @@ was the wrong objective: the sentence has eight clauses and two of them are the
 trust links. Building clause 6 before clause 4 produces a UI that looks
 accountable and is not.
 
-### Tier 1 — an answer can be believed
+### Tier 1 — an answer can be believed. **DONE 2026-10-10.**
 
-| # | work | unlocks | size |
+| # | work | unlocks | landed in |
 |---|---|---|---|
-| 1.1 | **Evidence resolution**: page render @ 144 DPI + row-band crop, content-addressed, engine-pinned | "every number opens to the page" — link 4 | bounded: `dw-evidence` crate + a renderer + local store |
-| 1.2 | **Release manifest**: `ReleaseId` resolves to an immutable manifest | "I can reproduce this" — link 5 | small: `dw-release` + `build_manifest` |
-| 1.3 | **Unresolvable ⇒ `Unknown`** in the evaluator | closes the loop: provenance failure is an elimination *refusal*, never a silent pass | one rule in `dw-decide::judge` |
+| 1.1 | **Evidence resolution**: page render @ 144 DPI + row-band crop, content-addressed, engine-pinned | "every number opens to the page" — link 4 | `crates/dw-evidence`, `dw_pdf::render_rgba`, `RenderedPage::crop` |
+| 1.2 | **Release manifest**: `ReleaseId` resolves to an immutable manifest | "I can reproduce this" — link 5 | `crates/dw-release` |
+| 1.3 | **Unresolvable ⇒ `Unknown`** in the evaluator | provenance failure is an elimination *refusal*, never a silent pass | `dw_decide::judge`, via the `Provenance` trait |
 
-**Stop here before anything else.** Everything after this is more valuable on a
-foundation where evidence resolves.
+Do **not** rebuild these. They are tested and green.
 
 ### Tier 2 — an answer can be relied on at scale
 
@@ -303,8 +308,10 @@ design on the answer, which is the only reason this product exists.
 
 **Tier 1 is done (2026-10-10).** What landed: `dw-evidence` (page render +
 crop, content-addressed, engine-pinned, local-only) · `dw-release` (manifest,
-append-only, lineage) · the trust rule in `dw-decide::judge`. Next is Tier 2 —
-specifically:
+append-only, lineage) · the trust rule in `dw-decide::judge`. **Do not rebuild
+these.**
+
+Next is Tier 2 — specifically:
 
 1. `dw-evidence`: page render @ 144 DPI, row-band crop, content-addressed,
    engine-pinned, stored locally. Small, bounded, and it converts the largest
@@ -315,6 +322,7 @@ specifically:
 Then Tier 2 (N4 + phrase-layer eval) is the proof the whole thing is faithful,
 and Tier 3 makes it useful.
 
-Everything in Tier 3 and 4 built before Tier 1 is a UI that looks accountable
-and is not. That is the failure mode worth being afraid of, and it is the one
-the plan already names as the worst class in the system.
+Tier 1 is the foundation; Tier 2 is the proof it is faithful; Tier 3 is what
+makes it useful. **The one thing that blocks Tier 2 is human input**: the 87K
+corpus location (§7). Without it, the only corpus-scale drift proof cannot run
+and the port is unverified at scale. Ask. Do not guess.

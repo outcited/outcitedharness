@@ -1,9 +1,55 @@
 # HANDOFF — the Rust port
 
-**Read this first if you are picking up the work cold.**
+**Read this first if you are picking up the work cold.** This document and
+`PROVENANCE.md` are the entire handoff. Everything below is measured, not
+assumed — if a claim here is wrong, the tests will say so; if it is right, you
+do not need to rediscover it.
 
-Everything below is measured, not assumed. If a claim here is wrong, the tests
-will say so; if a claim here is right, you do not need to rediscover it.
+---
+
+## 0. Start here: prove the workspace is green
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"     # brew rustup leaves the shims unlinked
+cd designwins
+cargo fmt --check && echo "FMT OK"
+cargo clippy --workspace --all-targets -- -D warnings && echo "CLIPPY OK"
+cargo test --workspace 2>&1 | grep "test result"
+cargo deny check
+```
+
+**What green looks like:** `FMT OK`, `CLIPPY OK`, **eleven `test result` lines —
+ten `ok` totalling 82 tests, plus one `FAILED`** — and `cargo deny` reporting
+`advisories ok, bans ok, licenses ok, sources ok`.
+
+**The one `FAILED` is `g7_path_segments_match_python_reference`.** That is a
+*gate*, not a regression — it blocks `dw-pdf` until the residual in §2 is
+closed. It is expected and correct. Any other failure is a real problem.
+
+If the workspace is not green, **stop and fix that first**. Nothing below is
+meaningful on a red build.
+
+### Orientation
+
+| thing | answer |
+|---|---|
+| repo root | `/Users/samkim/Harnessv1` (a Python factory being ported) |
+| Rust workspace | `designwins/` |
+| entry point | `dw_funnel::accept(sentence, registry, cohort, facts, release)` |
+| dependency graph | `dw-types → dw-normalize → dw-decide → dw-knives → dw-funnel`, with `dw-truth` / `dw-evidence` / `dw-release` / `dw-parity` / `dw-pdf` alongside. **Acyclic** — do not create a cycle; `dw-funnel` exists precisely to avoid one |
+| toolchain | `rustc 1.98.1`, `cargo-deny 0.20.2` |
+| lint bar | `clippy::pedantic` at `-D warnings` for library code. Test modules carry a documented `#[allow]`. **Do not weaken the library lint** |
+
+### Do not touch
+
+`git status` shows **~36 uncommitted changes that are not ours** — modified
+`harness/*.py`, `scripts/*.py`, `tests/*.py`, and several root `.md` files, all
+predating this work and sitting on `curve/07e-evidence-supply`. **Do not stage,
+commit, revert, or clean them.** They are someone else's work in progress.
+
+Our work is already committed — **19 commits**, each with its gates green. Only
+files under `designwins/`, `scripts/{emit_pdf_engine_reference,fetch_pdfium,
+freeze_corpus}.*`, `tests/fixtures/gold/*`, and `PLAN.md` are ours.
 
 ---
 
@@ -42,30 +88,46 @@ designwins/
   crates/dw-types      law as types + 4 compile-fail proofs
   crates/dw-normalize  condition / coverage / rating / thermal / units
   crates/dw-truth      quote verification (the free adjudication layer)
-  crates/dw-decide     Build / Atom / Cohort / evaluator
+  crates/dw-decide     Build / Atom / Cohort / evaluator + the trust gate
   crates/dw-knives     axes + phrase layer (D4/D5) — colloquial -> knives
   crates/dw-funnel     the composition root: accept(sentence) -> Build
+  crates/dw-evidence   resolvable provenance: page render + crop (C13)
+  crates/dw-release    ReleaseId -> immutable append-only manifest
   crates/dw-parity     D2 discrepancy ledger + corpus manifest
-  crates/dw-pdf        PDFium engine + D1 G7 gate
+  crates/dw-pdf        PDFium engine, renderer, + D1 G7 gate
 scripts/
   freeze_corpus.py               content-addressed freeze, drift-detecting
   emit_pdf_engine_reference.py   MuPDF reference fixture for G7
   fetch_pdfium.sh                pinned PDFium 7881, checksum-verified
 ```
 
-**33 Rust files, ~8,000 lines, 72 tests passing.** G7 is the one intentional
-failure — it is a gate that blocks `dw-pdf`, not a regression.
+**10 crates · 32 Rust files · 9,217 lines · 82 tests passing.** G7 is the one
+intentional failure.
 
 Dependency graph is acyclic and each layer has one job:
 
 ```
 dw-types -> dw-normalize -> dw-decide -> dw-knives -> dw-funnel
-                |              |            |
-            comparability   the funnel   colloquial -> knives
+   law      comparability     the funnel   colloquial->knives  composition
+                |                |
+           dw-truth         dw-evidence / dw-release   (the trust chain)
+                |                |
+           dw-parity             dw-pdf  (engine + render)
 ```
 
-`dw-funnel::accept` is **the** entry point. The PLAN §0 sentence is now a
-test (`acceptance_test_sentence_to_cohort`), not a paragraph.
+`dw-funnel::accept` is **the** entry point. The PLAN §0 sentence is a test
+(`acceptance_test_sentence_to_cohort`), not a paragraph:
+
+```rust
+let answer = dw_funnel::accept(
+    "an outdoor weather thermostat bluetooth",
+    &dw_knives::seed_from_measured_chips(),
+    &cohort,             // dw_decide::Cohort of distinct Candidate parts
+    &facts,              // BTreeMap<Candidate, CandidateFacts>
+    release,             // dw_types::ReleaseId
+);
+// answer.build = { cohort, derived[Pending], explain, exclusions, unknowns, next }
+```
 
 ### Gates
 
@@ -75,22 +137,12 @@ test (`acceptance_test_sentence_to_cohort`), not a paragraph.
 | N1a `condition_model_v1.jsonl` | 167/167 | **green** |
 | N1b `rating_class_v1.jsonl` | 63/63 | **green** |
 | N3 compile-fail | 4 laws | **green** |
+| N2 property tests | units round-trip, coverage reflexivity, margin explicitness | **green** |
 | Week 0 parity | ledger runs empty, `cutover_permitted` | **green** |
-| D1 G7 path segments | PDFium vs MuPDF | **OPEN** |
+| **Trust gate** | evidence resolves · releases resolve · unresolvable ⇒ `Unknown` | **green** (see `PROVENANCE.md` §9) |
+| D1 G7 path segments | PDFium vs MuPDF | **OPEN — expected** |
 
-Run everything:
-
-```bash
-export PATH="$HOME/.cargo/bin:$PATH"
-cd designwins
-cargo fmt --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
-cargo deny check
-```
-
-`~/.cargo/bin` is **not** on the shell PATH (brew's rustup left the shims
-unlinked; the session created them). Export it or add it to `~/.zshrc`.
+The commands are in §0 above.
 
 ---
 
@@ -107,13 +159,13 @@ two that are **not real today**. Building the other clauses first produces a UI
 that looks accountable and is not. That is the failure mode worth being afraid
 of.
 
-### Tier 1 — an answer can be believed. **Do this first. Stop here until it is done.**
+### Tier 1 — an answer can be believed. **DONE 2026-10-10. Do not rebuild.**
 
-| # | work | unlocks |
-|---|---|---|
-| 1.1 | **`dw-evidence`**: page render @ 144 DPI + row-band crop, content-addressed, engine-pinned, stored locally, served inline | "every number opens to the page it came from" |
-| 1.2 | **`dw-release`**: `ReleaseId` resolves to an immutable manifest (corpus freeze sha, vocab versions, embedder fingerprint, engine identity, code sha, `previous` for lineage) | "I can reproduce this" |
-| 1.3 | **One rule in `dw-decide::judge`**: unresolvable evidence ⇒ `Unknown`, never `Pass` | provenance failure refuses an answer instead of silently passing |
+| # | work | unlocks | landed in |
+|---|---|---|---|
+| 1.1 | **`dw-evidence`**: page render @ 144 DPI + row-band crop, content-addressed, engine-pinned, stored locally | "every number opens to the page it came from" | `crates/dw-evidence`, `dw_pdf::render_rgba` |
+| 1.2 | **`dw-release`**: `ReleaseId` resolves to an immutable manifest (corpus freeze sha, vocab versions, embedder fingerprint, engine identity, code sha, `previous` for lineage) | "I can reproduce this" | `crates/dw-release` |
+| 1.3 | **One rule in `dw-decide::judge`**: unresolvable evidence ⇒ `Unknown`, never `Pass` | provenance failure refuses an answer instead of silently passing | `dw_decide::judge` + the `Provenance` trait |
 
 ### Tier 2 — an answer can be relied on at scale
 
