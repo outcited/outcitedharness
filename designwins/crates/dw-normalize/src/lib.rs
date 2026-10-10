@@ -36,6 +36,7 @@
 pub mod condition;
 pub mod coverage;
 pub mod rating;
+pub mod thermal;
 pub mod units;
 
 /// Regex construction lives here and nowhere else in the crate.
@@ -66,4 +67,5 @@ pub use rating::{
     compare_with_margin, rating_class, CompareOutcome, Margin, RatingClass, RatingEvidence,
     RATING_CLASS_SCHEMA,
 };
+pub use thermal::{kind_of, thermal_rows, ThermalFact, ThermalKind, ThermalRow, THERMAL_SCHEMA};
 pub use units::{scale, unit_token, Kind, Scale};
