@@ -189,6 +189,18 @@ of.
 `dw-release` / `dw-model` / `dw-learn` (Week 3-5) · `dw-api` (D7 delivery gate)
 · `dw-controller` · cutover.
 
+## 2b. Storage — three surfaces, know which is which
+
+| surface | path | what it is | use it for |
+|---|---|---|---|
+| **yosemiteraid5** | `/Users/samkim/mnt/yosemiteraid5/{Public,Home}` | **local NVMe NAS, fast, writable.** SMB `tapes@yosemiteraid5.local`, `nobrowse` so it does **not** appear in `/Volumes` — you have to know the path | the work target. `Public/m5-opencode/` is a clean landing zone |
+| **M5_4TB** | `/Volumes/M5_4TB` | spinning-disk NAS, bulk data. **Unmounts without warning** | read-only source. Never a build or store target (`PLAN` §10) |
+| **Electronicdataassets** | `/Users/samkim/Volumes/Electronicdataassets` | SMB `harness@192.168.4.54`, contains `m5-4tb/` and `tapes4tb/` mirrors + `backups/m5/` | cross-checking; some files are readable here that are denied on the mount |
+
+`yosemiteraid5` is the one to build against. The evidence store (`dw-evidence`)
+and release store (`dw-release`) already refuse the NAS by design; point them
+here.
+
 ## 3. Ground truth — where the answers already are
 
 Do not re-derive these. They are measured.

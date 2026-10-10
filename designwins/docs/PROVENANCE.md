@@ -254,11 +254,19 @@ data. Reviewing the code would have passed all four.
 
 ---
 
+## 6b. Storage surfaces
+
+| surface | path | what it is | use for |
+|---|---|---|---|
+| **yosemiteraid5** | `/Users/samkim/mnt/yosemiteraid5/{Public,Home}` | **local NVMe NAS, fast, writable**, `nobrowse` (hidden from `/Volumes`) | the work target. Evidence and release stores belong here |
+| **M5_4TB** | `/Volumes/M5_4TB` | spinning-disk NAS, bulk data, unmounts | read-only source; never a store target (`PLAN` §10) |
+| **Electronicdataassets** | `/Users/samkim/Volumes/Electronicdataassets` | SMB mirror of both, plus `backups/m5/` | cross-checks |
+
 ## 7. Blockers
 
 | blocker | blocks | what unblocks it |
 |---|---|---|
-| **87K corpus — read access** | Gate N4, the only corpus-scale drift proof | **Located.** `/Volumes/M5_4TB/harness-training/datasets/designwins-{v1,v2,v3}-20260829/` — `canonical/{text,vision}/{train,test,validation}.jsonl`, ~2.4 GB / 2.3 GB / 2.3 GB. **This sandbox cannot read that subtree**: `stat`/`readdir` succeed, `open` returns `EACCES`, even on a 396-byte manifest. Not a Unix permission problem — the tree is `0700`, owned by the current user, no ACL. It is a macOS TCC / sandbox read-deny. Fix by granting Full Disk Access to the terminal (or to opencode), or by copying the corpus to a readable path. Run Gate N4 from a process that has access. |
+| **87K corpus — read access** | Gate N4, the only corpus-scale drift proof | **Located, and the denial is narrower than first reported.** `harness-training/datasets/designwins-{v1,v2,v3}-20260829/canonical/**` — 18 files (`{text,vision}/{train,test,validation}.jsonl`), ~2.4 / 2.3 / 2.3 GB. `stat`/`readdir` succeed, `open` → `EACCES`. Same files via the `Electronicdataassets` mirror fail identically, so it is not mount-specific. **Sibling files in the same directory read fine** (`curve-sft-v1` 5,629 rows; `power-tables-v2` 1,713 + 190), so this is a targeted restriction on exactly the quote-native pair corpora — not a tree deny and not a sandbox quirk. Fix: grant access, or stage a readable copy on `yosemiteraid5` (see below). |
 | NAS availability | corpus-wide work, G7 | run gates against in-repo fixtures; treat the vault as an input, not a dependency |
 | `~/.cargo/bin` on PATH | nothing, but it costs every command | one line in `~/.zshrc`, needs the user's word |
 
