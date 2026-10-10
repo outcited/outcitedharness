@@ -292,7 +292,7 @@ case actually depends on.
 |---|---|
 | content gate (`PLAN` §0) | **executable** — `dw-funnel::accept`, asserted clause by clause |
 | delivery gate (`D7`) | typed, not met — needs `dw-api` and evidence inline |
-| **trust gate (this document)** | **not met** — links 4 and 5 are typed but unresolvable |
+| **trust gate (this document)** | **met on the evidence and release clauses** — links 4 and 5 resolve, and unresolvable ⇒ `Unknown`. Still open: corpus-scale drift proof (N4) and the phrase-layer eval (Tier 2) |
 
 All three must pass. The trust gate is the one that lets an engineer stake a
 design on the answer, which is the only reason this product exists.
@@ -301,7 +301,10 @@ design on the answer, which is the only reason this product exists.
 
 ## 10. Recommendation
 
-**Do Tier 1 before anything else.** Specifically:
+**Tier 1 is done (2026-10-10).** What landed: `dw-evidence` (page render +
+crop, content-addressed, engine-pinned, local-only) · `dw-release` (manifest,
+append-only, lineage) · the trust rule in `dw-decide::judge`. Next is Tier 2 —
+specifically:
 
 1. `dw-evidence`: page render @ 144 DPI, row-band crop, content-addressed,
    engine-pinned, stored locally. Small, bounded, and it converts the largest
