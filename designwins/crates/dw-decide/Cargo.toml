@@ -1,0 +1,21 @@
+[package]
+name = "dw-decide"
+description = "THE FUNNEL: Build, Requirement, Atom, Cohort, Verdict, Question, curves @ operating point, elimination. The product."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+dw-types = { path = "../dw-types" }
+dw-normalize = { path = "../dw-normalize" }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+trybuild = "1"
+
+[lints]
+workspace = true
