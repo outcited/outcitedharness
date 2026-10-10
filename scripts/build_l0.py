@@ -26,11 +26,16 @@ if str(ROOT) not in sys.path:
 from harness.electronics.l0 import l0_record  # noqa: E402
 
 
-def _scan(path: str) -> dict | str:
+def _scan(item) -> dict | str:
+    if isinstance(item, dict):
+        path = item.get("path") or item.get("source_path")
+        prior = item.get("asset_type")
+    else:
+        path, prior = item, None
     try:
         doc = pymupdf.open(path)
         try:
-            record = l0_record(doc, source_path=path)
+            record = l0_record(doc, source_path=path, manifest_prior=prior)
         finally:
             doc.close()
         return record
@@ -54,7 +59,10 @@ def main() -> int:
                 done.add(json.loads(line).get("source_path"))
             except Exception:
                 continue
-    todo = [p for p in paths if p not in done]
+    def _path_of(item):
+        return item.get("path") or item.get("source_path") if isinstance(item, dict) else item
+
+    todo = [p for p in paths if _path_of(p) not in done]
     args.out.parent.mkdir(parents=True, exist_ok=True)
 
     class_counts: Counter[str] = Counter()

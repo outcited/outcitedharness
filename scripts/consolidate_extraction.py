@@ -39,6 +39,10 @@ LANES = [
     ("curves_tp4", RESULTS / "typical-curves-wave-a-20261006/tp4-rows.jsonl"),
     ("aec_mcu", RESULTS / "aec-grade-wave-20261006/aec-grade-rows-v2.jsonl"),
     ("aec_power", RESULTS / "aec-grade-wave-20261006/aec-grade-power-rows.jsonl"),
+    ("aec_fullcorpus", RESULTS / "aec-fullcorpus-20261008/aec-rows-enriched.jsonl"),
+    ("pillars_fullcorpus", RESULTS / "pillar-facts-v3-20261009/pillar-rows-enriched.jsonl"),
+    ("thermal_fullcorpus", RESULTS / "thermal-fullcorpus-20261008/thermal-rows.jsonl"),
+    ("curves_qwen_retry", RESULTS / "vision-qwen-retry-20261008/retry2-rows.jsonl"),
     ("errata", RESULTS / "errata-wave-c-20261006/errata-rows-v3-scoped.jsonl"),
     ("p3_reread", Path("/Volumes/M5_4TB/exports/cr_drops/power-reread-p0-20260917/rows.jsonl")),
 ]
@@ -77,6 +81,8 @@ def _row_value(row: dict) -> dict:
         "mode": row.get("mode"),
         "verbatim": row.get("verbatim") or row.get("context_verbatim"),
         "condition_verbatim": row.get("condition_verbatim") or row.get("conditions_verbatim"),
+        "confidence": row.get("confidence"),
+        "prints": row.get("prints"),
         "page_1based": row.get("page_1based") or row.get("page"),
         "pdf_sha": row.get("pdf_sha") or row.get("document_sha256"),
         "source_url": row.get("source_url"),
@@ -133,6 +139,19 @@ def main():
     for part, axes in parts.items():
         clean = {}
         for axis, entries in axes.items():
+            if axis == "package" and len(entries) > 1:
+                # packages are multi-valued (a part ships in several):
+                # keep all distinct printed values as a list
+                seen: list = []
+                for e in entries:
+                    v = e.get("value")
+                    if v and v not in seen:
+                        seen.append(v)
+                best = dict(entries[0])
+                best["value"] = seen
+                best["multi"] = True
+                clean[axis] = best
+                continue
             if len(entries) == 1:
                 clean[axis] = entries[0]
                 continue
@@ -140,6 +159,8 @@ def main():
                 TIER.get("deterministic" if "deterministic" in str(e.get("method", "")) else "vision", 0),
                 1 if e.get("value_role") in ("typ", "range", "printed") else 0,
                 1 if e.get("condition_verbatim") and "25" in str(e.get("condition_verbatim")) else 0,
+                float(e.get("confidence") or 0),
+                1 if e.get("verbatim") else 0,
             ))
             clean[axis] = best
         clean_parts[part] = clean

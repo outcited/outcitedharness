@@ -435,6 +435,61 @@ cannot click open.
 
 ---
 
+## D8 — The curated gold is not automatically authoritative
+
+**Ruling.** When a curated fixture and a corpus-scale gate disagree, **run the
+live reference**. The reference is the spec; a fixture is a *sample* of it and
+can be stale. A fixture must never be "fixed" toward a port, and a port must
+never be bent toward a fixture, without first establishing which one the
+reference supports.
+
+**The incident.** Gate N4a (`dw-normalize::tests::gold_condition_catalog`, 9,551
+rows from `catalog.db::conditions_typed`) reported 14 divergences, all in one
+class: `comparators` array order. Keys matched exactly.
+
+| source | `comparators` for the same substring |
+|---|---|
+| live Python reference | `["VDS,peak < 1200 V", "VDD ≤ 800 V"]` |
+| `catalog.db` `condition_model.v1.1` | `["VDS,peak < 1200 V", "VDD ≤ 800 V"]` |
+| curated `condition_model_v1.jsonl` (v1) | `["VDD ≤ 800 V", "VDS,peak < 1200 V"]` |
+
+The curated fixture was **stale**. It is in document order; the reference
+emits symbol-table order, which is simply the order the scan finds them in.
+An earlier session added a sort by document position to satisfy that fixture —
+which made the port *diverge from the reference in order to match a wrong
+sample*. The 167 curated rows never exercised a case where the two orders
+differed except those rows, and the corpus did.
+
+**Actions taken:**
+1. The document-position sort is removed. Comparators are emitted in scan
+   order, which is the reference behaviour.
+2. `condition_model_v1.jsonl` regenerated from the live reference. **5 of 167
+   rows changed**: 3 comparator order, 2 float representation
+   (`1.5e-08` → `1.5000000000000002e-08`, `0.0045` → `0.0045000000000000005`).
+   The float rows confirm the earlier finding that the fixture was serialised
+   compactly and was not bit-exact with the reference.
+
+**Result:** `167/167` and `9551/9551`.
+
+### The general rule
+
+Curated fixtures are for **the laws** — hand-picked cases that name a rule.
+Corpus gates are for **the drift** — everything the factory actually saw. They
+answer different questions and must both be green. When they conflict, the
+reference decides, and the conflict itself is a finding worth recording rather
+than resolving quietly.
+
+This is also why Gate N4 is *blocking* and not informational: 167 hand-picked
+rows passed while the port was wrong in exactly the way the fixture happened
+not to test.
+
+### Why this matters for `claims_canonical`
+
+The 86,736 claims in `catalog.db` were produced by `condition_model.v1.1`. If
+`dw-normalize` had kept v1 behaviour, Gate N4b (the claim diff) would have
+failed on comparator order for every claim with two comparator-bound
+conditions — a systematic divergence, not a bug hunt.
+
 ## Superseded / not decided here
 
 | item | status |

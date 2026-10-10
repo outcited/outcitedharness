@@ -50,7 +50,8 @@ def load_staging():
     global PARTS, ERRATA
     PARTS.clear()
     ERRATA.clear()
-    for aisle_dir in ["mcu_family_content", "power_family_content"]:
+    for aisle_dir in ["mcu_family_content", "power_family_content",
+                      "connector_family_content", "refdesign_family_content"]:
         ext_dir = STAGING / aisle_dir / "datasheet_extractions"
         if not ext_dir.exists():
             continue
@@ -58,6 +59,13 @@ def load_staging():
             try:
                 data = json.loads(f.read_text())
                 PARTS[data["part_number"]] = data
+                # family files carry a FAMILY_* pseudo-key; alias every real
+                # covered part so it's addressable 1:1
+                for covered in data.get("parts_covered") or []:
+                    pn2 = covered if isinstance(covered, str) else (
+                        covered or {}).get("part_number")
+                    if pn2 and pn2 not in PARTS:
+                        PARTS[pn2] = data
             except Exception:
                 continue
     errata_dir = STAGING / "mcu_family_content" / "errata"
@@ -69,7 +77,48 @@ def load_staging():
                     ERRATA[token] = data
             except Exception:
                 continue
+    compute_coverage()
     print(f"[staging] loaded {len(PARTS)} parts, {len(ERRATA)} errata devices")
+
+
+COVERAGE: dict = {}
+
+# what the front end can render, per facet
+_FACETS = ("pillars", "thermal", "aec", "curves", "description", "vout_iq",
+           "power_modes", "connectors", "pinout", "overview", "deep_specs",
+           "enriched_specs", "parametric_specs", "fine_tune_facets",
+           "electrical", "peripheral_features", "vision_electrical",
+           "claude_ground_truth", "mistral_compatibility")
+
+
+def compute_coverage():
+    """UX-offer inventory: parts per facet + pillar field breakdown."""
+    global COVERAGE
+    facets: dict[str, int] = {}
+    pillar_fields: dict[str, int] = {}
+    curve_entries = 0
+    covered_parts = 0
+    for pn, data in PARTS.items():
+        for facet in _FACETS:
+            v = data.get(facet)
+            if v:
+                facets[facet] = facets.get(facet, 0) + 1
+                if facet == "curves" and isinstance(v, list):
+                    curve_entries += len(v)
+                if facet == "pillars" and isinstance(v, dict):
+                    for field in v:
+                        pillar_fields[field] = pillar_fields.get(field, 0) + 1
+        if data.get("parts_covered"):
+            covered_parts += len(data["parts_covered"])
+    COVERAGE = {
+        "parts_served": len(PARTS),
+        "errata_devices": len(ERRATA),
+        "family_covered_parts": covered_parts,
+        "curve_index_entries": curve_entries,
+        "facets": dict(sorted(facets.items(), key=lambda x: -x[1])),
+        "pillar_fields": dict(sorted(pillar_fields.items(), key=lambda x: -x[1])),
+        "computed_at": time.time(),
+    }
 
 
 def _problem(status: int, title: str, detail: str = ""):
@@ -123,6 +172,10 @@ class Handler(BaseHTTPRequestHandler):
             })
             return
 
+        if path == "/v1/coverage":
+            self._send(COVERAGE)
+            return
+
         if path == "/v1/axes":
             axes = defaultdict(int)
             for part, data in PARTS.items():
@@ -161,6 +214,10 @@ class Handler(BaseHTTPRequestHandler):
                     "qualification": "aec",
                     "description": "description",
                     "documents": "documents",
+                    "connectors": "connectors",
+                    "pillars": "pillars",
+                    "design": "design",
+                    "used-in-designs": "used_in_designs",
                 }
                 data_key = key_map.get(sub)
                 if not data_key or data_key not in part_data:

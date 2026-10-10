@@ -237,6 +237,7 @@ def _scan_item(
     renders: Path,
     cloud_key: str = "",
     thinking_off: bool = False,
+    extra_body_json: str = "",
 ) -> list[dict] | str:
     if not Path(item["source_path"]).exists():
         return "missing_pdf"
@@ -247,11 +248,14 @@ def _scan_item(
                 curve_prompt,
             )
 
+            extra_body = json.loads(extra_body_json) if extra_body_json else None
+            if thinking_off:
+                extra_body = {**(extra_body or {}), "thinking": {"type": "disabled"}}
             cloud = CloudVisionClient(
                 base_url=base_url,
                 model=model,
                 api_key=cloud_key,
-                extra_body={"thinking": {"type": "disabled"}} if thinking_off else None,
+                extra_body=extra_body,
             )
 
             class _Adapter:
@@ -299,6 +303,10 @@ def main() -> int:
         "--cloud",
         action="store_true",
         help="volume vision lane: cloud client (key from MIMO_API_KEY env/.env)",
+    )
+    ap.add_argument(
+        "--extra-body-json", default="",
+        help='extra JSON body fields for cloud calls, e.g. \'{"enable_thinking": false}\' for Qwen',
     )
     args = ap.parse_args()
     cloud_key = ""
@@ -357,6 +365,7 @@ def main() -> int:
                     [args.renders] * len(pages),
                     [cloud_key] * len(pages),
                     [args.thinking_off] * len(pages),
+                    [args.extra_body_json] * len(pages),
                 ),
             ):
                 if isinstance(result, str):
@@ -374,7 +383,8 @@ def main() -> int:
                 continue
             try:
                 result = _scan_item(
-                    item, args.base_url, args.model, args.renders, cloud_key
+                    item, args.base_url, args.model, args.renders, cloud_key,
+                    args.thinking_off, args.extra_body_json,
                 )
                 if isinstance(result, str):
                     tally[result] += 1

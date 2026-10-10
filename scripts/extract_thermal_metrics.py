@@ -38,16 +38,23 @@ def _queue_parts(path: Path) -> list[dict]:
         source = item.get("source_path")
         if part:
             out.append({"part_number": part,
-                        "source_url": item.get("datasheet_url") or item.get("source_url")})
+                        "source_url": item.get("datasheet_url") or item.get("source_url"),
+                        "source_path": source})
         elif source:
-            stem = Path(source).stem
+            url = item.get("source_url")
+            if url:
+                stem = Path(url.split("?")[0]).stem
+            else:
+                stem = Path(source).stem
             out.append({"part_number": stem[3:] if stem.startswith("ti-") else stem,
-                        "source_url": item.get("source_url")})
+                        "source_url": url,
+                        "source_path": source})
     return out
 
 
 def _scan(item: dict, pdf_root: str) -> dict:
-    pdf = Path(pdf_root) / f"ti-{item['part_number']}.pdf"
+    direct = item.get("source_path")
+    pdf = Path(direct) if direct else Path(pdf_root) / f"ti-{item['part_number']}.pdf"
     if not pdf.exists():
         return {"rows": [], "error": "missing_pdf"}
     try:
@@ -89,12 +96,13 @@ def main() -> int:
                 tally["parts_with_rows"] += 1
             else:
                 tally["parts_no_rows"] += 1
-            pdf = args.pdf_root / f"ti-{item['part_number']}.pdf"
+            direct = item.get("source_path")
+            pdf = Path(direct) if direct else args.pdf_root / f"ti-{item['part_number']}.pdf"
             sha = hashlib.sha256(pdf.read_bytes()).hexdigest()
             for row in result["rows"]:
                 row["part_number"] = item["part_number"]
                 row["pdf_sha"] = sha
-                row["source_url"] = item["source_url"]
+                row["source_url"] = item.get("source_url")
                 row["verdict"] = "printed_row"
                 out_rows.append(row)
                 tally[f"metric:{row['metric']}"] += 1

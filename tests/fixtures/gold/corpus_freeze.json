@@ -1,11 +1,16 @@
 {
- "generated_at": "2026-10-10T18:09:17+00:00",
- "member_count": 32,
+ "generated_at": "2026-10-10T23:08:34+00:00",
+ "member_count": 33,
  "members": [
   {
-   "bytes": 28330,
+   "bytes": 28375,
    "path": "condition_model_v1.jsonl",
-   "sha256": "a8031fb012cd2ef4025cf1879c4369710ed98efc5132818ec5bfe2c397c9cce8"
+   "sha256": "b82a7f2b12c838f12132886cc556e54a6d609f48ad5d6c277d0acb3cd50a75c5"
+  },
+  {
+   "bytes": 1807880,
+   "path": "condition_typed_catalog_v1.jsonl",
+   "sha256": "bb3fac73649ac298f7fb7ed128a5cfc7143f90b21b5d8fbda92709fdff798dcb"
   },
   {
    "bytes": 12771,
@@ -163,8 +168,8 @@
    "sha256": "053f4bee6b6bed619410b249ec2f5bf223a4a8fbd3631c8746a8f274873bd39f"
   }
  ],
- "release": "designwins-2026-W46-freeze-0",
+ "release": "designwins-2026-W46-freeze-1",
  "root": "/Users/samkim/Harnessv1/tests/fixtures/gold",
  "schema_version": "harness.dw-parity-corpus.v1",
- "total_bytes": 7023226
+ "total_bytes": 8831151
 }

@@ -3,7 +3,8 @@
 
 Truth is derived, never declared: every run re-reads the services themselves
 (/healthz, /health, /v1/models) and docker ps.
-Snapshots: /Volumes/M5_4TB/fleet-state/snapshots/  Changes: CHANGES.md + agent-inbox mail.
+Snapshots: /Volumes/M5_4TB/fleet-state/snapshots/  Changes: CHANGES.md + mail to the
+canonical agent inbox on the NAS (see inbox_root; the M5 tree is frozen).
 
 A probe never reports an empty list. "Reachable but not serving what we expect"
 is recorded as HTTP_<code>, because that is the failure mode that hides: the
@@ -12,6 +13,7 @@ on /healthz. Both used to be indistinguishable from silence.
 """
 
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -20,7 +22,25 @@ from pathlib import Path
 ROOT = Path("/Volumes/M5_4TB/fleet-state")
 SNAP_DIR = ROOT / "snapshots"
 CHANGES = ROOT / "CHANGES.md"
-INBOX = Path("/Volumes/M5_4TB/agent-inbox")
+
+# Canonical agent inbox = the NAS share (Sam directive 2026-10-08, see
+# /Volumes/M5_4TB/agent-inbox/MOVED.md). The M5 tree is FROZEN and this probe
+# kept writing change-mails into it after the freeze (2026-10-09 08:39Z and
+# 17:24Z), so the frozen path is deliberately not a fallback here: if the share
+# is not mounted the mail spools under ~/Logs and the run says so out loud.
+NAS_INBOX = Path.home() / "Volumes/Electronicdataassets/agent-inbox"
+SPOOL = Path.home() / "Logs/fleet-state-mail-spool"
+MAIL_BOXES = ("cursor-cr", "m5-opencode", "m4opencode")
+
+
+def inbox_root():
+    """(write_root, note). AGENT_INBOX overrides; NAS wins; frozen M5 never."""
+    override = os.environ.get("AGENT_INBOX")
+    if override:
+        return Path(override), ""
+    if NAS_INBOX.is_dir():
+        return NAS_INBOX, ""
+    return SPOOL, " (NAS inbox NOT mounted -> spooled to ~/Logs/fleet-state-mail-spool; frozen M5 tree not written)"
 
 # name -> (url, probe kind)
 ENDPOINTS = {
@@ -182,10 +202,29 @@ def mail(delta, stamp):
         + "\n\nIf you made this change, reply with why (one line). If you did not, investigate.\n"
         f"Snapshot: {SNAP_DIR / (stamp.replace(':', '').replace('-', '') + '.json')}\n"
     )
-    for box in ("cursor-cr", "m5-opencode", "m4opencode"):
-        d = INBOX / box
+    root, note = inbox_root()
+    index = root.parent / "INDEX.jsonl" if root == NAS_INBOX else None
+    for box in MAIL_BOXES:
+        d = root / box
         d.mkdir(parents=True, exist_ok=True)
-        (d / f"{slug}_fleet-state-probe_{box}_status_fleet-change.md").write_text(body)
+        name = f"{slug}_fleet-state-probe_{box}_status_fleet-change.md"
+        (d / name).write_text(body)
+        if index is not None:
+            row = {
+                "ts": stamp,
+                "from": "fleet-state-probe",
+                "to": box,
+                "type": "status",
+                "id": f"fleet-change-{slug}",
+                "subject": subject,
+                "path": f"agent-inbox/{box}/{name}",
+            }
+            try:
+                with index.open("a") as fh:
+                    fh.write(json.dumps(row) + "\n")
+            except OSError:
+                pass
+    return note
 
 
 def main():
@@ -204,8 +243,8 @@ def main():
             entry = f"\n## {stamp}\n" + "\n".join(f"- {d}" for d in delta) + "\n"
             with CHANGES.open("a") as f:
                 f.write(entry)
-            mail(delta, stamp)
-            print(f"CHANGED:\n{entry}")
+            note = mail(delta, stamp)
+            print(f"CHANGED:\n{entry}" + note)
         else:
             print(f"OK: no change ({stamp})")
     path = SNAP_DIR / (now.strftime("%Y%m%dT%H%M%SZ") + ".json")

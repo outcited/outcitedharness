@@ -332,8 +332,13 @@ fn value_regex(kind: Kind) -> Regex {
 /// Reversed bounds (`2.5 V≤VOUT`, `1.0V≦VOUT＜1.2V`) — scanned BEFORE symbol
 /// anchors so the bound value is not stolen as a plain anchor (L9).
 fn rev_bound() -> Regex {
+    // The reference compiles this with `re.I`. Without the inline flag, `Vcc`
+    // fails to match the `CC` alternative and the reversed bound is never
+    // recognised — `4.0V <= Vcc <= 26.5V` then degrades to a scalar plus
+    // residue. Caught by Gate N4a against the 9,551-row corpus, not by the
+    // 167-row curated gold, which never exercised a lowercase symbol here.
     re::build(&format!(
-        "(?P<rb_lo>{NUM})\\s*(?P<rb_lu>mV|kV|V)\\s*[≤≥≦<＜]\\s*(?P<rb_sym>V\\s*_?\\s*(?:OUT|O|IN|DD|CC|DS|GS))(?:\\s*[≤≥≦<＜]\\s*(?P<rb_hi>{NUM})\\s*(?P<rb_hu>mV|kV|V))?"
+        "(?i)(?P<rb_lo>{NUM})\\s*(?P<rb_lu>mV|kV|V)\\s*[≤≥≦<＜]\\s*(?P<rb_sym>V\\s*_?\\s*(?:OUT|O|IN|DD|CC|DS|GS))(?:\\s*[≤≥≦<＜]\\s*(?P<rb_hi>{NUM})\\s*(?P<rb_hu>mV|kV|V))?"
     ))
 }
 
@@ -500,7 +505,7 @@ pub fn parse_condition(text: &str) -> ParseOutcome {
     let mut approx: BTreeSet<String> = BTreeSet::new();
     let mut sym: BTreeSet<String> = BTreeSet::new();
     let mut bare: BTreeSet<String> = BTreeSet::new();
-    let mut comparators: Vec<(usize, String)> = Vec::new();
+    let mut comparators: Vec<(usize, String)> = Vec::new(); // (position, segment); position is retained for diagnostics only
     let mut mode: Option<Mode> = None;
     let mut unitless_hit = false;
 
@@ -707,9 +712,11 @@ pub fn parse_condition(text: &str) -> ParseOutcome {
     };
 
     if !keys.is_empty() || mode.is_some() {
-        // Gold emits comparators in **document order**, which is not the table
-        // iteration order the scan uses. Sort on the match position.
-        comparators.sort_by_key(|(pos, _)| *pos);
+        // Comparators are emitted in **symbol-table order**, which is the order
+        // the scan finds them in. That is what the live reference produces; an
+        // earlier sort by document position was added to satisfy a stale gold
+        // fixture and made this diverge from the reference. Gate N4a caught it
+        // (see DECISIONS.md D8).
         let comparators: Vec<String> = comparators.into_iter().map(|(_, s)| s).collect();
         return ParseOutcome::Typed(TypedCondition {
             keys,
