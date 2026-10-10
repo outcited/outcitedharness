@@ -258,7 +258,7 @@ data. Reviewing the code would have passed all four.
 
 | blocker | blocks | what unblocks it |
 |---|---|---|
-| **87K corpus location** | Gate N4, which is the only corpus-scale drift proof | Candidates: `/Volumes/M5_4TB/exports/power-datasheet-pairs/{ti,rohm,infineon}-20260908/` (9,201 rows) and `results/lora-v1-pairs/`. Neither matches "2,713 v1 / 87K v2". **Needs a human to name it**, or a decision to redefine N4 against the 9,201-row corpus that does exist. |
+| **87K corpus — read access** | Gate N4, the only corpus-scale drift proof | **Located.** `/Volumes/M5_4TB/harness-training/datasets/designwins-{v1,v2,v3}-20260829/` — `canonical/{text,vision}/{train,test,validation}.jsonl`, ~2.4 GB / 2.3 GB / 2.3 GB. **This sandbox cannot read that subtree**: `stat`/`readdir` succeed, `open` returns `EACCES`, even on a 396-byte manifest. Not a Unix permission problem — the tree is `0700`, owned by the current user, no ACL. It is a macOS TCC / sandbox read-deny. Fix by granting Full Disk Access to the terminal (or to opencode), or by copying the corpus to a readable path. Run Gate N4 from a process that has access. |
 | NAS availability | corpus-wide work, G7 | run gates against in-repo fixtures; treat the vault as an input, not a dependency |
 | `~/.cargo/bin` on PATH | nothing, but it costs every command | one line in `~/.zshrc`, needs the user's word |
 

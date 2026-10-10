@@ -219,6 +219,12 @@ and anything corpus-wide is blocked. The in-repo gold under
 `tests/fixtures/gold/` is deliberately self-contained precisely so the gates
 run without it.
 
+**When the NAS is mounted, most of it is readable** — `exports/`, `vault/`,
+`extract-results/`, root-level docs. One exception: `harness-training/datasets/`
+returns `EACCES` on `open` from this sandbox while `stat`/`readdir` succeed. The
+tree is `0700` and owned by us with no ACL, so it is a sandbox/TCC read-deny
+rather than a permissions problem. The 87K corpus is in there; see §7.
+
 ---
 
 ## 4. What the gold caught — do not re-learn these
