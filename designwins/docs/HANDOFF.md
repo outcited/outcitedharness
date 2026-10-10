@@ -42,7 +42,9 @@ designwins/
   crates/dw-types      law as types + 4 compile-fail proofs
   crates/dw-normalize  condition / coverage / rating / thermal / units
   crates/dw-truth      quote verification (the free adjudication layer)
-  crates/dw-decide     Build / Atom / Cohort / evaluator (the product)
+  crates/dw-decide     Build / Atom / Cohort / evaluator
+  crates/dw-knives     axes + phrase layer (D4/D5) — colloquial -> knives
+  crates/dw-funnel     the composition root: accept(sentence) -> Build
   crates/dw-parity     D2 discrepancy ledger + corpus manifest
   crates/dw-pdf        PDFium engine + D1 G7 gate
 scripts/
@@ -51,8 +53,19 @@ scripts/
   fetch_pdfium.sh                pinned PDFium 7881, checksum-verified
 ```
 
-**27 Rust files, 6,120 lines, 59 tests passing.** G7 is the one intentional
+**33 Rust files, ~8,000 lines, 72 tests passing.** G7 is the one intentional
 failure — it is a gate that blocks `dw-pdf`, not a regression.
+
+Dependency graph is acyclic and each layer has one job:
+
+```
+dw-types -> dw-normalize -> dw-decide -> dw-knives -> dw-funnel
+                |              |            |
+            comparability   the funnel   colloquial -> knives
+```
+
+`dw-funnel::accept` is **the** entry point. The PLAN §0 sentence is now a
+test (`acceptance_test_sentence_to_cohort`), not a paragraph.
 
 ### Gates
 
@@ -87,8 +100,9 @@ Ranked by how much of the §0 sentence each one unlocks.
 
 | # | missing | unlocks | notes |
 |---|---|---|---|
-| 1 | **`dw-knives` phrase layer (D4)** | "types one sentence … returns a cohort" | The colloquial→knife bindings. This is *the* gap: without it, `"outdoor weather thermostat bluetooth"` matches text instead of narrowing a cohort. Source material is `exports/cr_drops/20260813_mcu_yellow_occasion_holes/holes.json` (`chips_discovered`) |
-| 2 | **question ranking** | "suggests the next question that would narrow it most" | `dw-decide::Question` exists; the expected-reduction ranking is `harness/discovery/service.py::next_question` (1,881 parts / 86,736 claims verified) |
+| ~~1~~ | ~~`dw-knives` phrase layer (D4)~~ | ~~"types one sentence … returns a cohort"~~ | **done.** `phrase::bind` + `unknowns_from_residue`, seeded from `holes.json` with measured stamps |
+| 1 | **question ranking by measured reduction** | "suggests the next question that would narrow it most" | currently ranks by `affected` count as an honest proxy. The real ranking is `harness/discovery/service.py::next_question` (1,881 parts / 86,736 claims verified) |
+| 2 | **evidence deep links** | "every number opens to the page it came from" | `SourceRef`/`CropRef` exist (C13). Missing: content-addressed page render at 144 DPI + row-band crop |
 | 3 | **evidence deep links** | "every number opens to the page it came from" | `SourceRef`/`CropRef` exist (C13). Missing: content-addressed page render at 144 DPI + row-band crop |
 | 4 | **`dw-search` (D4)** | the front door | FTS5 + the binding layer. Eval is the query telemetry xlsx |
 | 5 | **`dw-coverage`** | "lists what it could not evaluate" at corpus scale | coverage cube + gap ledger. `20260814_yellow_scorecard` is the measured substrate |
@@ -204,7 +218,7 @@ exist.
 |---|---|---|
 | **87K corpus location** | **blocker for N4** | Candidate locations: `/Volumes/M5_4TB/exports/power-datasheet-pairs/{ti,rohm,infineon}-20260908/` (9,201 rows) and `results/lora-v1-pairs/`. Neither matches "2,713 v1 / 87K v2". Must be pinned before N4 can run. |
 | G7 residual | open | Form XObject: pdfium bakes the parent transform into enumerated children, so composing the form matrix double-applies it. Recursing with the *parent* matrix takes `msp430fr6005` p29 to exact drawing count (208 = 208). `msp430g2744` p15 still shows a y-distribution mismatch. Then decomposition normalization (`re`→4 corners, Bézier triples) to ≥99% vertex parity. |
-| git working tree | 35 pre-existing uncommitted changes on `curve/07e-evidence-supply` | **not ours.** Do not commit them. Our work is committed. |
+| git working tree | 35 pre-existing uncommitted changes on `curve/07e-evidence-supply` | **not ours.** Do not commit them. Our work is committed (12 commits this session). |
 | `~/.cargo/bin` on PATH | not done | one line in `~/.zshrc`, needs the user's word |
 | vendor priors content | decided (D6) | derived from `dw-coverage`, never authored. Not yet implemented. |
 | `dw-queue` lease semantics | open | needs durations and policy |
@@ -241,12 +255,16 @@ exist.
 
 ## 7. Suggested next session
 
-1. Read `DECISIONS.md` §D4 and `PLAN.md` §6 (taxonomy induction).
-2. Pull `holes.json` `chips_discovered` and the four-drawers ruling.
-3. Write `dw-knives` phrase layer: `ColloquialBinding { phrase, knives: Vec<AtomTemplate>, confidence, evidence, stamp }` with `Stamp = ProvenFit | PositiveOnly | Blocked(reason)`.
-4. Wire it into `dw-decide`: colloquial intent → bindings → `Vec<Atom>` → `evaluate` → cohort.
-5. Gate it against the query telemetry xlsx, weighted by search count.
-6. Then #2–#5 in §2 above.
+1. **Question ranking.** Port `harness/discovery/service.py::next_question`
+   (expected cohort reduction) into `dw-decide`. It is verified over 1,881
+   parts / 86,736 claims — port it, do not re-derive it.
+2. **Gate the phrase layer against the query telemetry xlsx**, weighted by
+   search count. 1,485 query rows / 703 unique strings / 8,653 searches. The
+   `Theme` column is the labelled category tier.
+3. **Evidence deep links.** Content-addressed page render at 144 DPI +
+   row-band crop (`C13`), so "every number opens to the page it came from" is
+   literally true in a browser.
+4. Then #3–#11 in §2 above.
 
 The acceptance test is one sentence long. Everything on that list is in
 service of it.
