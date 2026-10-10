@@ -34,6 +34,8 @@
 use std::collections::BTreeMap;
 
 use dw_types::{Admitted, Ineligible, ReleaseId, SourceRef, Verdict as Outcome};
+
+pub use dw_normalize::CondValue;
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
@@ -159,8 +161,12 @@ pub struct Atom {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub margin_pct: Option<f64>,
     /// Conditions the evidence must cover (`C9.6`).
+    ///
+    /// Values are [`CondValue`], not `f64`, because a required condition can be
+    /// a range (`-40 to 125 °C`) and [`dw_normalize::condition_covers`] is the
+    /// only thing that knows how to compare one.
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
-    pub required_conditions: BTreeMap<String, f64>,
+    pub required_conditions: BTreeMap<String, CondValue>,
 }
 
 /// A requirement the human stated explicitly.
@@ -438,7 +444,10 @@ impl Build {
 // re-export the outcome so callers need one import
 // ---------------------------------------------------------------------------
 
+pub mod evaluate;
+
 pub use dw_types::Verdict;
+pub use evaluate::{evaluate, judge, CandidateFacts, Evaluation, Evidence, DEFAULT_NEAR_MISS_PCT};
 
 /// An admitted claim, for callers building judgements from verified evidence.
 pub type Verified<T> = Admitted<T>;
@@ -454,7 +463,7 @@ pub type Verified<T> = Admitted<T>;
 )]
 mod tests {
     use super::*;
-    use dw_types::{Sha256, Verdict};
+    use dw_types::Sha256;
 
     fn cand(n: &str) -> Candidate {
         Candidate {
