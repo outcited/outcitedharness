@@ -145,6 +145,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-knives"
+version = "0.1.0"
+dependencies = [
+ "dw-decide",
+ "dw-normalize",
+ "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-normalize"
 version = "0.1.0"
 dependencies = [

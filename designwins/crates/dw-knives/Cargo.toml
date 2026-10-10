@@ -1,0 +1,21 @@
+[package]
+name = "dw-knives"
+description = "Axis registry (discovered-then-curated) + phrase layer: colloquial intent -> technical knives. D4. The difference between a text matcher and the product."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+dw-types = { path = "../dw-types" }
+dw-normalize = { path = "../dw-normalize" }
+dw-decide = { path = "../dw-decide" }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

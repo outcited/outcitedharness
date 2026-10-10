@@ -124,6 +124,8 @@ pub enum Axis {
     HasWirelessBle,
     /// Has USB.
     HasUsb,
+    /// Has motor-control peripherals (PWM, gate drive, quadrature decode).
+    HasMotorControl,
     /// Flash, in kilobytes.
     FlashKb,
     /// Frequency, in megahertz.
