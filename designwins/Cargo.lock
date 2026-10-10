@@ -141,6 +141,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "trybuild",
 ]
 
 [[package]]
@@ -160,6 +161,19 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+]
+
+[[package]]
+name = "dw-truth"
+version = "0.1.0"
+dependencies = [
+ "dw-normalize",
+ "dw-types",
+ "fancy-regex",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "trybuild",
 ]
 
 [[package]]
