@@ -1,0 +1,25 @@
+[package]
+name = "dw-normalize"
+description = "Typed normalization: condition typing, condition coverage, rating class, margin, canonical units. PRD: docs/PRD-NORMALIZE.md. Replaces harness/electronics/{condition_model,rating_class,curve_atoms,thermal_metrics,mode_currents}.py"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+dw-types = { path = "../dw-types" }
+
+# Python `re` semantics require lookaround: `_TEMP_UNIT` uses `(?![A-Za-z])`
+# and `_BARE_TEMP` uses `(?<![\w.])` / `(?![\w/])`. The `regex` crate cannot
+# express these. `fancy-regex` can, and is the only reason this dependency
+# exists. See PRD-NORMALIZE §8 "regex engine differences".
+fancy-regex = "0.14"
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/dw-types", "crates/dw-pdf", "crates/dw-parity"]
+members = ["crates/dw-types", "crates/dw-pdf", "crates/dw-parity", "crates/dw-normalize"]
 
 [workspace.package]
 version = "0.1.0"
