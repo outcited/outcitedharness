@@ -195,10 +195,10 @@ Do not re-derive these. They are measured.
 
 | thing | location |
 |---|---|
-| the plan | `PLAN.md` (Revision 3) |
-| ratified laws | `designwins/docs/DECISIONS.md` — D1–D7 |
+| the plan | `PLAN.md` (Revision 3) — **its body is partly stale**. Read §19 "Corrections" at the bottom: it names which sections are superseded and by what. Where a `DECISIONS.md` entry disagrees with `PLAN.md`, **the decision wins** |
+| ratified laws | `designwins/docs/DECISIONS.md` — D1–D7. **These supersede `PLAN.md`** |
 | contracts | `designwins/docs/CONTRACTS.md` — `Build` first, then C1–C13 |
-| normalization spec | `designwins/docs/PRD-NORMALIZE.md` |
+| normalization spec | `designwins/docs/PRD-NORMALIZE.md` — reviewed, with its own corrections recorded in §10 |
 | Python reference, extraction side | `harness/electronics/*.py` (49 files) |
 | Python reference, gate side | `harness/pipeline/{quote_verify,admission,ladder,crop_verify,ball_validate}.py` |
 | **the funnel, verified** | `harness/discovery/` — 1,881 parts / 86,736 claims |
