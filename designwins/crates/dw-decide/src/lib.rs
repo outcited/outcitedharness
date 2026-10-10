@@ -449,7 +449,10 @@ impl Build {
 pub mod evaluate;
 
 pub use dw_types::Verdict;
-pub use evaluate::{evaluate, judge, CandidateFacts, Evaluation, Evidence, DEFAULT_NEAR_MISS_PCT};
+pub use evaluate::{
+    evaluate, judge, AlwaysResolvable, CandidateFacts, Evaluation, Evidence, Provenance,
+    DEFAULT_NEAR_MISS_PCT,
+};
 
 /// An admitted claim, for callers building judgements from verified evidence.
 pub type Verified<T> = Admitted<T>;

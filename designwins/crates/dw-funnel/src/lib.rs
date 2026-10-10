@@ -17,8 +17,8 @@
 use std::collections::BTreeMap;
 
 use dw_decide::{
-    evaluate, Build, Candidate, CandidateFacts, Cohort, ConfirmState, Derived, DesignContext,
-    DesignIntent,
+    evaluate, AlwaysResolvable, Build, Candidate, CandidateFacts, Cohort, ConfirmState, Derived,
+    DesignContext, DesignIntent,
 };
 use dw_types::ReleaseId;
 
@@ -56,7 +56,7 @@ pub fn accept(
     let bound = registry.bind(sentence);
     let (mut unknowns, mut questions) = dw_knives::unknowns_from_residue(&bound, cohort.len());
 
-    let eval = evaluate(cohort, &bound.atoms, facts);
+    let eval = evaluate(cohort, &bound.atoms, facts, &AlwaysResolvable);
     unknowns.extend(eval.unknowns.clone());
 
     // Rank the questions by expected cohort reduction: prefer the ones whose

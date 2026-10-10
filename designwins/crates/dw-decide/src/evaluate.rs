@@ -77,6 +77,31 @@ pub struct CandidateFacts {
 /// Stored explicitly because `C9.3` forbids a silent default.
 pub const DEFAULT_NEAR_MISS_PCT: f64 = 10.0;
 
+/// Can a piece of evidence be opened?
+///
+/// This is the trust law in trait form. `dw-evidence::EvidenceStore`
+/// implements it against real pixels; tests use [`AlwaysResolvable`].
+///
+/// It is a parameter of [`judge`] rather than a caller-side check **so it
+/// cannot be forgotten**. A provenance check that lives at the call site is a
+/// provenance check that gets skipped the first time someone is in a hurry.
+pub trait Provenance {
+    /// True when every source reference on this evidence resolves to a
+    /// content-addressed page render and row-band crop.
+    fn resolvable(&self, sources: &[SourceRef]) -> bool;
+}
+
+/// A resolver that accepts everything. For tests and for the period before a
+/// store is wired in — and **only** for that.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct AlwaysResolvable;
+
+impl Provenance for AlwaysResolvable {
+    fn resolvable(&self, _: &[SourceRef]) -> bool {
+        true
+    }
+}
+
 /// Compare one evidence against one atom.
 ///
 /// # The decision, in order
@@ -88,15 +113,24 @@ pub const DEFAULT_NEAR_MISS_PCT: f64 = 10.0;
 ///    still be fine, we simply have not established it.
 /// 3. Evidence exists but its condition does not **cover** the required
 ///    operating point → `Unknown` (`C9.6`).
-/// 4. Compare, with the margin applied to the **requirement** (`C9.3`).
+/// 4. Evidence that does not resolve to pixels is `Unknown` — **provenance
+///    failure refuses an answer rather than passing one**
+///    (`PROVENANCE.md` §4.1).
+/// 5. Compare, with the margin applied to the **requirement** (`C9.3`).
 #[must_use]
-pub fn judge(evidence: Option<&Evidence>, atom: &Atom) -> Verdict {
+pub fn judge(evidence: Option<&Evidence>, atom: &Atom, provenance: &dyn Provenance) -> Verdict {
     let Some(ev) = evidence else {
         return Verdict::Unknown;
     };
     let Some(value) = ev.value else {
         return Verdict::Unknown;
     };
+
+    // Trust gate: a number we cannot open is a number we cannot assert. This
+    // is `C9.1` applied to provenance itself.
+    if !provenance.resolvable(&ev.sources) {
+        return Verdict::Unknown;
+    }
 
     // C9.2: an absolute maximum is a survival boundary, not an operating
     // guarantee. The wrong quantity cannot be compared — say so, do not guess.
@@ -175,6 +209,7 @@ pub fn evaluate(
     cohort: &Cohort,
     atoms: &[Atom],
     facts: &BTreeMap<Candidate, CandidateFacts>,
+    provenance: &dyn Provenance,
 ) -> Evaluation {
     let mut eval = Evaluation::default();
     let mut unknown_counts: BTreeMap<Axis, usize> = BTreeMap::new();
@@ -186,7 +221,7 @@ pub fn evaluate(
 
         for atom in atoms {
             let evidence = known.and_then(|f| f.axes.get(&atom.axis));
-            let outcome = judge(evidence, atom);
+            let outcome = judge(evidence, atom, provenance);
 
             eval.judgements.push(Judgement {
                 candidate: candidate.clone(),
@@ -195,7 +230,10 @@ pub fn evaluate(
                 evidence: evidence.map(|e| e.sources.clone()).unwrap_or_default(),
             });
 
-            if evidence.is_none_or(|e| e.value.is_none()) {
+            // Unresolvable evidence is an unknown too: we have a number we
+            // cannot open, which is the same as not having established it.
+            let unresolvable = evidence.is_some_and(|e| !provenance.resolvable(&e.sources));
+            if evidence.is_none_or(|e| e.value.is_none()) || unresolvable {
                 *unknown_counts.entry(atom.axis).or_insert(0) += 1;
             }
 
@@ -281,11 +319,65 @@ mod tests {
         let mut facts = BTreeMap::new();
         facts.insert(cand("A"), CandidateFacts::default());
 
-        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts);
+        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts, &AlwaysResolvable);
         assert!(eval.exclusions.is_empty());
         assert_eq!(eval.cohort.len(), 1);
         assert_eq!(eval.unknowns.len(), 1);
         assert_eq!(eval.unknowns[0].affected, 1);
+    }
+
+    /// The trust gate (`PROVENANCE.md` §4.1): a number we cannot open is a
+    /// number we cannot assert. Unresolvable evidence is `Unknown`, never
+    /// `Pass` — provenance failure refuses an answer instead of passing one.
+    #[test]
+    fn unresolvable_evidence_is_unknown_not_pass() {
+        struct NothingResolves;
+        impl Provenance for NothingResolves {
+            fn resolvable(&self, _: &[SourceRef]) -> bool {
+                false
+            }
+        }
+
+        let a = vds_atom(true, None);
+        // Plenty of rating, plenty of condition coverage — and no pixels.
+        let ev = Evidence::measured(1000.0, true, src());
+        assert_eq!(
+            judge(Some(&ev), &a, &NothingResolves),
+            Verdict::Unknown,
+            "an unopenable number must not become Pass"
+        );
+        // The same evidence with a working resolver does pass.
+        assert_eq!(judge(Some(&ev), &a, &AlwaysResolvable), Verdict::Pass);
+    }
+
+    /// The trust gate is in the signature, not at a call site, so it cannot
+    /// be skipped by someone in a hurry.
+    #[test]
+    fn evaluate_refuses_unresolvable_evidence() {
+        struct NothingResolves;
+        impl Provenance for NothingResolves {
+            fn resolvable(&self, _: &[SourceRef]) -> bool {
+                false
+            }
+        }
+
+        let cohort = Cohort::from_candidates(vec![cand("A")]);
+        let mut facts = BTreeMap::new();
+        facts.insert(
+            cand("A"),
+            CandidateFacts {
+                axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(40.0, true, src()))]),
+            },
+        );
+
+        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts, &NothingResolves);
+        assert!(eval.exclusions.is_empty(), "no proof, no elimination");
+        assert_eq!(
+            eval.cohort.len(),
+            1,
+            "nothing is eliminated without evidence"
+        );
+        assert_eq!(eval.unknowns.len(), 1, "and the gap is reported");
     }
 
     /// C9.2: an absolute maximum is the wrong quantity, so it is Unknown —
@@ -294,7 +386,7 @@ mod tests {
     fn absmax_evidence_is_unknown_not_fail() {
         let a = vds_atom(true, None);
         let ev = Evidence::measured(40.0, false, src());
-        assert_eq!(judge(Some(&ev), &a), Verdict::Unknown);
+        assert_eq!(judge(Some(&ev), &a, &AlwaysResolvable), Verdict::Unknown);
         assert!(!crate::Elimination::eliminates(Verdict::Unknown, true));
     }
 
@@ -315,7 +407,7 @@ mod tests {
             },
         );
 
-        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts);
+        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts, &AlwaysResolvable);
         assert!(
             eval.exclusions.is_empty(),
             "34 is a near-miss at 10%, not a fail"
@@ -328,15 +420,27 @@ mod tests {
     fn near_miss_is_not_fail() {
         let a = vds_atom(true, None);
         assert_eq!(
-            judge(Some(&Evidence::measured(34.0, true, src())), &a),
+            judge(
+                Some(&Evidence::measured(34.0, true, src())),
+                &a,
+                &AlwaysResolvable
+            ),
             Verdict::NearMiss
         );
         assert_eq!(
-            judge(Some(&Evidence::measured(30.0, true, src())), &a),
+            judge(
+                Some(&Evidence::measured(30.0, true, src())),
+                &a,
+                &AlwaysResolvable
+            ),
             Verdict::Fail
         );
         assert_eq!(
-            judge(Some(&Evidence::measured(36.0, true, src())), &a),
+            judge(
+                Some(&Evidence::measured(36.0, true, src())),
+                &a,
+                &AlwaysResolvable
+            ),
             Verdict::Pass
         );
     }
@@ -348,8 +452,11 @@ mod tests {
         let none = vds_atom(true, None);
         let pct20 = vds_atom(true, Some(20.0));
         let ev = Evidence::measured(40.0, true, src());
-        assert_eq!(judge(Some(&ev), &none), Verdict::Pass);
-        assert_eq!(judge(Some(&ev), &pct20), Verdict::NearMiss);
+        assert_eq!(judge(Some(&ev), &none, &AlwaysResolvable), Verdict::Pass);
+        assert_eq!(
+            judge(Some(&ev), &pct20, &AlwaysResolvable),
+            Verdict::NearMiss
+        );
     }
 
     /// C9.6: the evidence condition must COVER the required operating point.
@@ -362,7 +469,7 @@ mod tests {
             "ta_c".to_string(),
             CondValue::Scalar(25.0),
         )]));
-        assert_eq!(judge(Some(&ev), &a), Verdict::Unknown);
+        assert_eq!(judge(Some(&ev), &a, &AlwaysResolvable), Verdict::Unknown);
     }
 
     #[test]
@@ -374,7 +481,7 @@ mod tests {
             "ta_c".to_string(),
             CondValue::Scalar(25.0),
         )]));
-        assert_eq!(judge(Some(&ev), &a), Verdict::Pass);
+        assert_eq!(judge(Some(&ev), &a, &AlwaysResolvable), Verdict::Pass);
     }
 
     /// A soft atom never eliminates, however badly it fails.
@@ -388,7 +495,7 @@ mod tests {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(1.0, true, src()))]),
             },
         );
-        let eval = evaluate(&cohort, &[vds_atom(false, None)], &facts);
+        let eval = evaluate(&cohort, &[vds_atom(false, None)], &facts, &AlwaysResolvable);
         assert!(eval.exclusions.is_empty());
         assert_eq!(eval.cohort.len(), 1);
     }
@@ -404,7 +511,7 @@ mod tests {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(1.0, true, src()))]),
             },
         );
-        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts);
+        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts, &AlwaysResolvable);
         assert_eq!(eval.exclusions.len(), 1);
         let e = &eval.exclusions[0];
         assert!(!e.ineligible.reason().is_empty());
@@ -432,7 +539,7 @@ mod tests {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(1.0, true, src()))]),
             },
         );
-        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts);
+        let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts, &AlwaysResolvable);
 
         let build = Build {
             id: "b".into(),
