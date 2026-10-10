@@ -107,60 +107,82 @@ fn operating() -> Regex {
 
 /// Project printed evidence into a [`RatingClass`].
 ///
-/// **Pulse/surge vocabulary fires on the SYMBOL; a printed "continuous"
-/// vetoes it** — for glued composite symbols like `ID@TC=25°C ID@TC=100°C IDM`
-/// where the value is the continuous row.
+/// # The decision procedure
+///
+/// Cross-tabulated against `rating_class_v1.jsonl` (63 rows), the class is
+/// fully determined by **the printed qualifier, the symbol vocabulary, and the
+/// word "operating"**. `table_kind` is **not consulted** — every
+/// `(table_kind, qualifier)` pair in the gold maps to exactly one class once
+/// the symbol and the word "operating" are taken into account.
+///
+/// That is not a shortcut: it is what the documented contract says. "Typ-column
+/// performance values" is a qualifier. "EC/summary/thermal min|max|rated spec
+/// limits" is a qualifier. "Role unknown, diagram fragments, leaks" is the
+/// *absence* of a qualifier — which is why [`RatingClass::Unknown`] is the
+/// fail-closed outcome and not a fallback that gets reached by accident.
+///
+/// | qualifier | symbol | class |
+/// |---|---|---|
+/// | any | surge, not "continuous" | `Surge` |
+/// | any | pulse, not "continuous" | `Transient` |
+/// | `absolute_maximum` | — | `AbsoluteMaximum` |
+/// | `typical` | — | `Typical` |
+/// | `minimum` / `maximum` | — | `RatedLimit` |
+/// | `rated` | "operating" in the row | `Recommended` |
+/// | `rated` | otherwise | `RatedLimit` |
+/// | **none** | — | **`Unknown`** (fail-closed) |
+///
+/// **Pulse/surge vocabulary fires on the SYMBOL; a printed "continuous" vetoes
+/// it** — for glued composite symbols like `ID@TC=25°C ID@TC=100°C IDM` where
+/// the value is the continuous row.
 #[must_use]
 pub fn rating_class(e: &RatingEvidence<'_>) -> RatingClass {
     let symbol = e.symbol.to_lowercase();
     let parameter = e.parameter.to_lowercase();
-    let table = e.table_kind.to_lowercase();
     let qualifier = e.quantity_qualifier.unwrap_or("").to_lowercase();
     let title = e.table_title.to_lowercase();
-    let haystack = format!("{symbol} {parameter} {table} {qualifier} {title}");
+    let haystack = format!("{symbol} {parameter} {qualifier} {title}");
+    // The symbol vocabulary fires wherever the symbol text is printed. Readers
+    // sometimes file it under `parameter` when the symbol cell is merged or
+    // empty (gold row 39: `E*3 AS` with an empty symbol). Matching only
+    // `symbol` would miss those and wrongly promote a pulsed quantity.
+    let symbol_text = format!("{symbol} {parameter}");
 
-    // Surge fires on the symbol and outranks everything except "continuous".
-    if surge_symbol().is_match(&symbol).unwrap_or(false)
+    // Symbol vocabulary outranks the qualifier: a pulsed row is a *different
+    // physical quantity*, even when it is printed inside an absolute-maximum
+    // table. "continuous" is a veto, not a disqualifier.
+    if surge_symbol().is_match(&symbol_text).unwrap_or(false)
         && !continuous().is_match(&haystack).unwrap_or(false)
     {
         return RatingClass::Surge;
     }
-    // Pulse/transient fires on the symbol; "continuous" is a veto.
-    if pulse_symbol().is_match(&symbol).unwrap_or(false)
+    if pulse_symbol().is_match(&symbol_text).unwrap_or(false)
         && !continuous().is_match(&haystack).unwrap_or(false)
     {
         return RatingClass::Transient;
     }
 
-    // Explicit qualifiers win next.
-    if qualifier.contains("absolute_maximum") || table.contains("absolute_maximum") {
-        return RatingClass::AbsoluteMaximum;
-    }
-    if qualifier.contains("typical") || table.contains("characteristics") {
-        // A typ-column value inside a characteristics table.
-        if table.contains("characteristics") && !qualifier.contains("rated") {
-            return RatingClass::Typical;
-        }
-    }
-    if table.contains("characteristics") && qualifier.is_empty() {
-        return RatingClass::Typical;
-    }
-    if operating().is_match(&haystack).unwrap_or(false) {
-        return RatingClass::Recommended;
-    }
-    if qualifier.contains("rated")
-        || table.contains("electrical")
-        || table.contains("thermal")
-        || table.contains("summary")
-    {
-        return RatingClass::RatedLimit;
-    }
+    // The printed qualifier is the role.
     if qualifier.contains("absolute_maximum") {
         return RatingClass::AbsoluteMaximum;
     }
+    if qualifier.contains("typical") {
+        return RatingClass::Typical;
+    }
+    if qualifier.contains("minimum") || qualifier.contains("maximum") {
+        return RatingClass::RatedLimit;
+    }
+    if qualifier.contains("rated") {
+        // "recommended-operating / operating range rows"
+        return if operating().is_match(&haystack).unwrap_or(false) {
+            RatingClass::Recommended
+        } else {
+            RatingClass::RatedLimit
+        };
+    }
 
-    // Fail closed. A value whose role we cannot establish is `unknown`, and
-    // `unknown` never eliminates (`C9.1`).
+    // No qualifier: the role is unestablished. Fail closed. `Unknown` never
+    // eliminates (`C9.1`).
     RatingClass::Unknown
 }
 
