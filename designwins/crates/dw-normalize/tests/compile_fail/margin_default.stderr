@@ -1,0 +1,11 @@
+error[E0599]: no associated function or constant named `default` found for struct `Margin` in the current scope
+  --> tests/compile_fail/margin_default.rs:10:26
+   |
+10 |     let margin = Margin::default();
+   |                          ^^^^^^^ associated function or constant not found in `Margin`
+   |
+note: if you're trying to build a new `Margin`, consider using `Margin::pct` which returns `Margin`
+  --> src/rating.rs
+   |
+   |     pub const fn pct(pct: f64) -> Self {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -17,6 +17,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use fancy_regex::Regex;
 use serde::{Deserialize, Serialize};
 
+use dw_types::Verbatim;
+
 use crate::re;
 
 use crate::units::{scale, Kind, Scale};
@@ -216,7 +218,13 @@ pub enum Mode {
 
 /// A typed condition. `verbatim` is the provenance anchor and is never
 /// destroyed or replaced (`C3`).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+///
+/// **No `Deserialize`.** A typed condition must be *produced* by
+/// [`parse_condition`], which is where the laws live. Deserialising one from
+/// JSON would be a way to bypass [`Verbatim`]'s constructor and the fail-closed
+/// rules, so the trait is deliberately absent. Only `Serialize` exists, for the
+/// gold comparison.
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct TypedCondition {
     /// Canonical SI anchors.
     pub keys: BTreeMap<String, CondValue>,
@@ -238,13 +246,21 @@ pub struct TypedCondition {
     /// Verbatim text no anchor claimed.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub residue: Vec<String>,
-    /// The printed string, unchanged.
+    /// The printed string, unchanged (`C3`).
+    ///
+    /// This is a [`Verbatim`], not a `String`, so a typed condition cannot
+    /// exist without its provenance anchor. See
+    /// `tests/compile_fail/typed_condition_no_verbatim.rs`.
     #[serde(skip)]
-    pub verbatim: String,
+    pub verbatim: Verbatim,
 }
 
 /// The only two outcomes of a parse. No `Default`, no silent fallback.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+///
+/// **No `Deserialize`,** for the same reason as [`TypedCondition`]: the laws
+/// are enforced by [`parse_condition`], and a JSON round-trip would route
+/// around them. See `tests/compile_fail/`.
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum ParseOutcome {
     /// Typed anchors.
@@ -682,6 +698,14 @@ pub fn parse_condition(text: &str) -> ParseOutcome {
         }
     }
 
+    // `s` is non-empty here (the dash/empty path returned above), so this
+    // cannot fail. If it somehow did, fail closed rather than panic.
+    let Ok(verbatim) = Verbatim::new(text) else {
+        return ParseOutcome::Rejected {
+            reject: Rejection::NoAnchors,
+        };
+    };
+
     if !keys.is_empty() || mode.is_some() {
         // Gold emits comparators in **document order**, which is not the table
         // iteration order the scan uses. Sort on the match position.
@@ -695,7 +719,7 @@ pub fn parse_condition(text: &str) -> ParseOutcome {
             bare,
             comparators,
             residue: residue(&s, &spans),
-            verbatim: text.to_string(),
+            verbatim: verbatim.clone(),
         });
     }
 
@@ -806,7 +830,7 @@ mod tests {
         let text = "VGS = 0 V, VDS = 25 V, f = 1 MHz";
         match parse_condition(text) {
             ParseOutcome::Typed(t) => {
-                assert_eq!(t.verbatim, text);
+                assert_eq!(t.verbatim.as_str(), text);
                 assert_eq!(t.keys.get("vgs_v"), Some(&CondValue::Scalar(0.0)));
                 assert_eq!(t.keys.get("vds_v"), Some(&CondValue::Scalar(25.0)));
                 assert_eq!(t.keys.get("f_hz"), Some(&CondValue::Scalar(1e6)));
