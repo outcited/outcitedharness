@@ -1,0 +1,22 @@
+[package]
+name = "dw-funnel"
+description = "The composition root: one sentence in, a defensible cohort out. PLAN.md 0 made executable. The only entry point."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+dw-types = { path = "../dw-types" }
+dw-normalize = { path = "../dw-normalize" }
+dw-decide = { path = "../dw-decide" }
+dw-knives = { path = "../dw-knives" }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

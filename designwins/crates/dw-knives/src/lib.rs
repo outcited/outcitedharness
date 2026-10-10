@@ -72,7 +72,11 @@ fn sourced(
         vec![AtomTemplate {
             axis,
             op: Op::MinRating,
-            value: None,
+            // A boolean capability is modelled as "at least 1": a candidate
+            // with 0 does not have it. An atom with no threshold can never
+            // fail, so it can never narrow the cohort — which would make the
+            // whole phrase layer decorative.
+            value: Some(1.0),
             hard: true,
             drawer,
         }],

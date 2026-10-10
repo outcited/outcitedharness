@@ -145,6 +145,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-funnel"
+version = "0.1.0"
+dependencies = [
+ "dw-decide",
+ "dw-knives",
+ "dw-normalize",
+ "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-knives"
 version = "0.1.0"
 dependencies = [
