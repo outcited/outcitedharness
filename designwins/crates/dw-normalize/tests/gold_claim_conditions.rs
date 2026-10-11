@@ -191,6 +191,7 @@ fn claim_provenance_has_c3_shape() {
     let mut total = 0usize;
     let mut with_quote = 0usize;
     let mut with_sha = 0usize;
+    let mut with_row = 0usize;
     let mut with_page = 0usize;
 
     for line in text.lines().filter(|l| !l.trim().is_empty()) {
@@ -208,24 +209,42 @@ fn claim_provenance_has_c3_shape() {
         {
             with_sha += 1;
         }
-        if v.get("page").is_some() {
+        if v.get("row_header")
+            .and_then(|q| q.as_str())
+            .is_some_and(|q| !q.is_empty())
+        {
+            with_row += 1;
+        }
+        // `Value::get` returns `Some(&Null)` for a present-but-null field, so
+        // this must check the VALUE, not the key. The first version of this
+        // test asserted 86,736/86,736 pages and passed on that bug.
+        if v.get("page").is_some_and(|p| !p.is_null()) {
             with_page += 1;
         }
     }
 
     eprintln!(
-        "claim_provenance: {total} rows, quote {with_quote}, sha {with_sha}, page {with_page}"
+        "claim_provenance: {total} rows, quote {with_quote}, sha {with_sha}, \
+         row_header {with_row}, page {with_page}"
     );
     assert_eq!(total, 86736, "the full claim corpus");
     assert_eq!(
         with_sha, total,
         "C1: every claim joins to the vault on sha256"
     );
-    // Quote and page are the C13 path. They are not universal in the corpus
-    // yet, so this asserts the floor rather than perfection, and reports the
-    // real number instead of hiding it.
-    assert!(
-        with_quote >= total * 9 / 10,
-        "C3: at least 90% of claims must carry a verbatim quote; got {with_quote}/{total}"
+    assert_eq!(
+        with_quote, total,
+        "C3: every claim carries a verbatim quote"
+    );
+    // The gap, asserted rather than hidden. The claim corpus carries **no page
+    // numbers** — `SourceRef.page` would be empty for all 86,736. Getting one
+    // means running `dw_truth::find_quote` per page and recording the result.
+    // Asserted at exactly 0 so this cannot close silently without the test
+    // being revisited.
+    assert_eq!(
+        with_page, 0,
+        "C13: expected 0 page numbers in the claim corpus today; got {with_page}. \
+         If this is non-zero the evidence pipeline has started populating pages, \
+         which is progress — update this assertion deliberately."
     );
 }
