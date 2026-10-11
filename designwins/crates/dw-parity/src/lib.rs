@@ -374,6 +374,12 @@ impl CorpusManifest {
     }
 }
 
+pub mod replace;
+
+pub use replace::{
+    run_replacement, subjects_from_jsonl, ClosureCandidate, CommandReference, EnginePair,
+};
+
 #[cfg(test)]
 #[allow(clippy::expect_used, clippy::unwrap_used)]
 mod tests {
