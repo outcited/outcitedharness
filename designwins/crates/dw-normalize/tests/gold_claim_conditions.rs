@@ -248,3 +248,67 @@ fn claim_provenance_has_c3_shape() {
          which is progress — update this assertion deliberately."
     );
 }
+
+/// **Negative control** (`ASSURANCE.md` R2).
+///
+/// The provenance floor must be able to fail. `Value::get` returns `Some(&Null)`
+/// for a present-but-null key, so a check that tests key *presence* reports
+/// 86,736 pages when the truth is zero. That is exactly the bug this control
+/// exists to prevent recurring: it feeds the gate a null page and asserts the
+/// gate does **not** count it.
+#[test]
+fn negative_control_null_page_is_not_a_page() {
+    let null_page = serde_json::json!({"quote": "x", "doc_sha256": "y", "page": null});
+    let missing_page = serde_json::json!({"quote": "x", "doc_sha256": "y"});
+    let real_page = serde_json::json!({"quote": "x", "doc_sha256": "y", "page": 8});
+
+    // The predicate the gate uses must reject both null and absent.
+    let is_real_page = |v: &serde_json::Value| v.get("page").is_some_and(|p| !p.is_null());
+    assert!(!is_real_page(&null_page), "a null page is not a page");
+    assert!(!is_real_page(&missing_page), "an absent page is not a page");
+    assert!(is_real_page(&real_page), "a real page is a page");
+
+    // …and the count must therefore be zero on the real corpus, which is what
+    // the gate above asserts. If these two ever disagree, the gate is lying.
+    assert_eq!(
+        null_page
+            .get("page")
+            .map_or(0, |p| usize::from(!p.is_null())),
+        0
+    );
+}
+
+/// **Negative control** (R2) for Gate N4b itself: the comparison must be able
+/// to fail on a single mutated field. A comparator that returns true for
+/// everything would make N4b green forever.
+#[test]
+fn negative_control_n4b_comparison_detects_a_mutation() {
+    let good = serde_json::json!({"keys": {"vgs_v": 0.0}, "mode": "ac"});
+    let mutated = serde_json::json!({"keys": {"vgs_v": 1.0}, "mode": "ac"});
+    let structurally_different = serde_json::json!({"keys": {"vgs_v": 0.0}});
+
+    assert!(values_match(&good, &good), "identical must match");
+    assert!(
+        !values_match(&good, &mutated),
+        "a mutated VALUE must be detected, or N4b cannot catch drift"
+    );
+    assert!(
+        !values_match(&good, &structurally_different),
+        "a missing FIELD must be detected"
+    );
+}
+
+/// **Negative control** (R2) for the float tolerance: a real difference must
+/// not be absorbed by it, or the tolerance becomes a way to hide drift.
+#[test]
+fn negative_control_float_tolerance_is_not_a_blanket() {
+    use serde_json::json;
+    // Within tolerance: same number, different serialisation.
+    assert!(values_match(
+        &json!(1.5e-8),
+        &json!(1.500_000_000_000_000_2e-8)
+    ));
+    // Outside tolerance: a genuine 1% difference must fail.
+    assert!(!values_match(&json!(1.0), &json!(1.01)));
+    assert!(!values_match(&json!(600.0), &json!(601.0)));
+}

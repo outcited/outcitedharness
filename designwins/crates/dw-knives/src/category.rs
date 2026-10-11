@@ -248,4 +248,45 @@ mod tests {
         use dw_types::Ineligible;
         assert!(Ineligible::new("not AM13x", vec![]).is_err());
     }
+
+    /// **Negative control** (`ASSURANCE.md` R2).
+    ///
+    /// `CategoryOp` must distinguish containment from equality. If `Is` returned
+    /// true for any ancestor, an "ARM Cortex-M4" requirement would match a
+    /// Cortex-M0 — and the whole reason the type exists is to refuse that.
+    #[test]
+    fn negative_control_is_is_not_within() {
+        let g = graph();
+        let (leaf, ancestors, _) = g.facts_for("AM13E23019", vec![]).expect("opn known");
+        let facts = CandidateFacts {
+            axes: BTreeMap::new(),
+            category_leaf: Some(leaf.clone()),
+            category_ancestors: ancestors,
+            category_evidence: vec![],
+        };
+
+        let root = CategoryId::new("AM1x").unwrap();
+        let self_id = leaf.clone();
+
+        // The candidate IS AM13E230 and is WITHIN AM1x.
+        assert_eq!(
+            facts.category_matches(dw_decide::CategoryOp::Is, &self_id),
+            Some(true)
+        );
+        assert_eq!(
+            facts.category_matches(dw_decide::CategoryOp::Within, &root),
+            Some(true)
+        );
+        // …but it is NOT AM1x. If `Is` matched ancestors, this would be true and
+        // the category type would be doing nothing.
+        assert_eq!(
+            facts.category_matches(dw_decide::CategoryOp::Is, &root),
+            Some(false),
+            "Is must not match an ancestor"
+        );
+        assert_eq!(
+            facts.category_matches(dw_decide::CategoryOp::Excludes, &root),
+            Some(false)
+        );
+    }
 }

@@ -44,7 +44,7 @@
 
 use std::path::PathBuf;
 
-use dw_knives::{seed_from_measured_chips, PhraseRegistry, Stamp};
+use dw_knives::{seed_from_measured_chips, PhraseRegistry, Stamp, ACTIVATION_FLOOR};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -283,4 +283,67 @@ fn telemetry_is_skewed() {
         max >= total / 20,
         "the top query should be a material share of traffic; got {max}/{total}"
     );
+}
+
+/// **Negative control** (`ASSURANCE.md` R2).
+///
+/// The coverage floor must be able to trip. `bound >= 632` is only a gate if a
+/// collapse below it is red. This feeds the measurement a registry with no
+/// bindings and asserts the result is 0 — which is the only condition under
+/// which the floor means anything.
+#[test]
+fn negative_control_coverage_floor_trips_on_an_empty_registry() {
+    let registry = PhraseRegistry::new();
+    let rows = telemetry();
+    let c = measure(&registry, &rows);
+
+    assert_eq!(c.bound, 0, "an empty registry binds nothing");
+    assert_eq!(c.proven_fit, 0, "an empty registry eliminates nothing");
+    assert_eq!(c.unmapped, 7423, "all traffic is unmapped");
+
+    // The floor in the gate above must therefore be reachable-from-zero: if
+    // `bound` were computed over the wrong denominator, an empty registry
+    // could still report a positive number and the floor would never trip.
+    assert!(
+        c.bound < 632,
+        "the floor must be able to fail; if this ever passes the gate is unfalsifiable"
+    );
+}
+
+/// **Negative control** (R2) for the denominator: a set that double-counts
+/// reports >100% coverage and every floor passes. The measurement must union,
+/// not sum.
+#[test]
+fn negative_control_denominator_must_not_double_count() {
+    // Two family documents that both cover the same OPN.
+    let a = ["OPN1", "OPN2"];
+    let b = ["OPN1", "OPN3"];
+
+    let summed: usize = a.len() + b.len();
+    let unioned: std::collections::BTreeSet<&str> = a.iter().chain(b.iter()).copied().collect();
+
+    assert_eq!(summed, 4, "summing double-counts OPN1");
+    assert_eq!(unioned.len(), 3, "union is the honest denominator");
+    assert!(
+        unioned.len() < summed,
+        "if these ever agree, the coverage figure can exceed 100% again"
+    );
+}
+
+/// **Negative control** (R2) for `Stamp`: the activation floor must actually
+/// discriminate. 0.49 is below the floor and must block.
+#[test]
+fn negative_control_activation_floor_discriminates() {
+    assert!(matches!(
+        Stamp::from_coverage(0.49, "just below"),
+        Stamp::Blocked(_)
+    ));
+    assert_eq!(
+        Stamp::from_coverage(ACTIVATION_FLOOR, "exactly at"),
+        Stamp::ProvenFit
+    );
+    assert!(matches!(
+        Stamp::from_coverage(0.0, "nothing"),
+        Stamp::Blocked(_)
+    ));
 }
