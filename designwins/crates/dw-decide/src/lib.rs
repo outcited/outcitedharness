@@ -88,7 +88,7 @@ pub struct DesignContext {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub isolation: Option<bool>,
     /// Supply rails, in volts.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub rails: Vec<f64>,
     /// Free-text environment notes. Kept verbatim.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -256,7 +256,11 @@ pub struct Atom {
     /// Values are [`CondValue`], not `f64`, because a required condition can be
     /// a range (`-40 to 125 °C`) and [`dw_normalize::condition_covers`] is the
     /// only thing that knows how to compare one.
-    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    ///
+    /// `serde(default)` because the field is skipped when empty on the way
+    /// out: a wire shape that cannot be read back by its own deserializer is
+    /// a trap (`HANDOFF.md` §6 — "skip needs default on the way in").
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub required_conditions: BTreeMap<String, CondValue>,
 }
 
@@ -412,7 +416,8 @@ pub struct Judgement {
     /// The outcome. `Unknown` **never eliminates** (`C9.1`).
     pub outcome: Outcome,
     /// The evidence, when there is any. Every number opens to its page (§0).
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    /// Skipped when empty on the wire, defaulted on the way in — see [`Atom`].
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub evidence: Vec<SourceRef>,
 }
 
@@ -710,5 +715,30 @@ mod tests {
         assert!(s.contains("cohort       2 distinct parts"));
         assert!(s.contains("derived (0 confirmed)"));
         assert!(s.contains("exclusions   0"));
+    }
+
+    /// The wire shape must round-trip: fields skipped when empty still parse
+    /// back (`HANDOFF.md` §6 — "skip needs default on the way in").
+    ///
+    /// Negative control: before `serde(default)` landed on
+    /// `required_conditions` and `evidence`, both halves of this failed with
+    /// `missing field` on our **own** serialiser output — a shape nothing
+    /// could read back.
+    #[test]
+    fn wire_shapes_round_trip_when_empty_blocks_are_skipped() {
+        let atom = atom(Axis::FlashKb, true);
+        let wire = serde_json::to_string(&atom).unwrap();
+        let back: Atom = serde_json::from_str(&wire).unwrap();
+        assert_eq!(atom, back);
+
+        let j = Judgement {
+            candidate: cand("X"),
+            axis: Axis::FlashKb,
+            outcome: Verdict::Unknown,
+            evidence: vec![],
+        };
+        let wire = serde_json::to_string(&j).unwrap();
+        let back: Judgement = serde_json::from_str(&wire).unwrap();
+        assert_eq!(j, back);
     }
 }

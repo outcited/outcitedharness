@@ -12,6 +12,9 @@ thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 dw-types = { path = "../dw-types" }
+dw-decide = { path = "../dw-decide" }
+dw-knives = { path = "../dw-knives" }
+dw-funnel = { path = "../dw-funnel" }
 
 [dev-dependencies]
 
