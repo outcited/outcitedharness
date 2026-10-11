@@ -196,6 +196,8 @@ dependencies = [
 name = "dw-parity"
 version = "0.1.0"
 dependencies = [
+ "dw-normalize",
+ "dw-truth",
  "serde",
  "serde_json",
  "thiserror",

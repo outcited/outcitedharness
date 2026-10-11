@@ -14,17 +14,23 @@ export PATH="$HOME/.cargo/bin:$PATH"   # brew rustup leaves shims unlinked
 cd designwins
 cargo fmt --check && echo "FMT OK"
 cargo clippy --workspace --all-targets -- -D warnings && echo "CLIPPY OK"
-cargo test --workspace 2>&1 | grep "test result"
+cargo test --workspace --no-fail-fast 2>&1 | grep "test result"
 cargo deny check
 ```
 
-**Green looks like:** `FMT OK` · `CLIPPY OK` · **16 `test result` lines, 106
-tests** · `cargo deny` reporting `advisories ok, bans ok, licenses ok, sources
-ok`.
+**Green looks like:** `FMT OK` · `CLIPPY OK` · **20 test binaries, 143 tests —
+142 pass, 1 expected failure** · `cargo deny` reporting `advisories ok, bans
+ok, licenses ok, sources ok`.
 
-**One line is expected to FAIL:** `g7_path_segments_match_python_reference`.
+**One test is expected to FAIL:** `g7_path_segments_match_python_reference`.
 That is a **gate**, not a regression — it blocks `dw-pdf` until the residual in
 §5 closes. Any *other* failure is real.
+
+**`--no-fail-fast` is load-bearing.** Cargo aborts at the first failing target,
+and the G7 gate fails by design — without the flag the run stops at G7 and
+**never executes `dw-truth`, `dw-types`, `dw-release`** (37 tests invisible).
+The previous smoke line said "16 binaries, 106 tests": a truncated floor, not
+the inventory. A green truncated run is not a green workspace.
 
 If it is not green, fix that first. Nothing below means anything on a red build.
 
@@ -42,12 +48,13 @@ If it is not green, fix that first. Nothing below means anything on a red build.
 
 ### Do not touch
 
-`git status` shows **~36 uncommitted changes that are not ours** — modified
-`harness/*.py`, `scripts/*.py`, `tests/*.py`, root `.md` files, all predating
-this work on `curve/07e-evidence-supply`. **Do not stage, commit, revert, or
-clean them.** Ours is committed: `designwins/`, `scripts/{emit_pdf_engine_reference,
-fetch_pdfium,freeze_corpus,locate_claim_pages,build_evidence,prepare_quote_parity,
-parity_reference}.py`, `tests/fixtures/gold/*`, `PLAN.md`.
+`git status` shows **uncommitted changes that are not ours** (21 at handoff,
+the count moves) — modified `harness/*.py`, `scripts/*.py`, `tests/*.py`, root
+`.md` files, all predating this work on `curve/07e-evidence-supply`. **Do not
+stage, commit, revert, or clean them.** Ours is committed: `designwins/`,
+`scripts/{emit_pdf_engine_reference,fetch_pdfium,freeze_corpus,locate_claim_pages,build_evidence,prepare_quote_parity,
+parity_reference}.py`, `tests/fixtures/gold/*`, `PLAN.md`. Trust `git status`,
+not this number.
 
 ---
 
@@ -91,16 +98,16 @@ python:harness.electronics.condition_model.parse_condition
   subjects  10270   agreements 10270   discrepancies 0   cutover_permitted yes
 ```
 
-### `quote_verify.verify_claims` — **gate built, 1 of 3 cases agree**
+### `quote_verify.verify_claims` — **PROVEN**
 
 ```
 python:harness.pipeline.quote_verify.verify_claims
   vs rust:dw_truth::verify_claims
-  cases 40 prepared (9,890 claims, 2.13M chars)   1/3 sample cases agree
+  subjects  40   agreements  40   discrepancies  0   cutover_permitted yes
 ```
 
-**221 field-level diffs remain across the 2 diverging cases.** Triaged by
-class, not yet fixed. See §5.
+All 40 cases (9,890 claims, 2.13M chars) agree. The `header_binds` divergence
+was never in `header_binds` — root cause closed in §5.1.
 
 ### Why this is stronger than the gold gates
 
@@ -138,7 +145,7 @@ cargo run -q -p dw-parity --bin dw-replace -- \
 | Week 0 parity | ledger | empty | **green** |
 | trust gate | links 1–6 | real | **green** |
 | **replacement: condition** | 10,270 live | 0 diffs | **green** |
-| **replacement: quote** | 40 cases live | **1/3 sample agree** | **OPEN** |
+| **replacement: quote** | 40 cases live (9,890 claims) | 0 diffs | **green** |
 | D1 G7 path segments | PDFium vs MuPDF | vertex parity ≥99% | **OPEN — expected** |
 
 ---
@@ -172,29 +179,44 @@ that copy is at `…/m5-opencode/scratch/catalog.db`.
 
 ## 5. OPEN WORK — in priority order
 
-### 5.1 `header_binds` divergence — the one real porting bug left
+### 5.1 `header_binds` divergence — **CLOSED 2026-10-11**
 
-`quote_verify` replacement gate: **221 field-level diffs across 2 of 3 sample
-cases**. Triaged by class:
+Fixed and proven: the quote gate is **40/40, 0 discrepancies**. The bug was
+never in `header_binds`:
 
-| class | n | reading |
-|---|---:|---|
-| `verdict REVIEW→SUPPORTED` | 90 | my `header_binds` returns `Some(true)` where the reference returns `None` |
-| `verdict UNSUPPORTED→SUPPORTED` | 56 | same root, downstream effect |
-| `reason partially_bound_header→unbound_header` | 33 | partial vs unbound |
-| `verdict SUPPORTED→REVIEW` | 21 | reverse |
-| `verdict UNSUPPORTED→REVIEW` | 14 | |
-| `severity P0→P1` | 4 | |
+**`str::find` returns a byte offset; the reference slices by code point.**
+`quote.rs` built its `±400/±200` span windows in bytes and then
+`t_normed.get(start..end).unwrap_or(&t_normed)` — whenever a window edge
+landed mid-character (extracted datasheet text is dense with `µ`, `©`, `℃`,
+`Ω`, `–`…), `get` returned `None` and the fallback **silently widened the span
+to the whole document**. Every header token then hit, so `unbound_header`
+became `SUPPORTED` — the 90× `REVIEW→SUPPORTED` class. When `get` succeeded
+the window still covered the wrong region (bytes ≠ code points). Same bug in
+`token_window_match`'s `±number_window` span. Both sites now use
+`char_index`/`char_slice`, each with a negative control that fails on the old
+code (`multibyte_window_edge_does_not_widen_span`,
+`token_window_edge_does_not_widen_span`).
 
-**Known asymmetry that is not the bug:** the reference emits
-`"reason_code": null` but **omits** `evidence_quote` when absent. Both fields
-must be serialised to match — `reason_code` always, `evidence_quote` only when
-present.
+**Suspects that are NOT the bug — do not re-investigate:**
 
-**Suspect:** `norm(quote)[:40]` slicing and the `idx`-based span window. Note
-the reference is **context-dependent per case** — running `verify_claims` on one
-claim in isolation can give a different answer than the same claim inside the
-full map. Find out why before changing anything.
+- `norm(quote)[:40]` prefix collision is real but **reference-shared**:
+  identical on both engines, so not a porting divergence. (It does mislocate
+  short quotes — `"1.0"` finds the first `1.0` anywhere in the doc — a
+  reference limitation to fix on both sides one day.)
+- **context-dependence is dead.** 483/483 claims verified isolated vs
+  full-map give identical verdicts on the reference; the earlier observation
+  was an experimental artifact. `verify_claims` is purely per-claim.
+- The "221 diffs" figure was stale (pre-`value_as_f64` fix); the real
+  post-fix count was 170, now **0**.
+
+**Latent divergences, not firing on the 40-case corpus** (recorded so they
+are not lost; each needs its own negative control when fixed):
+`dw_truth::norm` does **not** NFKC-normalise although its doc comment claims
+it (`let folded = s;` is a no-op); `find_quote` lacks the reference's
+`norm_m4.locates` fallback layer; `value_in_quote`/`column_position_binds`
+split numbers differently from the reference's `re.findall(r"-?\d+…")` on
+inputs like `"1.5-3"`; `verify_claims` skip semantics differ for
+`value: null` claims with a quote (reference skips, port verifies).
 
 ### 5.2 `dw-api` — the D7 delivery gate
 
@@ -257,6 +279,8 @@ them. Read it before writing a check.
 | **claim `value` is a string in the corpus** | `"0.5"`, not `0.5`. `Value::as_f64()` returns `None` for a string and silently skipped the ordinal wrong-cell guard |
 | reference wire shape is **asymmetric** | `reason_code` emitted as `null`; `evidence_quote` omitted when absent |
 | array order is not semantic for keyed records | reference emits claim order, `BTreeMap` emits sorted |
+| **`str::find` is byte-indexed; Python `str.find` is code-point** | spans built in bytes cover the wrong region — and `get(a..b).unwrap_or(&s)` then **silently widens to the whole document** when an edge lands mid-char. Cost: the entire `header_binds` divergence. See §5.1 |
+| **`cargo test` truncates at the first failing target** | the expected-failing G7 gate hid 4 binaries / 37 tests from the smoke count. "16 binaries, 106 tests" was a floor. **`--no-fail-fast` is part of the smoke** |
 
 ### Semantics the gold corrected
 
@@ -412,13 +436,13 @@ again.*
 
 ## 11. Next session — do these in order
 
-1. **`header_binds` divergence** (§5.1). The one real porting bug left. Note it
-   is context-dependent per case — find out why before changing anything.
-2. **`dw-api`** (§5.2). The D7 gate. No corpus dependency.
-3. **Question ranking** (§5.3) — port `next_question`.
-4. **`dw-lessons`** — my open offer to `mac-mini`, and the thing that would have
+1. **`dw-api`** (§5.2). The D7 gate. No corpus dependency. Both replacement
+   proofs are now clean (condition 10,270/10,270 · quote 40/40), so the
+   surfaces a front end would serve are trustworthy.
+2. **Question ranking** (§5.3) — port `next_question`, do not re-derive it.
+3. **`dw-lessons`** — my open offer to `mac-mini`, and the thing that would have
    saved this session two hours.
-5. Then §5.5.
+4. Then §5.5.
 
 The acceptance test is one sentence long. Everything on that list is in service
 of it.

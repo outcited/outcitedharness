@@ -103,6 +103,31 @@ pub fn tokens(s: &str) -> Vec<String> {
     out
 }
 
+/// Character index of a byte offset.
+///
+/// `str::find` returns a **byte** offset; the reference's `str.find` returns a
+/// code-point index and its slices are code-point slices. Windows computed in
+/// bytes cover the wrong region whenever the text carries multibyte characters
+/// — which extracted datasheet text always does.
+fn char_index(s: &str, byte_idx: usize) -> usize {
+    s.char_indices().take_while(|(i, _)| *i < byte_idx).count()
+}
+
+/// Slice by character offsets, exactly like Python's `s[start:end]`.
+///
+/// `skip`/`take` clamp at the ends and can never split a character. The
+/// obvious `s.get(start..end)` is a trap: `get` returns `None` when a window
+/// edge lands mid-character, and an `unwrap_or(&s)` fallback silently widens
+/// the window to the whole document — every token then hits and an unbound
+/// header looks bound. That class is `ASSURANCE.md` §1: a check that cannot
+/// fail on the property it claims.
+fn char_slice(s: &str, start: usize, end: usize) -> String {
+    s.chars()
+        .skip(start)
+        .take(end.saturating_sub(start))
+        .collect()
+}
+
 // ---------------------------------------------------------------------------
 // field aliases and the ambient convention
 // ---------------------------------------------------------------------------
@@ -257,13 +282,15 @@ pub fn token_window_match(
             let Some(idx) = t_norm.find(num.as_str()) else {
                 return false;
             };
-            positions.push(idx);
+            positions.push(char_index(&t_norm, idx));
         }
         let first = positions.iter().copied().min().unwrap_or(0);
         let last = positions.iter().copied().max().unwrap_or(0);
-        let start = first.saturating_sub(number_window);
-        let end = (last + number_window).min(t_norm.len());
-        t_norm.get(start..end).unwrap_or(&t_norm).to_string()
+        char_slice(
+            &t_norm,
+            first.saturating_sub(number_window),
+            last + number_window,
+        )
     };
 
     let non_num: Vec<&String> = q_tokens.iter().filter(|t| !is_number_token(t)).collect();
@@ -703,15 +730,11 @@ pub fn verify_claims(claims: &BTreeMap<String, ClaimInput>, doc_text: &str) -> V
 
         let nq = norm(&c.quote);
         let head = nq.chars().take(40).collect::<String>();
-        let idx = t_normed.find(&head);
+        let idx = t_normed.find(&head).map(|b| char_index(&t_normed, b));
         let col = c.column_header.as_deref();
         let row = c.row_header.as_deref();
         let span = match idx {
-            Some(i) => {
-                let start = i.saturating_sub(400);
-                let end = (i + 200).min(t_normed.len());
-                t_normed.get(start..end).unwrap_or(&t_normed).to_string()
-            }
+            Some(i) => char_slice(&t_normed, i.saturating_sub(400), i + 200),
             None => t_normed.clone(),
         };
         let ordinal = column_position_binds(col, &c.quote, &span, value_as_f64(c.value.as_ref()));
@@ -731,11 +754,7 @@ pub fn verify_claims(claims: &BTreeMap<String, ClaimInput>, doc_text: &str) -> V
         } else {
             let col_ok = header_binds(col, &span, c.qualifier.as_deref());
             let row_span = match idx {
-                Some(i) => {
-                    let start = i.saturating_sub(200);
-                    let end = (i + 200).min(t_normed.len());
-                    t_normed.get(start..end).unwrap_or(&t_normed).to_string()
-                }
+                Some(i) => char_slice(&t_normed, i.saturating_sub(200), i + 200),
                 None => t_normed.clone(),
             };
             let row_ok = header_binds(row, &row_span, None);
@@ -952,6 +971,44 @@ mod tests {
         let out = verify_claims(&claims, doc);
         assert_eq!(out[0].severity, Severity::P0);
         assert_eq!(out[0].reason_code, Some(ReasonCode::WrongCellBinding));
+    }
+
+    /// Negative control — byte offsets must never widen the span window.
+    ///
+    /// `find` returns a byte offset, but the reference slices by code point.
+    /// When `idx + 200` lands mid-character (this doc starts 15 ASCII bytes,
+    /// then `µ` — 2 bytes each — so a `µ` straddles byte 200), a
+    /// `get(start..end).unwrap_or(&t_normed)` fallback silently degrades the
+    /// span to the **whole document**. Every header token then hits and
+    /// `unbound_header` becomes `SUPPORTED`. The header tokens here sit at
+    /// char 435+, outside the correct `[idx-400, idx+200)` window.
+    #[test]
+    fn multibyte_window_edge_does_not_widen_span() {
+        let doc = format!("quoted 42 here {} max output voltage", "µ".repeat(420));
+        let mut claims = BTreeMap::new();
+        let mut c = claim(42.0, "quoted 42 here", "");
+        c.column_header = Some("Max".into());
+        c.row_header = Some("Output voltage".into());
+        claims.insert("iout_max_a".to_string(), c);
+        let out = verify_claims(&claims, &doc);
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0].reason_code, Some(ReasonCode::UnboundHeader));
+        assert_eq!(one(&out[0]), (VerdictLabel::Review, Severity::P1));
+    }
+
+    /// Negative control — same byte/char bug in `token_window_match`'s
+    /// `±number_window` span. The tolerant locator must judge the window it
+    /// computed, not fall back to the whole document when the window edge
+    /// splits a multibyte character (`widget` here sits 100 chars past `7`).
+    #[test]
+    fn token_window_edge_does_not_widen_span() {
+        let doc = format!("7{} widget", "µ".repeat(100));
+        assert!(
+            !token_window_match("widget 7", &doc, 0.7, 60, None),
+            "whole-doc fallback made a far token look near"
+        );
+        // Positive control: the same tokens genuinely near each other bind.
+        assert!(token_window_match("widget 7", "7 widget", 0.7, 60, None));
     }
 
     /// `PLAN` §9: a class caught deterministically never needs model judgment.
