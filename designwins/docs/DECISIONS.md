@@ -536,6 +536,73 @@ The 86,736 claims in `catalog.db` were produced by `condition_model.v1.1`. If
 failed on comparator order for every claim with two comparator-bound
 conditions — a systematic divergence, not a bug hunt.
 
+## D9 — Two denominators, and what each one gates
+
+**Ruling.** A knife's coverage has two denominators and they answer **different
+questions**. `Stamp` must be taken against the *covered* denominator; the
+*universe* denominator is **reach**, and it is reported, not gated.
+
+| denominator | question it answers | what it gates |
+|---|---|---|
+| **covered** — of the parts this knife has data on, how many does it speak to? | *reliability* | **the license to eliminate** |
+| **universe** — of all 18,789 candidates, how many does it have data on? | *reach* | how much of the cohort it can say anything about at all |
+
+**Why the covered denominator gates elimination.** `C9.1` already handles the
+rest: a part with no data is `Unknown`, and `Unknown` never eliminates. So a
+knife can only ever eliminate among the parts it has measured, and *there* it
+should be trusted exactly as far as its covered fraction says. Gating on the
+universe fraction would forbid a knife that is 98% reliable where it speaks
+because it is silent elsewhere — conflating reach with correctness.
+
+**Why reach is still reported.** Low reach is not a lie, but it is a limit. A
+knife at 39% reach can only narrow 39% of the cohort, and the answer must say
+so. `holes.json`'s `do_not_stamp` is a *correctness* rule (a vendor island is
+not the knife), not a coverage rule — and it stands unchanged.
+
+### Measured 2026-10-10 — `scripts/measure_knife_coverage.py`
+
+Substrate: `results/family-matrix-*-20260908/records.jsonl` — 681 family
+documents, **352 distinct families**, **1,590 series tokens**, **7,442 OPNs**.
+Every attribute carries a *receipt* (`page`, `row_label`, `column_index`), so
+every number here traces to a printed table row.
+
+This is `PLAN.md` §6 induction signal #3 verbatim: *"the attribute rows a
+comparison table addresses ARE the category's axes."*
+
+| knife | doc% | covered% | universe% | stamp (covered) | reach |
+|---|---:|---:|---:|---|---|
+| **core_family** | **96.6%** | **98.6%** | 39.0% | **`ProvenFit`** | 39.0% |
+| timers | 49.9% | 38.1% | 15.1% | `Blocked` | |
+| ram_kb | 41.6% | 33.9% | 13.4% | `Blocked` | |
+| i2c_count | 38.0% | 33.3% | 13.2% | `Blocked` | |
+| usart_count | 38.9% | 31.7% | 12.6% | `Blocked` | |
+| adc_dac | 31.1% | 29.0% | 11.5% | `Blocked` | |
+| spi_count | 31.6% | 25.6% | 10.2% | `Blocked` | |
+| freq_mhz | 25.4% | 17.7% | 7.0% | `Blocked` | |
+| has_can | 18.8% | 14.9% | 5.9% | `Blocked` | |
+| has_usb | 17.9% | 12.9% | 5.1% | `Blocked` | |
+| flash_kb | 19.2% | 10.6% | 4.2% | `Blocked` | |
+| … | | | | | |
+
+**The finding: `core_family` is the only knife that clears the floor, and it
+covers the largest traffic class (47.3%).** 352 families and 1,590 series
+tokens give the containment nesting (`AM13E230x ⊂ AM13x ⊂ AM1x`) — which is
+why it is [`KnifeId::Category`] with `Is`/`Within`/`Excludes`, not a scalar
+(`PRD-PHRASE` §8.1).
+
+Everything else is `Blocked` on **both** denominators. That is not a failure of
+the measurement — it is the measurement. The substrate is real but narrow: 7,442
+of 18,789 parts have a family document at all.
+
+### What this does *not* license
+
+* It does not license inventing axes to move the number (`PRD-PHRASE` §10).
+* It does not lift the `do_not_stamp` rules. The four `has_*` knives still sit
+  on one 3,489-row ST/TI island and remain `PositiveOnly`/`Blocked` on
+  correctness grounds, independent of coverage.
+* It does not raise Gate D4's floor. `core_family` has **no phrase binding
+  yet** — a `ProvenFit` knife with no phrase still narrows nothing.
+
 ## Superseded / not decided here
 
 | item | status |

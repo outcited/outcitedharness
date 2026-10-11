@@ -1,0 +1,245 @@
+{
+ "core_family": {
+  "distinct_families": 352,
+  "distinct_series_tokens": 1590,
+  "doc_fraction": 0.9662,
+  "docs_with_family": 658,
+  "docs_with_series_tokens": 523,
+  "note": "family + series_tokens give the containment nesting (AM13E230x c AM13x c AM1x). PRD-PHRASE 6: this is KnifeId::Category, not a scalar axis.",
+  "opn_fraction_of_covered": 0.9855,
+  "opn_fraction_of_universe": 0.3903,
+  "opns_with_family": 7334
+ },
+ "denominators": {
+  "family_documents": 681,
+  "opns_covered": 7442,
+  "yellow_universe": 18789
+ },
+ "generated_by": "scripts/measure_knife_coverage.py",
+ "knives": {
+  "adc_dac": {
+   "doc_fraction": 0.3113,
+   "docs_classified": 212,
+   "docs_typed": 190,
+   "opn_fraction_of_covered": 0.2897,
+   "opn_fraction_of_universe": 0.1147,
+   "opns_classified": 2156
+  },
+  "crypto": {
+   "doc_fraction": 0.1189,
+   "docs_classified": 81,
+   "docs_typed": 0,
+   "opn_fraction_of_covered": 0.0731,
+   "opn_fraction_of_universe": 0.029,
+   "opns_classified": 544
+  },
+  "flash_kb": {
+   "doc_fraction": 0.1924,
+   "docs_classified": 131,
+   "docs_typed": 114,
+   "opn_fraction_of_covered": 0.1059,
+   "opn_fraction_of_universe": 0.0419,
+   "opns_classified": 788
+  },
+  "freq_mhz": {
+   "doc_fraction": 0.254,
+   "docs_classified": 173,
+   "docs_typed": 168,
+   "opn_fraction_of_covered": 0.1774,
+   "opn_fraction_of_universe": 0.0703,
+   "opns_classified": 1320
+  },
+  "gpio_count": {
+   "doc_fraction": 0.0705,
+   "docs_classified": 48,
+   "docs_typed": 46,
+   "opn_fraction_of_covered": 0.0466,
+   "opn_fraction_of_universe": 0.0185,
+   "opns_classified": 347
+  },
+  "has_can": {
+   "doc_fraction": 0.188,
+   "docs_classified": 128,
+   "docs_typed": 124,
+   "opn_fraction_of_covered": 0.1486,
+   "opn_fraction_of_universe": 0.0589,
+   "opns_classified": 1106
+  },
+  "has_usb": {
+   "doc_fraction": 0.1791,
+   "docs_classified": 122,
+   "docs_typed": 0,
+   "opn_fraction_of_covered": 0.1289,
+   "opn_fraction_of_universe": 0.051,
+   "opns_classified": 959
+  },
+  "i2c_count": {
+   "doc_fraction": 0.3803,
+   "docs_classified": 259,
+   "docs_typed": 256,
+   "opn_fraction_of_covered": 0.3332,
+   "opn_fraction_of_universe": 0.132,
+   "opns_classified": 2480
+  },
+  "i2s_count": {
+   "doc_fraction": 0.2394,
+   "docs_classified": 163,
+   "docs_typed": 151,
+   "opn_fraction_of_covered": 0.1599,
+   "opn_fraction_of_universe": 0.0633,
+   "opns_classified": 1190
+  },
+  "operating_voltage_v": {
+   "doc_fraction": 0.185,
+   "docs_classified": 126,
+   "docs_typed": 116,
+   "opn_fraction_of_covered": 0.1146,
+   "opn_fraction_of_universe": 0.0454,
+   "opns_classified": 853
+  },
+  "ram_kb": {
+   "doc_fraction": 0.4156,
+   "docs_classified": 283,
+   "docs_typed": 234,
+   "opn_fraction_of_covered": 0.3394,
+   "opn_fraction_of_universe": 0.1344,
+   "opns_classified": 2526
+  },
+  "rtc": {
+   "doc_fraction": 0.2555,
+   "docs_classified": 174,
+   "docs_typed": 74,
+   "opn_fraction_of_covered": 0.1931,
+   "opn_fraction_of_universe": 0.0765,
+   "opns_classified": 1437
+  },
+  "sdio_count": {
+   "doc_fraction": 0.0925,
+   "docs_classified": 63,
+   "docs_typed": 36,
+   "opn_fraction_of_covered": 0.0736,
+   "opn_fraction_of_universe": 0.0292,
+   "opns_classified": 548
+  },
+  "spi_count": {
+   "doc_fraction": 0.3157,
+   "docs_classified": 215,
+   "docs_typed": 202,
+   "opn_fraction_of_covered": 0.2562,
+   "opn_fraction_of_universe": 0.1015,
+   "opns_classified": 1907
+  },
+  "temp_range_c": {
+   "doc_fraction": 0.1527,
+   "docs_classified": 104,
+   "docs_typed": 103,
+   "opn_fraction_of_covered": 0.0896,
+   "opn_fraction_of_universe": 0.0355,
+   "opns_classified": 667
+  },
+  "timers": {
+   "doc_fraction": 0.4993,
+   "docs_classified": 340,
+   "docs_typed": 314,
+   "opn_fraction_of_covered": 0.3813,
+   "opn_fraction_of_universe": 0.151,
+   "opns_classified": 2838
+  },
+  "usart_count": {
+   "doc_fraction": 0.3891,
+   "docs_classified": 265,
+   "docs_typed": 241,
+   "opn_fraction_of_covered": 0.3173,
+   "opn_fraction_of_universe": 0.1257,
+   "opns_classified": 2361
+  }
+ },
+ "raw_attributes": {
+  "by_doc_count": {
+   "adc_channels": 31,
+   "adc_count": 50,
+   "camera": 24,
+   "can_count": 128,
+   "code_flash_kb": 131,
+   "comparator_count": 132,
+   "core": 14,
+   "crypto": 81,
+   "dac_channels": 97,
+   "dac_count": 36,
+   "data_flash_kb": 24,
+   "eeprom_kb": 41,
+   "ethernet": 27,
+   "freq_mhz": 173,
+   "fsmc": 11,
+   "gpio_count": 48,
+   "i2c_count": 259,
+   "i2s_count": 163,
+   "lcd": 24,
+   "lpuart_count": 106,
+   "opamp_count": 37,
+   "operating_voltage": 126,
+   "package": 31,
+   "pin_count": 16,
+   "pwm_channels": 26,
+   "rtc": 174,
+   "sdio_count": 63,
+   "spi_count": 215,
+   "sram_kb": 271,
+   "temp_range": 104,
+   "timer_advanced": 197,
+   "timer_basic": 216,
+   "timer_general_purpose": 227,
+   "timer_low_power": 108,
+   "timer_systick": 187,
+   "timer_watchdog": 191,
+   "timers": 92,
+   "trustzone": 2,
+   "uart_count": 96,
+   "usart_count": 180,
+   "usb": 122
+  },
+  "by_typed_count": {
+   "adc_channels": 17,
+   "adc_count": 47,
+   "can_count": 124,
+   "code_flash_kb": 114,
+   "comparator_count": 129,
+   "dac_channels": 55,
+   "dac_count": 35,
+   "data_flash_kb": 24,
+   "eeprom_kb": 41,
+   "freq_mhz": 168,
+   "gpio_count": 46,
+   "i2c_count": 256,
+   "i2s_count": 151,
+   "lpuart_count": 87,
+   "opamp_count": 37,
+   "operating_voltage": 116,
+   "pin_count": 13,
+   "pwm_channels": 22,
+   "rtc": 74,
+   "sdio_count": 36,
+   "spi_count": 202,
+   "sram_kb": 222,
+   "temp_range": 103,
+   "timer_advanced": 197,
+   "timer_basic": 216,
+   "timer_general_purpose": 222,
+   "timer_low_power": 106,
+   "timer_systick": 172,
+   "timer_watchdog": 164,
+   "timers": 75,
+   "uart_count": 96,
+   "usart_count": 172
+  }
+ },
+ "schema": "harness.dw-knife-coverage.v1",
+ "source": "results/family-matrix-*-20260908/records.jsonl",
+ "wanted_but_absent": {
+  "core_family": "handled separately: overview.family + series_tokens",
+  "ethernet": "Ethernet / PHY / RGMII",
+  "hmi_display": "LCD / TFT / touch / GUI / LVGL",
+  "motor": "BLDC / stepper / FOC \u2014 timers are a proxy, not the knife",
+  "security": "AES / TrustZone / secure boot (holes.json: 0%, do_not_stamp)"
+ }
+}
