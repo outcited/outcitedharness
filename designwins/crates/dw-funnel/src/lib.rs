@@ -66,12 +66,12 @@ pub fn accept(
     questions.sort_by(|a, b| {
         let ea = unknowns
             .iter()
-            .filter(|u| u.axis == Some(a.axis))
+            .filter(|u| u.axis.as_ref() == Some(&a.axis))
             .map(|u| u.affected)
             .sum::<usize>();
         let eb = unknowns
             .iter()
-            .filter(|u| u.axis == Some(b.axis))
+            .filter(|u| u.axis.as_ref() == Some(&b.axis))
             .map(|u| u.affected)
             .sum::<usize>();
         eb.cmp(&ea)
@@ -121,8 +121,8 @@ pub fn accept(
 )]
 mod tests {
     use super::*;
-    use dw_decide::Evidence;
     use dw_decide::Op;
+    use dw_decide::{Constraint, Evidence, KnifeId};
     use dw_knives::{AtomTemplate, Drawer, Stamp};
     use dw_types::Sha256;
 
@@ -149,9 +149,12 @@ mod tests {
                 "bluetooth",
                 "bluetooth",
                 vec![AtomTemplate {
-                    axis: dw_decide::Axis::HasWirelessBle,
-                    op: Op::MinRating,
-                    value: None,
+                    knife: KnifeId::Axis(dw_decide::Axis::HasWirelessBle),
+                    constraint: Constraint::Scalar {
+                        op: Op::MinRating,
+                        value: 1.0,
+                        margin_pct: None,
+                    },
                     hard: true,
                     drawer: Drawer::Applications,
                 }],
@@ -171,6 +174,7 @@ mod tests {
                     dw_decide::Axis::VdsRatingV,
                     Evidence::measured(40.0, true, src()),
                 )]),
+                ..Default::default()
             },
         );
 
@@ -238,12 +242,15 @@ mod tests {
                 "car",
                 "talks to a car",
                 vec![AtomTemplate {
-                    axis: dw_decide::Axis::HasCan,
-                    op: Op::MinRating,
-                    // A boolean capability is modelled as "at least 1": a
-                    // candidate with 0 does not have it. An atom with no
-                    // threshold can never fail, so it can never narrow.
-                    value: Some(1.0),
+                    knife: KnifeId::Axis(dw_decide::Axis::HasCan),
+                    constraint: Constraint::Scalar {
+                        op: Op::MinRating,
+                        // A boolean capability is modelled as "at least 1": a
+                        // candidate with 0 does not have it. An atom with no
+                        // threshold can never fail, so it can never narrow.
+                        value: 1.0,
+                        margin_pct: None,
+                    },
                     hard: true,
                     drawer: Drawer::Applications,
                 }],
@@ -263,6 +270,7 @@ mod tests {
                     dw_decide::Axis::HasCan,
                     Evidence::measured(1.0, true, src()),
                 )]),
+                ..Default::default()
             },
         );
         facts.insert(
@@ -272,6 +280,7 @@ mod tests {
                     dw_decide::Axis::HasCan,
                     Evidence::measured(0.0, true, src()),
                 )]),
+                ..Default::default()
             },
         );
 

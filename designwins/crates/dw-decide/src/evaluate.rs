@@ -12,12 +12,15 @@
 //! evidence does not cover the operating point is `Unknown`, and `Unknown`
 //! never eliminates (`C9.1`).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use dw_normalize::{condition_covers, CondValue};
 use dw_types::{Ineligible, SourceRef, Verdict};
 
-use crate::{Atom, Axis, Candidate, Cohort, Exclusion, Judgement, MissingAxis, Op};
+use crate::{
+    Atom, Axis, Candidate, CategoryId, CategoryOp, Cohort, Constraint, Exclusion, Judgement,
+    KnifeId, MissingAxis, Op,
+};
 
 /// What is known about one candidate, on one axis.
 #[derive(Debug, Clone, PartialEq)]
@@ -70,6 +73,58 @@ impl Evidence {
 pub struct CandidateFacts {
     /// Per-axis evidence. An absent axis is `Unknown`, never `None`-means-ok.
     pub axes: BTreeMap<Axis, Evidence>,
+    /// The **most specific** category node this candidate sits at — its core
+    /// family. `None` is `Unknown`, never "miscellaneous".
+    pub category_leaf: Option<CategoryId>,
+    /// Every ancestor of `category_leaf`, **materialised**. Storing the closure
+    /// rather than the edges means [`CategoryOp::Within`] is a set lookup and
+    /// no graph has to be threaded through the evaluator.
+    pub category_ancestors: BTreeSet<CategoryId>,
+    /// Where the category assignment came from — the family document that
+    /// printed it, with its row receipt. Required for any category-based
+    /// exclusion, so §16.5 ("no unsupported exclusion") holds for categories
+    /// exactly as it holds for scalars.
+    pub category_evidence: Vec<SourceRef>,
+}
+
+impl CandidateFacts {
+    /// Which nodes this candidate belongs to, leaf included.
+    pub fn category_nodes(&self) -> impl Iterator<Item = &CategoryId> {
+        self.category_leaf
+            .iter()
+            .chain(self.category_ancestors.iter())
+    }
+
+    /// `CategoryOp::Is` / `Within` / `Excludes`, evaluated against the
+    /// materialised closure.
+    #[must_use]
+    pub fn category_matches(&self, op: CategoryOp, node: &CategoryId) -> Option<bool> {
+        let leaf = self.category_leaf.as_ref()?;
+        let within =
+            self.category_leaf.as_ref() == Some(node) || self.category_ancestors.contains(node);
+        Some(match op {
+            CategoryOp::Is => leaf == node,
+            CategoryOp::Within => within,
+            CategoryOp::Excludes => !within,
+        })
+    }
+}
+
+/// Judge a category atom against a candidate's materialised node closure.
+///
+/// `None` from [`CandidateFacts::category_matches`] means the candidate has no
+/// category recorded — which is `Unknown`, and `Unknown` never eliminates.
+#[must_use]
+pub fn judge_category(
+    facts: Option<&CandidateFacts>,
+    op: CategoryOp,
+    node: &CategoryId,
+) -> Verdict {
+    match facts.and_then(|f| f.category_matches(op, node)) {
+        Some(true) => Verdict::Pass,
+        Some(false) => Verdict::Fail,
+        None => Verdict::Unknown,
+    }
 }
 
 /// The margin band inside which a shortfall is `NearMiss` rather than `Fail`.
@@ -146,14 +201,30 @@ pub fn judge(evidence: Option<&Evidence>, atom: &Atom, provenance: &dyn Provenan
         }
     }
 
-    let required = atom.value.unwrap_or(f64::NEG_INFINITY);
-    let inflated = match atom.margin_pct {
-        Some(p) => required * (1.0 + p / 100.0),
-        None => required,
+    // A category atom has no magnitude and no margin. `PRD-PHRASE` §8.1: a
+    // minimum on a core family is meaningless and the type refuses it.
+    let (op, required, inflated) = match &atom.constraint {
+        Constraint::Scalar {
+            op,
+            value,
+            margin_pct,
+        } => {
+            let inflated = match margin_pct {
+                Some(p) => *value * (1.0 + p / 100.0),
+                None => *value,
+            };
+            (*op, *value, inflated)
+        }
+        Constraint::Category { .. } => {
+            // Category atoms carry no magnitude and no evidence-in-quotes;
+            // membership lives on `CandidateFacts` and is judged by
+            // [`judge_category`]. `judge` never invents an answer for them.
+            return Verdict::Unknown;
+        }
     };
     let band = required.abs() * (DEFAULT_NEAR_MISS_PCT / 100.0);
 
-    match atom.op {
+    match op {
         Op::MinRating => {
             if value >= inflated {
                 Verdict::Pass
@@ -220,12 +291,49 @@ pub fn evaluate(
         let mut eliminated = false;
 
         for atom in atoms {
-            let evidence = known.and_then(|f| f.axes.get(&atom.axis));
+            // Category atoms are judged on the node closure, not on evidence.
+            if let (KnifeId::Category(node), Constraint::Category { op: cop, .. }) =
+                (&atom.knife, &atom.constraint)
+            {
+                let outcome = judge_category(known, *cop, node);
+                eval.judgements.push(Judgement {
+                    candidate: candidate.clone(),
+                    axis: Axis::TempRangeC,
+                    outcome,
+                    evidence: Vec::new(),
+                });
+                if !eliminated && crate::Elimination::eliminates(outcome, atom.hard) {
+                    let sources = known
+                        .map(|f| f.category_evidence.clone())
+                        .unwrap_or_default();
+                    // §16.5: an exclusion is unconstructible without evidence.
+                    // A category membership with no provenance therefore cannot
+                    // eliminate — which is the correct behaviour, not a gap.
+                    if let Ok(ineligible) =
+                        Ineligible::new(format!("{cop:?} {} failed", node.as_str()), sources)
+                    {
+                        eval.exclusions.push(Exclusion {
+                            candidate: candidate.clone(),
+                            axis: Axis::TempRangeC,
+                            ineligible,
+                            outcome,
+                        });
+                        eliminated = true;
+                    }
+                }
+                continue;
+            }
+
+            let axis = match &atom.knife {
+                KnifeId::Axis(a) => *a,
+                KnifeId::Category(_) => Axis::TempRangeC,
+            };
+            let evidence = known.and_then(|f| f.axes.get(&axis));
             let outcome = judge(evidence, atom, provenance);
 
             eval.judgements.push(Judgement {
                 candidate: candidate.clone(),
-                axis: atom.axis,
+                axis,
                 outcome,
                 evidence: evidence.map(|e| e.sources.clone()).unwrap_or_default(),
             });
@@ -234,12 +342,12 @@ pub fn evaluate(
             // cannot open, which is the same as not having established it.
             let unresolvable = evidence.is_some_and(|e| !provenance.resolvable(&e.sources));
             if evidence.is_none_or(|e| e.value.is_none()) || unresolvable {
-                *unknown_counts.entry(atom.axis).or_insert(0) += 1;
+                *unknown_counts.entry(axis).or_insert(0) += 1;
             }
 
             // The elimination law, applied in exactly one place.
             if !eliminated && crate::Elimination::eliminates(outcome, atom.hard) {
-                let reason = format!("{:?} failed at the required operating point", atom.axis);
+                let reason = format!("{axis:?} failed at the required operating point");
                 let sources = evidence.map(|e| e.sources.clone()).unwrap_or_default();
                 // `Ineligible` is unconstructible without evidence; if we have
                 // none, the exclusion cannot be motivated and must not be
@@ -248,7 +356,7 @@ pub fn evaluate(
                 if let Ok(ineligible) = Ineligible::new(reason, sources) {
                     eval.exclusions.push(Exclusion {
                         candidate: candidate.clone(),
-                        axis: atom.axis,
+                        axis,
                         ineligible,
                         outcome,
                     });
@@ -264,7 +372,7 @@ pub fn evaluate(
 
     for (axis, affected) in unknown_counts {
         eval.unknowns.push(MissingAxis {
-            axis: Some(axis),
+            axis: Some(KnifeId::Axis(axis)),
             phrase: None,
             why: "no evidence on this axis for these candidates".to_string(),
             affected,
@@ -286,7 +394,9 @@ pub fn evaluate(
 )]
 mod tests {
     use super::*;
-    use crate::{ConfirmState, Derived, DesignContext, DesignIntent, Op, Requirement};
+    use crate::{
+        ConfirmState, Constraint, Derived, DesignContext, DesignIntent, KnifeId, Op, Requirement,
+    };
     use dw_types::{ReleaseId, Sha256};
 
     fn src() -> Vec<SourceRef> {
@@ -296,11 +406,13 @@ mod tests {
 
     fn vds_atom(hard: bool, margin: Option<f64>) -> Atom {
         Atom {
-            axis: Axis::VdsRatingV,
-            op: Op::MinRating,
-            value: Some(36.0),
+            knife: KnifeId::Axis(Axis::VdsRatingV),
+            constraint: Constraint::Scalar {
+                op: Op::MinRating,
+                value: 36.0,
+                margin_pct: margin,
+            },
             hard,
-            margin_pct: margin,
             required_conditions: BTreeMap::new(),
         }
     }
@@ -367,6 +479,7 @@ mod tests {
             cand("A"),
             CandidateFacts {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(40.0, true, src()))]),
+                ..Default::default()
             },
         );
 
@@ -398,12 +511,14 @@ mod tests {
             cand("A"),
             CandidateFacts {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(40.0, true, src()))]),
+                ..Default::default()
             },
         );
         facts.insert(
             cand("B"),
             CandidateFacts {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(34.0, true, src()))]),
+                ..Default::default()
             },
         );
 
@@ -493,6 +608,7 @@ mod tests {
             cand("A"),
             CandidateFacts {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(1.0, true, src()))]),
+                ..Default::default()
             },
         );
         let eval = evaluate(&cohort, &[vds_atom(false, None)], &facts, &AlwaysResolvable);
@@ -509,6 +625,7 @@ mod tests {
             cand("A"),
             CandidateFacts {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(1.0, true, src()))]),
+                ..Default::default()
             },
         );
         let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts, &AlwaysResolvable);
@@ -531,12 +648,14 @@ mod tests {
             cand("A"),
             CandidateFacts {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(40.0, true, src()))]),
+                ..Default::default()
             },
         );
         facts.insert(
             cand("B"),
             CandidateFacts {
                 axes: BTreeMap::from([(Axis::VdsRatingV, Evidence::measured(1.0, true, src()))]),
+                ..Default::default()
             },
         );
         let eval = evaluate(&cohort, &[vds_atom(true, None)], &facts, &AlwaysResolvable);

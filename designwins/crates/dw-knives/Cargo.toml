@@ -10,12 +10,12 @@ repository.workspace = true
 [dependencies]
 thiserror = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 dw-types = { path = "../dw-types" }
 dw-normalize = { path = "../dw-normalize" }
 dw-decide = { path = "../dw-decide" }
 
 [dev-dependencies]
-serde_json = { workspace = true }
 
 [lints]
 workspace = true

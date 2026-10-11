@@ -184,18 +184,25 @@ fn d4_phrase_layer_over_real_traffic() {
 
     // 2. Regression floor, set from **measurement, not aspiration**.
     //
-    //    Measured 2026-10-10: 19 of 7,423 weighted searches bind (0.26%), and
-    //    every one of them is `Blocked` — so **0% of real traffic can currently
-    //    eliminate anything**. The seed registry holds four bindings and the
-    //    traffic is 15 themes of mostly unmodelled vocabulary.
+    //    Measured 2026-10-10, before the axis work: 19 of 7,423 (0.26%), all
+    //    `Blocked` — 0% could eliminate. Adding the ONE knife that cleared the
+    //    measured floor (`core_family`, DECISIONS.md D9) took it to 632 (8.51%)
+    //    with **625 ProvenFit**. 33x coverage from a single measured knife.
     //
-    //    That number is the point of this gate. It is not a target to aim at;
-    //    it is a floor to fail below. Raise it deliberately when the registry
-    //    grows. **Never lower it.**
+    //    That is the point of the gate: it makes the axis-first thesis
+    //    falsifiable. The number is a floor to fail below, not a target. Raise
+    //    it deliberately when the registry grows. **Never lower it.**
     assert!(
-        c.bound >= 19,
-        "bound coverage regressed: {} weighted searches (floor 19, measured 2026-10-10)",
+        c.bound >= 632,
+        "bound coverage regressed: {} weighted searches (floor 632, measured 2026-10-10)",
         c.bound
+    );
+    // ProvenFit is the number that matters. Coverage made entirely of Blocked
+    // bindings is not progress (PRD-PHRASE 9).
+    assert!(
+        c.proven_fit >= 625,
+        "ProvenFit coverage regressed: {} weighted searches (floor 625)",
+        c.proven_fit
     );
 }
 

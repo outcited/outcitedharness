@@ -148,16 +148,18 @@ impl Drawer {
 // bindings
 // ---------------------------------------------------------------------------
 
-/// A technical knife a phrase proposes. Maps onto [`dw_decide::Atom`].
+/// A technical knife a phrase proposes. Maps 1:1 onto [`dw_decide::Atom`].
+///
+/// [`Constraint::Category`] and [`Constraint::Scalar`] are distinct here for
+/// the same reason they are distinct in `dw-decide` (`PRD-PHRASE` §8.1): a
+/// phrase like *"an ARM Cortex-M4 part"* binds a **category**, and category
+/// membership is containment, not magnitude.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AtomTemplate {
-    /// Which axis.
-    pub axis: dw_decide::Axis,
-    /// How it is compared.
-    pub op: dw_decide::Op,
-    /// The required magnitude, when the phrase implies one.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<f64>,
+    /// Which knife.
+    pub knife: dw_decide::KnifeId,
+    /// What it demands.
+    pub constraint: dw_decide::Constraint,
     /// Whether the phrase makes this a hard requirement. Only
     /// [`Stamp::ProvenFit`] bindings may set this true.
     pub hard: bool,
@@ -233,11 +235,9 @@ impl ColloquialBinding {
         self.knives
             .iter()
             .map(|k| dw_decide::Atom {
-                axis: k.axis,
-                op: k.op,
-                value: k.value,
+                knife: k.knife.clone(),
+                constraint: k.constraint.clone(),
                 hard: k.hard && self.stamp.may_eliminate(),
-                margin_pct: None,
                 required_conditions: BTreeMap::new(),
             })
             .collect()
@@ -369,13 +369,16 @@ impl PhraseRegistry {
 )]
 mod tests {
     use super::*;
-    use dw_decide::{Axis, Op};
+    use dw_decide::{Axis, Constraint, KnifeId, Op};
 
     fn knife(axis: Axis, hard: bool, drawer: Drawer) -> AtomTemplate {
         AtomTemplate {
-            axis,
-            op: Op::MinRating,
-            value: None,
+            knife: KnifeId::Axis(axis),
+            constraint: Constraint::Scalar {
+                op: Op::MinRating,
+                value: 1.0,
+                margin_pct: None,
+            },
             hard,
             drawer,
         }
@@ -557,7 +560,7 @@ pub fn unknowns_from_residue(
         // evaluable. Until it is answered, the phrase is unevaluable and the
         // cohort is honestly reported as such.
         questions.push(dw_decide::Question {
-            axis: dw_decide::Axis::TempRangeC,
+            axis: dw_decide::KnifeId::Axis(dw_decide::Axis::TempRangeC),
             prompt: format!("What must this survive that {chunk:?} implies?"),
             help: format!(
                 "{chunk:?} is not in the axis vocabulary. Answering with a typed \
@@ -574,7 +577,7 @@ pub fn unknowns_from_residue(
     for binding in &bound.bindings {
         if let Stamp::Blocked(reason) = &binding.stamp {
             unknowns.push(dw_decide::MissingAxis {
-                axis: binding.knives.first().map(|k| k.axis),
+                axis: binding.knives.first().map(|k| k.knife.clone()),
                 phrase: Some(binding.phrase.clone()),
                 why: reason.clone(),
                 affected: cohort_size,
@@ -596,6 +599,7 @@ pub fn unknowns_from_residue(
 mod d5_tests {
     use super::*;
     use dw_decide::{Axis, Op};
+    use dw_decide::{Constraint, KnifeId};
 
     /// D5: an unmapped phrase becomes a `MissingAxis` and a `Question`, never a
     /// silent miss and never a bare error.
@@ -607,9 +611,12 @@ mod d5_tests {
                 "bluetooth",
                 "bluetooth",
                 vec![AtomTemplate {
-                    axis: Axis::HasWirelessBle,
-                    op: Op::MinRating,
-                    value: None,
+                    knife: KnifeId::Axis(Axis::HasWirelessBle),
+                    constraint: Constraint::Scalar {
+                        op: Op::MinRating,
+                        value: 1.0,
+                        margin_pct: None,
+                    },
                     hard: true,
                     drawer: Drawer::Applications,
                 }],

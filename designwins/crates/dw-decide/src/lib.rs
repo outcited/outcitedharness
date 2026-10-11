@@ -132,7 +132,7 @@ pub enum Axis {
     FreqMhz,
 }
 
-/// How an atom is compared against a claim.
+/// How a **scalar** axis is compared against a claim.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Op {
@@ -144,24 +144,113 @@ pub enum Op {
     Covers,
 }
 
+/// A node in the category graph.
+///
+/// Categories **contain** one another: `AM13E230x ⊂ AM13x ⊂ AM1x`, and
+/// `Cortex-M4F ⊂ Cortex-M ⊂ ARM`. Membership is therefore not equality, and a
+/// core family is not a number — see [`CategoryOp`] and `PRD-PHRASE` §8.1.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct CategoryId(String);
+
+impl CategoryId {
+    /// Name a category node.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`dw_types::LawError::Empty`] if the name is empty.
+    pub fn new(name: impl Into<String>) -> Result<Self, dw_types::LawError> {
+        let s = name.into();
+        if s.is_empty() {
+            return Err(dw_types::LawError::Empty {
+                field: "category id",
+            });
+        }
+        Ok(Self(s))
+    }
+
+    /// The node name.
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// How a category is compared. **There is no `MinRating`/`MaxRating` here** —
+/// a minimum on a core family is meaningless, and the type refuses to express
+/// it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CategoryOp {
+    /// Exactly this node.
+    Is,
+    /// Inside the named subtree. `Cortex-M4F` satisfies `Within(Cortex-M)`;
+    /// `Cortex-M0` does not satisfy `Within(Cortex-M4)`.
+    Within,
+    /// Outside the named subtree.
+    Excludes,
+}
+
+/// A knife: either a scalar axis or a category-graph node.
+///
+/// **`Category` is not `Axis`** (`PRD-PHRASE` §8.1). A scalar compares
+/// magnitudes; a category compares containment. Fusing them into one enum with
+/// one op set is how "minimum ARM Cortex" would end up expressible.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum KnifeId {
+    /// A named scalar axis: `FlashKb`, `FreqMhz`, `TempRangeC`, …
+    Axis(Axis),
+    /// A node in the category graph: core family, product category.
+    Category(CategoryId),
+}
+
+/// What a constraint demands.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Constraint {
+    /// A magnitude, compared with [`Op`].
+    Scalar {
+        /// How it is compared.
+        op: Op,
+        /// The required magnitude.
+        value: f64,
+        /// Margin applied to the **requirement**, never silent (`C9.3`).
+        #[serde(skip_serializing_if = "Option::is_none")]
+        margin_pct: Option<f64>,
+    },
+    /// Graph membership, compared with [`CategoryOp`].
+    Category {
+        /// How it is compared.
+        op: CategoryOp,
+        /// Which node.
+        node: CategoryId,
+    },
+}
+
+impl Constraint {
+    /// The margin on this constraint, if it is a scalar.
+    #[must_use]
+    pub const fn margin_pct(&self) -> Option<f64> {
+        match self {
+            Self::Scalar { margin_pct, .. } => *margin_pct,
+            Self::Category { .. } => None,
+        }
+    }
+}
+
 /// A typed constraint.
 ///
 /// Every atom carries the **required conditions** it must hold under, because
 /// `C9.6` demands that an evidence condition *cover* the operating point.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Atom {
-    /// Which axis.
-    pub axis: Axis,
-    /// How it is compared.
-    pub op: Op,
-    /// The required magnitude, if this is a scalar constraint.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub value: Option<f64>,
+    /// Which knife. `Axis` and `Category` carry different op sets on purpose.
+    pub knife: KnifeId,
+    /// What it demands.
+    pub constraint: Constraint,
     /// Hard atoms eliminate. Soft atoms only rank.
     pub hard: bool,
-    /// Margin applied to the requirement, never silent (`C9.3`).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub margin_pct: Option<f64>,
     /// Conditions the evidence must cover (`C9.6`).
     ///
     /// Values are [`CondValue`], not `f64`, because a required condition can be
@@ -169,6 +258,44 @@ pub struct Atom {
     /// only thing that knows how to compare one.
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     pub required_conditions: BTreeMap<String, CondValue>,
+}
+
+impl Atom {
+    /// A scalar atom.
+    #[must_use]
+    pub fn scalar(axis: Axis, op: Op, value: f64, hard: bool) -> Self {
+        Self {
+            knife: KnifeId::Axis(axis),
+            constraint: Constraint::Scalar {
+                op,
+                value,
+                margin_pct: None,
+            },
+            hard,
+            required_conditions: BTreeMap::new(),
+        }
+    }
+
+    /// A category atom. Note there is no `hard`-only constructor for a scalar
+    /// category comparison with a margin — the type has no such shape.
+    #[must_use]
+    pub fn category(op: CategoryOp, node: CategoryId, hard: bool) -> Self {
+        Self {
+            knife: KnifeId::Category(node.clone()),
+            constraint: Constraint::Category { op, node },
+            hard,
+            required_conditions: BTreeMap::new(),
+        }
+    }
+
+    /// The axis, when this is a scalar atom.
+    #[must_use]
+    pub const fn axis(&self) -> Option<Axis> {
+        match self.knife {
+            KnifeId::Axis(a) => Some(a),
+            KnifeId::Category(_) => None,
+        }
+    }
 }
 
 /// A requirement the human stated explicitly.
@@ -313,9 +440,11 @@ impl Elimination {
 /// An axis we could not evaluate. **First-class** (CONTRACTS law 3).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MissingAxis {
-    /// Which axis, when we know its name.
+    /// Which knife, when we know its name. `KnifeId` rather than `Axis`:
+    /// an unanswerable *category* question is as real as an unanswerable
+    /// scalar one, and "ARM Cortex?" has no axis name to carry.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub axis: Option<Axis>,
+    pub axis: Option<KnifeId>,
     /// The colloquial phrase that bound to nothing, when that is the origin.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub phrase: Option<String>,
@@ -333,7 +462,7 @@ pub struct MissingAxis {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Question {
     /// The axis this question would pin.
-    pub axis: Axis,
+    pub axis: KnifeId,
     /// The question in the engineer's language.
     pub prompt: String,
     /// Help text explaining why the axis matters.
@@ -478,14 +607,7 @@ mod tests {
     }
 
     fn atom(axis: Axis, hard: bool) -> Atom {
-        Atom {
-            axis,
-            op: Op::MinRating,
-            value: Some(36.0),
-            hard,
-            margin_pct: None,
-            required_conditions: BTreeMap::new(),
-        }
+        Atom::scalar(axis, Op::MinRating, 36.0, hard)
     }
 
     fn build() -> Build {

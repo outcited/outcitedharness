@@ -24,14 +24,16 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+pub mod category;
 pub mod phrase;
 
+pub use category::{Assignment, CategoryGraph, Closure};
 pub use phrase::{
     unknowns_from_residue, AtomTemplate, Bound, ColloquialBinding, Drawer, PhraseRegistry, Stamp,
     ACTIVATION_FLOOR,
 };
 
-use dw_decide::{Axis, Op};
+use dw_decide::{Axis, CategoryId, CategoryOp, Constraint, KnifeId, Op};
 
 /// The measured chips from `holes.json`, seeded into a registry.
 ///
@@ -70,13 +72,16 @@ fn sourced(
         id,
         phrase,
         vec![AtomTemplate {
-            axis,
-            op: Op::MinRating,
-            // A boolean capability is modelled as "at least 1": a candidate
-            // with 0 does not have it. An atom with no threshold can never
-            // fail, so it can never narrow the cohort — which would make the
-            // whole phrase layer decorative.
-            value: Some(1.0),
+            knife: KnifeId::Axis(axis),
+            constraint: Constraint::Scalar {
+                op: Op::MinRating,
+                // A boolean capability is modelled as "at least 1": a candidate
+                // with 0 does not have it. An atom with no threshold can never
+                // fail, so it can never narrow the cohort — which would make
+                // the whole phrase layer decorative.
+                value: 1.0,
+                margin_pct: None,
+            },
             hard: true,
             drawer,
         }],
@@ -94,6 +99,14 @@ fn sourced(
 /// A new substrate that crosses [`ACTIVATION_FLOOR`] becomes
 /// [`Stamp::ProvenFit`] automatically and may start eliminating — which is
 /// exactly what D4 law 2 demands.
+///
+/// # Panics
+///
+/// Never in practice. The category ids and the bindings are **literals**, and
+/// [`dw_decide::CategoryId::new`] rejects only the empty string. A panic here
+/// is a programming error in this file — the same reasoning that governs
+/// [`sourced`] below.
+#[allow(clippy::expect_used, clippy::unwrap_used)]
 #[must_use]
 pub fn seed_from_measured_chips() -> PhraseRegistry {
     use Stamp::{Blocked, PositiveOnly, ProvenFit};
@@ -150,6 +163,41 @@ pub fn seed_from_measured_chips() -> PhraseRegistry {
                 .into(),
         ),
     ));
+
+    // -----------------------------------------------------------------------
+    // core_family — the 47% traffic class.
+    //
+    // Measured 2026-10-10 by `scripts/measure_knife_coverage.py`: 96.6% of
+    // family documents carry a family, 98.6% of covered OPNs have one, 352
+    // distinct families and 1,590 series tokens. It is the **only** knife that
+    // clears `ACTIVATION_FLOOR` on the covered denominator (DECISIONS.md D9).
+    //
+    // It binds a *category*, not a scalar: "ARM Cortex-M4" is containment
+    // (`Cortex-M4F c Cortex-M c ARM`), and `CategoryOp` refuses min/max for
+    // exactly that reason (PRD-PHRASE 8.1).
+    // -----------------------------------------------------------------------
+    registry.insert(
+        ColloquialBinding::new(
+            "core_family",
+            "cortex",
+            vec![AtomTemplate {
+                knife: KnifeId::Category(CategoryId::new("ARM").unwrap()),
+                constraint: Constraint::Category {
+                    op: CategoryOp::Within,
+                    node: CategoryId::new("ARM").unwrap(),
+                },
+                hard: true,
+                drawer: Drawer::CatalogSubcategory,
+            }],
+            0.9,
+            vec!["knife_coverage_v1.json#core_family".into()],
+            // Covered 98.6% of the OPNs it speaks for. Reach is 39.0% of the
+            // universe, which is a limit on usefulness, not on correctness —
+            // the rest are `Unknown` and `Unknown` never eliminates (C9.1).
+            ProvenFit,
+        )
+        .expect("sourced"),
+    );
 
     registry
 }
