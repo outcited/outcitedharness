@@ -1,0 +1,19 @@
+[package]
+name = "dw-extract"
+description = "Extraction surface: document -> structured facts. Port of harness/electronics/{extraction,bom_extract,key_features_grid}.py. Gate: extraction gold."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+dw-types = { path = "../dw-types" }
+
+[dev-dependencies]
+
+[lints]
+workspace = true
