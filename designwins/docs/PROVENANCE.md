@@ -33,14 +33,22 @@ Each link must hold or the ones after it are worthless.
 | 1 | the number is what the document printed | `dw-truth::quote` — quote locates, value parses from quote | **real** — 86,736/86,736 claims carry a non-empty `quote` |
 | 2 | it is the *kind* of number that can answer this | `dw-normalize::rating` — absmax never satisfies operating | **real** |
 | 3 | it holds *at my operating point* | `dw-normalize::coverage` — condition must COVER | **real** |
-| 4 | I can **see** it on the page | `C13` page render + row-band crop | **TYPED, NOT REAL** |
-| 5 | I can reproduce this answer | `ReleaseId` → immutable manifest | **TYPED, NOT REAL** |
+| 4 | I can **see** it on the page | `C13` page render + row-band crop, content-addressed, engine-pinned | **real** (Tier 1.1, `dw-evidence`) — 86,398/86,736 located (99.6%); the 338 residual are `Unknown`, never `Pass` |
+| 5 | I can reproduce this answer | `ReleaseId` → immutable manifest | **real** (Tier 1.2, `dw-release`) |
 | 6 | nothing was silently assumed | `derived` is never silent · `unknowns` is first-class | **real** |
-| 7 | the port did not drift | gold gates + `dw-parity` ledger | **real, partial** |
-| 8 | the colloquial mapping is right | `Stamp` measured against the floor | **real, unclosed** |
+| 7 | the port did not drift | gold gates + `dw-parity` ledgers, both engines live in one run | **real 2026-10-11** — `parse_condition` 10,270/10,270 · `verify_claims` 40/40, ledgers empty. `G7` (D1, PDF-engine path parity) is the one open gate: it blocks `dw-pdf`'s **cutover claim**, not the answer — renders are engine-pinned and content-addressed, so a pixel change breaks loudly |
+| 8 | the colloquial mapping is right | `Stamp` measured against the floor | **real at measured coverage** — D4: 632/7,423 weighted searches bound, 625 `ProvenFit`; the floor is falsifiable (can-trip control). Unbound residue is first-class (`D5`), never a silent miss |
 
-**Links 4 and 5 are the gap.** And they are the two that turn a correct
-answer into a *defensible* one.
+**The gap is closed.** Links 4 and 5 were the gap (this section kept its
+original wording until 2026-10-11; Tier 1 landed them 2026-10-10 — see §5).
+Link 7's last partial piece was the `quote_verify` replacement gate; its
+divergence was a byte-vs-char span bug, fixed 2026-10-11 with negative
+controls, and both replacement ledgers are now empty.
+
+**What is not claimed: completeness.** 99.6% page location, 8.5% colloquial
+binding coverage, and `G7` open are all stated as measured gaps — never
+hidden behind green. An answer is *defensible* at the numbers above; the
+residuals are named.
 
 ---
 

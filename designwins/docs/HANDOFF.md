@@ -58,16 +58,17 @@ not this number.
 
 ---
 
-## 1. Definition of done — three gates, and where each stands
+## 1. Definition of done — three gates
 
 | gate | source | state |
 |---|---|---|
-| **content** | `PLAN.md` §0 — sentence → cohort + derived + exclusions + unknowns + next + every number opens to the page | **executable**, asserted clause-by-clause in `dw-funnel::accept` |
-| **delivery** | `DECISIONS.md` D7 — every front end renders from one response | **not met** — needs `dw-api` |
-| **trust** | `PROVENANCE.md` §9 — evidence resolves, releases resolve, unresolvable ⇒ `Unknown` | **met on links 1–6**; link 7 partial, link 8 measured |
+| **content** | `PLAN.md` §0 — sentence → cohort + derived + exclusions + unknowns + next + every number opens to the page | **met** — executable, asserted clause-by-clause in `dw-funnel::accept` |
+| **delivery** | `DECISIONS.md` D7 — every front end renders from one response | **met 2026-10-11** — `dw-api`: 7 routes, feed items 1–7 inline on every response, audited post-serialisation with negative controls (`dw-serve` on `127.0.0.1:8787`). Fixture-backed store; catalog slots behind `ApiStore` |
+| **trust** | `PROVENANCE.md` §2 — evidence resolves, releases resolve, unresolvable ⇒ `Unknown` | **met 2026-10-11** — links 1–8 real/measured, both replacement ledgers empty. `G7` open is a **D1 cutover gate** on `dw-pdf`'s engine parity, not a hole in the answer chain (renders are engine-pinned + content-addressed) |
 
-All three must pass. The trust gate is the one that lets an engineer stake a
-design on the answer, which is the only reason this product exists.
+**All three pass as of 2026-10-11.** The trust gate is the one that lets an
+engineer stake a design on the answer, which is the only reason this product
+exists.
 
 ### PLAN §0 clause by clause
 
@@ -146,6 +147,7 @@ cargo run -q -p dw-parity --bin dw-replace -- \
 | trust gate | links 1–6 | real | **green** |
 | **replacement: condition** | 10,270 live | 0 diffs | **green** |
 | **replacement: quote** | 40 cases live (9,890 claims) | 0 diffs | **green** |
+| **D7 feed contract** | 7 routes live (`dw-serve`, `127.0.0.1:8787`) | items 1–7 inline, audited post-serialisation | **green** |
 | D1 G7 path segments | PDFium vs MuPDF | vertex parity ≥99% | **OPEN — expected** |
 
 ---
@@ -218,11 +220,20 @@ split numbers differently from the reference's `re.findall(r"-?\d+…")` on
 inputs like `"1.5-3"`; `verify_claims` skip semantics differ for
 `value: null` claims with a quote (reference skips, port verifies).
 
-### 5.2 `dw-api` — the D7 delivery gate
+### 5.2 `dw-api` — the D7 delivery gate — **DONE 2026-10-11**
 
-The only thing between here and "every front end renders from one response."
-Seven routes, evidence inline. See `CONTRACTS.md` C7 for the per-response feed
-contract. **No corpus dependency** — buildable now.
+Seven routes, feed items 1–7 inline on every response, `problem+json`
+renderable errors, evidence assets served as pixels. The feed audit runs on
+the **serialised** body with negative controls (strip a block → fail; break
+an evidence ref → fail; unreason an exclusion → fail). `dw-serve` binds
+`127.0.0.1:8787`, `Bearer crk_…`, no new dependencies. Data is
+fixture-backed (`DemoStore`); a catalog store slots behind `ApiStore` without
+touching a route.
+
+Found and fixed on the way: `dw-decide`'s wire shape did not round-trip
+(`skip_serializing_if` without `serde(default)` — third instance of the §6
+class); `dw-serve`'s `read_head` consumed past the header terminator, so
+bodies arriving with the headers hung `read_exact`.
 
 ### 5.3 Question ranking by measured reduction
 
@@ -434,15 +445,18 @@ again.*
 
 ---
 
-## 11. Next session — do these in order
+## 11. Next — the roadmap, in order
 
-1. **`dw-api`** (§5.2). The D7 gate. No corpus dependency. Both replacement
-   proofs are now clean (condition 10,270/10,270 · quote 40/40), so the
-   surfaces a front end would serve are trustworthy.
-2. **Question ranking** (§5.3) — port `next_question`, do not re-derive it.
-3. **`dw-lessons`** — my open offer to `mac-mini`, and the thing that would have
-   saved this session two hours.
-4. Then §5.5.
+**The three gates pass (2026-10-11).** Everything below is product work, not
+definition-of-done.
+
+1. **Question ranking** (§5.3) — port `next_question`, do not re-derive it.
+2. **`dw-lessons`** — my open offer to `mac-mini`, and the thing that would
+   have saved this session two hours.
+3. **G7 residual** (§5.4) — unblocks `dw-pdf`'s cutover claim.
+4. Then §5.5 — `dw-extract` is already scaffolded and handed off; the rest
+   (extractor/recon/loop, `dw-search`, `dw-coverage`, `dw-controller`,
+   cutover) opens now.
 
 The acceptance test is one sentence long. Everything on that list is in service
 of it.
