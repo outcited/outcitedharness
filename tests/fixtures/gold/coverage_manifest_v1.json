@@ -1,0 +1,193 @@
+{
+  "capability_pillars": {
+    "opn_decoder": {
+      "conflates": [],
+      "pillar": "P02"
+    },
+    "parametrics": {
+      "conflates": [
+        "P08",
+        "P10",
+        "P13"
+      ],
+      "pillar": "P09"
+    },
+    "pin_or_ball": {
+      "conflates": [],
+      "pillar": "P06"
+    },
+    "pin_semantics": {
+      "conflates": [
+        "P06"
+      ],
+      "pillar": "P07"
+    },
+    "series_summary": {
+      "conflates": [],
+      "pillar": "P04"
+    }
+  },
+  "documents": {
+    "A": {
+      "document_sha256": "A",
+      "pillars": {
+        "P06": {
+          "attempt_statuses": {},
+          "capability": "pin_or_ball",
+          "conflates": [],
+          "extracted_pages": 1,
+          "quarantined_items": 0,
+          "state": "EXTRACTED",
+          "targeted_pages": 1,
+          "validated_items": 0
+        },
+        "P09": {
+          "attempt_statuses": {
+            "cross_source_disagreement": 1,
+            "ok": 2
+          },
+          "capability": "parametrics",
+          "conflates": [
+            "P08",
+            "P10",
+            "P13"
+          ],
+          "extracted_pages": 0,
+          "quarantined_items": 0,
+          "state": "CONFLICT",
+          "targeted_pages": 1,
+          "validated_items": 1
+        }
+      },
+      "vendor": "ROHM"
+    },
+    "B": {
+      "document_sha256": "B",
+      "pillars": {
+        "P09": {
+          "attempt_statuses": {},
+          "capability": "parametrics",
+          "conflates": [
+            "P08",
+            "P10",
+            "P13"
+          ],
+          "extracted_pages": 1,
+          "quarantined_items": 1,
+          "state": "CONFLICT",
+          "targeted_pages": 1,
+          "validated_items": 0
+        }
+      },
+      "vendor": null
+    },
+    "C": {
+      "document_sha256": "C",
+      "pillars": {
+        "P02": {
+          "attempt_statuses": {},
+          "capability": "opn_decoder",
+          "conflates": [],
+          "extracted_pages": 0,
+          "quarantined_items": 0,
+          "state": "VALIDATED",
+          "targeted_pages": 1,
+          "validated_items": 1
+        }
+      },
+      "vendor": "TI"
+    }
+  },
+  "pillar_ontology": {
+    "P01": {
+      "name": "Document Identity & Provenance",
+      "weight": 5
+    },
+    "P02": {
+      "name": "Product Identity, OPN & Ordering",
+      "weight": 5
+    },
+    "P03": {
+      "name": "Family / Variant Matrix",
+      "weight": 5
+    },
+    "P04": {
+      "name": "Functional Features & Architecture",
+      "weight": 5
+    },
+    "P05": {
+      "name": "Package & Mechanical",
+      "weight": 5
+    },
+    "P06": {
+      "name": "Pin / Ball / Pad Mapping",
+      "weight": 5
+    },
+    "P07": {
+      "name": "Pin Function & Multiplexing Semantics",
+      "weight": 5
+    },
+    "P08": {
+      "name": "Absolute Maximum Ratings & Operating Envelope",
+      "weight": 5
+    },
+    "P09": {
+      "name": "DC Electrical Characteristics",
+      "weight": 5
+    },
+    "P10": {
+      "name": "AC, Dynamic & Timing Characteristics",
+      "weight": 5
+    },
+    "P11": {
+      "name": "Power, Reset, Clocking & Sequencing",
+      "weight": 5
+    },
+    "P12": {
+      "name": "Thermal & Derating",
+      "weight": 5
+    },
+    "P13": {
+      "name": "Functional-Block / Peripheral Performance",
+      "weight": 5
+    },
+    "P14": {
+      "name": "Memory, Configuration, Boot & Security",
+      "weight": 2
+    },
+    "P15": {
+      "name": "Typical Performance & Characterization Curves",
+      "weight": 2
+    },
+    "P16": {
+      "name": "Application & Design Implementation Guidance",
+      "weight": 2
+    },
+    "P17": {
+      "name": "Qualification, Reliability & Compliance",
+      "weight": 2
+    },
+    "P18": {
+      "name": "Ecosystem & Development Support",
+      "weight": 1
+    },
+    "P19": {
+      "name": "Revision & Change History",
+      "weight": 2
+    }
+  },
+  "schema": "harness.electronics-coverage-manifest.v1",
+  "summary": {
+    "document_pillar_states": {
+      "CONFLICT": 2,
+      "EXTRACTED": 1,
+      "VALIDATED": 1
+    },
+    "documents": 3,
+    "extraction_coverage_index": 0.5,
+    "validated_coverage_index": 0.25,
+    "weighted_applicable": 20,
+    "weighted_extracted": 10,
+    "weighted_validated": 5
+  }
+}

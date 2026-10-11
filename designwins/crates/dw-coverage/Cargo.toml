@@ -1,0 +1,19 @@
+[package]
+name = "dw-coverage"
+description = "Coverage as a product: the 19-pillar ontology + 8-state machine (ported from coverage.py), the rollup cube, and the gap ledger. What we know we don't know."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+dw-types = { path = "../dw-types" }
+
+[dev-dependencies]
+
+[lints]
+workspace = true
