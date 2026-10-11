@@ -230,7 +230,26 @@ fn canonicalize(v: &Value) -> Value {
             }
             Value::Object(out)
         }
-        Value::Array(items) => Value::Array(items.iter().map(canonicalize).collect()),
+        Value::Array(items) => {
+            // If every element is an object carrying a `field` key, the array
+            // is a keyed record set and its order is not semantic. The
+            // reference emits claim order; a map-based candidate emits sorted
+            // order. Sorting here makes the comparison about content.
+            let keyed = !items.is_empty()
+                && items
+                    .iter()
+                    .all(|i| i.get("field").and_then(|f| f.as_str()).is_some());
+            let mut mapped: Vec<Value> = items.iter().map(canonicalize).collect();
+            if keyed {
+                mapped.sort_by_key(|v| {
+                    v.get("field")
+                        .and_then(|f| f.as_str())
+                        .unwrap_or_default()
+                        .to_string()
+                });
+            }
+            Value::Array(mapped)
+        }
         other => other.clone(),
     }
 }

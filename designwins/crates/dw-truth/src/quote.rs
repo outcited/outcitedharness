@@ -132,6 +132,30 @@ pub enum Field {
 }
 
 impl Field {
+    /// Map an arbitrary claim-field name to a known field.
+    ///
+    /// The reference is **string-keyed** — `verify_claims` accepts any field
+    /// name and only two of them carry rules (`temp_min_c` / `temp_max_c`, and
+    /// the alias table for tolerant quote location). An unrecognised name is
+    /// therefore `None`, which means "no special rule", **not** a new variant.
+    /// Returning `None` here is what keeps this port able to run over real
+    /// claim corpora, whose field names are `opn:symbol`, not a closed enum.
+    #[must_use]
+    pub fn parse(name: &str) -> Option<Self> {
+        match name {
+            "vin_min_v" => Some(Self::VinMinV),
+            "vin_max_v" => Some(Self::VinMaxV),
+            "vout_min_v" => Some(Self::VoutMinV),
+            "vout_max_v" => Some(Self::VoutMaxV),
+            "iout_max_a" => Some(Self::IoutMaxA),
+            "temp_min_c" => Some(Self::TempMinC),
+            "temp_max_c" => Some(Self::TempMaxC),
+            "v_abs_max" => Some(Self::VAbsMax),
+            "description" => Some(Self::Description),
+            _ => None,
+        }
+    }
+
     /// The stable string used in verdicts and gold fixtures.
     #[must_use]
     pub const fn as_str(self) -> &'static str {
@@ -295,6 +319,22 @@ pub fn find_quote(quote: &str, text: &str, window: Option<&str>, field: Option<F
         }
     }
     token_window_match(quote, text, 0.7, 60, field)
+}
+
+/// Coerce a claim value to `f64`, accepting a numeric **string**.
+///
+/// The claim corpus stores `value` as a string as often as a number
+/// (`"0.5"`, not `0.5`). `Value::as_f64()` returns `None` for a string, which
+/// silently skipped the ordinal wrong-cell guard and produced `SUPPORTED`
+/// where the reference produced `wrong_cell_binding` (P0). A predicate that
+/// returns `None` instead of failing is exactly the class `ASSURANCE.md` §1
+/// names — so this one fails loudly on a non-numeric string.
+fn value_as_f64(v: Option<&serde_json::Value>) -> Option<f64> {
+    match v? {
+        serde_json::Value::Number(n) => n.as_f64(),
+        serde_json::Value::String(s) => s.trim().parse::<f64>().ok(),
+        _ => None,
+    }
 }
 
 /// The claimed value must parse from the quote itself.
@@ -486,7 +526,10 @@ pub fn header_binds(
 
 /// How strongly the evidence supports the claim.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+/// Serialised exactly as the reference emits it (`SUPPORTED`, `REVIEW`,
+/// `UNSUPPORTED`). Case is part of the wire format — a port that "tidies" it
+/// to `snake_case` cannot be diffed against the reference it is replacing.
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum VerdictLabel {
     /// Quote located, value parses, headers bind.
     Supported,
@@ -498,7 +541,8 @@ pub enum VerdictLabel {
 
 /// Severity of a finding. P0 is fabricated evidence.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+/// Serialised as the reference emits it: `P0`, `P1`, `P2`.
+#[serde(rename_all = "UPPERCASE")]
 pub enum Severity {
     /// Fabricated quote/value, wrong cell, wrong quantity.
     P0,
@@ -555,11 +599,20 @@ pub struct Verdict {
     /// The outcome.
     pub verdict: VerdictLabel,
     /// Why, when it is not clean.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    ///
+    /// Serialised as an explicit `null` rather than omitted, because the
+    /// reference emits `"reason_code": null`. Absent and null are the same
+    /// fact, but a port that "tidies" the wire shape cannot be diffed against
+    /// what it replaces.
     pub reason_code: Option<ReasonCode>,
     /// Severity.
     pub severity: Severity,
     /// A snippet of the quote, when the quote itself is the problem.
+    ///
+    /// **Omitted when absent**, unlike `reason_code`: the reference builds
+    /// this key only when it has a quote (`{"…", "evidence_quote": quote[:80]}`)
+    /// and never emits it as null. The two fields are asymmetric on the wire
+    /// and the port has to match both shapes to be diffable.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub evidence_quote: Option<String>,
 }
@@ -593,14 +646,15 @@ pub struct ClaimInput {
 /// reviewed against `quote_verify.py` line by line.
 #[allow(clippy::too_many_lines)]
 #[must_use]
-pub fn verify_claims(
-    claims: &BTreeMap<String, (Field, ClaimInput)>,
-    doc_text: &str,
-) -> Vec<Verdict> {
+pub fn verify_claims(claims: &BTreeMap<String, ClaimInput>, doc_text: &str) -> Vec<Verdict> {
     let mut verdicts = Vec::new();
     let t_normed = norm(doc_text);
 
-    for (field_name, (field, c)) in claims {
+    for (field_name, c) in claims {
+        // Only known field names carry a rule. An unrecognised name is "no
+        // special rule", which is exactly what the reference does with a
+        // string lookup that misses.
+        let field = Field::parse(field_name);
         if c.value.is_none() && c.quote.is_empty() {
             continue;
         }
@@ -614,7 +668,7 @@ pub fn verify_claims(
             });
             continue;
         }
-        if !find_quote(&c.quote, doc_text, None, Some(*field)) {
+        if !find_quote(&c.quote, doc_text, None, field) {
             verdicts.push(Verdict {
                 field: field_name.clone(),
                 verdict: VerdictLabel::Unsupported,
@@ -624,7 +678,7 @@ pub fn verify_claims(
             });
             continue;
         }
-        if temp_convention_check(*field, &c.quote) == Some(false) {
+        if field.is_some_and(|f| temp_convention_check(f, &c.quote) == Some(false)) {
             verdicts.push(Verdict {
                 field: field_name.clone(),
                 verdict: VerdictLabel::Unsupported,
@@ -645,7 +699,7 @@ pub fn verify_claims(
             continue;
         }
 
-        let table_ok = c.table.is_empty() || find_quote(&c.table, doc_text, None, Some(*field));
+        let table_ok = c.table.is_empty() || find_quote(&c.table, doc_text, None, field);
 
         let nq = norm(&c.quote);
         let head = nq.chars().take(40).collect::<String>();
@@ -660,12 +714,7 @@ pub fn verify_claims(
             }
             None => t_normed.clone(),
         };
-        let ordinal = column_position_binds(
-            col,
-            &c.quote,
-            &span,
-            c.value.as_ref().and_then(serde_json::Value::as_f64),
-        );
+        let ordinal = column_position_binds(col, &c.quote, &span, value_as_f64(c.value.as_ref()));
         if ordinal == Some(false) {
             verdicts.push(Verdict {
                 field: field_name.clone(),
@@ -775,10 +824,7 @@ mod tests {
         let mut claims = BTreeMap::new();
         claims.insert(
             "v_abs_max".to_string(),
-            (
-                Field::VAbsMax,
-                claim(600.0, "VDS 999 V", "Absolute maximum ratings"),
-            ),
+            claim(600.0, "VDS 999 V", "Absolute maximum ratings"),
         );
         let out = verify_claims(&claims, DOC);
         assert_eq!(out.len(), 1);
@@ -791,10 +837,7 @@ mod tests {
         let mut claims = BTreeMap::new();
         claims.insert(
             "v_abs_max".to_string(),
-            (
-                Field::VAbsMax,
-                claim(999.0, "VDS 600 V", "Absolute maximum ratings"),
-            ),
+            claim(999.0, "VDS 600 V", "Absolute maximum ratings"),
         );
         let out = verify_claims(&claims, DOC);
         assert_eq!(out[0].reason_code, Some(ReasonCode::ValueNotInQuote));
@@ -804,10 +847,7 @@ mod tests {
     #[test]
     fn unquoted_assertion_is_p0() {
         let mut claims = BTreeMap::new();
-        claims.insert(
-            "v_abs_max".to_string(),
-            (Field::VAbsMax, claim(600.0, "", "")),
-        );
+        claims.insert("v_abs_max".to_string(), claim(600.0, "", ""));
         let out = verify_claims(&claims, DOC);
         assert_eq!(out[0].reason_code, Some(ReasonCode::UnquotedAssertion));
     }
@@ -836,10 +876,7 @@ mod tests {
         // the thing that rejects it — otherwise quote location fires first.
         let doc = "Junction temperature Tj = 150 C";
         let mut claims = BTreeMap::new();
-        claims.insert(
-            "temp_max_c".to_string(),
-            (Field::TempMaxC, claim(150.0, "Tj = 150 C", "")),
-        );
+        claims.insert("temp_max_c".to_string(), claim(150.0, "Tj = 150 C", ""));
         let out = verify_claims(&claims, doc);
         assert_eq!(
             out[0].reason_code,
@@ -857,7 +894,7 @@ mod tests {
         let mut c = claim(2.5, "Gate threshold VGS(th) 2.0 2.5 4.0 V", "");
         c.column_header = Some("maximum".into());
         c.qualifier = Some("maximum".into());
-        claims.insert("v_abs_max".to_string(), (Field::VAbsMax, c));
+        claims.insert("v_abs_max".to_string(), c);
         let out = verify_claims(&claims, doc);
         assert_eq!(out[0].severity, Severity::P0);
     }
@@ -888,7 +925,7 @@ mod tests {
         let mut c = claim(600.0, "Drain-Source voltage VDS 450 550 600 V", "");
         c.column_header = Some("max".into());
         c.row_header = Some("Drain-Source voltage".into());
-        claims.insert("v_abs_max".to_string(), (Field::VAbsMax, c));
+        claims.insert("v_abs_max".to_string(), c);
         let out = verify_claims(&claims, doc);
         assert_eq!(out.len(), 1);
         assert_eq!(one(&out[0]), (VerdictLabel::Supported, Severity::P2));
@@ -911,7 +948,7 @@ mod tests {
         let mut claims = BTreeMap::new();
         let mut c = claim(600.0, "Drain-Source voltage VDS - - 600 V", "");
         c.column_header = Some("max".into());
-        claims.insert("v_abs_max".to_string(), (Field::VAbsMax, c));
+        claims.insert("v_abs_max".to_string(), c);
         let out = verify_claims(&claims, doc);
         assert_eq!(out[0].severity, Severity::P0);
         assert_eq!(out[0].reason_code, Some(ReasonCode::WrongCellBinding));
@@ -921,8 +958,8 @@ mod tests {
     #[test]
     fn every_p0_has_a_reason_code() {
         let mut claims = BTreeMap::new();
-        claims.insert("a".to_string(), (Field::VAbsMax, claim(1.0, "nope", "")));
-        claims.insert("b".to_string(), (Field::VAbsMax, claim(2.0, "", "")));
+        claims.insert("a".to_string(), claim(1.0, "nope", ""));
+        claims.insert("b".to_string(), claim(2.0, "", ""));
         for v in verify_claims(&claims, DOC) {
             if v.severity == Severity::P0 {
                 assert!(v.reason_code.is_some(), "P0 without a reason: {v:?}");

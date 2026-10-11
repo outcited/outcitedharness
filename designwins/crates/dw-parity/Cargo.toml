@@ -16,6 +16,7 @@ thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 dw-normalize = { path = "../dw-normalize" }
+dw-truth = { path = "../dw-truth" }
 
 [lints]
 workspace = true
