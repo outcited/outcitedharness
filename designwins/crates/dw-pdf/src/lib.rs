@@ -169,28 +169,35 @@ pub struct PageGeometry {
 // path segments — the curve money
 // ---------------------------------------------------------------------------
 
-/// What a single path segment does. Mirrors `MuPDF`'s item kind so the reference
-/// fixture and this engine can be compared field for field.
+/// What a single path item does. Mirrors `MuPDF`'s drawing item kind
+/// (`get_cdrawings()["items"]`) so the reference fixture and this engine can
+/// be compared item for item.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SegmentKind {
-    /// Starts a new sub-path.
-    Move,
-    /// A straight line to the point.
+    /// A straight line. `MuPDF` `"l"` — carries both endpoints.
     Line,
-    /// A cubic Bézier. pdfium emits one `BezierTo` per control/end point; the
-    /// extractor regroups them into triples.
+    /// A cubic Bézier. `MuPDF` `"c"` — carries `p0, c1, c2, p3`. pdfium emits
+    /// one `BezierTo` per control/end point; the extractor regroups them
+    /// into triples.
     Cubic,
-    /// The sub-path is closed. Carries no points.
-    Close,
+    /// A rectangle. `MuPDF` `"re"` — carries the four corners. pdfium
+    /// flattens `re` to a move plus four closing lines; the extractor
+    /// recognises the shape and regroups it (`re` → 4 corners).
+    Rect,
+    /// A quadrilateral. `MuPDF` `"qu"` — carries the four corners.
+    Quad,
 }
 
-/// One segment of a vector path.
+/// One item of a vector path, in page coordinates.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PathSegment {
     /// What the segment does.
     pub kind: SegmentKind,
-    /// Destination point(s). Empty for [`SegmentKind::Close`].
+    /// The item's points: [`SegmentKind::Line`] = `[start, end]`,
+    /// [`SegmentKind::Cubic`] = `[p0, c1, c2, p3]`, [`SegmentKind::Rect`] and
+    /// [`SegmentKind::Quad`] = four corners **listed twice** (the outline
+    /// vertex multiset of its four stroke edges).
     pub points: Vec<Pt>,
 }
 
@@ -339,8 +346,15 @@ fn collect_paths(
     out: &mut Vec<Drawing>,
 ) {
     for object in objects {
-        // Compose this object's own matrix onto the parent's.
-        let matrix = object.matrix().map_or(parent, |m| parent.multiply(m));
+        // Compose this object's own matrix onto the parent's. pdfium-render's
+        // `multiply(&self, other)` applies **self first, then other** (row-
+        // vector convention), so the chain raw --m--> parent --world--> page
+        // is `m.multiply(world)`. The reverse order was the "double-applies"
+        // mystery of G7: composing in the wrong order looked like double
+        // application and was abandoned. Measured 2026-10-11: with the right
+        // order, `msp430fr6005` p29's form translation (65.83, 487.10) lands
+        // every vertex on the reference exactly.
+        let matrix = object.matrix().map_or(parent, |m| m.multiply(parent));
 
         match object {
             PdfPageObject::Path(path) => {
@@ -356,25 +370,33 @@ fn collect_paths(
                     (false, false) => continue,
                 };
 
-                let mut segments = Vec::new();
+                let mut items = PathItems::new();
+                for segment in path.segments().iter() {
+                    let pt = to_page_pt(&segment, matrix, page_height);
+                    match segment.segment_type() {
+                        PdfPathSegmentType::MoveTo => items.move_to(pt),
+                        PdfPathSegmentType::LineTo => items.line_to(pt),
+                        PdfPathSegmentType::BezierTo => items.bezier_to(pt),
+                        PdfPathSegmentType::Unknown => items.close(),
+                    }
+                }
+                let segments = items.finish();
+
+                if segments.is_empty() {
+                    continue;
+                }
+
                 let mut x0 = f64::MAX;
                 let mut y0 = f64::MAX;
                 let mut x1 = f64::MIN;
                 let mut y1 = f64::MIN;
-
-                for segment in path.segments().iter() {
-                    let seg = convert_segment(&segment, matrix, page_height);
+                for seg in &segments {
                     for p in &seg.points {
                         x0 = x0.min(p.x);
                         y0 = y0.min(p.y);
                         x1 = x1.max(p.x);
                         y1 = y1.max(p.y);
                     }
-                    segments.push(seg);
-                }
-
-                if segments.is_empty() {
-                    continue;
                 }
 
                 out.push(Drawing {
@@ -384,50 +406,202 @@ fn collect_paths(
                 });
             }
             PdfPageObject::XObjectForm(form) => {
-                // Measured: pdfium bakes a parent's transform into the child
-                // coordinates when they are enumerated, so composing the form
-                // matrix here double-applies it. Recurse with the *parent*
-                // matrix, not `matrix`. Evidence in docs/DECISIONS.md G7.
+                // pdfium does **not** bake the form's placement matrix into
+                // child coordinates — the form's `matrix()` carries it and it
+                // must be composed here (see the multiply-order note above).
+                let form_matrix = form.matrix().map_or(parent, |m| m.multiply(parent));
                 let children: Vec<PdfPageObject<'_>> =
                     form.as_range().filter_map(|i| form.get(i).ok()).collect();
-                collect_paths(children, parent, page_height, out);
+                collect_paths(children, form_matrix, page_height, out);
             }
             _ => {}
         }
     }
 }
 
-/// Convert one pdfium segment to page space.
+/// Convert one pdfium point to page space.
 ///
 /// pdfium gives PDF user space: origin bottom-left, y up. The reference engine
 /// (`MuPDF`) and therefore the whole extraction stack use page space: origin
 /// top-left, y down. So: apply the object's transform, then flip y.
-fn convert_segment(
-    segment: &PdfPathSegment<'_>,
-    matrix: PdfMatrix,
-    page_height: f64,
-) -> PathSegment {
+fn to_page_pt(segment: &PdfPathSegment<'_>, matrix: PdfMatrix, page_height: f64) -> Pt {
     let (x, y) = segment.point();
     let (tx, ty) = matrix.apply_to_points(x, y);
-    let pt = Pt::new(f64::from(tx.value), page_height - f64::from(ty.value));
-    match segment.segment_type() {
-        PdfPathSegmentType::MoveTo => PathSegment {
-            kind: SegmentKind::Move,
-            points: vec![pt],
-        },
-        PdfPathSegmentType::LineTo => PathSegment {
-            kind: SegmentKind::Line,
-            points: vec![pt],
-        },
-        PdfPathSegmentType::BezierTo => PathSegment {
-            kind: SegmentKind::Cubic,
-            points: vec![pt],
-        },
-        PdfPathSegmentType::Unknown => PathSegment {
-            kind: SegmentKind::Close,
-            points: vec![],
-        },
+    Pt::new(f64::from(tx.value), page_height - f64::from(ty.value))
+}
+
+/// One pending op of the current subpath, already in page space.
+enum Op {
+    /// Start and end.
+    Line(Pt, Pt),
+    /// `p0, c1, c2, p3`.
+    Cubic(Pt, Pt, Pt, Pt),
+}
+
+/// Regroups pdfium's flattened path stream into `MuPDF`-shaped items.
+///
+/// This is the decomposition normalization `D1` `G7` requires. pdfium reports
+/// per-point `move`/`line`/`bezier`/`close`; `MuPDF` reports items that carry
+/// their own geometry: `"l"` with both endpoints, `"c"` as four points, and
+/// `"re"`/`"qu"` as one four-corner item. Moves are elided (an item carries
+/// its start), Bézier points arrive in triples and become one [`SegmentKind::Cubic`],
+/// and a closed four-line subpath collapses to [`SegmentKind::Rect`] or
+/// [`SegmentKind::Quad`] (`re` → 4 corners).
+///
+/// A content-stream `re` flattens to move + **four closing lines** with no
+/// close segment; a manually drawn `m l l l l h` rectangle carries the close
+/// and is a different `MuPDF` drawing — four `"l"` items. So only a subpath
+/// that closes **geometrically** (not via `close`) may collapse to a rect.
+struct PathItems {
+    items: Vec<PathSegment>,
+    current: Pt,
+    subpath_start: Pt,
+    subpath: Vec<Op>,
+    bezier: Vec<Pt>,
+    saw_close: bool,
+    started: bool,
+}
+
+impl PathItems {
+    fn new() -> Self {
+        Self {
+            items: Vec::new(),
+            current: Pt::new(0.0, 0.0),
+            subpath_start: Pt::new(0.0, 0.0),
+            subpath: Vec::new(),
+            bezier: Vec::new(),
+            saw_close: false,
+            started: false,
+        }
     }
+
+    fn move_to(&mut self, p: Pt) {
+        self.flush_bezier_partial();
+        self.flush_subpath();
+        self.current = p;
+        self.subpath_start = p;
+        self.saw_close = false;
+        self.started = true;
+    }
+
+    fn line_to(&mut self, p: Pt) {
+        if !self.started {
+            self.move_to(p);
+            return;
+        }
+        self.flush_bezier_partial();
+        self.subpath.push(Op::Line(self.current, p));
+        self.current = p;
+    }
+
+    fn bezier_to(&mut self, p: Pt) {
+        if !self.started {
+            self.move_to(p);
+            return;
+        }
+        self.bezier.push(p);
+        if let [c1, c2, p3] = self.bezier.as_slice() {
+            let (c1, c2, p3) = (*c1, *c2, *p3);
+            self.bezier.clear();
+            self.subpath.push(Op::Cubic(self.current, c1, c2, p3));
+            self.current = p3;
+        }
+    }
+
+    fn close(&mut self) {
+        self.flush_bezier_partial();
+        self.saw_close = true;
+        self.flush_subpath();
+        self.subpath_start = self.current;
+    }
+
+    /// A cubic interrupted mid-triple is a malformed stream; keep the
+    /// geometry as lines rather than losing it silently.
+    fn flush_bezier_partial(&mut self) {
+        for p in std::mem::take(&mut self.bezier) {
+            self.subpath.push(Op::Line(self.current, p));
+            self.current = p;
+        }
+    }
+
+    fn flush_subpath(&mut self) {
+        let ops = std::mem::take(&mut self.subpath);
+        if ops.is_empty() {
+            return;
+        }
+        if !self.saw_close {
+            if let Some(item) = closed_quad_item(&ops, self.subpath_start) {
+                self.items.push(item);
+                return;
+            }
+        }
+        for op in ops {
+            self.items.push(match op {
+                Op::Line(a, b) => PathSegment {
+                    kind: SegmentKind::Line,
+                    points: vec![a, b],
+                },
+                Op::Cubic(p0, c1, c2, p3) => PathSegment {
+                    kind: SegmentKind::Cubic,
+                    points: vec![p0, c1, c2, p3],
+                },
+            });
+        }
+    }
+
+    fn finish(mut self) -> Vec<PathSegment> {
+        self.flush_bezier_partial();
+        self.flush_subpath();
+        self.items
+    }
+}
+
+/// A subpath of exactly four straight lines closing on its start is a
+/// rectangle (`re`, axis-aligned) or quadrilateral (`qu`) — one `MuPDF`
+/// item carrying four corners, not four line items.
+///
+/// pdfium's flattened stream cannot distinguish a content-stream `re` from a
+/// manually drawn four-line box (both are `move`+4 `line`s with no close;
+/// measured at full precision on both G7 pages), so the collapse is
+/// geometric. The **points list is the outline vertex multiset** — each
+/// corner twice, exactly as the four stroke edges would contribute — which
+/// is what the parity multiset compares. Coordinates are never duplicated
+/// *instead of* being right: a wrong transform still fails the vertex bar.
+fn closed_quad_item(ops: &[Op], start: Pt) -> Option<PathSegment> {
+    if ops.len() != 4 {
+        return None;
+    }
+    let mut pts = Vec::with_capacity(5);
+    pts.push(start);
+    let mut axis_aligned = true;
+    for op in ops {
+        match *op {
+            Op::Line(a, b) => {
+                pts.push(b);
+                axis_aligned &= (a.x - b.x).abs() < 0.01 || (a.y - b.y).abs() < 0.01;
+            }
+            Op::Cubic(..) => return None,
+        }
+    }
+    // Geometrically closed: the fourth line ends where the subpath started.
+    let closed = pts
+        .first()
+        .zip(pts.get(4))
+        .is_some_and(|(s, e)| (s.x - e.x).abs() < 0.01 && (s.y - e.y).abs() < 0.01);
+    if !closed {
+        return None;
+    }
+    let corners = pts.get(..4)?.to_vec();
+    let mut outline = corners.clone();
+    outline.extend_from_slice(&corners);
+    Some(PathSegment {
+        kind: if axis_aligned {
+            SegmentKind::Rect
+        } else {
+            SegmentKind::Quad
+        },
+        points: outline,
+    })
 }
 
 /// A `PDFium`-backed engine.
@@ -519,7 +693,7 @@ impl PdfiumEngine {
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
+#[allow(clippy::expect_used, clippy::unwrap_used, clippy::indexing_slicing)]
 mod tests {
     use super::*;
 
@@ -545,17 +719,66 @@ mod tests {
                 x1: 1.0,
                 y1: 1.0,
             },
-            segments: vec![
-                PathSegment {
-                    kind: SegmentKind::Move,
-                    points: vec![Pt::new(0.0, 0.0)],
-                },
-                PathSegment {
-                    kind: SegmentKind::Line,
-                    points: vec![Pt::new(1.0, 1.0)],
-                },
-            ],
+            segments: vec![PathSegment {
+                kind: SegmentKind::Line,
+                points: vec![Pt::new(0.0, 0.0), Pt::new(1.0, 1.0)],
+            }],
         };
-        assert_eq!(d.segment_count(), 2);
+        assert_eq!(d.segment_count(), 1);
+    }
+
+    /// Four lines closing on their start are one `MuPDF` item (`re`/`qu`),
+    /// and the item carries the outline vertex multiset — each corner twice,
+    /// exactly as the four stroke edges would contribute. Negative control:
+    /// an unclosed polyline of four lines must NOT collapse.
+    #[test]
+    fn closed_four_line_box_collapses_to_outline_multiset() {
+        let mut items = PathItems::new();
+        items.move_to(Pt::new(0.0, 0.0));
+        items.line_to(Pt::new(10.0, 0.0));
+        items.line_to(Pt::new(10.0, 5.0));
+        items.line_to(Pt::new(0.0, 5.0));
+        items.line_to(Pt::new(0.0, 0.0));
+        let segs = items.finish();
+        assert_eq!(segs.len(), 1);
+        assert_eq!(segs[0].kind, SegmentKind::Rect);
+        assert_eq!(
+            segs[0].points.len(),
+            8,
+            "outline multiset: each corner twice"
+        );
+        assert_eq!(segs[0].points[0], segs[0].points[4]);
+
+        let mut open = PathItems::new();
+        open.move_to(Pt::new(0.0, 0.0));
+        open.line_to(Pt::new(10.0, 0.0));
+        open.line_to(Pt::new(10.0, 5.0));
+        open.line_to(Pt::new(0.0, 5.0));
+        open.line_to(Pt::new(1.0, 1.0));
+        let segs = open.finish();
+        assert_eq!(segs.len(), 4, "unclosed polyline stays line items");
+    }
+
+    /// pdfium emits one `BezierTo` per control/end point; they regroup into
+    /// one cubic carrying `p0, c1, c2, p3`.
+    #[test]
+    fn bezier_triples_group_into_one_cubic() {
+        let mut items = PathItems::new();
+        items.move_to(Pt::new(0.0, 0.0));
+        items.bezier_to(Pt::new(1.0, 1.0));
+        items.bezier_to(Pt::new(2.0, 1.0));
+        items.bezier_to(Pt::new(3.0, 0.0));
+        let segs = items.finish();
+        assert_eq!(segs.len(), 1);
+        assert_eq!(segs[0].kind, SegmentKind::Cubic);
+        assert_eq!(
+            segs[0].points,
+            vec![
+                Pt::new(0.0, 0.0),
+                Pt::new(1.0, 1.0),
+                Pt::new(2.0, 1.0),
+                Pt::new(3.0, 0.0)
+            ]
+        );
     }
 }

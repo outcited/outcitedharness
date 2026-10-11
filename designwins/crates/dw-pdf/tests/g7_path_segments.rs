@@ -205,10 +205,10 @@ fn engine_kind_counts(drawings: &[dw_pdf::Drawing]) -> HashMap<&'static str, usi
     for d in drawings {
         for s in &d.segments {
             *m.entry(match s.kind {
-                SegmentKind::Move => "move",
                 SegmentKind::Line => "line",
                 SegmentKind::Cubic => "cubic",
-                SegmentKind::Close => "close",
+                SegmentKind::Rect => "rect",
+                SegmentKind::Quad => "quad",
             })
             .or_insert(0) += 1;
         }

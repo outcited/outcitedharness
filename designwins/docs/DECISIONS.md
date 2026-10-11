@@ -74,6 +74,16 @@ question is answered; the porting question is not. `dw-pdf` remains gated until
 parity is demonstrated, and the D1 fallback (PyMuPDF out-of-process, never
 linked) stays available.
 
+**Gate green 2026-10-11 — parity achieved.**
+`g7_path_segments_match_python_reference` passes at **100% vertex parity on
+both pages** (segments within 2%, geometry exact). It was never an engine
+limitation: three porting bugs — matrix composition order
+(`pdfium-render`'s `multiply(&self, other)` applies self first; the code had
+it backwards), raw path segments not regrouped into `MuPDF` items (`re` → 4
+corners, Bézier triples), and the rect collapse's vertex multiset. Full
+writeup: `HANDOFF.md` §5.4. The fallback stays available; parity no longer
+needs it.
+
 Corpus: `tests/fixtures/gold/typical_curves/pdfs/` — two in-repo MSP430
 datasheets with matching gold curve pages. Self-contained, no vault dependency.
 Reference fixture emitted by `scripts/emit_pdf_engine_reference.py` into

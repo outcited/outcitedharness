@@ -36,7 +36,7 @@ Each link must hold or the ones after it are worthless.
 | 4 | I can **see** it on the page | `C13` page render + row-band crop, content-addressed, engine-pinned | **real** (Tier 1.1, `dw-evidence`) — 86,398/86,736 located (99.6%); the 338 residual are `Unknown`, never `Pass` |
 | 5 | I can reproduce this answer | `ReleaseId` → immutable manifest | **real** (Tier 1.2, `dw-release`) |
 | 6 | nothing was silently assumed | `derived` is never silent · `unknowns` is first-class | **real** |
-| 7 | the port did not drift | gold gates + `dw-parity` ledgers, both engines live in one run | **real 2026-10-11** — `parse_condition` 10,270/10,270 · `verify_claims` 40/40, ledgers empty. `G7` (D1, PDF-engine path parity) is the one open gate: it blocks `dw-pdf`'s **cutover claim**, not the answer — renders are engine-pinned and content-addressed, so a pixel change breaks loudly |
+| 7 | the port did not drift | gold gates + `dw-parity` ledgers + G7, both engines live | **real 2026-10-11** — `parse_condition` 10,270/10,270 · `verify_claims` 40/40 · G7 path-segment parity 100% on both pages, ledgers empty. The PDF engine's old "double-applies" residual was a matrix-multiplication-order bug (`HANDOFF.md` §5.4) |
 | 8 | the colloquial mapping is right | `Stamp` measured against the floor | **real at measured coverage** — D4: 632/7,423 weighted searches bound, 625 `ProvenFit`; the floor is falsifiable (can-trip control). Unbound residue is first-class (`D5`), never a silent miss |
 
 **The gap is closed.** Links 4 and 5 were the gap (this section kept its
@@ -45,10 +45,9 @@ Link 7's last partial piece was the `quote_verify` replacement gate; its
 divergence was a byte-vs-char span bug, fixed 2026-10-11 with negative
 controls, and both replacement ledgers are now empty.
 
-**What is not claimed: completeness.** 99.6% page location, 8.5% colloquial
-binding coverage, and `G7` open are all stated as measured gaps — never
-hidden behind green. An answer is *defensible* at the numbers above; the
-residuals are named.
+**What is not claimed: completeness.** 99.6% page location and 8.5% colloquial
+binding coverage are stated as measured gaps — never hidden behind green. An
+answer is *defensible* at the numbers above; the residuals are named.
 
 ---
 

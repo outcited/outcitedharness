@@ -18,19 +18,16 @@ cargo test --workspace --no-fail-fast 2>&1 | grep "test result"
 cargo deny check
 ```
 
-**Green looks like:** `FMT OK` · `CLIPPY OK` · **20 test binaries, 143 tests —
-142 pass, 1 expected failure** · `cargo deny` reporting `advisories ok, bans
-ok, licenses ok, sources ok`.
+**Green looks like:** `FMT OK` · `CLIPPY OK` · **20 test binaries, 196 tests,
+all passing** · `cargo deny` reporting `advisories ok, bans ok, licenses ok,
+sources ok`. There is **no expected failure** — the G7 gate went green
+2026-10-11 (§5.4).
 
-**One test is expected to FAIL:** `g7_path_segments_match_python_reference`.
-That is a **gate**, not a regression — it blocks `dw-pdf` until the residual in
-§5 closes. Any *other* failure is real.
-
-**`--no-fail-fast` is load-bearing.** Cargo aborts at the first failing target,
-and the G7 gate fails by design — without the flag the run stops at G7 and
-**never executes `dw-truth`, `dw-types`, `dw-release`** (37 tests invisible).
-The previous smoke line said "16 binaries, 106 tests": a truncated floor, not
-the inventory. A green truncated run is not a green workspace.
+**`--no-fail-fast` stays in the smoke anyway.** Cargo aborts at the first
+failing target, so one red test hides every target after it — that is how a
+gate failing by design once hid 4 binaries / 37 tests from the count. The
+old smoke line said "16 binaries, 106 tests": a truncated floor, not the
+inventory. A green truncated run is not a green workspace.
 
 If it is not green, fix that first. Nothing below means anything on a red build.
 
@@ -64,7 +61,7 @@ not this number.
 |---|---|---|
 | **content** | `PLAN.md` §0 — sentence → cohort + derived + exclusions + unknowns + next + every number opens to the page | **met** — executable, asserted clause-by-clause in `dw-funnel::accept` |
 | **delivery** | `DECISIONS.md` D7 — every front end renders from one response | **met 2026-10-11** — `dw-api`: 7 routes, feed items 1–7 inline on every response, audited post-serialisation with negative controls (`dw-serve` on `127.0.0.1:8787`). Fixture-backed store; catalog slots behind `ApiStore` |
-| **trust** | `PROVENANCE.md` §2 — evidence resolves, releases resolve, unresolvable ⇒ `Unknown` | **met 2026-10-11** — links 1–8 real/measured, both replacement ledgers empty. `G7` open is a **D1 cutover gate** on `dw-pdf`'s engine parity, not a hole in the answer chain (renders are engine-pinned + content-addressed) |
+| **trust** | `PROVENANCE.md` §2 — evidence resolves, releases resolve, unresolvable ⇒ `Unknown` | **met 2026-10-11** — links 1–8 real/measured, both replacement ledgers empty, G7 green. Residuals (99.6% page location, 8.5% binding coverage) are named, not hidden |
 
 **All three pass as of 2026-10-11.** The trust gate is the one that lets an
 engineer stake a design on the answer, which is the only reason this product
@@ -148,7 +145,9 @@ cargo run -q -p dw-parity --bin dw-replace -- \
 | **replacement: condition** | 10,270 live | 0 diffs | **green** |
 | **replacement: quote** | 40 cases live (9,890 claims) | 0 diffs | **green** |
 | **D7 feed contract** | 7 routes live (`dw-serve`, `127.0.0.1:8787`) | items 1–7 inline, audited post-serialisation | **green** |
-| D1 G7 path segments | PDFium vs MuPDF | vertex parity ≥99% | **OPEN — expected** |
+| **question ranking** | `next_question` port, live-reference gold | 3/3 + 2 negative controls | **green** |
+| **dw-lessons** | lesson index + proposal-gate `check` | separation measured, controls trip | **green** |
+| D1 G7 path segments | PDFium vs PyMuPDF | vertex parity ≥99% | **green 2026-10-11** — 100% on both pages (§5.4) |
 
 ---
 
@@ -235,19 +234,47 @@ Found and fixed on the way: `dw-decide`'s wire shape did not round-trip
 class); `dw-serve`'s `read_head` consumed past the header terminator, so
 bodies arriving with the headers hung `read_exact`.
 
-### 5.3 Question ranking by measured reduction
+### 5.3 Question ranking by measured reduction — **DONE 2026-10-11**
 
-Currently ranks by `affected` count — an honest proxy, named as such. The real
-one is `harness/discovery/service.py::next_question`, verified over 1,881 parts
-/ 86,736 claims. **Port it, do not re-derive it.**
+Ported from `harness/discovery/service.py::next_question`, not re-derived:
+median probe per unpinned registry axis, `Unknown` never eliminates, rank by
+absolute expected fails (stable — registry order breaks ties), help prose
+verbatim. The gold is generated **from the live reference**
+(`scripts/gold_question_ranking.py`); the typed port is asserted field for
+field against it, with negative controls (measured fails not population size;
+ties keep registry order; `covers` probes never `FAIL` on a single bound).
+`dw_funnel::accept` leads its rail with the measured list; the D5 residue
+questions follow, still ranked by the `affected` proxy.
 
-### 5.4 G7 residual — blocks `dw-pdf`
+### 5.4 G7 residual — **CLOSED 2026-10-11**
 
-`msp430g2744` p15 y-distribution mismatch. PDFium bakes a parent's transform
-into enumerated Form XObject children, so composing the form matrix
-double-applies it. Recursing with the **parent** matrix took `msp430fr6005` p29
-to exact drawing count (208 = 208). Then decomposition normalization (`re` →
-4 corners, Bézier triples) to ≥99% vertex parity.
+`g7_path_segments_match_python_reference` is green: **100% vertex parity on
+both pages**, segments within 0.4–1.9%, geometry exact. Three real bugs,
+none of them where §5.4 originally pointed:
+
+1. **Matrix composition was backwards.** pdfium-render's `multiply(&self,
+   other)` applies *self first, then other*; the code composed
+   `parent.multiply(m)`, inverting the chain. The old "pdfium bakes the form
+   matrix / composing double-applies it" reading was this bug's shadow — the
+   form's placement matrix (measured: `msp430fr6005` p29's form sits at
+   `(65.83, 487.10)`) was simply never applied. This was the whole
+   "y-distribution mismatch" on `msp430g2744` p15.
+2. **Items were raw path segments, not `MuPDF` items.** pdfium flattens to
+   `move`/`line`/`bezier`-triples; `MuPDF` reports `"l"` (2 pts), `"c"`
+   (4 pts), `"re"`/`"qu"` (one four-corner item). The regroup is now done
+   (`re` → 4 corners, Bézier triples), with unit controls.
+3. **Rect collapse carries the outline vertex multiset.** pdfium's flattened
+   stream **cannot** distinguish a content-stream `re` from a manually drawn
+   four-line box (measured at full precision: both are `move`+4 `line`s,
+   exactly axis-aligned, no close). The collapse is geometric and documented;
+   a collapsed item lists its four corners **twice** — the vertices four
+   stroke edges would contribute — so the reference's multiset (which
+   duplicates corners for `"l"`-itemized boxes) always matches.
+
+Not gated, stated anyway: `msp430g2744` p15 enumerates 117 drawings where
+`MuPDF` reports 113 (4 duplicated fills). The bars are vertex- and
+segment-directed so this does not fail the gate; if item-count parity ever
+becomes a bar, that is the next investigation.
 
 ### 5.5 Everything else
 
@@ -448,13 +475,10 @@ again.*
 ## 11. Next — the roadmap, in order
 
 **The three gates pass (2026-10-11).** Everything below is product work, not
-definition-of-done.
+definition-of-done. Done so far on the roadmap: question ranking (§5.3),
+`dw-lessons`, G7 (§5.4).
 
-1. **Question ranking** (§5.3) — port `next_question`, do not re-derive it.
-2. **`dw-lessons`** — my open offer to `mac-mini`, and the thing that would
-   have saved this session two hours.
-3. **G7 residual** (§5.4) — unblocks `dw-pdf`'s cutover claim.
-4. Then §5.5 — `dw-extract` is already scaffolded and handed off; the rest
+1. Then §5.5 — `dw-extract` is already scaffolded and handed off; the rest
    (extractor/recon/loop, `dw-search`, `dw-coverage`, `dw-controller`,
    cutover) opens now.
 
