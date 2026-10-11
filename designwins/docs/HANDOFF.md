@@ -177,7 +177,8 @@ of.
 | # | work | unlocks | state |
 |---|---|---|---|
 | ~~2.1~~ | ~~**Gate N4: condition + claim corpora**~~ | proof the port did not drift | **DONE** — N4a 9,551/9,551 · N4b 10,270/10,270 weighted 64,245/64,245 · provenance 86,736/86,736 |
-| 2.2 | **Phrase-layer gate** against the query telemetry, count-weighted (1,485 rows / 8,653 searches) | proof the colloquial mapping is right | — |
+| ~~2.2~~ | ~~**Phrase-layer gate**~~ | proof the colloquial mapping is right | **DONE as a gate, and it says the product is unbuilt** — 19 / 7,423 weighted searches bind (0.26%), **0% can eliminate**. Floor pinned at 19 as a regression bar |
+| 2.3 | **Grow the phrase registry** — this is now the main work | make `dw-funnel::accept` useful on real queries | See the traffic table in `DECISIONS.md` D4: ARM Cortex 1,357 · Performance & Memory 1,259 · HMI 705 · USB & PD 520 · Wireless 261 |
 
 **Next is the phrase-layer gate (2.2), then Tier 3.**
 

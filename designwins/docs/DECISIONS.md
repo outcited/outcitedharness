@@ -274,6 +274,35 @@ The motivating case: an AEC-Q100, -40/+125 automotive-rated part is genuinely
 not specced into a home thermostat. That constraint lives in **qualification /
 temp / rating**, not in the subcategory, and not in the occasion.
 
+### Measured 2026-10-10: the phrase layer does not yet serve real traffic
+
+Gate D4 (`dw-knives::tests::d4_phrase_telemetry`) ran the whole query
+telemetry — 1,342 rows, 7,423 searches, 15 themes, weighted by search count —
+through the seeded registry.
+
+| outcome | weighted searches | share |
+|---|---:|---:|
+| bound | 19 | 0.26% |
+| &nbsp;&nbsp;`ProvenFit` (may eliminate) | **0** | **0.00%** |
+| &nbsp;&nbsp;`PositiveOnly` | 0 | 0.00% |
+| &nbsp;&nbsp;`Blocked` | 19 | 0.26% |
+| unmapped | 7,404 | 99.74% |
+
+**Not one search in the corpus can currently narrow a cohort.** The seed
+registry holds four bindings taken from `holes.json`, and the traffic is 15
+themes of mostly unmodelled vocabulary.
+
+That number is not a failure of the gate — it is what the gate is for. It
+says plainly that the product's front door is unbuilt, and it puts a floor
+under the work so progress is measurable rather than asserted. The floor is
+set at the measured 19: **a regression bar, not a target**. Raise it
+deliberately as the registry grows. Never lower it.
+
+For comparison, the traffic the bindings *would* need to cover, by weight:
+ARM Cortex 1,357 · Performance & Memory 1,259 · HMI 705 · USB & PD 520 ·
+Wireless & IoT 261. Those five themes are 4,102 of 5,213 representative
+searches — the registry has bindings for fragments of one of them.
+
 ### Eval
 
 **The query telemetry is the gold set:**

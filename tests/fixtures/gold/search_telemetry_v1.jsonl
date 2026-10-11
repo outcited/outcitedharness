@@ -1,0 +1,1342 @@
+{"query": "32b 24 MHz ARM MCU", "search_count": 709, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "32b 24 MHz ARM MCU", "search_count": 709, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "32b 24 MHz ARM MCU", "search_count": 709, "sheet": "Complex Searches", "theme": null}
+{"query": "hmi machine core", "search_count": 437, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "HMI MACHINE CORE", "search_count": 212, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "cortex", "search_count": 95, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m0 core other components", "search_count": 64, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m0 core other components", "search_count": 64, "sheet": "Complex Searches", "theme": null}
+{"query": "cortex m4", "search_count": 54, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM ATMEGA ATMEL", "search_count": 50, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM ATMEGA ATMEL", "search_count": 50, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB 180", "search_count": 50, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB 180", "search_count": 50, "sheet": "Design Intent Searches", "theme": null}
+{"query": "core router core memory", "search_count": 42, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "core with arm cortex m0", "search_count": 41, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "core with arm cortex m0", "search_count": 41, "sheet": "Complex Searches", "theme": null}
+{"query": "esp 32", "search_count": 35, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "motor", "search_count": 32, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "ENABLE CPU", "search_count": 31, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ENABLE CPU", "search_count": 31, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP 32", "search_count": 28, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ENABLE TWO CORES", "search_count": 24, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ENABLE TWO CORES", "search_count": 24, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB PD", "search_count": 23, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "USB PD", "search_count": 23, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "cortex m0 mcu core other components", "search_count": 21, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m0 mcu core other components", "search_count": 21, "sheet": "Complex Searches", "theme": null}
+{"query": "esp 32", "search_count": 20, "sheet": "Design Intent Searches", "theme": null}
+{"query": "hmi machine core 128kb", "search_count": 18, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "hmi machine core 128kb", "search_count": 18, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "STM  COMPARATOR", "search_count": 17, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "100 MHz 1.8 V", "search_count": 16, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "8 pwm header", "search_count": 16, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "8 pwm header", "search_count": 16, "sheet": "Design Intent Searches", "theme": null}
+{"query": "cortex m0 with other components", "search_count": 16, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m0 with other components", "search_count": 16, "sheet": "Complex Searches", "theme": null}
+{"query": "usb power delivery", "search_count": 16, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "16-BIT CABLE BOX", "search_count": 15, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "16-BIT CABLE BOX", "search_count": 15, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CORE ROUTER MEMORY", "search_count": 15, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "MOTOROLA", "search_count": 15, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "MOTOROLA", "search_count": 15, "sheet": "Design Intent Searches", "theme": null}
+{"query": "prototype board", "search_count": 15, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Built in USB MCU", "search_count": 14, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Built in USB MCU", "search_count": 14, "sheet": "Design Intent Searches", "theme": null}
+{"query": "INFINEON ADC", "search_count": 14, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "INFINEON ADC", "search_count": 14, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB to SMBus", "search_count": 13, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB to SMBus", "search_count": 13, "sheet": "Design Intent Searches", "theme": null}
+{"query": "memory encode", "search_count": 13, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ADC UART", "search_count": 12, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "ADC UART", "search_count": 12, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "ADC UART", "search_count": 12, "sheet": "Design Intent Searches", "theme": null}
+{"query": "FD can", "search_count": 12, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "FD can", "search_count": 12, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Infineon AURIX", "search_count": 12, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "SBUS-CAN", "search_count": 12, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "SBUS-CAN", "search_count": 12, "sheet": "Design Intent Searches", "theme": null}
+{"query": "memory FRAM", "search_count": 12, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "memory FRAM", "search_count": 12, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "single board computers", "search_count": 12, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "usb PD", "search_count": 12, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "usb PD", "search_count": 12, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb PD", "search_count": 12, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ADC 28 PIN DIP", "search_count": 11, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "ADC 28 PIN DIP", "search_count": 11, "sheet": "Complex Searches", "theme": null}
+{"query": "ARM Cortex-M3 32-bit RISC", "search_count": 11, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM Cortex-M3 32-bit RISC", "search_count": 11, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ARM Cortex-M3 32-bit RISC", "search_count": 11, "sheet": "Complex Searches", "theme": null}
+{"query": "RF CMOS", "search_count": 11, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "RF CMOS", "search_count": 11, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm mcu 32b 256KB", "search_count": 11, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm mcu 32b 256KB", "search_count": 11, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "arm mcu 32b 256kb", "search_count": 11, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm mcu 32b 256kb", "search_count": 11, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "arm mcu 32b 256kb", "search_count": 11, "sheet": "Complex Searches", "theme": null}
+{"query": "bldc motor", "search_count": 11, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "prototype circuit board", "search_count": 11, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "prototype circuit board", "search_count": 11, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "ram memory", "search_count": 11, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "usb", "search_count": 11, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb", "search_count": 11, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb i2s", "search_count": 11, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb i2s", "search_count": 11, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"arm bcu 32bit 128kb\"", "search_count": 10, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "\"arm bcu 32bit 128kb\"", "search_count": 10, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"arm bcu 32bit 128kb\"", "search_count": 10, "sheet": "Complex Searches", "theme": null}
+{"query": "16.000MHZ EQXO-2025UIT-S-50P", "search_count": 10, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "DC Motor with encoder", "search_count": 10, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "DC Motor with encoder", "search_count": 10, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Micro USB SMD 5 Pin Type B", "search_count": 10, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Micro USB SMD 5 Pin Type B", "search_count": 10, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB UART", "search_count": 10, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB UART", "search_count": 10, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB UART", "search_count": 10, "sheet": "Design Intent Searches", "theme": null}
+{"query": "board computers", "search_count": 10, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "fram", "search_count": 10, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "pwm ic", "search_count": 10, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "pwm ic", "search_count": 10, "sheet": "Design Intent Searches", "theme": null}
+{"query": "single board computer", "search_count": 10, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Built in USB MCU 10 bit", "search_count": 9, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Built in USB MCU 10 bit", "search_count": 9, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP 32", "search_count": 9, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Microchip Flash Pro 6", "search_count": 9, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Microchip Flash Pro 6", "search_count": 9, "sheet": "Complex Searches", "theme": null}
+{"query": "TMS320f28069m eval brd", "search_count": 9, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "zedboard", "search_count": 9, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Microchip COMPARATOR", "search_count": 8, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "USB-TO-GPIO", "search_count": 8, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "cmos 3.3v 120Mhz oscillator", "search_count": 8, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "cortex mcu", "search_count": 8, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex mcu", "search_count": 8, "sheet": "Design Intent Searches", "theme": null}
+{"query": "flash memory spi", "search_count": 8, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "flash memory spi", "search_count": 8, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "hmi machine core 128kb ram", "search_count": 8, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "hmi machine core 128kb ram", "search_count": 8, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "oled display", "search_count": 8, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "prototyping boards", "search_count": 8, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "qspi flash", "search_count": 8, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "qspi flash", "search_count": 8, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "qspi flash", "search_count": 8, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb regulator board", "search_count": 8, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "usb regulator board", "search_count": 8, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb regulator board", "search_count": 8, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"arm mcu 32bit 256kb\"", "search_count": 7, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "\"arm mcu 32bit 256kb\"", "search_count": 7, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"arm mcu 32bit 256kb\"", "search_count": 7, "sheet": "Complex Searches", "theme": null}
+{"query": "24-bit adc and microcontroller", "search_count": 7, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "24-bit adc and microcontroller", "search_count": 7, "sheet": "Complex Searches", "theme": null}
+{"query": "ARM STM32F 405", "search_count": 7, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM STM32F 405", "search_count": 7, "sheet": "Design Intent Searches", "theme": null}
+{"query": "GD-LINK", "search_count": 7, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "GD-LINK", "search_count": 7, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB to CAN", "search_count": 7, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "USB to CAN", "search_count": 7, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB to CAN", "search_count": 7, "sheet": "Design Intent Searches", "theme": null}
+{"query": "mcu 32bit", "search_count": 7, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "mcu 32bit", "search_count": 7, "sheet": "Design Intent Searches", "theme": null}
+{"query": "microcontrollers ARM7", "search_count": 7, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "microcontrollers ARM7", "search_count": 7, "sheet": "Design Intent Searches", "theme": null}
+{"query": "motors", "search_count": 7, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "motors", "search_count": 7, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb type-c", "search_count": 7, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Ethernet controller", "search_count": 6, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "Ethernet controller", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "FLASH EMULATION TOOL FOR MSP430", "search_count": 6, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "FLASH EMULATION TOOL FOR MSP430", "search_count": 6, "sheet": "Complex Searches", "theme": null}
+{"query": "J-Link", "search_count": 6, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "J-Link", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB controller", "search_count": 6, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Usb c connector 4 pin", "search_count": 6, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "ZedBoard", "search_count": 6, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "arm 100pin", "search_count": 6, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm 100pin", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm 32b mcu", "search_count": 6, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm 32b mcu", "search_count": 6, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "arm 32b mcu", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm 55", "search_count": 6, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm 55", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "cortex m4 nxp", "search_count": 6, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m4 nxp", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "eMMC memory chip", "search_count": 6, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "eeprom-memory-size:\"32 kB\"", "search_count": 6, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "esp prog 2", "search_count": 6, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp prog 2", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "microcontroller ARM7", "search_count": 6, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "microcontroller ARM7", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "microcontroller arm7 nxp", "search_count": 6, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "microcontroller arm7 nxp", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "microcontroller open source board", "search_count": 6, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "microcontroller open source board", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "type c", "search_count": 6, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb i2s bridge", "search_count": 6, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb i2s bridge", "search_count": 6, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb type c", "search_count": 6, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "\"esp 32-bit microcontroller\"", "search_count": 5, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"esp 32-bit microcontroller\"", "search_count": 5, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "\"esp 32-bit microcontroller\"", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "20.000MHZ MQ", "search_count": 5, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "24 bit adc and microcontroller", "search_count": 5, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "24 bit adc and microcontroller", "search_count": 5, "sheet": "Complex Searches", "theme": null}
+{"query": "3x3 adc", "search_count": 5, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "3x3 adc", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ARM", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "BLDC MOTOR", "search_count": 5, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "BLDC MOTOR", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "BLDC motor", "search_count": 5, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "BLDC motor", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "FRAM", "search_count": 5, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "Fram", "search_count": 5, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "Fram", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "INTEGRATED CIRCUIT- PROGRAMMABLE OSCILLATOR,", "search_count": 5, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "LCD spi", "search_count": 5, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "Memory RAM", "search_count": 5, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Nuvoton M058SSAN", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "SPI-USB CONVERTER", "search_count": 5, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "SPI-USB CONVERTER", "search_count": 5, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Texas Instruments' SimpleLink™ MCU", "search_count": 5, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Texas Instruments' SimpleLink™ MCU", "search_count": 5, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Texas Instruments' SimpleLink™ MCU", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB controller", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "XDS200 USB", "search_count": 5, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "XDS200 USB", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ZEDBOARD ZYNQ-7000", "search_count": 5, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Zedboard", "search_count": 5, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "arm", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm sdio", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm sdio", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "atsam board", "search_count": 5, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "automotive", "search_count": 5, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "comparator", "search_count": 5, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "cortex automotive", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex automotive", "search_count": 5, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "cortex automotive", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "cortex m0 mcu with other components", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m0 mcu with other components", "search_count": 5, "sheet": "Complex Searches", "theme": null}
+{"query": "development board", "search_count": 5, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "dsPIC30F6014A-20E/PF", "search_count": 5, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC30F6014A-20E/PF", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC33EP512MU810-E/PF", "search_count": 5, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33EP512MU810-E/PF", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ethernet board", "search_count": 5, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "ethernet board", "search_count": 5, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "ethernet board", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "external flash chip", "search_count": 5, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "external flash chip", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "mcu arm 32", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "mcu arm 32", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "memory", "search_count": 5, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "nxp arm7", "search_count": 5, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "nxp arm7", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stm32 frequency<\"32 MHz\"", "search_count": 5, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "stm32 frequency<\"32 MHz\"", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb sizes", "search_count": 5, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb sizes", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb type c", "search_count": 5, "sheet": "Design Intent Searches", "theme": null}
+{"query": "1.77 LCD SPI", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "3200K FLASH 512K RAM BGA136", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "3200K FLASH 512K RAM BGA136", "search_count": 4, "sheet": "Complex Searches", "theme": null}
+{"query": "5MHZ 44-PLCC", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "60MHz oscillators 1.8V", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "64MHZ 5V SMD", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "8 MHz DIP oscillator", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ADC", "search_count": 4, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "ADC", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ADC 16 bits", "search_count": 4, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "ADC 16 bits", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ARM Cortex M4/M7", "search_count": 4, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM Cortex M4/M7", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "AT flash memory 128", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "DAC", "search_count": 4, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "DAC", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP 30E", "search_count": 4, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ESP 30E", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP 32-bit microcontroller", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ESP 32-bit microcontroller", "search_count": 4, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ESP 32-bit microcontroller", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Esp 32", "search_count": 4, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "Esp 32", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "FRAM", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Flasher RX", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Flasher RX", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "I2S ADC", "search_count": 4, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "I2S ADC", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "IC MCU 16BIT 66KB FLASH 64TQFP", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 16BIT 66KB FLASH 64TQFP", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "MPU Cortex", "search_count": 4, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "MPU Cortex", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "NXP S32K310 ARM Cortex-M7", "search_count": 4, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "NXP S32K310 ARM Cortex-M7", "search_count": 4, "sheet": "Complex Searches", "theme": null}
+{"query": "Nuvoton M032", "search_count": 4, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "OLED display", "search_count": 4, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "PMSM Motor", "search_count": 4, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "PMSM Motor", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "PWM controller family", "search_count": 4, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "PWM controller family", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "R7FA6M5BH3CFB ARM Microcontrollers QFP144", "search_count": 4, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "R7FA6M5BH3CFB ARM Microcontrollers QFP144", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R7FA6M4AF3CFM#BA0", "search_count": 4, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Renesas R7FA6M4AF3CFM#BA0", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB TO UART", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB TO UART", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB TO UART", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB UART/I2C Debugger", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB UART/I2C Debugger", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB UART/I2C Debugger", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB type C", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB type C", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-C 16", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-C 16", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-C 16 Pin", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-C 16 Pin", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "adc", "search_count": 4, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "adc", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "atmega 16mhz", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "atmega 16mhz", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC30F6011-30 I/PF", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC30F6011-30 I/PF", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC30F6014AT-30I/PF", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC30F6014AT-30I/PF", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC33EP512GM710-I/PF", "search_count": 4, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "dsPIC33EP512GM710-I/PF", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33EP512GM710-I/PF", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dspic33fj256gp710a-i/pf", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dspic33fj256gp710a-i/pf", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "flash relay", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "flash-memory-size:\"64 kB\"", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "jlink", "search_count": 4, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "motor", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "motor control sensor", "search_count": 4, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "qspi memory", "search_count": 4, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "qspi memory", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "risc-v ethernet", "search_count": 4, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "risc-v ethernet", "search_count": 4, "sheet": "Representative Searches", "theme": "Security & Next-Gen"}
+{"query": "risc-v ethernet", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "shielding can", "search_count": 4, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "stm32 frequency<\"50 MHz\"", "search_count": 4, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "stm32 frequency<\"50 MHz\"", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb c pd controller 12V", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb c pd controller 12V", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb jtag", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb jtag", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb to serial", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb to serial", "search_count": 4, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb-c 24-pin connector", "search_count": 4, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "\"128kb flash\"", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"128kb flash\"", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "12kb cmos ram", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "16 bits ADC", "search_count": 3, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "16 bits ADC", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "16MHz", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "24 bit 8 channel dac i2c", "search_count": 3, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "24 bit 8 channel dac i2c", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "32 memory-size:\"32 kB\"", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "32Mhz oscillator", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "32b arm", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "32b arm", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "32b arm", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "32kb flash", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "32kb flash", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "64kB Flash 48-Pin LQFP Tray", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "64kB Flash 48-Pin LQFP Tray", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "8251a uart", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "8251a uart", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ADC 38-TSSOP", "search_count": 3, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "ADC 38-TSSOP", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ARM STM 32", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM STM 32", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "AURIX TC366", "search_count": 3, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "AURIX TC366", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Arm", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Arm", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Arm cortex m7", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Arm cortex m7", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CAN 11 din rail", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "CAN 11 din rail", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "DISPLAY OLED I2C BLUE 0.96\"", "search_count": 3, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "Development board", "search_count": 3, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Digital Signal Processor 40MHz tms", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Dual Drive usb-c usb", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Dual Drive usb-c usb", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "EMULATOR USB 100 V2", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "EMULATOR USB 100 V2", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP PROG", "search_count": 3, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ESP PROG", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "EXPANDIO-USB-PT-FS", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "EXPANDIO-USB-PT-FS", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "IC MCU 32BIT 32KB FLASH 48UFQFPN", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 32BIT 32KB FLASH 48UFQFPN", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "INFINEON AURIX", "search_count": 3, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "INFINEON AURIX", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "J Link", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "J Link", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "J-LINK EDU Mini", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "J-LINK EDU Mini", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "KB- 10", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "LEVEL DEVELOPMENTS LTD", "search_count": 3, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "M4F  512KB Flash", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "M4F  512KB Flash", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "M4F  512KB Flash", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "MCU 32-bit ARM Cortex Bluetooth", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "MCU 32-bit ARM Cortex Bluetooth", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "MCU 32-bit ARM Cortex Bluetooth", "search_count": 3, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "MCU 32-bit ARM Cortex Bluetooth", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "MCU 64k memory, 72mhz", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "MCU for IoT sensor node", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "MCU for deterministic real time contro", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "MCU with Bluetooth and WiFi", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "Microchip ADC", "search_count": 3, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "Microchip ADC", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Microcontroller board", "search_count": 3, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Microcontroller board", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Motor", "search_count": 3, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "Motor", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "OLED display 0.96", "search_count": 3, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "Oled display", "search_count": 3, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "PIC Wire Cable", "search_count": 3, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "PIC Wire Cable", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "PLCC 44 memory", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Programmable Multifunction", "search_count": 3, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "Programmable Multifunction", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "QSPI", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "QSPI", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "QSPI SRAM", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "QSPI SRAM", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "R7FA4M1AB3CFM 32-bit Arm® Cortex®-M4", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "R7FA4M1AB3CFM 32-bit Arm® Cortex®-M4", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "R7FA4M1AB3CFM 32-bit Arm® Cortex®-M4", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "RA CABLE", "search_count": 3, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "RA CABLE", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "RED-BEET-P 2.0 SPI", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "RED-BEET-P 2.0 SPI", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R7FA6M4AF2CBM#BC0", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Renesas R7FA6M4AF2CBM#BC0", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Rochester Electronics 2909ADC", "search_count": 3, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "Rochester Electronics 2909ADC", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ST-LINK V2", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ST-LINK V2", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Secure MCU 16bit OPTIGA™ TPM CISC 7KB ROM 1.8V/3.3V 32-Pin VQFN EP T/R", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Secure MCU 16bit OPTIGA™ TPM CISC 7KB ROM 1.8V/3.3V 32-Pin VQFN EP T/R", "search_count": 3, "sheet": "Representative Searches", "theme": "Security & Next-Gen"}
+{"query": "Secure MCU 16bit OPTIGA™ TPM CISC 7KB ROM 1.8V/3.3V 32-Pin VQFN EP T/R", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "TYPE C CHIP PROTOCOL USB PD3.0", "search_count": 3, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "TYPE C CHIP PROTOCOL USB PD3.0", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "TYPE C CHIP PROTOCOL USB PD3.0", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Texas Instruments M0G3519QPNRQ1", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Texas Instruments M0G3519QPNRQ1", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Texas Instruments M0L1227QPTRQ1", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Texas Instruments M0L1227QPTRQ1", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "UART to I2C", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "UART to I2C", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB PD controller", "search_count": 3, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "USB PD controller", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB PD controller", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB TYPE C 16 PIN", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB TYPE C 16 PIN", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB i2s", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB i2s", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-CAN-FD", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "USB-CAN-FD", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-CAN-FD", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Usb C", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Usb C", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "WATER PUMP MOTOR", "search_count": 3, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "WATER PUMP MOTOR", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "XILINX SOC", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "XILINX SOC", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm cortex-m3", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm cortex-m3", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm mcu 32b 256kb blah", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm mcu 32b 256kb blah", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "arm mcu 32b 256kb blah", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "aurix mcu", "search_count": 3, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "aurix mcu", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "automotive MCU with CAN FD", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "coral usb", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "cortex", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "cortex m3 nxp", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m3 nxp", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC30F6011A-30I/PT DSP 16 Bit", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC30F6011A-30I/PT DSP 16 Bit", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "dsPIC33EP256MU810-I/PF", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33EP256MU810-I/PF", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC33FJ256MC710-I/PF", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33FJ256MC710-I/PF", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dspic30f6014-30i/pf", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dspic30f6014-30i/pf", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dspic30f6014a-30i/pf", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dspic30f6014a-30i/pf", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "embedded flash", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "embedded flash", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "gmr linear sensor", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "high performance MCU for real time processing", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "high temp usb", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "high temp usb", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "industrial sd card memory", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "jlink", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "latest bluetooth", "search_count": 3, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "lingto", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "lingto", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "low cost 32 bit MCU", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "main board", "search_count": 3, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "micro usb", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "nuvoton M487", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "nxp arm 7", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "nxp arm 7", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "nxp arm 7 lpc", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "nxp arm 7 lpc", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "nxp automotive radar", "search_count": 3, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "nxp automotive radar", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "oscillator 16MHz", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "pwm", "search_count": 3, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "pwm", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "pwm ic AAHBD", "search_count": 3, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "pwm ic AAHBD", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "quad uart", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "quad uart", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "r IC M0+ MCU 128KB", "search_count": 3, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "r IC M0+ MCU 128KB", "search_count": 3, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "r IC M0+ MCU 128KB", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "raspberry pi expansion board", "search_count": 3, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "risc-v", "search_count": 3, "sheet": "Representative Searches", "theme": "Security & Next-Gen"}
+{"query": "risc-v", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "secure element", "search_count": 3, "sheet": "Representative Searches", "theme": "Security & Next-Gen"}
+{"query": "segger j-link", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "segger j-link", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "spi to ethernet interface modules", "search_count": 3, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "spi to ethernet interface modules", "search_count": 3, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "spi to ethernet interface modules", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "st-link v2", "search_count": 3, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ti usb microcontrollers", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "ti usb microcontrollers", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "type-c", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "ultra low power MCU for battery device", "search_count": 3, "sheet": "Complex Searches", "theme": null}
+{"query": "usb b fix", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb b fix", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb bridge", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb bridge", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb controllers", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb controllers", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb i2s audio", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb i2s audio", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb to rs232", "search_count": 3, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb to rs232", "search_count": 3, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"CAN transceiver\" AND \"MCU\"", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "\"CAN transceiver\" AND \"MCU\"", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "\"atmega 10mhz\"", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"atmega 10mhz\"", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "128kb flash", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "128kb flash", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "2 ch uart to ethernet", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "2 ch uart to ethernet", "search_count": 2, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "2 ch uart to ethernet", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "32 mhz through hole", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "60 MHz to 800 MHZ IC oscillator voltage controlled oscillator", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "64GB plsc micro usb", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "64GB plsc micro usb", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "8140  Lin", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "8140  Lin", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "8MHz Oscillator", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ARM Cortex-M microcontroller with 64KB RAM and I2C interface", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM Cortex-M microcontroller with 64KB RAM and I2C interface", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ARM Cortex-M microcontroller with 64KB RAM and I2C interface", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "AVR AVR® ATmega Microcontroller IC 8-Bit 8MHz 8KB (4K x 16) FLASH 44-PLCC (16.6x16.6)", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "AVR AVR® ATmega Microcontroller IC 8-Bit 8MHz 8KB (4K x 16) FLASH 44-PLCC (16.6x16.6)", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "Arduino Shield Board", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Arm cortex m33", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Arm cortex m33", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Automotive Microcontroller", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "Automotive Microcontroller (AURIX TC3xx)", "search_count": 2, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "Automotive Microcontroller (AURIX TC3xx)", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "BGA WLP- 08P-M01", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "BLDC Motor", "search_count": 2, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "BLDC Motor", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "BLDC motor driver", "search_count": 2, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "BLDC motor driver", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CAN I/O", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "CAN I/O", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CAN-USB FD interface/analyzer", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "CAN-USB FD interface/analyzer", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "CAN-USB FD interface/analyzer", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CORTEX-M3,72MHZ", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "CORTEX-M3,72MHZ", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "CORTEX-M3,72MHZ", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Can controller modules standard", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Can controller modules standard", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "Can controller modules standard serial", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Can controller modules standard serial", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "Comparator DIP-8", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "Control board LIN", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Control board LIN", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Control board LIN", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Coral usb", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Coral usb", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Cortex DIP", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Cortex DIP", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Cortex M MCU", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Cortex M MCU", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "DSPIC33FJ256MC710At-I/PF", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "DSPIC33FJ256MC710At-I/PF", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Digilent ZedBoard", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "ECAN", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ECAN", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "F29H850DM4SP ZSR", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "I2C FRAM", "search_count": 2, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "I2C FRAM", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "IC MCU 16BIT 512KB FLASH 112LQFP", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 16BIT 512KB FLASH 112LQFP", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "IC MCU 32BIT 512KB FLASH 100LQFP", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 32BIT 512KB FLASH 100LQFP", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "IC USB 3.0 to UART", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "IC USB 3.0 to UART", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "IC USB 3.0 to UART", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "IC, Microcontroller Small 8KB 10ADC", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "IC, Microcontroller Small 8KB 10ADC", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC, Microcontroller Small 8KB 10ADC", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "Infineon AURIX", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Jlink", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Jlink", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "KB ELECTRONICS 8832", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "KBY", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "LDO and MCU and CAN", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "LDO and MCU and CAN", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "LDO and MCU and CAN", "search_count": 2, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "LDO and MCU and CAN", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "MCU USB 12-bit ADC 20-pin", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "MCU USB 12-bit ADC 20-pin", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "MCU USB 12-bit ADC 20-pin", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "MPC can module", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "MPC can module", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Micro Servo Motor", "search_count": 2, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "Micro Servo Motor", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "NXP Semiconductors P51XAG30KBA", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "NXP Semiconductors P51XAG30KBA", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "NXP Semiconductors P89LPC932BA", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "NXP Semiconductors P89LPC932BA", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Nuvoton M052ZDE", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Nuvoton M451VG6AE", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "NxP Microcontroller ARM 7", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "NxP Microcontroller ARM 7", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "Nxp 16 kB", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Nxp 16 kB", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "OSCILLATOR 20MHZ PCB", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "PWM comtroller", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "PWM comtroller", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Prototyping board", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "RISC-V 48MHZ", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "RISC-V 48MHZ", "search_count": 2, "sheet": "Representative Searches", "theme": "Security & Next-Gen"}
+{"query": "RISC-V 48MHZ", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F100BCANA#40", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F100BCANA#40", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F100BCANA#W0", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F100BCANA#W0", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F10KBCANA#W0", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F10KBCANA#W0", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Renesas R5F10KBCANA#W0", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F10KGCANA#W0", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F10KGCANA#W0", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F10RLCANB#U0", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F10RLCANB#U0", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F11B7CANA#W0", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F11B7CANA#W0", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F2135CANFP#V2", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F2135CANFP#V2", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "SAM-KB", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "TIVA TM4c123gh6pm", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Type CLFR", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB C Daughter board", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "USB C Daughter board", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB C Daughter board", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB PD", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB c to UART", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB c to UART", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB c to UART", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-ISO", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-ISO", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-TEMP", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-TEMP", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-TO-GPIO", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-to-CAN V2", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "USB-to-CAN V2", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-to-CAN V2", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-to-CAN v2", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "USB-to-CAN v2", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-to-CAN v2", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Zilog Z8F1621PM020EC", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Zilog Z8F4821PM020EC", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "adc 5721", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "adc 5721", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm mcy 32b", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm mcy 32b", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "arm mcy 32b", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm mcy 32b 256kb", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm mcy 32b 256kb", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "arm mcy 32b 256kb", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "arm swd", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm swd", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "attiny 20mhz", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "aurix tc298", "search_count": 2, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "aurix tc298", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "automotive camera", "search_count": 2, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "baseline", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "baseline", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "can adc pwm", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "can adc pwm", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "can adc pwm", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "coral usb", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "cortex m3", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "cortex m3", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "cortex m4", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "display 7", "search_count": 2, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "dsPIC30F6011-30I/PF", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC30F6011-30I/PF", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC33FJ128GP710A-I/PF", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33FJ128GP710A-I/PF", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dspic30f6011-30i/pf", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dspic30f6011-30i/pf", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dspic30f6011a-30i/pf", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dspic30f6011a-30i/pf", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp 19", "search_count": 2, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 19", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp 32 module", "search_count": 2, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 32 module", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp prog", "search_count": 2, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ethernet embedded", "search_count": 2, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "ethernet embedded", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "flash 125°C", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "flash 125°C", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "fram", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "i2c/spi extender", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "i2c/spi extender", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "jack adc single", "search_count": 2, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "jack adc single", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "manufacturer:ST MICROELECTRONICS L78M05ABDT-TR", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "mcu 32bit 256kb", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "mcu 32bit 256kb", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "mcu for motor control", "search_count": 2, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "mcu for motor control", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "memory qspi  125°C", "search_count": 2, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "memory qspi  125°C", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "micro usb", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "micro usb 5v", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "micro usb 5v", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "microcontroller CAN", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "microcontroller CAN", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "motor control ics", "search_count": 2, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "motor control ics", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "motors and drives", "search_count": 2, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "motors and drives", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "multi port usb pd controller source", "search_count": 2, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "multi port usb pd controller source", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "multi port usb pd controller source", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "nuvoton M467", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "parallel arm", "search_count": 2, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "parallel arm", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "rotork kb-a", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "sharp memory lcd", "search_count": 2, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "st link v2", "search_count": 2, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "st link v2", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "st-link v2", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stepper motor card", "search_count": 2, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "stepper motor card", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "switch board", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "usb 2", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb 2", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb 3 9 pins", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb 3 9 pins", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb applications", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb applications", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb board", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "usb board", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb board", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb c board stacker", "search_count": 2, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "usb c board stacker", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb c board stacker", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb c pd controller", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb c pd controller", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb codec", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb codec", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb hub SSOP", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb hub SSOP", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb memoria", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb memoria", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb microphone", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb microphone", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb pd source ic", "search_count": 2, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "usb pd source ic", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb pd source ic", "search_count": 2, "sheet": "Complex Searches", "theme": null}
+{"query": "usb power controller", "search_count": 2, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "usb power controller", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb power controller", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb power delivery", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb type c port", "search_count": 2, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb type c port", "search_count": 2, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"CAN transceiver\" AND \"MCU\" AND \"LDO\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "\"CAN transceiver\" AND \"MCU\" AND \"LDO\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "\"CAN transceiver\" AND \"MCU\" AND \"LDO\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "\"CAN transceiver\" AND \"MCU\" AND \"LDO\"", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "\"ESP 32-bit microcontroller\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"ESP 32-bit microcontroller\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "\"ESP 32-bit microcontroller\"", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"ST-LINK V2\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "\"ST-LINK V2\"", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"USB MICRO 1.8\"", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "\"USB MICRO 1.8\"", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"USB-C 16\"", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "\"USB-C 16\"", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"arm mcu 32bit 128kb\"", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "\"arm mcu 32bit 128kb\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"arm mcu 32bit 128kb\"", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "\"atmega32 8mhz oscillator\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"mcu 32bit\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "\"mcu 32bit\"", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "\"portable air conditioning\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "\"portable air conditioning\"", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "054382-01 flash", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "054382-01 flash", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "128kb 100lqfp controller", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "128kb flash 100lqfp", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "128kb flash 100lqfp", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "12V/24V USB-C", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "12V/24V USB-C", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "2-CH CAN FD HAT", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "2-CH CAN FD HAT", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "20 mbaud uart", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "20 mbaud uart", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "20 mhz", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "2s100 ic pwm", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "2s100 ic pwm", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "3.3V Brushed DC Motors", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "3.3V Brushed DC Motors", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "32b 128kB 16MHz MCU", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "32b 128kB 16MHz MCU", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "3M0701182-134\tB84143A0025R105\tTDK CORPORATION\tFilter\tN/A\t1\t135.252000\t135.252000\tSZ\t1.36\t133", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "48V-60V BLDC MOTOR", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "48V-60V BLDC MOTOR", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "4Mb flash", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "4Mb flash", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "5432 USB", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "5432 USB", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "5V/16MHZ", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "64GB pslc micro usb", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "64GB pslc micro usb", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "664 usb c", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "664 usb c", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "6mhz z80", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "7145 USB-C", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "7145 USB-C", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "7145 USB-C douglas", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "7145 USB-C douglas", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "8 Bit MCU, Flash, PIC18 Family PIC18LF25xx Series Microcontrollers, PIC18, 40 MHz, 32 KB, 28 Pins", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "8 Bit MCU, Flash, PIC18 Family PIC18LF25xx Series Microcontrollers, PIC18, 40 MHz, 32 KB, 28 Pins", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "8 Mhz oscillator", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ABSM-3.6864 MHZ-B", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ACT212 M46 12V", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ADC Ch 8 5V 85°C LQFP 64", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "ADC Ch 8 5V 85°C LQFP 64", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "ADC-FMC", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "ADC-FMC", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ARDUINO COMPATIBLE KIT", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ARDUINO COMPATIBLE KIT", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ARM", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ARM A-12", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM A-12", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ARM DIP", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "ARM DIP", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "AU M451610 07C", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Adc", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "Adc", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Analog Devices USBi", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Analog Devices USBi", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Automotive Camera Processor", "search_count": 1, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "Automotive Camera Processor", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "BUS Interface UART TSSOP", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "BUS Interface UART TSSOP", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "Bettlink", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Bettlink", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Bldc motor controler", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "Bldc motor controler", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CAN CONTROLLER", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "CAN CONTROLLER", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CAN FD usb", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "CAN FD usb", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "CAN FD usb", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CAN controller", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "CAN controller", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CCP N005M7", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "COMPACT FLASH connector vertical", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "CONTROL ARM", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "CONTROL ARM", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "CPU S1C17M33D001000", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "DART-6UL Evaluation", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "DSPIC 33 FJ 128 GP 3 06-I/PT", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "DSPIC 33 FJ 128 GP 3 06-I/PT", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "DSPIC 33EP256MU810-I/PT", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "DSPIC 33EP256MU810-I/PT", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP 32 kit", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ESP 32 kit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP PRG", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ESP PRG", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ESP32 DEV KIT 32 D", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ESP32 DEV KIT 32 D", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "Esp 32-bit microcontroller", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Esp 32-bit microcontroller", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "Esp 32-bit microcontroller", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "F29H850DM4S PZS", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "FD 13 mHZ", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "FLASH", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "FLASH", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "FLASH - NAND Memory IC 64Gbit MMC 153-VFBGA (11.5x13)", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "FRAM  16kb", "search_count": 1, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "FRAM  16kb", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "FRAM  16kb", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "FTDI USB-to-I²C", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "FTDI USB-to-I²C", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "FULL CAN oscillator  4.096M", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Flash MCU Programmer", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Flash MCU Programmer", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Generic Compatible GPON OLT SFP", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "Generic Compatible GPON OLT SFP", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "High speed  motor", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "High speed  motor", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "I2C FRAM 32KB", "search_count": 1, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "I2C FRAM 32KB", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "I2C FRAM 32KB", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "IC FLASH 32bit 1088KB 105C LQFP64", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC FLASH 32bit 1088KB 105C LQFP64", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC FLASH 4MBIT SPI/QUAD 8SOIC", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "IC FLASH 4MBIT SPI/QUAD 8SOIC", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC FLASH 4MBIT SPI/QUAD 8SOIC", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC LIN OPAMP 07CPZ", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "IC MCU 16BIT 128KB FLASH 80LQFP", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 16BIT 128KB FLASH 80LQFP", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC MCU 16BIT 512KB FLASH 100LQFP", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 16BIT 512KB FLASH 100LQFP", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC MCU 32BIT 128KB FLSH 32UFQFPN", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 32BIT 128KB FLSH 32UFQFPN", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "IC MCU 32BIT 16KB FLASH 24QFN", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 32BIT 16KB FLASH 24QFN", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC MCU 8BIT 16KB FLASH 24QFN", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 8BIT 16KB FLASH 24QFN", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC MCU 8BIT 4KB FLASH 28DIP", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 8BIT 4KB FLASH 28DIP", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC MCU 8BIT 4KB FLASH 32TQFP", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC MCU 8BIT 4KB FLASH 32TQFP", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "IC MEMORY 14SOIC RoHS", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC qspi 2gbit", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "IC qspi 2gbit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "IC,MICROPROCESSOR,ARM,600.0MHZ,BGA", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "IC,MICROPROCESSOR,ARM,600.0MHZ,BGA", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "IC,MICROPROCESSOR,ARM,600.0MHZ,BGA", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "INTERFACE UART QFN", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "INTERFACE UART QFN", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Instrument cable", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "Instrument cable", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "JTAG EMULATOR FOR ARM CORES", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "JTAG EMULATOR FOR ARM CORES", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "KB ELECTRONICS 9501", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "KB Electronics 9444", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "KB Electronics, 9537", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "KB-A", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "M40-3010646R MICROCHIP", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "M40-3010646R MICROCHIP", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "MCU 32KB Flash 8-Bit, 64-TQFP", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "MCU 32KB Flash 8-Bit, 64-TQFP", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "MCU 8-Bit C8051F36x 8051 CISC 32KB Flash 3V 32-Pin LQFP T/R", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "MCU 8-Bit C8051F36x 8051 CISC 32KB Flash 3V 32-Pin LQFP T/R", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "MCU and LDO", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "MCU and LDO", "search_count": 1, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "MCU and LDO", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "MCU-LINK", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "MCU-LINK", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "MICRO CROUZET SOLDABLE CI REF. 83261087", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "MICRO CROUZET SOLDABLE CI REF. 83261087", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "MICROCHIP / dsPIC33FJ64GS606-E/MR", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "MICROCHIP / dsPIC33FJ64GS606-E/MR", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "MICROCONTROLADOR DEV KIT ESP32 C6 -WROOM-1 ESPRESSIF", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "MICROCONTROLADOR DEV KIT ESP32 C6 -WROOM-1 ESPRESSIF", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "MPN - CM-M4160-ISO", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Motherboard power cable", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Motherboard power cable", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "Motherboard power cable", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Motorcomm", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "Motorcomm", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "NAND flash controllers", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "NAND flash controllers", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "NF-A4x10 5V PWM", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "NF-A4x10 5V PWM", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "NXP SE power ethernet", "search_count": 1, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "NXP SE power ethernet", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "OLED DISPLAY", "search_count": 1, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "OSCILLATOR 14 pin DIP  4M096", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "OSCILLATOR 4M096  14 pin DIP", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "PIC WIRE AND CABLE", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "PIC WIRE AND CABLE", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "PMOD1 SPI SCI/UART", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "PMOD1 SPI SCI/UART", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "PSRAM QSPI", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "PSRAM QSPI", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "PWM TSSOP20", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "PWM TSSOP20", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "PWM-C", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "PWM-C", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "R7FA6M4AF3CFP#AA0 (100-pin LQFP)", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "RTC SPI IC", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "RTC SPI IC", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R5F100GCANA#40", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Renesas R5F100GCANA#40", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas R7FA6M4AE3CFM#AA0", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Renesas R7FA6M4AE3CFM#AA0", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Renesas RA6 eval", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "Renesas RA6 eval", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "S12ZVC and CAN", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "S12ZVC and CAN", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "SC-USB-SPI", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "SC-USB-SPI", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "SC-USB-SPI", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "SPI to CAN CONTROLLER", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "SPI to CAN CONTROLLER", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "SPI to CAN CONTROLLER", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "SPI-USB CONVERTER", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ST LINK PROGRAMMER", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ST LINK PROGRAMMER", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ST-LINK", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ST-LINK", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ST-Link V2", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ST-Link V2", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "STM ADC", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "STM ADC", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Segger J-Link", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Segger J-Link", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "SoC thread and ethernet", "search_count": 1, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "SoC thread and ethernet", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "Spi to pcie", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "Spi to pcie", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "TI FRAM microcontroller", "search_count": 1, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "TI FRAM microcontroller", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "TMP-3766 32-bit Arm® Cortex®-M7 MCU", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "TMP-3766 32-bit Arm® Cortex®-M7 MCU", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "TMP-3766 32-bit Arm® Cortex®-M7 MCU", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "TPM-SPI", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "TPM-SPI", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "TPM-SPI asrok", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "TPM-SPI asrok", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "TYPE-C", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "UART TO ETH", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "UART TO ETH", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB 005", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB 005", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB 4914", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB 4914", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB 60MHz oscillators", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "USB 60MHz oscillators", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB 8452", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB 8452", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB C Power Only", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB C Power Only", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB C2.0", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB C2.0", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB MICRO", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB MICRO", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB MICRO 1.8", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB MICRO 1.8", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB SOCK", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB SOCK", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB TO CANBUS CONVERTER", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "USB TO CANBUS CONVERTER", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB TO CANBUS CONVERTER", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "USB Type-C", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB Type-C", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB pd", "search_count": 1, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "USB pd", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB pd", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB pd dual role", "search_count": 1, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "USB pd dual role", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB pd dual role", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "USB to CAN FD", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "USB to CAN FD", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB to CAN FD", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "USB to UART", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB to UART", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB to UART", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB to UART Bridge Controller", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB to UART Bridge Controller", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB to UART Bridge Controller", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB to UART QFN", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB to UART QFN", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB to UART QFN", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-A-S-X-X-TH", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-A-S-X-X-TH", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-C", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-C", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-C 16 pines", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-C 16 pines", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-JTAG/SWD", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-JTAG/SWD", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-TO-GPIO (296-23114)", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-TO-GPIO (296-23114)", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-UART", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "USB-UART", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-UART", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USB-temp", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USB-temp", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "USBCAN-I+", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "USBCAN-I+", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "USBCAN-I+", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "Ultra-low-power dual core Arm Cortex-M4 MCU 64 MHz, Cortex-M0+ 32 MHz", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "Ultra-low-power dual core Arm Cortex-M4 MCU 64 MHz, Cortex-M0+ 32 MHz", "search_count": 1, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "Ultra-low-power dual core Arm Cortex-M4 MCU 64 MHz, Cortex-M0+ 32 MHz", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "Ultra-low-power dual core Arm Cortex-M4 MCU 64 MHz, Cortex-M0+ 32 MHz", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "Usbf sc", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "Usbf sc", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "XCZU4CG dev board", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "XDS200 USB DEBUG PROBE", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "XDS200 USB DEBUG PROBE", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "XDS200 USB JTAG EMULATOR", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "XDS200 USB JTAG EMULATOR", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "Xilinx ZC702", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "Xilinx ZC702", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ZedBoard Zynq-7000 Development Board", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "adc 128", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "adc 128", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "adc evaluation", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "adc evaluation", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "adc evaluation", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "arm 32b 128k mcu", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm 32b 128k mcu", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "arm 32b 128k mcu", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "arm mcu 32b 256KB", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "arm microcontroller", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "arm microcontroller", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "asmedia asm4242", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "atmega 20mhz", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "atmega 20mhz", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "atmega with ethernet", "search_count": 1, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "atmega with ethernet", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "ball canning", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ball canning", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "bldc motor", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "bluetooth ic low cost", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "can CONTROLLER", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "can CONTROLLER", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "comparator 10MHz", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "comparator 10MHz", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "coral usb accelerator", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "coral usb accelerator", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dSPIC 33EP256MU810-I/PT", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dSPIC 33EP256MU810-I/PT", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "development", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "display buttons", "search_count": 1, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "display oled", "search_count": 1, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "dsPIC30F6011A-30I/PF", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC30F6011A-30I/PF", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC30F6014A20E/PF", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC30F6014A20E/PF", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC33EP512MU810-I/PF", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33EP512MU810-I/PF", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC33FJ256MC710*-I/PF", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33FJ256MC710*-I/PF", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPIC33FJ64GS406- I/PT", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPIC33FJ64GS406- I/PT", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dsPic33FJ256GP710-I/PF", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dsPic33FJ256GP710-I/PF", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dspic33fj128 gp306 i/pt", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dspic33fj128 gp306 i/pt", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "dspic33fj256mc710T-i/pf", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "dspic33fj256mc710T-i/pf", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "eMMC automotive", "search_count": 1, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "eartec boom arm", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "eartec boom arm", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ecc 6400mhz", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "embedded usb", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "embedded usb", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "embedded usb 54gb", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "embedded usb 54gb", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "emmc automotive", "search_count": 1, "sheet": "Representative Searches", "theme": "Automotive"}
+{"query": "esp 12E", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 12E", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp 32 32 dev", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 32 32 dev", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "esp 32 dev kit", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 32 dev kit", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "esp 32 doit", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 32 doit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp 32 kit", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 32 kit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp 32 supermini", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp 32 supermini", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp prog", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "esp32-wroom 32 development module", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "esp32-wroom 32 development module", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "esp32-wroom 32 development module", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "ethernet to pcie ic", "search_count": 1, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "ethernet to pcie ic", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "external flash", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "external flash", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "flash SLC NAND memory 28 pin", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "flash pro 6", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "flash pro 6", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "flash witer", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "flash witer", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "flash-memory-size:\"512 kB\"", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ftdi jtag to usb", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "ftdi jtag to usb", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "high-performance microcontroller with secure boot for iot devices", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "hilink pm03", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "hilink pm03", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "hilink pm03", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "i2S DAC", "search_count": 1, "sheet": "Representative Searches", "theme": "Integrated Analog & Control"}
+{"query": "i2S DAC", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "i2c to can", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "i2c to can", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "iMOTION-LINK", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "iMOTION-LINK", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ic mcu 32 bit 64 mhz 128kb", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "ic mcu 32 bit 64 mhz 128kb", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ir circuit ESP 1253", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "ir circuit ESP 1253", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "kb electronics", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "lcd display 16*2", "search_count": 1, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "lcd spi 5 inch", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "led board connector 6 pin", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "lpc11u24  evaluation", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "main board 24230ft2s2", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "manufacturer:\"NXP Semiconductors\" ARM7", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "manufacturer:\"NXP Semiconductors\" ARM7", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "max1000 dev board", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "mcu 4uart", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "mcu 4uart", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "mcu usb high-speed", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "mcu usb high-speed", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "mcu usb high-speed lqfp-64", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "mcu usb high-speed lqfp-64", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "microcontroller with can interface for automotive application, 32-bit, >128kb flash", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "microcontroller with integrated wi-fi for smart home devices", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "microcontrollers nxp arm7", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "microcontrollers nxp arm7", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "microphone, voltage-output, wind-screen", "search_count": 1, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "motor capacitor", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "motorcom", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "motorcom", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "motorola 68000", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "motorola 68000", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "nxp arm7 32-bit", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "nxp arm7 32-bit", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "nxp arm7 32-bit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "nxp low power 2.4ghz transceiver", "search_count": 1, "sheet": "Representative Searches", "theme": "Low-Power / Battery-Powered"}
+{"query": "nxp low power 2.4ghz transceiver", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "oscillator module 20mhz", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "perf circuit boards", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "perf circuit boards", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "perf circuit boards", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "project circuit boards", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "qspi 2-gbit", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "qspi 2-gbit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "qspi 2gbit", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "qspi 2gbit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "quad spi sram", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "quad spi sram", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "realtek rtl9201 usb device", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "realtek rtl9201 usb device", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "realtek rtl9201 usb device driver windows 11", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "realtek rtl9201 usb device driver windows 11", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "red pitaya wifi", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "renesas cortex a76", "search_count": 1, "sheet": "Representative Searches", "theme": "ARM Cortex-Based MCUs"}
+{"query": "renesas cortex a76", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "rf microcontroller", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "rf microcontroller", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "riscv", "search_count": 1, "sheet": "Representative Searches", "theme": "Security & Next-Gen"}
+{"query": "rotork KB-S", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "screen with microcontroller", "search_count": 1, "sheet": "Representative Searches", "theme": "HMI"}
+{"query": "screen with microcontroller", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "secure microcontroller for iot, arm cortex-m4, 256kb flash, aes-256 encryption, secure boot", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "shielding can", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "silicon labs usb debug adapter", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "silicon labs usb debug adapter", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "simplelink", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "simplelink", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "simplelink", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "sit16 can to uart", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "sit16 can to uart", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "sit16 can to uart", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "software development", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "spi emmc", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "spi emmc", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "st-link", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "st-link", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stepper motor controller soc", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "stepper motor controller soc", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "stepper motor driver", "search_count": 1, "sheet": "Representative Searches", "theme": "Motor Control"}
+{"query": "stepper motor driver", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stlink v4", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "stlink v4", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stm32 h7 development boarr", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "stm32 h7 development boarr", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "stm32 h7 development boarrd", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "stm32 h7 development boarrd", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "stm32 h7 development boarrdd", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "stm32 h7 development boarrdd", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "stm32 mcu 32bit", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "stm32 mcu 32bit", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stm32f4 board", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "stm32f4 board", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stm32f407vgt6 discovery board", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "stm32f407vgt6 discovery board", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "stm32h743 eval", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "stm32h743 eval", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "texas instruments smart metering board", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "texas instruments smart metering board", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "type c chip protocal usb pd", "search_count": 1, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "type c chip protocal usb pd", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "type c chip protocal usb pd", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "type c port", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "type-c port", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "uart to ble module", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "uart to ble module", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "uart to ble module", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "uart to rs-232", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "uart to rs-232", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "uart to usb host", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "uart to usb host", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "uart to usb host", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "ulink", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "ulink", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb 2.0 lqfp-64", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb 2.0 lqfp-64", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb 3.0 type C port", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb 3.0 type C port", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb PD port", "search_count": 1, "sheet": "Representative Searches", "theme": "Power Management"}
+{"query": "usb PD port", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb PD port", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb c receptable usb 2.0 16 p", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb c receptable usb 2.0 16 p", "search_count": 1, "sheet": "Representative Searches", "theme": "Wireless & IoT"}
+{"query": "usb c receptable usb 2.0 16 p", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb ethernet", "search_count": 1, "sheet": "Representative Searches", "theme": "Ethernet Connectivity"}
+{"query": "usb ethernet", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb ethernet", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb flash 16 go", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "usb flash 16 go", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb flash 16 go", "search_count": 1, "sheet": "Complex Searches", "theme": null}
+{"query": "usb host uac", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb host uac", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb memory", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "usb memory", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb memory stick", "search_count": 1, "sheet": "Representative Searches", "theme": "Performance & Memory"}
+{"query": "usb memory stick", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb power input board", "search_count": 1, "sheet": "Representative Searches", "theme": "Development Platforms"}
+{"query": "usb power input board", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb power input board", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb to uart", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "usb to uart", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb to uart", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb to uart chip", "search_count": 1, "sheet": "Representative Searches", "theme": "Embedded Networking"}
+{"query": "usb to uart chip", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb to uart chip", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb type-c", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb-c simple power only", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb-c simple power only", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "usb-icp", "search_count": 1, "sheet": "Representative Searches", "theme": "USB & USB Power Delivery"}
+{"query": "usb-icp", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
+{"query": "xc888cm 3V3, CAN", "search_count": 1, "sheet": "Representative Searches", "theme": "Industrial Communications"}
+{"query": "xc888cm 3V3, CAN", "search_count": 1, "sheet": "Design Intent Searches", "theme": null}
