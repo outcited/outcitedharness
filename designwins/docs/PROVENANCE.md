@@ -30,7 +30,7 @@ Each link must hold or the ones after it are worthless.
 
 | # | claim the answer makes | how it is enforced | state |
 |---|---|---|---|
-| 1 | the number is what the document printed | `dw-truth::quote` — quote locates, value parses from quote | **real** |
+| 1 | the number is what the document printed | `dw-truth::quote` — quote locates, value parses from quote | **real** — 86,736/86,736 claims carry a non-empty `quote` |
 | 2 | it is the *kind* of number that can answer this | `dw-normalize::rating` — absmax never satisfies operating | **real** |
 | 3 | it holds *at my operating point* | `dw-normalize::coverage` — condition must COVER | **real** |
 | 4 | I can **see** it on the page | `C13` page render + row-band crop | **TYPED, NOT REAL** |
@@ -80,6 +80,33 @@ machines") and §16.4 ("no lost lineage, append-only releases") are asserted by
 a `String` newtype.
 
 ---
+
+## 3b. Measured against the corpus — 2026-10-10
+
+Counted by direct query over `claim_provenance_v1.jsonl`, not by an
+assertion (`ASSURANCE.md` R3):
+
+| field | count | state |
+|---|---:|---|
+| `quote` non-empty | 86,736 / 86,736 | **real** |
+| `doc_sha256` non-empty | 86,736 / 86,736 | **real** |
+| `row_header` non-empty | 86,637 / 86,736 | **real** |
+| **`page` non-null** | **0 / 86,736** | **absent** |
+
+So link 1 and the document half of link 4 hold. **The page does not.** Every
+number has a quote and a document; none has a place to open to.
+
+This is the work item, not a surprise: getting a page means running
+`dw_truth::find_quote` per page of the source document and recording the
+result. It is asserted at exactly `0` in
+`gold_claim_conditions.rs::claim_provenance_has_c3_shape` so the gap cannot
+close silently without the assertion being revisited.
+
+> **Correction to a prior claim.** An earlier revision of this document, and a
+> status report, stated *"86,736/86,736 carry quote + sha + page, so C3 and C13
+> are satisfied."* That came from a test asserting `Value::get("page").is_some()`,
+> which is true for a present-but-`null` field. Two of three were real. The
+> page was not. See `ASSURANCE.md` §1.3.
 
 ## 4. What "resolvable provenance" means
 
