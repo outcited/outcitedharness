@@ -321,11 +321,18 @@ fn unit_re(kind: Kind) -> String {
 fn value_regex(kind: Kind) -> Regex {
     let p = kind.prefix();
     let u = unit_re(kind);
-    // Python: `_VALUE_RE[kind].match(tail, pos)` — anchored at `pos`.
+    // Two flags matter here, and both are the reference's:
+    //
+    // * `^` — `_VALUE_RE[kind].match(tail, pos)` anchors at `pos`.
+    // * `(?i)` — the reference compiles this with `re.I` because
+    //   **catalog `condition_norm` is lowercase-normalized** (`tc = 25 °c`).
+    //   Dropping it made every lowercase unit fail to bind, so those
+    //   conditions degraded to `no_anchors`. The curated gold carries
+    //   uppercase units and never exercised it — Gate N4b did.
     // NOTE: Rust raw strings have no `\`-newline continuation (Python does).
     // Every pattern here is single-line for that reason.
     re::build(&format!(
-        "^[±]?\\s*(?P<{p}_lo>{NUM})\\s*(?P<{p}_lu>{u})?(?:\\s*(?P<{p}_sep>{RANGE_SEP})\\s*(?P<{p}_hi>{NUM})\\s*(?P<{p}_hu>{u})?)?(?:\\s*(?P<{p}_unit>{u}))?"
+        "(?i)^[±]?\\s*(?P<{p}_lo>{NUM})\\s*(?P<{p}_lu>{u})?(?:\\s*(?P<{p}_sep>{RANGE_SEP})\\s*(?P<{p}_hi>{NUM})\\s*(?P<{p}_hu>{u})?)?(?:\\s*(?P<{p}_unit>{u}))?"
     ))
 }
 
