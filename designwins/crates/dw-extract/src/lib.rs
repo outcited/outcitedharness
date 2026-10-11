@@ -20,11 +20,13 @@ pub mod canonical;
 pub mod claims;
 pub mod corpus;
 pub mod grid;
+pub mod parity;
 pub mod queue;
 pub mod sha256;
 
 pub use canonical::{canonical_json, stable_id, CanonicalError};
 pub use claims::{make_claim, ClaimSpec, FactClaim};
+pub use parity::{diff_wire, ParitySummary};
 
 /// Extraction-surface errors.
 #[derive(Debug, thiserror::Error)]
