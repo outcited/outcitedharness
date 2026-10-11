@@ -1,0 +1,182 @@
+{
+  "battery": [
+    {
+      "class": "transient",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "IDM",
+      "table_kind": null
+    },
+    {
+      "class": "transient",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "ID,pulse",
+      "table_kind": null
+    },
+    {
+      "class": "transient",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "IAS",
+      "table_kind": null
+    },
+    {
+      "class": "transient",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "VPULSE",
+      "table_kind": null
+    },
+    {
+      "class": "transient",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "Zth",
+      "table_kind": null
+    },
+    {
+      "class": "unknown",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "VDS(transient)",
+      "table_kind": null
+    },
+    {
+      "class": "transient",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "E*3 AS",
+      "table_kind": null
+    },
+    {
+      "class": "surge",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "ISM",
+      "table_kind": null
+    },
+    {
+      "class": "surge",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "IFSM",
+      "table_kind": null
+    },
+    {
+      "class": "surge",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "ITSM",
+      "table_kind": null
+    },
+    {
+      "class": "surge",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "VSURGE2",
+      "table_kind": null
+    },
+    {
+      "class": "unknown",
+      "parameter": "continuous current",
+      "quantity_qualifier": null,
+      "symbol": "IDM",
+      "table_kind": null
+    },
+    {
+      "class": "transient",
+      "parameter": "E*3 AS",
+      "quantity_qualifier": null,
+      "symbol": "ID",
+      "table_kind": null
+    },
+    {
+      "class": "absolute_maximum",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "VDS",
+      "table_kind": "absolute_maximum"
+    },
+    {
+      "class": "recommended",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "VDS",
+      "table_kind": "recommended"
+    },
+    {
+      "class": "absolute_maximum",
+      "parameter": null,
+      "quantity_qualifier": "absolute_maximum",
+      "symbol": "VDS",
+      "table_kind": null
+    },
+    {
+      "class": "typical",
+      "parameter": null,
+      "quantity_qualifier": "typical",
+      "symbol": "VO",
+      "table_kind": null
+    },
+    {
+      "class": "rated_limit",
+      "parameter": null,
+      "quantity_qualifier": "minimum",
+      "symbol": "VO",
+      "table_kind": null
+    },
+    {
+      "class": "rated_limit",
+      "parameter": null,
+      "quantity_qualifier": "maximum",
+      "symbol": "VO",
+      "table_kind": null
+    },
+    {
+      "class": "recommended",
+      "parameter": "operating",
+      "quantity_qualifier": "rated",
+      "symbol": "ID",
+      "table_kind": null
+    },
+    {
+      "class": "rated_limit",
+      "parameter": null,
+      "quantity_qualifier": "rated",
+      "symbol": "ID",
+      "table_kind": null
+    },
+    {
+      "class": "unknown",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": "RDS(ON)",
+      "table_kind": null
+    },
+    {
+      "class": "unknown",
+      "parameter": null,
+      "quantity_qualifier": null,
+      "symbol": null,
+      "table_kind": null
+    },
+    {
+      "class": "recommended",
+      "parameter": "Quiescent current, Ta = 25 C",
+      "quantity_qualifier": null,
+      "symbol": "IDDC",
+      "table_kind": "recommended"
+    }
+  ],
+  "classes": [
+    "absolute_maximum",
+    "recommended",
+    "rated_limit",
+    "typical",
+    "transient",
+    "surge",
+    "unknown"
+  ],
+  "schema": "harness.electronics-rating-class.v1"
+}

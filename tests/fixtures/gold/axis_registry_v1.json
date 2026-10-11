@@ -1,0 +1,85 @@
+{
+  "axes": {
+    "id_continuous_a": {
+      "accepts_classes": null,
+      "default_near_miss_pct": 10.0,
+      "min_column_evidence": true,
+      "op": "min_rating",
+      "symbols": [
+        "IDDC",
+        "ID"
+      ]
+    },
+    "rds_on_ohm": {
+      "accepts_classes": [
+        "rated_limit",
+        "typical",
+        "unknown"
+      ],
+      "default_near_miss_pct": 10.0,
+      "min_column_evidence": true,
+      "op": "max_rating",
+      "symbols": [
+        "RDSON",
+        "RDS(ON)MAX"
+      ]
+    },
+    "tj_max_c": {
+      "accepts_classes": null,
+      "default_near_miss_pct": 10.0,
+      "min_column_evidence": false,
+      "op": "min_rating",
+      "symbols": [
+        "TJ",
+        "TJMAX"
+      ]
+    },
+    "tstg_range_c": {
+      "accepts_classes": null,
+      "default_near_miss_pct": 10.0,
+      "min_column_evidence": false,
+      "op": "covers",
+      "symbols": [
+        "TSTG"
+      ]
+    },
+    "vds_rating_v": {
+      "accepts_classes": null,
+      "default_near_miss_pct": 10.0,
+      "min_column_evidence": true,
+      "op": "min_rating",
+      "symbols": [
+        "VDSS",
+        "VBRDSS",
+        "VDSSMAX"
+      ]
+    }
+  },
+  "battery": {
+    "": null,
+    " tj ": "tj_max_c",
+    "FOO": null,
+    "ID": "id_continuous_a",
+    "IDDC": "id_continuous_a",
+    "IDMAX": null,
+    "RDS(ON)MAX": "rds_on_ohm",
+    "RDSON": "rds_on_ohm",
+    "RDS_ON_MAX": "rds_on_ohm",
+    "Rdson": "rds_on_ohm",
+    "TJ": "tj_max_c",
+    "TJMAX": "tj_max_c",
+    "TJ_MAX": "tj_max_c",
+    "TSTG": "tstg_range_c",
+    "TSTGMAX": null,
+    "VBR": null,
+    "VBRDSS": "vds_rating_v",
+    "VDS": null,
+    "VDSS": "vds_rating_v",
+    "VDSSMAX": "vds_rating_v",
+    "VDS_S": "vds_rating_v",
+    "rds(on)max": "rds_on_ohm",
+    "tstg": "tstg_range_c",
+    "vds s": "vds_rating_v",
+    "vdss": "vds_rating_v"
+  }
+}

@@ -26,12 +26,16 @@
 
 pub mod category;
 pub mod phrase;
+pub mod rating;
+pub mod registry;
 
 pub use category::{Assignment, CategoryGraph, Closure};
 pub use phrase::{
     unknowns_from_residue, AtomTemplate, Bound, ColloquialBinding, Drawer, PhraseRegistry, Stamp,
     ACTIVATION_FLOOR,
 };
+pub use rating::{rating_class, RatingClass};
+pub use registry::{axis_for_symbol, norm_symbol, AxisSpec, AXES};
 
 use dw_decide::{Axis, CategoryId, CategoryOp, Constraint, KnifeId, Op};
 
