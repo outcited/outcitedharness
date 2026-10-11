@@ -205,6 +205,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-lessons"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "dw-normalize"
 version = "0.1.0"
 dependencies = [

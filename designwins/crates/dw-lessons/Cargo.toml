@@ -1,0 +1,17 @@
+[package]
+name = "dw-lessons"
+description = "The lesson index in front of the proposal gate: queryable, git-versioned, sourced from the docs that already carry the lessons. A proposal that ignores a known lesson must fail loudly (PLAN §9)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+
+[lints]
+workspace = true
