@@ -41,12 +41,17 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+pub mod export;
 pub mod feed;
 pub mod problem;
 pub mod routes;
 pub mod store;
 
+pub use export::ExportStore;
 pub use feed::{EvidenceAsset, EvidenceRef, FeedAudit, Lineage, Query, QueryResult};
 pub use problem::Problem;
-pub use routes::{handle, parse_route, Request, Response, Route};
-pub use store::{ApiStore, DemoStore, JobRecord, JobState, PartRecord};
+pub use routes::{decode_segment, handle, parse_route, Request, Response, Route};
+pub use store::{
+    resolve_claim_source, ApiStore, ClaimSource, CoverageCube, CubeCell, DemoStore, GapLedger,
+    JobRecord, JobState, PartClaim, PartRecord,
+};

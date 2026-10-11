@@ -10,9 +10,62 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use dw_decide::{Build, Candidate, CandidateFacts, Cohort};
-use dw_types::{ReleaseId, Sha256, SourceRef};
+use dw_types::{ReleaseId, Sha256};
 
 use crate::feed::{EvidenceAsset, EvidenceRef, Lineage};
+
+/// Where a claim came from — the **loose** wire shape the extraction export
+/// prints (`tools/export_api_store.py`): a source may carry a document hash
+/// and no page, a page and no crop, or nothing at all. A missing field is a
+/// fact about the corpus, not a reason to invent one.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct ClaimSource {
+    /// Document hash, when the feed recorded one (the family feed).
+    #[serde(default)]
+    pub doc_sha256: Option<String>,
+    /// Document hash in the catalog feed's naming — also a hash of the
+    /// verbatim text on the family feed, so resolution uses
+    /// `doc_sha256.or(sha)` and never trusts this alone for page renders
+    /// without checking.
+    #[serde(default)]
+    pub sha: Option<String>,
+    /// 1-based page, when located.
+    #[serde(default)]
+    pub page: Option<u32>,
+    /// Row header that labels the value.
+    #[serde(default)]
+    pub row_header: Option<String>,
+    /// Column header that labels the value.
+    #[serde(default)]
+    pub column_header: Option<String>,
+    /// Row-band crop, when provenanced.
+    #[serde(default)]
+    pub crop: Option<dw_types::CropRef>,
+}
+
+impl ClaimSource {
+    /// The document this source points at: the family feed's `doc_sha256`,
+    /// else the catalog feed's `sha`.
+    #[must_use]
+    pub fn document(&self) -> Option<&str> {
+        self.doc_sha256.as_deref().or(self.sha.as_deref())
+    }
+}
+
+/// The funnel's typed [`dw_types::SourceRef`] is a complete source — it
+/// converts losslessly into the loose shape so one resolver serves both.
+impl From<&dw_types::SourceRef> for ClaimSource {
+    fn from(s: &dw_types::SourceRef) -> Self {
+        Self {
+            doc_sha256: Some(s.sha256.as_str().to_string()),
+            sha: Some(s.sha256.as_str().to_string()),
+            page: Some(s.page),
+            row_header: s.row_header.clone(),
+            column_header: s.column_header.clone(),
+            crop: s.crop.clone(),
+        }
+    }
+}
 
 /// A claim as the extraction surface shows it: value, and the page it opens to.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -24,7 +77,7 @@ pub struct PartClaim {
     /// The quote that proves it, when the surface shows one.
     pub quote: Option<String>,
     /// Where it came from. Resolved to assets by the handler.
-    pub source: SourceRef,
+    pub source: ClaimSource,
 }
 
 /// One part, joined 1:1 (`C7`: the facade join is not a search).
@@ -141,9 +194,14 @@ pub trait ApiStore {
     fn cube(&self) -> CoverageCube;
     /// `GET /api/coverage/v1/gaps`.
     fn gaps(&self) -> GapLedger;
-    /// Resolve a [`SourceRef`] to a complete [`EvidenceRef`] — page render,
-    /// crop, and `crop_sha256` in the payload so no second call is needed.
-    fn resolve_evidence(&self, field: &str, source: &SourceRef) -> EvidenceRef;
+    /// Resolve a [`ClaimSource`] to a complete [`EvidenceRef`] — page render
+    /// and crop refs in the payload so no second call is needed.
+    ///
+    /// `None` means the corpus printed no page to open: the claim stays on
+    /// the wire with its gaps, and the feed carries only what actually
+    /// resolves (`D7`: evidence links or an honest absence — never a link
+    /// that 404s).
+    fn resolve_evidence(&self, field: &str, source: &ClaimSource) -> Option<EvidenceRef>;
 }
 
 /// In-memory demo store. Honest data, real types — the point is the wire
@@ -184,10 +242,11 @@ impl DemoStore {
             rollback_to: Some(ReleaseId::new("rel-demo-20261004").expect("non-empty")),
         };
 
-        let source = |page: u32, row: &str, col: &str| -> SourceRef {
-            SourceRef {
-                sha256: demo_doc.clone(),
-                page,
+        let source = |page: u32, row: &str, col: &str| -> ClaimSource {
+            ClaimSource {
+                doc_sha256: Some(demo_doc.as_str().to_string()),
+                sha: Some(demo_doc.as_str().to_string()),
+                page: Some(page),
                 row_header: Some(row.into()),
                 column_header: Some(col.into()),
                 crop: None,
@@ -362,32 +421,43 @@ impl ApiStore for DemoStore {
         self.gaps.clone()
     }
 
-    fn resolve_evidence(&self, field: &str, source: &SourceRef) -> EvidenceRef {
-        let page_sha = source.sha256.clone();
-        let crop_sha = source
-            .crop
-            .as_ref()
-            .map_or_else(|| page_sha.clone(), |c| c.crop_sha256.clone());
-        EvidenceRef {
-            field: field.to_string(),
-            document_sha256: source.sha256.clone(),
-            page: source.page,
-            row_header: source.row_header.clone(),
-            column_header: source.column_header.clone(),
-            quote: None,
-            page_render: EvidenceAsset {
-                sha256: page_sha.clone(),
-                href: format!("/evidence/pages/{page_sha}.png"),
-                dpi: dw_types::CropRef::PROVENANCE_DPI,
-                bbox: [0, 0, 0, 0],
-            },
-            crop: Some(EvidenceAsset {
-                sha256: crop_sha.clone(),
-                href: format!("/evidence/crops/{crop_sha}.png"),
-                dpi: dw_types::CropRef::PROVENANCE_DPI,
-                bbox: source.crop.as_ref().map_or([0, 0, 0, 0], |c| c.bbox),
-            }),
-            crop_sha256: Some(crop_sha),
-        }
+    fn resolve_evidence(&self, field: &str, source: &ClaimSource) -> Option<EvidenceRef> {
+        resolve_claim_source(field, source)
     }
+}
+
+/// Resolve a [`ClaimSource`] to renderable evidence — the one place the
+/// document/page/crop rules live, shared by every store.
+///
+/// `None` when the corpus printed no page to open (or no well-formed
+/// document hash): the claim keeps its gaps on the wire and the feed carries
+/// only what actually resolves.
+#[must_use]
+pub fn resolve_claim_source(field: &str, source: &ClaimSource) -> Option<EvidenceRef> {
+    let doc = source.document()?;
+    let page = source.page?;
+    let doc_sha = Sha256::new(doc).ok()?;
+    let page_sha = doc_sha.clone();
+    let crop_sha = source.crop.as_ref().map(|c| c.crop_sha256.clone());
+    Some(EvidenceRef {
+        field: field.to_string(),
+        document_sha256: doc_sha,
+        page,
+        row_header: source.row_header.clone(),
+        column_header: source.column_header.clone(),
+        quote: None,
+        page_render: EvidenceAsset {
+            sha256: page_sha,
+            href: format!("/evidence/pages/{doc}.png"),
+            dpi: dw_types::CropRef::PROVENANCE_DPI,
+            bbox: [0, 0, 0, 0],
+        },
+        crop: source.crop.as_ref().map(|c| EvidenceAsset {
+            sha256: c.crop_sha256.clone(),
+            href: format!("/evidence/crops/{}.png", c.crop_sha256),
+            dpi: dw_types::CropRef::PROVENANCE_DPI,
+            bbox: c.bbox,
+        }),
+        crop_sha256: crop_sha,
+    })
 }

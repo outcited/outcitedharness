@@ -239,6 +239,33 @@ fn filters_are_refused_not_ignored() {
     assert!(err.to_json().get("what_to_do").is_some());
 }
 
+/// Percent-encoded part numbers (family feed titles carry spaces and `™`)
+/// decode before the lookup — the front end renders them from URLs.
+#[test]
+fn percent_encoded_part_numbers_resolve() {
+    assert_eq!(
+        dw_api::decode_segment("AURIX%E2%84%A2%20TC212"),
+        "AURIX™ TC212"
+    );
+    assert_eq!(
+        dw_api::decode_segment("plain"),
+        "plain",
+        "undecoded stays as-is"
+    );
+    let store = DemoStore::new();
+    let req = Request {
+        method: "GET".into(),
+        path: "/api/extraction/v1/parts/BU15TA2WHFV%20x".into(),
+        body: None,
+    };
+    let err = handle(&req, &store).expect_err("decoded name does not exist");
+    assert!(
+        err.detail.contains("BU15TA2WHFV x"),
+        "the lookup sees the decoded name: {}",
+        err.detail
+    );
+}
+
 /// Unknown ids fail renderably; wrong methods say what is allowed.
 #[test]
 fn not_found_and_method_problems_are_renderable() {

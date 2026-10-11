@@ -30,8 +30,10 @@
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 
-use dw_api::store::{ApiStore, DemoStore};
+use std::sync::Arc;
+
 use dw_api::{handle, Request};
+use dw_api::{ApiStore, DemoStore, ExportStore};
 
 const DEFAULT_ADDR: &str = "127.0.0.1:8787";
 
@@ -39,7 +41,15 @@ fn main() {
     let addr = std::env::var("DW_SERVE_ADDR").unwrap_or_else(|_| DEFAULT_ADDR.to_string());
     let token = std::env::var("DW_API_TOKEN").unwrap_or_else(|_| "crk_dev".to_string());
     let evidence_root = std::env::var("DW_EVIDENCE_ROOT").ok();
-    let store = DemoStore::new();
+    // DW_EXPORT_ROOT slots dw-extract's api-store-export behind ApiStore;
+    // without it the demo substrate serves (same wire, demo data).
+    let store: Arc<dyn ApiStore + Send + Sync> = match std::env::var("DW_EXPORT_ROOT") {
+        Ok(root) => {
+            eprintln!("dw-serve: export store at {root}");
+            Arc::new(ExportStore::open(root))
+        }
+        Err(_) => Arc::new(DemoStore::new()),
+    };
     eprintln!(
         "dw-serve on {addr} · release {} · token {}",
         store.release_id(),
@@ -61,9 +71,9 @@ fn main() {
             Ok(s) => {
                 let token = token.clone();
                 let evidence_root = evidence_root.clone();
-                let store = store.clone();
+                let store = Arc::clone(&store);
                 std::thread::spawn(move || {
-                    let _ = serve_conn(s, &token, evidence_root.as_deref(), &store);
+                    let _ = serve_conn(s, &token, evidence_root.as_deref(), &*store);
                 });
             }
             Err(e) => eprintln!("dw-serve: accept failed: {e}"),
@@ -76,7 +86,7 @@ fn serve_conn(
     mut stream: TcpStream,
     token: &str,
     evidence_root: Option<&str>,
-    store: &DemoStore,
+    store: &dyn ApiStore,
 ) -> std::io::Result<()> {
     let raw = read_head(&mut stream)?;
     let (head, mut body) = split_head(&raw);

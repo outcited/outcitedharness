@@ -33,6 +33,34 @@ pub struct Request {
     pub body: Option<serde_json::Value>,
 }
 
+/// Percent-decode one path segment (`%20` → space, `%E2%84%A2` → `™`).
+///
+/// Part numbers in the family feed are document titles with spaces and
+/// symbols; the front end sends them percent-encoded and the route must
+/// decode them before the lookup. Invalid escapes are left as-is rather
+/// than guessed at.
+#[must_use]
+pub fn decode_segment(s: &str) -> String {
+    let bytes = s.as_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        let hex = bytes
+            .get(i + 1..i + 3)
+            .and_then(|h| std::str::from_utf8(h).ok());
+        if bytes.get(i) == Some(&b'%') {
+            if let Some(v) = hex.and_then(|h| u8::from_str_radix(h, 16).ok()) {
+                out.push(v);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes.get(i).copied().unwrap_or(b'?'));
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
 /// Which route a request is for.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Route {
@@ -80,7 +108,7 @@ pub fn parse_route(method: &str, path: &str) -> Result<Route, Problem> {
             let rest = path.strip_prefix("/api/extraction/v1/parts/");
             if let Some(id) = rest.filter(|s| !s.is_empty() && !s.contains('/')) {
                 return if m == "GET" {
-                    Ok(Route::Part(id.to_string()))
+                    Ok(Route::Part(decode_segment(id)))
                 } else {
                     Err(known_wrong_method("GET"))
                 };
@@ -88,7 +116,7 @@ pub fn parse_route(method: &str, path: &str) -> Result<Route, Problem> {
             let rest = path.strip_prefix("/api/discovery/v1/designs/");
             if let Some(id) = rest.filter(|s| !s.is_empty() && !s.contains('/')) {
                 return if m == "GET" {
-                    Ok(Route::Design(id.to_string()))
+                    Ok(Route::Design(decode_segment(id)))
                 } else {
                     Err(known_wrong_method("GET"))
                 };
@@ -96,7 +124,7 @@ pub fn parse_route(method: &str, path: &str) -> Result<Route, Problem> {
             let rest = path.strip_prefix("/api/pipeline/v1/jobs/");
             if let Some(id) = rest.filter(|s| !s.is_empty() && !s.contains('/')) {
                 return if m == "GET" {
-                    Ok(Route::Job(id.to_string()))
+                    Ok(Route::Job(decode_segment(id)))
                 } else {
                     Err(known_wrong_method("GET"))
                 };
@@ -205,22 +233,27 @@ impl Response {
 }
 
 /// Evidence for every source a build's verdicts cite, so item 2 holds for
-/// any feed built from that build.
+/// any feed built from that build. Sources that cannot resolve to a page are
+/// left out of the feed (the verdict still carries them — the gap is data,
+/// not an invented link).
 fn evidence_for_build(
-    store: &dyn ApiStore,
+    store: &(impl ApiStore + ?Sized),
     build: &dw_decide::Build,
 ) -> Vec<crate::feed::EvidenceRef> {
     let mut out = Vec::new();
     for j in &build.explain {
         for s in &j.evidence {
-            out.push(store.resolve_evidence(&format!("{:?}", j.axis), s));
+            let loose = crate::store::ClaimSource::from(s);
+            if let Some(ev) = store.resolve_evidence(&format!("{:?}", j.axis), &loose) {
+                out.push(ev);
+            }
         }
     }
     out
 }
 
 /// The feed block for a build: items 1–7 in one value.
-fn feed_of(store: &dyn ApiStore, build: dw_decide::Build) -> QueryResult {
+fn feed_of(store: &(impl ApiStore + ?Sized), build: dw_decide::Build) -> QueryResult {
     let evidence = evidence_for_build(store, &build);
     QueryResult::from_build(build, store.lineage().clone(), evidence)
 }
@@ -235,7 +268,7 @@ fn feed_of(store: &dyn ApiStore, build: dw_decide::Build) -> QueryResult {
     clippy::result_large_err,
     reason = "Problem is the wire type; boxing it would leak into every call site"
 )]
-pub fn handle(req: &Request, store: &dyn ApiStore) -> Result<Response, Problem> {
+pub fn handle(req: &Request, store: &(impl ApiStore + ?Sized)) -> Result<Response, Problem> {
     let route = parse_route(&req.method, &req.path)?;
     match route {
         Route::Healthz => Ok(Response::Healthz(HealthzResponse {
@@ -249,10 +282,13 @@ pub fn handle(req: &Request, store: &dyn ApiStore) -> Result<Response, Problem> 
                 .ok_or_else(|| Problem::not_found(req.path.clone(), "part", &id))?;
             let build = store.feed_build();
             let mut feed = feed_of(store, build);
-            // The part's own claims are the evidence viewer's subject.
+            // The part's own claims are the evidence viewer's subject. A
+            // claim the corpus never located keeps its gaps on the wire and
+            // simply has no feed entry — never a link that 404s.
             for c in &part.claims {
-                feed.evidence
-                    .push(store.resolve_evidence(&c.field, &c.source));
+                if let Some(ev) = store.resolve_evidence(&c.field, &c.source) {
+                    feed.evidence.push(ev);
+                }
             }
             Ok(Response::Part(PartResponse { feed, part }))
         }
