@@ -162,6 +162,52 @@ match cannot later be read as a strong one.
 Until then **link 4 of the trust chain is `Blocked` for 99.6% of the corpus**,
 and `PROVENANCE.md` §2 says so.
 
+## 3d. Page location worked (2026-10-10, later)
+
+The NAS permission problem in §3c was fixed (Options A/B/C in
+`…/m5-opencode/UNLOCK-VAULT.sh`). Re-ran `scripts/locate_claim_pages.py` over
+the full corpus. **Counted:**
+
+| class | claims | share |
+|---|---:|---:|
+| `exact` | 85,915 | 99.1% |
+| `normalized` | 483 | 0.6% |
+| `unlocated` | 14 | 0.0% |
+| `doc_missing` (5 docs absent from the vault) | 324 | 0.4% |
+| **LOCATED** | **86,398** | **99.6%** |
+
+### Match quality, reported not assumed (`ASSURANCE.md` R3)
+
+| quality | claims | share |
+|---|---:|---:|
+| unique page (`pages.len() == 1`) | 38,993 | 45.0% |
+| `quote_len >= 8` | 5,542 | 6.4% |
+| `page_rank <= 0.2` | 48,340 | 55.8% |
+| **strong on both** (`len >= 8` and `rank <= 0.2`) | **5,526** | **6.4%** |
+| `page_rank > 0.5` — quote on most pages | 16,410 | 18.9% |
+
+`quote_len` and `page_rank` are recorded per row so a weak match cannot be
+read as a strong one. A three-character quote such as `"0.3"` "matches
+exactly" on many pages; that is a locate, not a proof.
+
+### Evidence rendered
+
+`scripts/build_evidence.py` renders each located page at `C13`'s **144 DPI**
+and cuts a **row band** — the union of the row header's rect and the value's
+rect, padded 36 pt horizontally and 6 pt vertically, so a reviewer sees *which
+row* the number came from and not just the number.
+
+Both artifacts are content-addressed (`pages/{sha[..2]}/{sha}.png`,
+`crops/{sha[..2]}/{sha}.png`), and the hashes were verified against the bytes
+on disk for a sample — 20/20 pages and 20/20 crops matched.
+
+The PNG encoder is in `build_evidence.py` deliberately and verified by
+**decoding it back** (IHDR dims, filter bytes, pixel round-trip) rather than by
+asserting its own determinism. It is part of provenance: a different encoder is
+different bytes and therefore a different identity for the same picture.
+
+**Link 4 of the trust chain is now `real`.**
+
 ## 4. What "resolvable provenance" means
 
 ### 4.1 Evidence resolution (C13)
