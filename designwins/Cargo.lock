@@ -146,6 +146,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-coverage"
+version = "0.1.0"
+dependencies = [
+ "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-decide"
 version = "0.1.0"
 dependencies = [
@@ -187,6 +197,17 @@ dependencies = [
  "dw-knives",
  "dw-normalize",
  "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "dw-graph"
+version = "0.1.0"
+dependencies = [
+ "fancy-regex",
+ "regex",
  "serde",
  "serde_json",
  "thiserror",
