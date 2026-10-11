@@ -1,0 +1,97 @@
+{
+  "errata_page_texts": [
+    "MSP430G2553 Silicon Errata\n2.2.1 USCI0 I2C Hang On Stop Condition\nThe USCI module may hang when a stop condition is received at 400 kHz at TA = 85\u00b0C.\nWork Around Use a lower bus frequency or toggle UCSWRST.\nAffected Silicon Revisions\nMSP430G2553\nRev. A\nRev. B\nX -\n2.2.2 GPIO Glitch On Reset\nA \u00b5s-scale glitch may appear on P1.0 at power-up with VCC = 1.8 V \u00b5A loads.\nAffected Silicon Revisions\nMSP430G2553\nA B\nX X\n2.2.1 Duplicate Heading Is Skipped\nThis section must not appear because its id is not strictly increasing.\n2.2.3 Empty Section Dropped\nAffected Silicon Revisions\n3 Clock Trim Table 12 MHz \u00b5A VCC = 3.3 V\nnote this is a note line not a title\n2.2.4 Number Only\nA Real Title On The Next Line\nThe symptom prints here with \u03a9 loads.\n2.2.5\nStandalone Heading Number\nIts symptom text prints here."
+  ],
+  "clarification_page_texts": [
+    "Data Sheet Clarifications\n3.1 Input Capacitance\nThe Cin column was printed as typ; the correct parameter is max 15 pF.\n3.2 Timer Clock\nA very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on.  very long correction text with \u00b5 and \u03a9 symbols that goes on and on. "
+  ],
+  "device_scope_front_text": "SLAS735G \u2013 NOVEMBER 2010\nMSP430G2x53 Mixed-Signal Microcontrollers\n1 Device Overview",
+  "device_scope_filename": "slas735.pdf",
+  "ti_lines": [
+    "BCL16",
+    "BCL Module",
+    "Category",
+    "Functional",
+    "Function",
+    "SPI slave mode loses bytes on fast clocks",
+    "Description",
+    "Bytes may be dropped when SCLK exceeds 8 MHz at 3.3 V.",
+    "Workaround",
+    "Limit SCLK or enable the FIFO delay.",
+    "BCL17",
+    "Category",
+    "Functional",
+    "Function",
+    "UART break detection",
+    "Description",
+    "Break detection misfires at high baud.",
+    "BCL16",
+    "Function",
+    "Second mention fills the earlier record"
+  ],
+  "ti_matrix_words": [
+    [
+      150.0,
+      10.0,
+      190.0,
+      20.0,
+      "Rev. A"
+    ],
+    [
+      210.0,
+      10.0,
+      250.0,
+      20.0,
+      "Rev. B"
+    ],
+    [
+      10.0,
+      40.0,
+      70.0,
+      50.0,
+      "BCL16"
+    ],
+    [
+      10.0,
+      70.0,
+      70.0,
+      80.0,
+      "BCL17"
+    ],
+    [
+      155.0,
+      41.0,
+      175.0,
+      49.0,
+      "\u2713"
+    ],
+    [
+      215.0,
+      41.0,
+      235.0,
+      49.0,
+      "\u2713"
+    ],
+    [
+      155.0,
+      71.0,
+      175.0,
+      79.0,
+      "\u2713"
+    ],
+    [
+      50.0,
+      50.0,
+      60.0,
+      55.0,
+      "X"
+    ],
+    [
+      300.0,
+      300.0,
+      310.0,
+      310.0,
+      "\u2713"
+    ]
+  ]
+}

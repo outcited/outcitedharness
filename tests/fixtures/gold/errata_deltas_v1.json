@@ -1,0 +1,95 @@
+{
+  "clarification_records": [
+    {
+      "correction_verbatim": "The Cin column was printed as typ; the correct parameter is max 15 pF.",
+      "issue_id": "3.1",
+      "record_kind": "clarification",
+      "schema": "harness.electronics-errata-delta.v1",
+      "title_verbatim": "Input Capacitance"
+    },
+    {
+      "correction_verbatim": "A very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 symbols that goes on and on. very long correction text with \u00b5 and \u03a9 sym",
+      "issue_id": "3.2",
+      "record_kind": "clarification",
+      "schema": "harness.electronics-errata-delta.v1",
+      "title_verbatim": "Timer Clock"
+    }
+  ],
+  "device_scope": {
+    "device_title_verbatim": "MSP430G2x53 Mixed-Signal Microcontrollers",
+    "device_tokens": [
+      "SLAS735G"
+    ]
+  },
+  "errata_records": [
+    {
+      "affected_silicon": {
+        "MSP430G2553": [
+          "A"
+        ]
+      },
+      "issue_id": "2.2.1",
+      "record_kind": "issue",
+      "schema": "harness.electronics-errata-delta.v1",
+      "symptom_verbatim": "The USCI module may hang when a stop condition is received at 400 kHz at TA = 85\u00b0C.",
+      "title_verbatim": "USCI0 I2C Hang On Stop Condition",
+      "workaround_verbatim": "Use a lower bus frequency or toggle UCSWRST."
+    },
+    {
+      "affected_silicon": {},
+      "issue_id": "2.2.2",
+      "record_kind": "issue",
+      "schema": "harness.electronics-errata-delta.v1",
+      "symptom_verbatim": "A \u00b5s-scale glitch may appear on P1.0 at power-up with VCC = 1.8 V \u00b5A loads.",
+      "title_verbatim": "GPIO Glitch On Reset",
+      "workaround_verbatim": null
+    },
+    {
+      "affected_silicon": {},
+      "issue_id": "2.2.4",
+      "record_kind": "issue",
+      "schema": "harness.electronics-errata-delta.v1",
+      "symptom_verbatim": "The symptom prints here with \u03a9 loads.",
+      "title_verbatim": "Number Only A Real Title On The Next Line",
+      "workaround_verbatim": null
+    },
+    {
+      "affected_silicon": {},
+      "issue_id": "2.2.5",
+      "record_kind": "issue",
+      "schema": "harness.electronics-errata-delta.v1",
+      "symptom_verbatim": "Its symptom text prints here.",
+      "title_verbatim": "Standalone Heading Number",
+      "workaround_verbatim": null
+    }
+  ],
+  "ti_advisory_details": [
+    {
+      "category": "Functional",
+      "issue_id": "BCL16",
+      "record_kind": "issue",
+      "schema": "harness.electronics-errata-delta.v1",
+      "symptom_verbatim": "Bytes may be dropped when SCLK exceeds 8 MHz at 3.3 V.",
+      "title_verbatim": "SPI slave mode loses bytes on fast clocks Second mention fills the earlier record",
+      "workaround_verbatim": "Limit SCLK or enable the FIFO delay."
+    },
+    {
+      "category": "Functional",
+      "issue_id": "BCL17",
+      "record_kind": "issue",
+      "schema": "harness.electronics-errata-delta.v1",
+      "symptom_verbatim": "Break detection misfires at high baud.",
+      "title_verbatim": "UART break detection",
+      "workaround_verbatim": null
+    }
+  ],
+  "ti_affected_matrix": {
+    "BCL16": [
+      "Rev A",
+      "Rev B"
+    ],
+    "BCL17": [
+      "Rev A"
+    ]
+  }
+}
