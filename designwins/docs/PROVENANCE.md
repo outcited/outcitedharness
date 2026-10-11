@@ -108,6 +108,60 @@ close silently without the assertion being revisited.
 > which is true for a present-but-`null` field. Two of three were real. The
 > page was not. See `ASSURANCE.md` §1.3.
 
+## 3c. Page location attempted — and blocked (2026-10-10)
+
+`scripts/locate_claim_pages.py` runs quote location per page of each claim's
+source document. Ran over the full corpus. **Counted, not asserted** (R3):
+
+| class | claims | share |
+|---|---:|---:|
+| `exact` — quote found on a page | 43 | 0.05% |
+| `doc_permission_denied` | **86,369** | **99.6%** |
+| `doc_missing` (5 docs absent from the vault) | 324 | 0.4% |
+| **total** | **86,736** | |
+
+**99.6% of the claim corpus sits on documents this sandbox cannot read.** Not
+a few files — 1,610 of 1,617 distinct documents. The vault *lists* fine and
+`stat` succeeds; `open` returns `EACCES`.
+
+### The R1 violation that produced a wrong estimate
+
+Earlier today this document, and a status report, said *"vault resolves,
+evidence rendering is fully unblocked."* That came from
+`path.exists()` — which is `stat`, not `open`. **The property I claimed
+(readable) and the predicate I tested (exists) are different properties.** The
+rule that would have caught it is `ASSURANCE.md` R1, written the same hour.
+
+Cross-checking the two populations with one consistent probe confirms it is
+real and not a flaky test:
+
+| probe | readable | denied |
+|---|---:|---:|
+| first 6 hash prefixes, 5 PDFs each | 23 | 7 |
+| 200 claim-referenced documents | **0** | **200** |
+| same file probed twice | consistent | consistent |
+
+The vault has readable PDFs. The claim corpus is drawn from the unreadable ones.
+
+### And the 43 are weak
+
+All 43 have `quote_len < 8` — short numeric quotes like `"0.3"` that appear on
+many pages. **Zero have a strong match** (`quote_len ≥ 8` and the quote on
+fewer than half the document's pages). Eight appear on more than half the
+pages, which means they locate nothing.
+
+Recorded as `quote_len` and `page_rank` in `claim_pages_v1.jsonl` so a weak
+match cannot later be read as a strong one.
+
+### What unblocks it
+
+1. Full Disk Access for the terminal / opencode, or
+2. a readable copy of `vault/cas` on `yosemiteraid5`, or
+3. running `scripts/locate_claim_pages.py` from a process that has access.
+
+Until then **link 4 of the trust chain is `Blocked` for 99.6% of the corpus**,
+and `PROVENANCE.md` §2 says so.
+
 ## 4. What "resolvable provenance" means
 
 ### 4.1 Evidence resolution (C13)
