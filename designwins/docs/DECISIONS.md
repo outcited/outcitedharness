@@ -483,6 +483,23 @@ This is also why Gate N4 is *blocking* and not informational: 167 hand-picked
 rows passed while the port was wrong in exactly the way the fixture happened
 not to test.
 
+### The same class bit twice
+
+Gate N4b then found the identical pattern one level down. The reference
+compiles `_value_regex` with `re.I`, and its comment states the reason:
+*"catalog `condition_norm` is lowercase-normalized (`tc = 25 °c`); case
+collapse already happened upstream."* The port dropped the flag. Every
+lowercase unit then failed to bind and the condition degraded to
+`no_anchors` — **7,954 of 10,270 distinct conditions, 52,085 of 64,245
+claims**. N1 was green the whole time, because the curated gold carries
+uppercase units and never contained a lowercase one.
+
+So the rule has a corollary:
+
+> **A curated set cannot prove what it does not contain.** N1 tested 167
+> rows and was green while the port was wrong on 81% of the real corpus.
+> Both gates are blocking for exactly this reason.
+
 ### Why this matters for `claims_canonical`
 
 The 86,736 claims in `catalog.db` were produced by `condition_model.v1.1`. If

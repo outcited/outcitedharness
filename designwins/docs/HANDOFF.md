@@ -101,8 +101,10 @@ scripts/
   fetch_pdfium.sh                pinned PDFium 7881, checksum-verified
 ```
 
-**10 crates · 33 Rust files · ~9,400 lines · 84 tests passing.** G7 is the one
-intentional failure. Gate N4a is green at 9,551/9,551 against `catalog.db`.
+**10 crates · 34 Rust files · ~9,700 lines · 86 tests passing.** G7 is the one
+intentional failure. **`PLAN.md` §12's "87K claim diff = 0 unexplained" is
+met** — N4a 9,551/9,551 and N4b 10,270/10,270 weighted 64,245/64,245, both
+against `catalog.db`.
 
 Dependency graph is acyclic and each layer has one job:
 
@@ -141,7 +143,8 @@ let answer = dw_funnel::accept(
 | Week 0 parity | ledger runs empty, `cutover_permitted` | **green** |
 | **Trust gate** | evidence resolves · releases resolve · unresolvable ⇒ `Unknown` | **green** (see `PROVENANCE.md` §9) |
 | **N4a condition corpus** | `catalog.db::conditions_typed`, **9,551/9,551** | **green** |
-| N4b claim diff | `claims_canonical`, 86,736 claims | **next** |
+| **N4b claim diff** | `claims_canonical`, **10,270/10,270** distinct · **64,245/64,245** claims weighted | **green — this is the PLAN §12 gate** |
+| C3/C13 provenance | 86,736/86,736 claims carry quote + sha + page | **green** |
 | D1 G7 path segments | PDFium vs MuPDF | **OPEN — expected** |
 
 The commands are in §0 above.
@@ -173,9 +176,10 @@ of.
 
 | # | work | unlocks | state |
 |---|---|---|---|
-| ~~2.1~~ | ~~**Gate N4a: condition corpus**~~ | proof the port did not drift on conditions | **DONE** — 9,551/9,551 against `catalog.db::conditions_typed` |
-| 2.1 | **Gate N4b: the 86,736 claim diff** | proof the port did not drift on claims | `claims_canonical` is readable and is the actual "87K". Diff `dw-normalize` output against it |
+| ~~2.1~~ | ~~**Gate N4: condition + claim corpora**~~ | proof the port did not drift | **DONE** — N4a 9,551/9,551 · N4b 10,270/10,270 weighted 64,245/64,245 · provenance 86,736/86,736 |
 | 2.2 | **Phrase-layer gate** against the query telemetry, count-weighted (1,485 rows / 8,653 searches) | proof the colloquial mapping is right | — |
+
+**Next is the phrase-layer gate (2.2), then Tier 3.**
 
 ### Tier 3 — an answer is useful
 
