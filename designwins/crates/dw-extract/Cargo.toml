@@ -13,6 +13,12 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 dw-types = { path = "../dw-types" }
 
+# Python `re` semantics require lookaround: `key_features_grid.py` uses
+# `(?<=[A-Za-z])[0-9]{1,2}$`, `(?!/MHz)`, `(?!\s*\(sram)`. The `regex` crate
+# cannot express these. `fancy-regex` can, and is the only reason this
+# dependency exists (same call as dw-normalize / dw-truth; docs/HANDOFF.md §6).
+fancy-regex = "0.14"
+
 [dev-dependencies]
 
 [lints]

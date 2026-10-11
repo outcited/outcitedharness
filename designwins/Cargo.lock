@@ -173,6 +173,7 @@ name = "dw-extract"
 version = "0.1.0"
 dependencies = [
  "dw-types",
+ "fancy-regex",
  "serde",
  "serde_json",
  "thiserror",

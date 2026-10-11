@@ -569,6 +569,9 @@ pub fn unknowns_from_residue(
             ),
             expected_reduction_pct: 0.0,
             askable: true,
+            proposed_value: None,
+            parts_with_claims: 0,
+            expected_fail_at_median: 0,
         });
     }
 

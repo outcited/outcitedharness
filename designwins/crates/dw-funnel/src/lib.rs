@@ -14,11 +14,11 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use dw_decide::{
     evaluate, AlwaysResolvable, Build, Candidate, CandidateFacts, Cohort, ConfirmState, Derived,
-    DesignContext, DesignIntent,
+    DesignContext, DesignIntent, KnifeId,
 };
 use dw_types::ReleaseId;
 
@@ -54,16 +54,16 @@ pub fn accept(
     release: ReleaseId,
 ) -> Answer {
     let bound = registry.bind(sentence);
-    let (mut unknowns, mut questions) = dw_knives::unknowns_from_residue(&bound, cohort.len());
+    let (mut unknowns, mut residue_questions) =
+        dw_knives::unknowns_from_residue(&bound, cohort.len());
 
     let eval = evaluate(cohort, &bound.atoms, facts, &AlwaysResolvable);
     unknowns.extend(eval.unknowns.clone());
 
-    // Rank the questions by expected cohort reduction: prefer the ones whose
-    // axis we could not evaluate across the most candidates. Until measured
-    // data exists per axis, `affected` is the honest proxy and is stated as
-    // such rather than invented as a percentage.
-    questions.sort_by(|a, b| {
+    // Residue questions have no measured population behind them — a phrase
+    // that bound to nothing cannot be probed. They rank by `affected`, an
+    // honest proxy, named as such.
+    residue_questions.sort_by(|a, b| {
         let ea = unknowns
             .iter()
             .filter(|u| u.axis.as_ref() == Some(&a.axis))
@@ -76,6 +76,22 @@ pub fn accept(
             .sum::<usize>();
         eb.cmp(&ea)
     });
+
+    // Measured ranking over the population: the port of
+    // `harness/discovery/service.py::next_question` (spec 29-30) — the median
+    // probe, ranked by absolute expected fails. Axes the design already pins
+    // are skipped. The probe list leads because its numbers are measured;
+    // the honest-proxy residue follows.
+    let pinned: BTreeSet<dw_decide::Axis> = bound
+        .atoms
+        .iter()
+        .filter_map(|a| match &a.knife {
+            KnifeId::Axis(ax) => Some(*ax),
+            KnifeId::Category(_) => None,
+        })
+        .collect();
+    let mut questions = dw_decide::next_questions(facts, &pinned);
+    questions.extend(residue_questions);
 
     let build = Build {
         id: format!("build:{}", 0),

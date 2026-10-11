@@ -477,6 +477,14 @@ pub struct Question {
     pub expected_reduction_pct: f64,
     /// Whether we can ask it now (the axis is classified enough to be useful).
     pub askable: bool,
+    /// The median measured claim, proposed as the screen
+    /// (`service.next_question`, spec 29-30). `None` when nothing is measured.
+    pub proposed_value: Option<f64>,
+    /// How many parts carry a claim that answers this axis.
+    pub parts_with_claims: usize,
+    /// How many current candidates would fail at the proposed screen.
+    /// The reference ranks by **this**, not by the percentage.
+    pub expected_fail_at_median: usize,
 }
 
 // ---------------------------------------------------------------------------
@@ -581,12 +589,14 @@ impl Build {
 // ---------------------------------------------------------------------------
 
 pub mod evaluate;
+pub mod questions;
 
 pub use dw_types::Verdict;
 pub use evaluate::{
     evaluate, judge, AlwaysResolvable, CandidateFacts, Evaluation, Evidence, Provenance,
     DEFAULT_NEAR_MISS_PCT,
 };
+pub use questions::next_questions;
 
 /// An admitted claim, for callers building judgements from verified evidence.
 pub type Verified<T> = Admitted<T>;

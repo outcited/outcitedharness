@@ -1,0 +1,38 @@
+{
+  "design_id": "fixture-design",
+  "note": "expected_reduction is over parts whose claims answer the axis; UNKNOWN never eliminates (spec section 7)",
+  "questions": [
+    {
+      "askable": true,
+      "axis": "rds_on_ohm",
+      "expected_fail_at_median": 3,
+      "expected_reduction_pct": 42.9,
+      "help": "Maximum on-resistance (conduction loss driver). Softer constraint: fails score lower, never eliminate.",
+      "parts_with_claims": 7,
+      "proposed_value": 0.4
+    },
+    {
+      "askable": true,
+      "axis": "vds_rating_v",
+      "expected_fail_at_median": 2,
+      "expected_reduction_pct": 40.0,
+      "help": "The blocking voltage the switch must survive. For a 24 V industrial rail (18-36 V) pick at least the 36 V maximum, plus margin you choose (a 20%% margin makes the effective requirement %.1f V).",
+      "parts_with_claims": 5,
+      "proposed_value": 100.0
+    },
+    {
+      "askable": false,
+      "axis": "tj_max_c",
+      "parts_with_claims": 0
+    },
+    {
+      "askable": true,
+      "axis": "tstg_range_c",
+      "expected_fail_at_median": 0,
+      "expected_reduction_pct": 0.0,
+      "help": "The storage/operating temperature span that must contain your environment.",
+      "parts_with_claims": 1,
+      "proposed_value": 125.0
+    }
+  ]
+}

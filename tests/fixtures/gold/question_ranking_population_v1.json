@@ -1,0 +1,32 @@
+{
+  "pinned_axes": ["id_continuous_a"],
+  "population": {
+    "P1": [
+      {"symbol": "VDSS", "qualifier": null, "condition": "", "value": 40.0, "unit": "V", "provenance": {}},
+      {"symbol": "RDS(ON)MAX", "qualifier": null, "condition": "", "value": 0.1, "unit": "ohm", "provenance": {}},
+      {"symbol": "TSTG", "qualifier": null, "condition": "", "value": 125.0, "unit": "C", "provenance": {}}
+    ],
+    "P2": [
+      {"symbol": "VDSS", "qualifier": null, "condition": "", "value": 60.0, "unit": "V", "provenance": {}},
+      {"symbol": "RDS(ON)MAX", "qualifier": null, "condition": "", "value": 0.2, "unit": "ohm", "provenance": {}}
+    ],
+    "P3": [
+      {"symbol": "VDSS", "qualifier": null, "condition": "", "value": 100.0, "unit": "V", "provenance": {}},
+      {"symbol": "RDS(ON)MAX", "qualifier": null, "condition": "", "value": 0.3, "unit": "ohm", "provenance": {}}
+    ],
+    "P4": [
+      {"symbol": "VDSS", "qualifier": null, "condition": "", "value": 120.0, "unit": "V", "provenance": {}},
+      {"symbol": "RDS(ON)MAX", "qualifier": null, "condition": "", "value": 0.4, "unit": "ohm", "provenance": {}}
+    ],
+    "P5": [
+      {"symbol": "VDSS", "qualifier": null, "condition": "", "value": 200.0, "unit": "V", "provenance": {}},
+      {"symbol": "RDS(ON)MAX", "qualifier": null, "condition": "", "value": 1.0, "unit": "ohm", "provenance": {}}
+    ],
+    "P6": [
+      {"symbol": "RDS(ON)MAX", "qualifier": null, "condition": "", "value": 2.0, "unit": "ohm", "provenance": {}}
+    ],
+    "P7": [
+      {"symbol": "RDS(ON)MAX", "qualifier": null, "condition": "", "value": 3.0, "unit": "ohm", "provenance": {}}
+    ]
+  }
+}
