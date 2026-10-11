@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/dw-types", "crates/dw-pdf", "crates/dw-parity", "crates/dw-normalize", "crates/dw-truth", "crates/dw-decide", "crates/dw-knives", "crates/dw-funnel", "crates/dw-evidence", "crates/dw-release", "crates/dw-api", "crates/dw-extract", "crates/dw-lessons", "crates/dw-search", "crates/dw-coverage"]
+members = ["crates/dw-types", "crates/dw-pdf", "crates/dw-parity", "crates/dw-normalize", "crates/dw-truth", "crates/dw-decide", "crates/dw-knives", "crates/dw-funnel", "crates/dw-evidence", "crates/dw-release", "crates/dw-api", "crates/dw-extract", "crates/dw-lessons", "crates/dw-search", "crates/dw-coverage", "crates/dw-graph"]
 
 [workspace.package]
 version = "0.1.0"

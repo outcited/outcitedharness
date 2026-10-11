@@ -1,0 +1,218 @@
+{
+  "battery": [
+    {
+      "decoded": {
+        "flash_kb": 64,
+        "pin_count_nominal": 48,
+        "scheme": "stm32"
+      },
+      "label": "ordering_code:stm32:flash_kb",
+      "part": "STM32F103C8T6"
+    },
+    {
+      "decoded": {
+        "flash_kb": 512,
+        "pin_count_nominal": 64,
+        "scheme": "stm32"
+      },
+      "label": "ordering_code:stm32:flash_kb",
+      "part": "STM32G474RET6"
+    },
+    {
+      "decoded": {
+        "flash_kb": 2048,
+        "pin_count_nominal": 100,
+        "scheme": "stm32"
+      },
+      "label": "ordering_code:stm32:flash_kb",
+      "part": "STM32H743VIT6"
+    },
+    {
+      "decoded": {
+        "flash_kb": 16,
+        "pin_count_nominal": 14,
+        "scheme": "stm32"
+      },
+      "label": "ordering_code:stm32:flash_kb",
+      "part": "STM32L011D4P6"
+    },
+    {
+      "decoded": {
+        "flash_kb": 16,
+        "pin_count_nominal": 20,
+        "scheme": "stm32"
+      },
+      "label": "ordering_code:stm32:flash_kb",
+      "part": "STM32C011F4U6"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "STM32WB55CGU6"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "STM32MP157"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "STM32WL55"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "STM32N657"
+    },
+    {
+      "decoded": {
+        "flash_kb": 64,
+        "pin_count": 48,
+        "scheme": "gd32"
+      },
+      "label": "ordering_code:gd32:flash_kb",
+      "part": "GD32F103C8T6"
+    },
+    {
+      "decoded": {
+        "flash_kb": 256,
+        "pin_count": 100,
+        "scheme": "gd32"
+      },
+      "label": "ordering_code:gd32:flash_kb",
+      "part": "GD32F303VCT6"
+    },
+    {
+      "decoded": {
+        "flash_kb": 256,
+        "pin_count": 48,
+        "scheme": "silabs_efm32_efr32"
+      },
+      "label": "ordering_code:silabs_efm32_efr32:flash_kb",
+      "part": "EFM32PG1B200F256GM48"
+    },
+    {
+      "decoded": {
+        "flash_kb": 1024,
+        "pin_count": 32,
+        "scheme": "silabs_efm32_efr32"
+      },
+      "label": "ordering_code:silabs_efm32_efr32:flash_kb",
+      "part": "EFR32MG21B220F1024IM32"
+    },
+    {
+      "decoded": {
+        "flash_kb": 16,
+        "pin_count": 24,
+        "scheme": "silabs_efm8"
+      },
+      "label": "ordering_code:silabs_efm8:flash_kb",
+      "part": "EFM8BB31F16A-D-4QFN24"
+    },
+    {
+      "decoded": {
+        "flash_kb": 128,
+        "pin_count": 28,
+        "scheme": "avr_dx"
+      },
+      "label": "ordering_code:avr_dx:flash_kb",
+      "part": "AVR128DA28"
+    },
+    {
+      "decoded": {
+        "flash_kb": 32,
+        "pin_count": 28,
+        "scheme": "avr_dx"
+      },
+      "label": "ordering_code:avr_dx:flash_kb",
+      "part": "AVR32EB28"
+    },
+    {
+      "decoded": {
+        "flash_kb": 16,
+        "pin_count": 20,
+        "scheme": "tinyavr"
+      },
+      "label": "ordering_code:tinyavr:flash_kb",
+      "part": "ATtiny1616"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "ATtiny85"
+    },
+    {
+      "decoded": {
+        "flash_kb": 4,
+        "pin_count": 8,
+        "scheme": "tinyavr"
+      },
+      "label": "ordering_code:tinyavr:flash_kb",
+      "part": "ATtiny402"
+    },
+    {
+      "decoded": {
+        "flash_kb": 48,
+        "scheme": "megaavr0"
+      },
+      "label": "ordering_code:megaavr0:flash_kb",
+      "part": "ATmega4809"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "ATmega328P"
+    },
+    {
+      "decoded": {
+        "flash_kb": 256,
+        "pin_count": 28,
+        "scheme": "pic32"
+      },
+      "label": "ordering_code:pic32:flash_kb",
+      "part": "PIC32MX270F256B"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "PIC32MZ2048EFM144"
+    },
+    {
+      "decoded": {
+        "flash_kb": 64,
+        "scheme": "pic24fj"
+      },
+      "label": "ordering_code:pic24fj:flash_kb",
+      "part": "PIC24FJ64GB002"
+    },
+    {
+      "decoded": {
+        "flash_kb": 512,
+        "scheme": "renesas_ra"
+      },
+      "label": "ordering_code:renesas_ra:flash_kb",
+      "part": "R7FA2E1AD3CFM"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "MSP430G2553"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": "FOO"
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": ""
+    },
+    {
+      "decoded": {},
+      "label": "ordering_code:vendor:flash_kb",
+      "part": null
+    }
+  ]
+}
