@@ -257,6 +257,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-search"
+version = "0.1.0"
+dependencies = [
+ "dw-decide",
+ "dw-funnel",
+ "dw-knives",
+ "dw-normalize",
+ "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-truth"
 version = "0.1.0"
 dependencies = [

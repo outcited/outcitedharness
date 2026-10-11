@@ -1,0 +1,23 @@
+[package]
+name = "dw-search"
+description = "The D4 front door: colloquial query -> typed population -> cohort. Claim rows become facts through the axis registry and the class gate; the funnel does the rest. Built, not ported (harness/search/ is empty)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+dw-types = { path = "../dw-types" }
+dw-normalize = { path = "../dw-normalize" }
+dw-decide = { path = "../dw-decide" }
+dw-knives = { path = "../dw-knives" }
+dw-funnel = { path = "../dw-funnel" }
+
+[dev-dependencies]
+
+[lints]
+workspace = true
