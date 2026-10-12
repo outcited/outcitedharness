@@ -41,6 +41,13 @@ pub struct ClaimSource {
     /// Row-band crop, when provenanced.
     #[serde(default)]
     pub crop: Option<dw_types::CropRef>,
+    /// Source PDF as printed, when the feed recorded one (the cr-core T1
+    /// rows carry a filename, not a hash — named, never invented).
+    #[serde(default)]
+    pub source_pdf: Option<String>,
+    /// Provenance tier as printed (e.g. `T1_DATASHEET`).
+    #[serde(default)]
+    pub provenance_tier: Option<String>,
 }
 
 impl ClaimSource {
@@ -63,6 +70,8 @@ impl From<&dw_types::SourceRef> for ClaimSource {
             row_header: s.row_header.clone(),
             column_header: s.column_header.clone(),
             crop: s.crop.clone(),
+            source_pdf: None,
+            provenance_tier: None,
         }
     }
 }
@@ -250,6 +259,8 @@ impl DemoStore {
                 row_header: Some(row.into()),
                 column_header: Some(col.into()),
                 crop: None,
+                source_pdf: None,
+                provenance_tier: None,
             }
         };
 
