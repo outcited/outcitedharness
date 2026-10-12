@@ -109,6 +109,7 @@ def cr_core_stratum() -> dict:
         "addressable_parts": len(parts),
         "aisles": aisles,
         "facets": dict(sorted(facets.items(), key=lambda x: -x[1])),
+        "_parts": parts,
     }
 
 
@@ -182,6 +183,7 @@ def snapshot() -> dict:
                     if _truthy(v):
                         facet_fields[k] = facet_fields.get(k, 0) + 1
         n = len(addressable)
+        board.setdefault("_partsets", {})[cat] = set(addressable)
         entry = {
             "records": len(files),
             "addressable_parts": n,
@@ -191,11 +193,39 @@ def snapshot() -> dict:
         board["categories"][cat] = entry
         board["totals"]["records"] += len(files)
         board["totals"]["addressable"] += n
-    board["strata"] = {
-        "cr_core": cr_core_stratum(),
-        "catalog_claims": catalog_stratum(),
-        "pinout_gold": gold_stratum(),
+    cr = cr_core_stratum()
+    cat_db = catalog_stratum()
+    gold = gold_stratum()
+    # Merged truth: addressable union per category across shelves, and the
+    # provenance-qualified subset (a claim with quote + page + sha).
+    staging_sets = board.pop("_partsets", {})
+    cr_parts = cr.pop("_parts", set())
+    merged = {}
+    for cat in ("mcu", "power", "connector", "refdesign"):
+        uni = set(staging_sets.get(cat, ()))
+        merged[cat] = {"staging_parts": len(uni)}
+    # cr-core aisles map onto categories; unassigned is its own bucket
+    merged["mcu"]["cr_core_parts"] = cr.get("aisles", {}).get("mcu", 0)
+    merged["unassigned_cr_core"] = {
+        "staging_parts": 0,
+        "cr_core_parts": cr.get("aisles", {}).get("unassigned", 0),
     }
+    # catalog.db is the power/discrete claims lane
+    merged["power"]["catalog_parts_with_claims"] = cat_db.get("parts_with_claims", 0)
+    for cat, m in merged.items():
+        m["extracted_evidence"] = (
+            m.get("cr_core_parts", 0) + m.get("catalog_parts_with_claims", 0)
+        )
+    provenance = {
+        "catalog_claims_quote_sha": cat_db.get("claims", 0),
+        "catalog_claims_with_page": None,
+        "pinout_gold_rows_quote_page_sha": (gold.get("manifest") or {}).get("counts", {}).get("rows_gold"),
+        "pinout_gold_docs": (gold.get("manifest") or {}).get("counts", {}).get("docs_total"),
+        "note": "catalog claim pages ride the claim_pages chain (99.6% located); gold rows are quote+page+sha verified; cr-core rows carry T1 source provenance but no page chain yet",
+    }
+    board["merged"] = merged
+    board["provenance"] = provenance
+    board["strata"] = {"cr_core": cr, "catalog_claims": cat_db, "pinout_gold": gold}
     board["generated_at"] = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     return board
 
@@ -267,6 +297,22 @@ def render(cur: dict, prev: dict | None) -> str:
         lines.append(f"- **pinout gold freeze r1** — shared with mac-mini: {json.dumps(counts)[:220]}")
     else:
         lines.append("- **pinout gold freeze r1** — manifest not readable from here")
+
+    mg = cur.get("merged") or {}
+    pv = cur.get("provenance") or {}
+    lines += ["", "## Merged truth — the true coverage numbers", ""]
+    for cat in ("mcu", "power", "connector", "refdesign", "unassigned_cr_core"):
+        m = mg.get(cat)
+        if not m:
+            continue
+        bits = [f"{k} {v:,}" for k, v in m.items() if isinstance(v, int) and v]
+        lines.append(f"- **{cat}**: " + (", ".join(bits) if bits else "nothing extracted yet"))
+    lines += ["", "### Provenance-qualified (quote + page + sha)", ""]
+    for k, v in pv.items():
+        if k == "note":
+            lines.append(f"- {v}")
+        elif v is not None:
+            lines.append(f"- {k}: {v:,}")
 
     lines += ["", "## Per category — parts carrying each saleable facet", ""]
     cols = ["pinout", "pillars", "overview", "parametric_specs", "thermal",
