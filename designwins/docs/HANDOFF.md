@@ -493,6 +493,30 @@ topology + errata), the axis registry + rating projection, the
 `dw-structure` (needs the PDF text layer), `dw-model`/`dw-learn`,
 `dw-controller`, cutover.
 
+### Session close 2026-10-12 — flip state (read this first)
+
+**Burn running in background** — pid 28128:
+`scripts/burn_aisle.py --aisle power --limit 50 --workers 10`, local
+ledger `results/pipeline-burn-batch1.db`, outputs
+`results/burn-power-batch1-local/` (2 of 50 done at flip). Log:
+`results/burn-power-batch1d-20261012.log`. When it completes:
+
+1. **Fold the burn outputs** into the served store: extend
+   `scripts/fold_strata.py` to read `results/burn-power-batch1-local/*.json`
+   (shape: `{stem, tier, claims, surviving, p0, supported, claim_data:
+   [{symbol, value, unit, qualifier, condition, quote, row_header,
+   column_header}]}` — stem is `vendor-part`) into
+   `parts_burn.jsonl` at the export root; the loader picks up `parts_*.jsonl`
+   automatically.
+2. **Re-run the board** (`scripts/extraction_board.py`) — the Δ column moves
+   for the first time. That is the user's marker of forward movement.
+
+**Then the remaining roadmap** (§5.5 order): `dw-recon` family modules
+(family_census is next — it decides `above_opn`, which the gold bar is
+defined against; note it imports `locator.PACKAGE_KEY`, a regex table in
+`locator.py`), then `dw-structure` (needs the PDF text layer first),
+`dw-model`/`dw-learn`, `dw-controller`, cutover.
+
 ### Ops notes (2026-10-12, learned the hard way)
 
 - **NFS (`electronicdataassets-nfs` / `nfs_charley`) is a read-only
