@@ -28,6 +28,43 @@ If that passes, everything else was correct. If it fails, nothing else mattered.
 
 ---
 
+## 0.1 The extraction board — the marker of forward movement
+*(merged 2026-10-12: the migration is done when this is true)*
+
+**The board is the plan.** Totals do not show progress; movement does. The
+extraction board is the scoreboard — per category, on a part basis, what
+fraction of addressable parts carry each facet we can sell the category
+with, and what moved since the last snapshot.
+
+> **GOLD (per category)** is the bar of minimum extracted **and
+> provenanced** content needed to sell that category above-OPN. Each
+> category judges it slightly differently — MCU is sold on family/series
+> documents (one die, many parts: `FamilyDoc | RefManual | OrderingTable`),
+> POWER on ratings + thermal + curves, CONNECTOR on the mechanical and
+> electrical interface.
+
+**Scoreboard** (`python3 scripts/extraction_board.py` →
+`results/api-coverage/BOARD.md`, snapshot per run, Δ every run):
+
+| category | addressable parts | the bar to sell it | where it stands (2026-10-12) |
+|---|---:|---|---|
+| **MCU** | 29,269 | overview · pinout · pillars · parametrics · power_modes | pillars 58.5% · pinout 9.8% · overview 7.4% · parametrics 3.9% |
+| **POWER** | 36,636 | pillars · parametrics · thermal · curves | thermal 2.9% · curves 0.8% · rest 0% |
+| **CONNECTOR** | 401 | connectors · parametrics · pinout | connectors 100% · rest 0% |
+| **REFDESIGN** | 5,239 | (intake lane — feeds the others) | stubs only |
+
+**Lane order:** MCU leads (already ahead), then POWER, CONNECTOR, and the
+other active/passive categories. The PDF factory (mac-mini) feeds the
+extraction lanes (this box); the API serves what they produce; the front end
+(m4) renders it and reports gaps — never workarounds.
+
+**Done means:** every category reaches its gold bar here, the Δ column is
+moving, and every served number opens to its page (the provenance half of
+"extracted and provenanced"). Until then the migration is not done —
+regardless of how green the Rust gates are.
+
+---
+
 ## 1. Ground truth — what actually exists
 
 | Fact | Number |

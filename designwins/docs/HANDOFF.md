@@ -62,10 +62,12 @@ not this number.
 | **content** | `PLAN.md` §0 — sentence → cohort + derived + exclusions + unknowns + next + every number opens to the page | **met** — executable, asserted clause-by-clause in `dw-funnel::accept` |
 | **delivery** | `DECISIONS.md` D7 — every front end renders from one response | **met 2026-10-11** — `dw-api`: 7 routes, feed items 1–7 inline on every response, audited post-serialisation with negative controls (`dw-serve` on `127.0.0.1:8787`). Fixture-backed store; catalog slots behind `ApiStore` |
 | **trust** | `PROVENANCE.md` §2 — evidence resolves, releases resolve, unresolvable ⇒ `Unknown` | **met 2026-10-11** — links 1–8 real/measured, both replacement ledgers empty, G7 green. Residuals (99.6% page location, 8.5% binding coverage) are named, not hidden |
+| **board** | `PLAN.md` §0.1 — every category at its gold bar, movement visible | **NOT met — this is the migration's real bar** (merged 2026-10-12). `results/api-coverage/BOARD.md` (run `scripts/extraction_board.py`): MCU pillars 58.5% / pinout 9.8%; POWER thermal 2.9%; CONNECTOR 100% `connectors` but 0% parametrics. Totals lie; Δ is the marker |
 
-**All three pass as of 2026-10-11.** The trust gate is the one that lets an
-engineer stake a design on the answer, which is the only reason this product
-exists.
+**Three gates pass as of 2026-10-11; the board gate (§0.1 of the plan) is
+the one that closes the migration.** The trust gate is what lets an engineer
+stake a design on the answer; the board is what says the product can be
+sold, category by category.
 
 ### PLAN §0 clause by clause
 
@@ -474,13 +476,20 @@ again.*
 
 ## 11. Next — the roadmap, in order
 
-**The three gates pass (2026-10-11).** Everything below is product work, not
-definition-of-done. Done so far on the roadmap: question ranking (§5.3),
-`dw-lessons`, G7 (§5.4).
+**The migration is not done until the board is** (`PLAN.md` §0.1). The work
+is the lanes, in order: **MCU → POWER → CONNECTOR** (and the other
+active/passive categories), pushing each to its gold bar so the Δ column
+moves. The machine around them is built: PDF factory (mac-mini) feeds the
+extraction lanes (this box); `dw-api` serves with provenance; m4 renders and
+reports gaps.
 
-1. Then §5.5 — `dw-extract` is already scaffolded and handed off; the rest
-   (extractor/recon/loop, `dw-search`, `dw-coverage`, `dw-controller`,
-   cutover) opens now.
+Infrastructure already done this session: question ranking (§5.3),
+`dw-lessons`, G7 (§5.4), `dw-api` (§5.2), `dw-search`, `dw-coverage`,
+`dw-graph` (ordering + topology + errata), the axis registry + rating
+projection, and the `api-store-export` loader. The §5.5 platform items
+(`dw-structure`, `dw-recon`, `dw-queue`, `dw-model`/`dw-learn`,
+`dw-controller`, cutover) queue behind the lanes — they exist to serve the
+same board.
 
 The acceptance test is one sentence long. Everything on that list is in service
 of it.
