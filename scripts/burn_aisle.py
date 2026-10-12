@@ -25,14 +25,19 @@ from harness.pipeline.quote_verify import verify_claims
 RESULTS = Path("/Volumes/M5_4TB/extract-results")
 ROUTES = RESULTS / "routes"
 SUBSTRATE_DIRS = [RESULTS / "collected", RESULTS / "runs"]
-BURN_OUT = RESULTS / (_os.environ.get("BURN_OUT_NAME", "burn-power-v1"))
+# The NFS transport is a read-only mirror; writes land locally and
+# stage to the NAS later. BURN_OUT is fully overridable.
+BURN_OUT = _os.PathLike and _os.environ.get("BURN_OUT") or None
+BURN_OUT = Path(BURN_OUT) if BURN_OUT else (RESULTS / (_os.environ.get("BURN_OUT_NAME", "burn-power-v1")))
 
 STUDENT = "http://100.81.201.24:8950/v1/chat/completions"
 DGX1_STUDENT = "http://100.81.201.24:8950/v1/chat/completions"
 V41 = "http://100.116.221.82:8888/v1/chat/completions"
 OPENROUTER = "https://openrouter.ai/api/v1/chat/completions"
 CLOUD_MODEL = "deepseek/deepseek-v4.1-flash"
-POWER_ROOT = Path("/Volumes/M5_4TB/exports/power-datasheet-pairs")
+# Env-overridable: the SMB view of the corpus intermittently denies
+# reads while the NFS transport (charley) serves the same data.
+POWER_ROOT = Path(_os.environ.get("POWER_ROOT", "/Volumes/M5_4TB/exports/power-datasheet-pairs"))
 MCU_ROOT = Path("/Volumes/macbookM4-4TB/datasheet-corpus/mcu")
 VAULT_ROOT = Path("/Volumes/M5_4TB/vault/landing")
 AISLE_ROOTS = {"power": POWER_ROOT, "mcu": MCU_ROOT, "vault": VAULT_ROOT}
