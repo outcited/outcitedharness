@@ -187,15 +187,25 @@ def regen_cube(root: Path) -> dict:
     return {"cells": len(cube["cells"]), "sha256": sha(body)}
 
 
-BURN_DIR = Path(__file__).resolve().parents[1] / "results" / "burn-power-batch1-local"
+RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
-def fold_burn(root: Path, burn_dir: Path) -> dict:
+def fold_burn_multi(root: Path, burn_dirs: list) -> dict:
+    """Fold every burn output dir into one parts_burn.jsonl."""
+    rows = []
+    for burn_dir in burn_dirs:
+        rows.extend(_burn_rows(burn_dir))
+    body = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
+    (root / "parts_burn.jsonl").write_text(body)
+    return {"dirs": [str(d) for d in burn_dirs], "rows": len(rows), "bytes": len(body), "sha256": sha(body)}
+
+
+def _burn_rows(burn_dir: Path) -> list:
     """Burn outputs -> parts_burn.jsonl. The per-doc claim_data rows carry
     quote + row + column provenance (the burn prompt mandates it); the
     source_pdf is the pdf stem by construction (`f"{p.stem}.json"`)."""
     if not burn_dir.is_dir():
-        return {"rows": 0}
+        return []
     rows = []
     for f in sorted(burn_dir.glob("*.json")):
         if f.name.startswith("_"):
@@ -227,20 +237,21 @@ def fold_burn(root: Path, burn_dir: Path) -> dict:
                 },
             })
         rows.append({"part_number": part, "vendor": vendor, "claims": claims})
-    body = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
-    (root / "parts_burn.jsonl").write_text(body)
-    return {"rows": len(rows), "bytes": len(body), "sha256": sha(body)}
+    return rows
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(DEFAULT_ROOT))
-    ap.add_argument("--burn-dir", default=str(BURN_DIR))
+    ap.add_argument("--burn-dir", default="", nargs="*")
     args = ap.parse_args()
     root = Path(args.root)
     root.mkdir(parents=True, exist_ok=True)
     cr = fold_cr_core(root)
-    burn = fold_burn(root, Path(args.burn_dir))
+    burn_dirs = [Path(d) for d in args.burn_dir] if args.burn_dir else sorted(
+        d for d in RESULTS_DIR.glob("burn-power-*-local") if d.is_dir()
+    )
+    burn = fold_burn_multi(root, burn_dirs)
     cube = regen_cube(root)
     files = {}
     for f in ("parts_catalog.jsonl", "parts_family.jsonl", "parts_cr_core.jsonl", "parts_burn.jsonl", "cube.json"):
