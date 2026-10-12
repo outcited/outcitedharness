@@ -278,6 +278,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-recon"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-release"
 version = "0.1.0"
 dependencies = [

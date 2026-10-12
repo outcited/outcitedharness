@@ -1,0 +1,241 @@
+{
+ "cases": [
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "user_manual",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "governs_series": [
+     "GD32F405xx",
+     "GD32F407xx",
+     "GD32F470xx"
+    ],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": false,
+    "scope_absent_reason": null,
+    "scope_page": 1,
+    "scope_statement": "For GD32F405xx, GD32F407xx and GD32F470xx",
+    "status": "read_ok",
+    "title_verbatim": "GD32F4xx User Manual GigaDevice Semiconductor"
+   },
+   "name": "gd32_filename_binding_near_miss",
+   "pages": [
+    "GD32F4xx User Manual\nGigaDevice Semiconductor\nRev 2.1\nFor GD32F405xx, GD32F407xx and GD32F470xx ARM Cortex-M4 32-bit\nmicrocontrollers. This user manual describes the memory and peripherals."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "governs_series": [
+     "STM32F405xx/07xx",
+     "STM32F415xx/17xx",
+     "STM32F42xxx",
+     "STM32F43xxx"
+    ],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": false,
+    "scope_absent_reason": null,
+    "scope_page": 1,
+    "scope_statement": "how to use the STM32F405xx/07xx, STM32F415xx/17xx, STM32F42xxx and STM32F43xxx",
+    "status": "read_ok",
+    "title_verbatim": "STM32F405xx/407xx Datasheet production data It provides complete information on how to use the STM32F405xx/07xx,"
+   },
+   "name": "st_composite_series",
+   "pages": [
+    "STM32F405xx/407xx Datasheet production data\nIt provides complete information on how to use the STM32F405xx/07xx,\nSTM32F415xx/17xx, STM32F42xxx and STM32F43xxx microcontroller memory\nand peripherals."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "reference_manual",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "governs_series": [
+     "STM32F446xx"
+    ],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": false,
+    "scope_absent_reason": null,
+    "scope_page": 1,
+    "scope_statement": "peripherals of STM32F446xx",
+    "status": "read_ok",
+    "title_verbatim": "RM0390 Reference manual STM32F446xx advanced Arm-based 32-bit MCUs"
+   },
+   "name": "st_inverted_phrasing",
+   "pages": [
+    "RM0390 Reference manual\nSTM32F446xx advanced Arm-based 32-bit MCUs\nThis manual describes how to use the memory and peripherals of\nSTM32F446xx microcontrollers."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "application_note",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "governs_series": [
+     "GD32F103xx",
+     "GD32F153xx"
+    ],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": false,
+    "scope_absent_reason": null,
+    "scope_page": 1,
+    "scope_statement": "Applicable products: GD32F103xx, GD32F153xx",
+    "status": "read_ok",
+    "title_verbatim": "Application Note AN1234 Applicable products: GD32F103xx, GD32F153xx."
+   },
+   "name": "prose_scope",
+   "pages": [
+    "Application Note AN1234\nAcme Devices Inc\nApplicable products: GD32F103xx, GD32F153xx.\nThis application note describes board layout guidance."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": null,
+    "governs_series": [],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": true,
+    "scope_absent_reason": "no_scope_statement_printed",
+    "scope_page": null,
+    "scope_statement": null,
+    "status": "read_ok",
+    "title_verbatim": "Quick Start Guide This guide covers development kit setup for evaluation boards"
+   },
+   "name": "scope_absent",
+   "pages": [
+    "Quick Start Guide\nSome Vendor Inc\nThis guide covers development kit setup for evaluation boards\nand shows how to load a first example program quickly."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": "no_text_layer_on_front_matter",
+    "governs_series": [],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": null,
+    "scope_absent_reason": null,
+    "scope_page": null,
+    "scope_statement": null,
+    "status": "extraction_failed",
+    "title_verbatim": null
+   },
+   "name": "no_text_layer",
+   "pages": [
+    "tiny"
+   ]
+  },
+  {
+   "expected": {
+    "control_token": "STM32",
+    "control_token_found": false,
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": "control_token_absent",
+    "governs_series": [],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": null,
+    "scope_absent_reason": null,
+    "scope_page": null,
+    "scope_statement": null,
+    "status": "extraction_failed",
+    "title_verbatim": null
+   },
+   "name": "control_token_absent",
+   "pages": [
+    "GD32F4xx User Manual\nFor GD32F405xx and GD32F407xx microcontrollers. This user manual\ndescribes the memory and peripherals."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "user_manual",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "governs_series": [
+     "STM32F303xB",
+     "STM32F303xC"
+    ],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": false,
+    "scope_absent_reason": null,
+    "scope_page": 1,
+    "scope_statement": "For STM32F303xB and STM32F303xC",
+    "status": "read_ok",
+    "title_verbatim": "User manual UM0421"
+   },
+   "name": "pm0214_class_trap",
+   "pages": [
+    "User manual\nUM0421\nReference manuals of STM32F3 Series describe the peripherals.\nFor STM32F303xB and STM32F303xC microcontrollers."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "programming_manual",
+    "document_subject": "cpu_core",
+    "extraction_failed_reason": null,
+    "governs_series": [],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": true,
+    "scope_absent_reason": "no_scope_statement_printed",
+    "scope_page": null,
+    "scope_statement": null,
+    "status": "read_ok",
+    "title_verbatim": "PM0214 Programming manual STM32 Cortex-M4 MCUs and MPUs programming manual"
+   },
+   "name": "cpu_core_subject",
+   "pages": [
+    "PM0214 Programming manual\nSTM32 Cortex-M4 MCUs and MPUs programming manual\nThis programming manual describes the instruction set core programming\nmodel for the Arm Cortex-M4 core."
+   ]
+  },
+  {
+   "expected": {
+    "control_token": null,
+    "control_token_found": null,
+    "document_class": "reference_manual",
+    "document_subject": "peripheral",
+    "extraction_failed_reason": null,
+    "governs_series": [],
+    "page_count": 1,
+    "schema": "harness.electronics-document-scope.v2",
+    "scope_absent": true,
+    "scope_absent_reason": "no_scope_statement_printed",
+    "scope_page": null,
+    "scope_statement": null,
+    "status": "read_ok",
+    "title_verbatim": "dsPIC33/PIC24 FRM I2C"
+   },
+   "name": "peripheral_subject",
+   "pages": [
+    "dsPIC33/PIC24 FRM\nI2C\nFramework Reference Manual\nThis reference manual describes the I2C peripheral module."
+   ]
+  }
+ ]
+}

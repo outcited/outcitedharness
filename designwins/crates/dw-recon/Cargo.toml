@@ -1,0 +1,19 @@
+[package]
+name = "dw-recon"
+description = "Document reconnaissance: what a document governs, printed scope only. Filename binding lies (GD32F4xx); the cover statement is the grain signal. Port of harness/electronics/document_scope.py."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+regex = "1"
+
+[dev-dependencies]
+
+[lints]
+workspace = true
