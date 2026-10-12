@@ -483,13 +483,27 @@ moves. The machine around them is built: PDF factory (mac-mini) feeds the
 extraction lanes (this box); `dw-api` serves with provenance; m4 renders and
 reports gaps.
 
-Infrastructure already done this session: question ranking (§5.3),
-`dw-lessons`, G7 (§5.4), `dw-api` (§5.2), `dw-search`, `dw-coverage`,
-`dw-graph` (ordering + topology + errata), the axis registry + rating
-projection, and the `api-store-export` loader. The §5.5 platform items
-(`dw-structure`, `dw-recon`, `dw-queue`, `dw-model`/`dw-learn`,
-`dw-controller`, cutover) queue behind the lanes — they exist to serve the
-same board.
+Infrastructure already done: question ranking (§5.3), `dw-lessons`, G7
+(§5.4), `dw-api` (§5.2), `dw-search`, `dw-coverage`, `dw-graph` (ordering +
+topology + errata), the axis registry + rating projection, the
+`api-store-export` loader + the strata fold (5,835 cr-core parts served),
+`dw-queue` (the loop's engine, gold vs the live Python store), and
+`dw-recon::document_scope` (gold vs the live reader). Remaining §5.5:
+`dw-recon` family modules (census/document/matrix/corpus — 3.7k lines),
+`dw-structure` (needs the PDF text layer), `dw-model`/`dw-learn`,
+`dw-controller`, cutover.
+
+### Ops notes (2026-10-12, learned the hard way)
+
+- **NFS (`electronicdataassets-nfs` / `nfs_charley`) is a read-only
+  mirror** — every write denies, even at the share root. Reads are the
+  fast path (5.7×). Writes go local (`PIPELINE_DB=…/results/…`,
+  `BURN_OUT=…`) and stage to the NAS later.
+- **SSH to charleybasecamp is live** (fleet key `~/.ssh/id_ed25519_nas`);
+  sshd reads `authorized_keys` as the user — never chown it root. Use
+  `ssh -F /dev/null` when the colima include chain trips on NFS uids.
+- The corpus vendor dirs needed `chmod -R o+rwX` server-side (they were
+  700 while SMB connected as a different identity).
 
 The acceptance test is one sentence long. Everything on that list is in service
 of it.
