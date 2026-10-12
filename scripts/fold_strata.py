@@ -191,10 +191,28 @@ RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
 def fold_burn_multi(root: Path, burn_dirs: list) -> dict:
-    """Fold every burn output dir into one parts_burn.jsonl."""
-    rows = []
+    """Fold every burn output dir into one parts_burn.jsonl. One row per
+    stem: a re-burned PDF (same stem in two batch dirs) merges into one row,
+    claims unioned on (field, value, quote, row, column). Without this the
+    served store double-counts the part (batch1+batch2 = 550 rows for 500
+    parts)."""
+    merged: dict[str, dict] = {}
     for burn_dir in burn_dirs:
-        rows.extend(_burn_rows(burn_dir))
+        for stem, row in _burn_rows(burn_dir):
+            cur = merged.get(stem)
+            if cur is None:
+                merged[stem] = row
+                continue
+            seen = {
+                (c["field"], c["value"], c["quote"], c["source"]["row_header"], c["source"]["column_header"])
+                for c in cur["claims"]
+            }
+            for c in row["claims"]:
+                key = (c["field"], c["value"], c["quote"], c["source"]["row_header"], c["source"]["column_header"])
+                if key not in seen:
+                    seen.add(key)
+                    cur["claims"].append(c)
+    rows = list(merged.values())
     body = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
     (root / "parts_burn.jsonl").write_text(body)
     return {"dirs": [str(d) for d in burn_dirs], "rows": len(rows), "bytes": len(body), "sha256": sha(body)}
@@ -206,7 +224,7 @@ def _burn_rows(burn_dir: Path) -> list:
     source_pdf is the pdf stem by construction (`f"{p.stem}.json"`)."""
     if not burn_dir.is_dir():
         return []
-    rows = []
+    out = []
     for f in sorted(burn_dir.glob("*.json")):
         if f.name.startswith("_"):
             continue
@@ -236,8 +254,8 @@ def _burn_rows(burn_dir: Path) -> list:
                     "provenance_tier": None,
                 },
             })
-        rows.append({"part_number": part, "vendor": vendor, "claims": claims})
-    return rows
+        out.append((stem, {"part_number": part, "vendor": vendor, "claims": claims}))
+    return out
 
 
 def main() -> int:

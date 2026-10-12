@@ -233,7 +233,15 @@ def main():
     root = AISLE_ROOTS[args.aisle]
     pattern = "*/pdf/*.pdf" if args.aisle == "power" else "**/*.pdf"
     all_pdfs = sorted(root.glob(pattern))
-    pdfs = [p for p in all_pdfs if not (BURN_OUT / f"{p.stem}.json").exists()][: args.limit]
+    # Skip stems already burned in ANY burn dir for this aisle, not just
+    # this batch's BURN_OUT: a fresh batch dir would otherwise re-walk the
+    # aisle from the top and re-burn finished docs (batch2 re-burned all 50
+    # of batch1's stems this way).
+    done = {p.stem for p in BURN_OUT.glob("*.json")}
+    for d in BURN_OUT.parent.glob(f"burn-{args.aisle}-*"):
+        if d.is_dir():
+            done |= {p.stem for p in d.glob("*.json")}
+    pdfs = [p for p in all_pdfs if p.stem not in done][: args.limit]
     print(f"burn: aisle={args.aisle} docs={len(pdfs)} (of {len(all_pdfs)} total)", flush=True)
     if args.dry_run:
         for p in pdfs[:5]:
