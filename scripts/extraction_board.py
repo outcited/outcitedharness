@@ -59,6 +59,86 @@ AISLES = [
     ("refdesign", "refdesign_family_content"),
 ]
 
+# Strata the staging assembly does NOT fold in. Each is real extracted work
+# (validation 2026-10-12: the board must count all of them or it lies).
+CR_CORE = STAGING / "mcu_family_content" / "from-cr-core"
+CATALOG_DB = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/scratch/catalog.db")
+GOLD_FREEZE = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/pinout-gold/pinout-gold-r1-20261011/manifest.json")
+
+CR_FACETS = ["pinout", "overview", "parametric_specs", "claude_ground_truth",
+             "mistral_compatibility", "peripheral_features", "deep_specs"]
+
+
+def _flatten(ps):
+    out = []
+    for p in ps:
+        if isinstance(p, str):
+            out.append(p)
+        elif isinstance(p, list):
+            out.extend(_flatten(p))
+        elif isinstance(p, dict):
+            pn = p.get("part_number")
+            if pn:
+                out.append(pn)
+    return out
+
+
+def cr_core_stratum() -> dict:
+    """The cr-core delivery — rich extractions never folded into staging."""
+    if not CR_CORE.is_dir():
+        return {"records": 0}
+    files = [f for f in os.listdir(CR_CORE) if f.endswith(".json")]
+    with ThreadPoolExecutor(max_workers=32) as ex:
+        recs = [r for r in ex.map(_load_one, [(CR_CORE, f) for f in files]) if r]
+    parts = set()
+    facets: dict[str, int] = {}
+    aisles: dict[str, int] = {}
+    for r in recs:
+        meta = r.get("_meta") or {}
+        aisles[meta.get("aisle") or "unassigned"] = aisles.get(meta.get("aisle") or "unassigned", 0) + 1
+        ov = r.get("overview") or {}
+        ps = _flatten(ov.get("part_numbers") or [])
+        if not ps and meta.get("part_number"):
+            ps = [meta["part_number"]]
+        parts.update(ps)
+        for f in CR_FACETS:
+            if _truthy(r.get(f)):
+                facets[f] = facets.get(f, 0) + 1
+    return {
+        "records": len(recs),
+        "addressable_parts": len(parts),
+        "aisles": aisles,
+        "facets": dict(sorted(facets.items(), key=lambda x: -x[1])),
+    }
+
+
+def catalog_stratum() -> dict:
+    """catalog.db — the verified power/discrete claims lane (86K)."""
+    if not CATALOG_DB.exists():
+        return {"parts_with_claims": 0}
+    import sqlite3
+    con = sqlite3.connect(f"file:{CATALOG_DB}?mode=ro&immutable=1", uri=True)
+    parts = con.execute("SELECT count(DISTINCT opn) FROM claims_canonical").fetchone()[0]
+    claims = con.execute("SELECT count(*) FROM claims_canonical").fetchone()[0]
+    symbols = {
+        s: con.execute(
+            "SELECT count(DISTINCT opn) FROM claims_canonical WHERE symbol LIKE ?",
+            (s + "%",),
+        ).fetchone()[0]
+        for s in ("RDS(ON)", "ID", "QG", "VGS(TH)", "COSS")
+    }
+    con.close()
+    return {"parts_with_claims": parts, "claims": claims, "symbol_parts": symbols}
+
+
+def gold_stratum() -> dict:
+    """The verified pinout gold freeze (content-addressed, shared with mac-mini)."""
+    if not GOLD_FREEZE.exists():
+        return {"available": False}
+    m = json.loads(GOLD_FREEZE.read_text())
+    return {"available": True, "manifest": {k: v for k, v in m.items() if k in
+            ("counts", "files", "release", "rows_gold", "docs") or isinstance(v, (int, str))}}
+
 
 def _truthy(v) -> bool:
     return bool(v) and v != [] and v != {}
@@ -111,6 +191,11 @@ def snapshot() -> dict:
         board["categories"][cat] = entry
         board["totals"]["records"] += len(files)
         board["totals"]["addressable"] += n
+    board["strata"] = {
+        "cr_core": cr_core_stratum(),
+        "catalog_claims": catalog_stratum(),
+        "pinout_gold": gold_stratum(),
+    }
     board["generated_at"] = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     return board
 
@@ -155,6 +240,34 @@ def render(cur: dict, prev: dict | None) -> str:
             f"features {_pct(f.get('peripheral_features', 0), n)}",
         ]
         lines.append(f"- **{cat.upper()}** — {n:,} parts: " + ", ".join(bits))
+    st = cur.get("strata") or {}
+    cr = st.get("cr_core") or {}
+    cat_db = st.get("catalog_claims") or {}
+    gold = st.get("pinout_gold") or {}
+    lines += ["", "## Strata — where extracted work already lives", "",
+              "The staging assembly above is one shelf. Validation 2026-10-12",
+              "found real extracted work on three more; the board counts them",
+              "so the gaps it reports are real gaps.", ""]
+    if cr.get("records"):
+        n = cr["addressable_parts"]
+        f = cr["facets"]
+        lines.append(
+            f"- **cr-core delivery** — {cr['records']:,} rich records / {n:,} parts "
+            f"(aisles: {cr.get('aisles')}): "
+            + ", ".join(f"{k} {_pct(v, cr['records'])}" for k, v in f.items())
+        )
+    if cat_db.get("parts_with_claims"):
+        lines.append(
+            f"- **catalog.db claims lane** — {cat_db['parts_with_claims']:,} parts / "
+            f"{cat_db.get('claims', 0):,} verified claims (power/discrete): "
+            + ", ".join(f"{k} {v:,} parts" for k, v in (cat_db.get("symbol_parts") or {}).items())
+        )
+    if gold.get("available"):
+        counts = gold.get("manifest", {})
+        lines.append(f"- **pinout gold freeze r1** — shared with mac-mini: {json.dumps(counts)[:220]}")
+    else:
+        lines.append("- **pinout gold freeze r1** — manifest not readable from here")
+
     lines += ["", "## Per category — parts carrying each saleable facet", ""]
     cols = ["pinout", "pillars", "overview", "parametric_specs", "thermal",
             "curves", "connectors", "errata", "peripheral_features"]
