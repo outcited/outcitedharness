@@ -115,7 +115,10 @@ fn scope_prose() -> &'static Regex {
     })
 }
 
-fn series_token() -> &'static Regex {
+/// The reference's `SERIES_TOKEN`: an uppercase stem with digits, then a
+/// tail of uppercase/digits with lowercase `x` wildcards allowed ANYWHERE,
+/// plus an optional composite tail preserved verbatim (`STM32F405xx/07xx`).
+pub fn series_token() -> &'static Regex {
     static R: OnceLock<Regex> = OnceLock::new();
     R.get_or_init(|| re(r"\b([A-Z]{2,10}\d{1,4}[A-Zx0-9]*(?:/[0-9A-Za-z]{1,8})?)\b"))
 }

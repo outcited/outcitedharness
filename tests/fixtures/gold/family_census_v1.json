@@ -1,0 +1,1963 @@
+{
+ "cases": [
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": "family_matrix",
+    "attributes_addressed": [
+     "code_flash_kb",
+     "data_flash_kb",
+     "sram_kb",
+     "timers",
+     "package"
+    ],
+    "category": "mcu",
+    "denominator_cells": 15,
+    "device_table_located": true,
+    "device_tables": [
+     {
+      "attribute_rows": 5,
+      "attributes_addressed": [
+       "code_flash_kb",
+       "data_flash_kb",
+       "sram_kb",
+       "timers",
+       "package"
+      ],
+      "columns": 5,
+      "orientation": "parts_as_columns",
+      "page": 2,
+      "rows": 7,
+      "series_tokens": [
+       "GD32F405xx"
+      ],
+      "variant_count": 3,
+      "variant_labels": [
+       "RE",
+       "RG",
+       "RK"
+      ]
+     }
+    ],
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "GD32"
+    ],
+    "governs_series": [
+     "GD32F405xx",
+     "GD32F407xx",
+     "GD32F450xx"
+    ],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "wildcard_series_tokens_printed",
+     "device_table_with_variants",
+     "registry_stems=3"
+    ],
+    "packages": [
+     {
+      "package_family": "LQFP",
+      "page": 2,
+      "pin_count": 64
+     },
+     {
+      "package_family": "LQFP",
+      "page": 2,
+      "pin_count": 100
+     }
+    ],
+    "page_count": 2,
+    "pages_inspected": [
+     1,
+     2
+    ],
+    "parts_named": [],
+    "parts_named_count": 0,
+    "pin_bogeys": [
+     64,
+     100
+    ],
+    "registry_stems": 3,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": 1,
+    "scope_statement": "For GD32F405xx, GD32F407xx and GD32F450xx",
+    "scope_status": "read_ok",
+    "series_tokens": [
+     "GD32F405xx",
+     "GD32F407xx",
+     "GD32F450xx"
+    ],
+    "title_verbatim": "GD32F405xx Datasheet GigaDevice Semiconductor",
+    "variant_count": 3,
+    "vendor": "st"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "family_matrix_columns",
+   "pages": [
+    "GD32F405xx Datasheet\nGigaDevice Semiconductor\nProduct information\nFor GD32F405xx, GD32F407xx and GD32F450xx ARM Cortex-M4 32-bit microcontrollers.\n",
+    "Device comparison table. Available in LQFP64 and LQFP100 packages.\nPart Number\nGD32F405xx\nRE\nRG\nRK\nFlash\nCode area (KB)\n512\n512\n512\nData area (KB)\n0\n512\n2560\nSRAM (KB)\n192\n192\n192\nTimers\nGeneral timer\n8\n8\n8\nPackage\nLQFP64\nLQFP64\nLQFP64\n"
+   ],
+   "registry_stems": 3,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    },
+    {
+     "page": 2,
+     "tables": [
+      [
+       [
+        "Part Number",
+        "",
+        "GD32F405xx",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "RE",
+        "RG",
+        "RK"
+       ],
+       [
+        "Flash",
+        "Code area (KB)",
+        "512",
+        "512",
+        "512"
+       ],
+       [
+        "",
+        "Data area (KB)",
+        "0",
+        "512",
+        "2560"
+       ],
+       [
+        "SRAM (KB)",
+        "",
+        "192",
+        "192",
+        "192"
+       ],
+       [
+        "Timers",
+        "General timer",
+        "8",
+        "8",
+        "8"
+       ],
+       [
+        "Package",
+        "",
+        "LQFP64",
+        "LQFP64",
+        "LQFP64"
+       ]
+      ]
+     ]
+    }
+   ],
+   "vendor": "st"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": "family_matrix",
+    "attributes_addressed": [
+     "code_flash_kb",
+     "sram_kb",
+     "pin_count",
+     "freq_mhz"
+    ],
+    "category": "mcu",
+    "denominator_cells": 12,
+    "device_table_located": true,
+    "device_tables": [
+     {
+      "attribute_rows": 4,
+      "attributes_addressed": [
+       "code_flash_kb",
+       "sram_kb",
+       "pin_count",
+       "freq_mhz"
+      ],
+      "columns": 5,
+      "orientation": "parts_as_rows",
+      "page": 2,
+      "rows": 4,
+      "series_tokens": [],
+      "variant_count": 3,
+      "variant_labels": [
+       "S32K142",
+       "S32K144",
+       "S32K146"
+      ]
+     }
+    ],
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "S32"
+    ],
+    "governs_series": [],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "parts_named=3",
+     "device_table_with_variants"
+    ],
+    "packages": [],
+    "page_count": 2,
+    "pages_inspected": [
+     1,
+     2
+    ],
+    "parts_named": [
+     {
+      "page": 1,
+      "token": "S32K142"
+     },
+     {
+      "page": 1,
+      "token": "S32K144"
+     },
+     {
+      "page": 1,
+      "token": "S32K146"
+     }
+    ],
+    "parts_named_count": 3,
+    "pin_bogeys": [],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": null,
+    "scope_statement": null,
+    "scope_status": "read_ok",
+    "series_tokens": [],
+    "title_verbatim": "S32K1xx Series Selection Guide Automotive general purpose MCUs",
+    "variant_count": 3,
+    "vendor": "nxp"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "selection_rows",
+   "pages": [
+    "S32K1xx Series Selection Guide\nAutomotive general purpose MCUs\nFor S32K142, S32K144 and S32K146 automotive microcontrollers.\n",
+    "Device selection table.\nDevice\nFlash (KB)\nSRAM (KB)\nPins\nMax freq (MHz)\nS32K142\n256\n32\n64\n112\nS32K144\n512\n64\n100\n112\nS32K146\n1024\n128\n144\n112\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    },
+    {
+     "page": 2,
+     "tables": [
+      [
+       [
+        "Device",
+        "Flash (KB)",
+        "SRAM (KB)",
+        "Pins",
+        "Max freq (MHz)"
+       ],
+       [
+        "S32K142",
+        "256",
+        "32",
+        "64",
+        "112"
+       ],
+       [
+        "S32K144",
+        "512",
+        "64",
+        "100",
+        "112"
+       ],
+       [
+        "S32K146",
+        "1024",
+        "128",
+        "144",
+        "112"
+       ]
+      ]
+     ]
+    }
+   ],
+   "vendor": "nxp"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": "ordering_variants",
+    "attributes_addressed": [
+     "code_flash_kb",
+     "sram_kb"
+    ],
+    "category": "mcu",
+    "denominator_cells": 6,
+    "device_table_located": true,
+    "device_tables": [
+     {
+      "attribute_rows": 2,
+      "attributes_addressed": [
+       "code_flash_kb",
+       "sram_kb"
+      ],
+      "columns": 4,
+      "orientation": "parts_as_rows",
+      "page": 2,
+      "rows": 4,
+      "series_tokens": [],
+      "variant_count": 3,
+      "variant_labels": [
+       "R7FA2E2A72DNK",
+       "R7FA2E2A73CFL",
+       "R7FA2E2A74CFL"
+      ]
+     }
+    ],
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "R7"
+    ],
+    "governs_series": [],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "parts_named=3",
+     "device_table_with_variants"
+    ],
+    "packages": [],
+    "page_count": 2,
+    "pages_inspected": [
+     1,
+     2
+    ],
+    "parts_named": [
+     {
+      "page": 1,
+      "token": "R7FA2E2A72DNK"
+     },
+     {
+      "page": 1,
+      "token": "R7FA2E2A73CFL"
+     },
+     {
+      "page": 1,
+      "token": "R7FA2E2A74CFL"
+     }
+    ],
+    "parts_named_count": 3,
+    "pin_bogeys": [],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": null,
+    "scope_statement": null,
+    "scope_status": "read_ok",
+    "series_tokens": [],
+    "title_verbatim": "RA2E2 Group Datasheet For R7FA2E2A72DNK, R7FA2E2A73CFL and R7FA2E2A74CFL 32-bit microcontrollers.",
+    "variant_count": 3,
+    "vendor": "renesas"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "caption_row_stripped",
+   "pages": [
+    "RA2E2 Group Datasheet\nFor R7FA2E2A72DNK, R7FA2E2A73CFL and R7FA2E2A74CFL 32-bit microcontrollers.\n",
+    "Table 1.12 Product list (1 of 2)\nTable 1.12 Product list (1 of 2)\nProduct part number\nCode flash\nSRAM\nTemp\nR7FA2E2A72DNK\n128\n16\n-40 to +105\nR7FA2E2A73CFL\n64\n16\n-40 to +85\nR7FA2E2A74CFL\n32\n8\n-40 to +85\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    },
+    {
+     "page": 2,
+     "tables": [
+      [
+       [
+        "Table 1.12 Product list (1 of 2)",
+        "",
+        "",
+        ""
+       ],
+       [
+        "Product part number",
+        "Code flash",
+        "SRAM",
+        "Temp"
+       ],
+       [
+        "R7FA2E2A72DNK",
+        "128",
+        "16",
+        "-40 to +105"
+       ],
+       [
+        "R7FA2E2A73CFL",
+        "64",
+        "16",
+        "-40 to +85"
+       ],
+       [
+        "R7FA2E2A74CFL",
+        "32",
+        "8",
+        "-40 to +85"
+       ]
+      ]
+     ]
+    }
+   ],
+   "vendor": "renesas"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": "wildcard_only",
+    "attributes_addressed": [],
+    "category": "mcu",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "STM32"
+    ],
+    "governs_series": [
+     "STM32C011x4"
+    ],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "wildcard_series_tokens_printed"
+    ],
+    "packages": [],
+    "page_count": 2,
+    "pages_inspected": [
+     1,
+     2
+    ],
+    "parts_named": [],
+    "parts_named_count": 0,
+    "pin_bogeys": [],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": 1,
+    "scope_statement": "For STM32C011x4",
+    "scope_status": "read_ok",
+    "series_tokens": [
+     "STM32C011x4",
+     "STM32C011x4/x6"
+    ],
+    "title_verbatim": "STM32C011x4 Datasheet For STM32C011x4/x6 microcontrollers.",
+    "variant_count": 0,
+    "vendor": "st"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "electrical_chars_rejected",
+   "pages": [
+    "STM32C011x4 Datasheet\nFor STM32C011x4/x6 microcontrollers.\n",
+    "Electrical characteristics.\nSymbol\nParameter\nConditions\nMin\nTyp\nMax\nUnit\nfHSE\n4\n48\nMHz\nTA\n-40\n85\nC\nVDD\n2.0\n3.6\nV\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    },
+    {
+     "page": 2,
+     "tables": [
+      [
+       [
+        "Symbol",
+        "Parameter",
+        "Conditions",
+        "Min",
+        "Typ",
+        "Max",
+        "Unit"
+       ],
+       [
+        "fHSE",
+        "",
+        "",
+        "4",
+        "",
+        "48",
+        "MHz"
+       ],
+       [
+        "TA",
+        "",
+        "",
+        "-40",
+        "",
+        "85",
+        "C"
+       ],
+       [
+        "VDD",
+        "",
+        "",
+        "2.0",
+        "",
+        "3.6",
+        "V"
+       ]
+      ]
+     ]
+    }
+   ],
+   "vendor": "st"
+  },
+  {
+   "category": "power",
+   "expected": {
+    "above_opn_kind": "wildcard_only",
+    "attributes_addressed": [],
+    "category": "power",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "TPS7"
+    ],
+    "governs_series": [
+     "TPS7A47xx"
+    ],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "wildcard_series_tokens_printed"
+    ],
+    "packages": [],
+    "page_count": 2,
+    "pages_inspected": [
+     1,
+     2
+    ],
+    "parts_named": [
+     {
+      "page": 1,
+      "token": "TPS7A47"
+     }
+    ],
+    "parts_named_count": 1,
+    "pin_bogeys": [],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": 1,
+    "scope_statement": "For TPS7A47xx",
+    "scope_status": "read_ok",
+    "series_tokens": [
+     "TPS7A47xx"
+    ],
+    "title_verbatim": "TPS7A47 Datasheet For TPS7A47xx low-noise linear regulators.",
+    "variant_count": 0,
+    "vendor": "ti"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "abs_max_ratings_rejected",
+   "pages": [
+    "TPS7A47 Datasheet\nFor TPS7A47xx low-noise linear regulators.\n",
+    "Absolute maximum ratings.\nMIN\nMAX\nUNIT\nInput voltage\nVBUS\n-0.3\n18\nV\nTJ\n-40\n125\nC\nPin voltage\nPG, CE\n-0.3\n7\nV\nTimer\nTMR\n10\ns\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    },
+    {
+     "page": 2,
+     "tables": [
+      [
+       [
+        "",
+        "",
+        "MIN",
+        "MAX",
+        "UNIT"
+       ],
+       [
+        "Input voltage",
+        "VBUS",
+        "-0.3",
+        "18",
+        "V"
+       ],
+       [
+        "",
+        "TJ",
+        "-40",
+        "125",
+        "C"
+       ],
+       [
+        "Pin voltage",
+        "PG, CE",
+        "-0.3",
+        "7",
+        "V"
+       ],
+       [
+        "Timer",
+        "TMR",
+        "",
+        "10",
+        "s"
+       ]
+      ]
+     ]
+    }
+   ],
+   "vendor": "ti"
+  },
+  {
+   "category": "power",
+   "expected": {
+    "above_opn_kind": "ordering_variants",
+    "attributes_addressed": [],
+    "category": "power",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "BQ200"
+    ],
+    "governs_series": [],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "parts_named=3"
+    ],
+    "packages": [
+     {
+      "package_family": "SOIC",
+      "page": 1,
+      "pin_count": 8
+     },
+     {
+      "package_family": "PDIP",
+      "page": 1,
+      "pin_count": 8
+     }
+    ],
+    "page_count": 1,
+    "pages_inspected": [
+     1
+    ],
+    "parts_named": [
+     {
+      "page": 1,
+      "token": "BQ2000T"
+     },
+     {
+      "page": 1,
+      "token": "BQ2000TPN"
+     },
+     {
+      "page": 1,
+      "token": "BQ2000TSN"
+     }
+    ],
+    "parts_named_count": 3,
+    "pin_bogeys": [
+     8
+    ],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": null,
+    "scope_statement": null,
+    "scope_status": "read_ok",
+    "series_tokens": [],
+    "title_verbatim": "BQ2000T Dual Output Regulator Ordering information: BQ2000TPN and BQ2000TSN switching regulators. Available in SOIC-8",
+    "variant_count": 0,
+    "vendor": "ti"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "ordering_variants",
+   "pages": [
+    "BQ2000T Dual Output Regulator\nOrdering information: BQ2000TPN and BQ2000TSN switching regulators. Available in SOIC-8\nand PDIP-8.\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    }
+   ],
+   "vendor": "ti"
+  },
+  {
+   "category": "power",
+   "expected": {
+    "above_opn_kind": null,
+    "attributes_addressed": [],
+    "category": "power",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "BQ200"
+    ],
+    "governs_series": [],
+    "grain": "single_opn",
+    "grain_reasons": [
+     "parts_named=1",
+     "registry_stems=0"
+    ],
+    "packages": [],
+    "page_count": 1,
+    "pages_inspected": [
+     1
+    ],
+    "parts_named": [
+     {
+      "page": 1,
+      "token": "BQ2000T"
+     }
+    ],
+    "parts_named_count": 1,
+    "pin_bogeys": [],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": null,
+    "scope_statement": null,
+    "scope_status": "read_ok",
+    "series_tokens": [],
+    "title_verbatim": "BQ2000T Switching Regulator Features: 100 kHz fixed frequency operation, cycle-by-cycle current limiting.",
+    "variant_count": 0,
+    "vendor": "ti"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "single_opn",
+   "pages": [
+    "BQ2000T Switching Regulator\nFeatures: 100 kHz fixed frequency operation, cycle-by-cycle current limiting.\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    }
+   ],
+   "vendor": "ti"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": "manual",
+    "attributes_addressed": [],
+    "category": "mcu",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "reference_manual",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "STM32"
+    ],
+    "governs_series": [
+     "STM32F446xx"
+    ],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "wildcard_series_tokens_printed",
+     "document_class=reference_manual",
+     "registry_stems=2"
+    ],
+    "packages": [],
+    "page_count": 1,
+    "pages_inspected": [
+     1
+    ],
+    "parts_named": [],
+    "parts_named_count": 0,
+    "pin_bogeys": [],
+    "registry_stems": 2,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": 1,
+    "scope_statement": "peripherals of STM32F446xx",
+    "scope_status": "read_ok",
+    "series_tokens": [
+     "STM32F446xx"
+    ],
+    "title_verbatim": "RM0390 Reference manual STM32F446xx advanced Arm-based 32-bit MCUs",
+    "variant_count": 0,
+    "vendor": "st"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "reference_manual_class",
+   "pages": [
+    "RM0390 Reference manual\nSTM32F446xx advanced Arm-based 32-bit MCUs\nThis manual describes how to use the memory and peripherals of STM32F446xx\nmicrocontrollers.\n"
+   ],
+   "registry_stems": 2,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    }
+   ],
+   "vendor": "st"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": null,
+    "attributes_addressed": [],
+    "category": "mcu",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "programming_manual",
+    "document_subject": "cpu_core",
+    "extraction_failed_reason": null,
+    "family_stems": [],
+    "governs_series": [],
+    "grain": "not_device_family",
+    "grain_reasons": [
+     "document_subject=cpu_core"
+    ],
+    "packages": [],
+    "page_count": 1,
+    "pages_inspected": [
+     1
+    ],
+    "parts_named": [],
+    "parts_named_count": 0,
+    "pin_bogeys": [],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": null,
+    "scope_statement": null,
+    "scope_status": "read_ok",
+    "series_tokens": [],
+    "title_verbatim": "PM0214 Programming manual STM32 Cortex-M4 MCUs and MPUs programming manual",
+    "variant_count": 0,
+    "vendor": "st"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "cpu_core_subject",
+   "pages": [
+    "PM0214 Programming manual\nSTM32 Cortex-M4 MCUs and MPUs programming manual\nThis programming manual describes the instruction set core programming model for the Arm\nCortex-M4 core.\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    }
+   ],
+   "vendor": "st"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": null,
+    "attributes_addressed": [],
+    "category": "mcu",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": "no_text_layer_on_front_matter",
+    "family_stems": [],
+    "governs_series": [],
+    "grain": "extraction_failed",
+    "grain_reasons": [
+     "extraction_failed"
+    ],
+    "packages": [],
+    "page_count": 1,
+    "pages_inspected": [],
+    "parts_named": [],
+    "parts_named_count": 0,
+    "pin_bogeys": [],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": null,
+    "scope_statement": null,
+    "scope_status": "extraction_failed",
+    "series_tokens": [],
+    "title_verbatim": null,
+    "variant_count": 0,
+    "vendor": "acme"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "no_text_layer",
+   "pages": [
+    "tiny\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    }
+   ],
+   "vendor": "acme"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": "ordering_variants",
+    "attributes_addressed": [],
+    "category": "mcu",
+    "denominator_cells": 0,
+    "device_table_located": false,
+    "device_tables": [],
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "ACME100"
+    ],
+    "governs_series": [],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "parts_named=3"
+    ],
+    "packages": [
+     {
+      "package_family": "LQFP",
+      "page": 1,
+      "pin_count": 64
+     },
+     {
+      "package_family": "LQFP",
+      "page": 1,
+      "pin_count": 100
+     },
+     {
+      "package_family": "UFBGA",
+      "page": 1,
+      "pin_count": 144
+     },
+     {
+      "package_family": "QFN",
+      "page": 1,
+      "pin_count": 48
+     }
+    ],
+    "page_count": 1,
+    "pages_inspected": [
+     1
+    ],
+    "parts_named": [
+     {
+      "page": 1,
+      "token": "ACME1000"
+     },
+     {
+      "page": 1,
+      "token": "ACME1000MP"
+     },
+     {
+      "page": 1,
+      "token": "ACME1000TP"
+     }
+    ],
+    "parts_named_count": 3,
+    "pin_bogeys": [
+     48,
+     64,
+     100,
+     144
+    ],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": null,
+    "scope_statement": null,
+    "scope_status": "read_ok",
+    "series_tokens": [],
+    "title_verbatim": "ACME1000 Dual LDO Family Ordering information: ACME1000MP and ACME1000TP. Available in LQFP64, LQFP100 and",
+    "variant_count": 0,
+    "vendor": "acme"
+   },
+   "kind": "census",
+   "lane_pages": null,
+   "name": "pin_bogeys_and_packages",
+   "pages": [
+    "ACME1000 Dual LDO Family\nOrdering information: ACME1000MP and ACME1000TP. Available in LQFP64, LQFP100 and\nUFBGA144 packages; 48-pin QFN.\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    }
+   ],
+   "vendor": "acme"
+  },
+  {
+   "category": "mcu",
+   "expected": {
+    "above_opn_kind": "family_matrix",
+    "attributes_addressed": [
+     "code_flash_kb",
+     "sram_kb",
+     "package"
+    ],
+    "category": "mcu",
+    "denominator_cells": 6,
+    "device_table_located": true,
+    "device_tables": [
+     {
+      "attribute_rows": 3,
+      "attributes_addressed": [
+       "code_flash_kb",
+       "sram_kb",
+       "package"
+      ],
+      "columns": 4,
+      "orientation": "parts_as_rows",
+      "page": 2,
+      "rows": 3,
+      "series_tokens": [],
+      "variant_count": 2,
+      "variant_labels": [
+       "GD32F103C8",
+       "GD32F103CB"
+      ]
+     }
+    ],
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "extraction_failed_reason": null,
+    "family_stems": [
+     "GD32"
+    ],
+    "governs_series": [
+     "GD32F103xx",
+     "GD32F153xx"
+    ],
+    "grain": "above_opn",
+    "grain_reasons": [
+     "wildcard_series_tokens_printed",
+     "parts_named=2",
+     "device_table_with_variants"
+    ],
+    "packages": [
+     {
+      "package_family": "LQFP",
+      "page": 2,
+      "pin_count": 48
+     }
+    ],
+    "page_count": 2,
+    "pages_inspected": [
+     1,
+     2
+    ],
+    "parts_named": [
+     {
+      "page": 2,
+      "token": "GD32F103C8"
+     },
+     {
+      "page": 2,
+      "token": "GD32F103CB"
+     }
+    ],
+    "parts_named_count": 2,
+    "pin_bogeys": [
+     48
+    ],
+    "registry_stems": 0,
+    "schema": "harness.electronics-family-census.v1",
+    "scope_page": 1,
+    "scope_statement": "For GD32F103xx and GD32F153xx",
+    "scope_status": "read_ok",
+    "series_tokens": [
+     "GD32F103xx",
+     "GD32F153xx"
+    ],
+    "title_verbatim": "GD32F103xx Datasheet For GD32F103xx and GD32F153xx microcontrollers.",
+    "variant_count": 2,
+    "vendor": "gigadevice"
+   },
+   "kind": "census",
+   "lane_pages": {
+    "opn_decoder": [],
+    "series_summary": [
+     2
+    ]
+   },
+   "name": "lane_pages_hint",
+   "pages": [
+    "GD32F103xx Datasheet\nFor GD32F103xx and GD32F153xx microcontrollers.\n",
+    "Ordering information. No keyword heading here at all.\nDevice name\nFlash\nSRAM\nPackage\nGD32F103C8\n64\n20\nLQFP48\nGD32F103CB\n128\n20\nLQFP48\n"
+   ],
+   "registry_stems": 0,
+   "tables": [
+    {
+     "page": 1,
+     "tables": []
+    },
+    {
+     "page": 2,
+     "tables": [
+      [
+       [
+        "Device name",
+        "Flash",
+        "SRAM",
+        "Package"
+       ],
+       [
+        "GD32F103C8",
+        "64",
+        "20",
+        "LQFP48"
+       ],
+       [
+        "GD32F103CB",
+        "128",
+        "20",
+        "LQFP48"
+       ]
+      ]
+     ]
+    }
+   ],
+   "vendor": "gigadevice"
+  },
+  {
+   "expected": true,
+   "kind": "is_wildcard_token",
+   "name": "wildcard_gd32",
+   "token": "GD32F405xx"
+  },
+  {
+   "expected": true,
+   "kind": "is_wildcard_token",
+   "name": "wildcard_st_g0",
+   "token": "STM32G0x1"
+  },
+  {
+   "expected": false,
+   "kind": "is_wildcard_token",
+   "name": "concrete_not_wildcard",
+   "token": "STM32C011F4"
+  },
+  {
+   "expected": [
+    "GD32F405xx",
+    "GD32F407xx",
+    "GD32F450xx"
+   ],
+   "kind": "wildcards_from_text",
+   "name": "three_series",
+   "text": "For GD32F405xx, GD32F407xx and GD32F450xx"
+  },
+  {
+   "expected": [],
+   "kind": "parts_from_text",
+   "name": "wildcard_is_not_a_part",
+   "stems": null,
+   "text": "For GD32F405xx microcontrollers"
+  },
+  {
+   "expected": true,
+   "kind": "is_concrete_part_token",
+   "name": "concrete_STM32C011F4",
+   "token": "STM32C011F4"
+  },
+  {
+   "expected": true,
+   "kind": "is_concrete_part_token",
+   "name": "concrete_R7FA0E1073CFJ",
+   "token": "R7FA0E1073CFJ"
+  },
+  {
+   "expected": true,
+   "kind": "is_concrete_part_token",
+   "name": "concrete_S32K144",
+   "token": "S32K144"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_RM0090",
+   "token": "RM0090"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_DS40002183B",
+   "token": "DS40002183B"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_LQFP64",
+   "token": "LQFP64"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_VQFN48",
+   "token": "VQFN48"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_OSC32K",
+   "token": "OSC32K"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_XOSC32K",
+   "token": "XOSC32K"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_SERNUM15",
+   "token": "SERNUM15"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_YUV444",
+   "token": "YUV444"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_R01DS0427EJ0120",
+   "token": "R01DS0427EJ0120"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_PLQP0032GB-A",
+   "token": "PLQP0032GB-A"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_REV1",
+   "token": "REV1"
+  },
+  {
+   "expected": false,
+   "kind": "is_concrete_part_token",
+   "name": "junk_PA10",
+   "token": "PA10"
+  },
+  {
+   "expected": [
+    "STM32C011F4",
+    "STM32C011J6"
+   ],
+   "kind": "parts_from_text",
+   "name": "anchored_to_family_stems",
+   "stems": [
+    "STM32"
+   ],
+   "text": "Ordering: STM32C011F4, STM32C011J6 and companion LDO XC6206P332MR"
+  },
+  {
+   "expected": [
+    "AVR128",
+    "GD32",
+    "STM32"
+   ],
+   "kind": "stems_from_tokens",
+   "name": "family_stems",
+   "tokens": [
+    "STM32C011x4",
+    "GD32F405xx",
+    "AVR128DA28"
+   ]
+  },
+  {
+   "expected": [
+    {
+     "package_family": "LQFP",
+     "pin_count": 64
+    },
+    {
+     "package_family": "LQFP",
+     "pin_count": 100
+    },
+    {
+     "package_family": "UFBGA",
+     "pin_count": 144
+    },
+    {
+     "package_family": "QFN",
+     "pin_count": 48
+    }
+   ],
+   "kind": "packages_from_text",
+   "name": "pin_bogeys",
+   "text": "Available in LQFP64, LQFP100 and UFBGA144 packages; 48-pin QFN"
+  },
+  {
+   "expected": [
+    "data_flash_kb"
+   ],
+   "kind": "attributes_in_label",
+   "label": "Flash Data area (KB)",
+   "name": "label_'Flash Data area (KB)'"
+  },
+  {
+   "expected": [
+    "code_flash_kb"
+   ],
+   "kind": "attributes_in_label",
+   "label": "Flash Code area (KB)",
+   "name": "label_'Flash Code area (KB)'"
+  },
+  {
+   "expected": [
+    "code_flash_kb"
+   ],
+   "kind": "attributes_in_label",
+   "label": "Flash memory (Kbyte)",
+   "name": "label_'Flash memory (Kbyte)'"
+  },
+  {
+   "expected": [
+    "data_flash_kb"
+   ],
+   "kind": "attributes_in_label",
+   "label": "Data flash memory",
+   "name": "label_'Data flash memory'"
+  },
+  {
+   "expected": [
+    "eeprom_kb"
+   ],
+   "kind": "attributes_in_label",
+   "label": "EEPROM",
+   "name": "label_'EEPROM'"
+  },
+  {
+   "expected": [
+    "standby_current_ua"
+   ],
+   "kind": "attributes_in_label",
+   "label": "Standby mode current (uA)",
+   "name": "label_'Standby mode current (uA)'"
+  },
+  {
+   "expected": [],
+   "kind": "attributes_in_label",
+   "label": "",
+   "name": "label_''"
+  },
+  {
+   "expected": [
+    [
+     "Product part number",
+     "Code flash",
+     "SRAM",
+     "Operating temperature"
+    ],
+    [
+     "R7FA2E1A93CFM",
+     "128",
+     "16",
+     "-40 to +105C"
+    ],
+    [
+     "R7FA2E1A72DFL",
+     "64",
+     "16",
+     "-40 to +85C"
+    ]
+   ],
+   "kind": "strip_title_rows",
+   "name": "caption_stripped",
+   "rows": [
+    [
+     "Table 1.12 Product list (1 of 2)",
+     null,
+     null,
+     null
+    ],
+    [
+     "Product part number",
+     "Code flash",
+     "SRAM",
+     "Operating temperature"
+    ],
+    [
+     "R7FA2E1A93CFM",
+     "128",
+     "16",
+     "-40 to +105C"
+    ],
+    [
+     "R7FA2E1A72DFL",
+     "64",
+     "16",
+     "-40 to +85C"
+    ]
+   ]
+  },
+  {
+   "expected": {
+    "attribute_rows": 5,
+    "attributes_addressed": [
+     "code_flash_kb",
+     "data_flash_kb",
+     "sram_kb",
+     "timers",
+     "package"
+    ],
+    "columns": 5,
+    "orientation": "parts_as_columns",
+    "rows": 7,
+    "series_tokens": [
+     "GD32F405xx"
+    ],
+    "variant_count": 3,
+    "variant_labels": [
+     "RE",
+     "RG",
+     "RK"
+    ]
+   },
+   "kind": "classify_table",
+   "name": "parts_as_columns",
+   "rows": [
+    [
+     "Part Number",
+     "",
+     "GD32F405xx",
+     "",
+     ""
+    ],
+    [
+     "",
+     "",
+     "RE",
+     "RG",
+     "RK"
+    ],
+    [
+     "Flash",
+     "Code area (KB)",
+     "512",
+     "512",
+     "512"
+    ],
+    [
+     "",
+     "Data area (KB)",
+     "0",
+     "512",
+     "2560"
+    ],
+    [
+     "SRAM (KB)",
+     "",
+     "192",
+     "192",
+     "192"
+    ],
+    [
+     "Timers",
+     "General timer",
+     "8",
+     "8",
+     "8"
+    ],
+    [
+     "Package",
+     "",
+     "LQFP64",
+     "LQFP64",
+     "LQFP64"
+    ]
+   ]
+  },
+  {
+   "expected": {
+    "attribute_rows": 4,
+    "attributes_addressed": [
+     "code_flash_kb",
+     "sram_kb",
+     "pin_count",
+     "freq_mhz"
+    ],
+    "columns": 5,
+    "orientation": "parts_as_rows",
+    "rows": 4,
+    "series_tokens": [],
+    "variant_count": 3,
+    "variant_labels": [
+     "S32K142",
+     "S32K144",
+     "S32K146"
+    ]
+   },
+   "kind": "classify_table",
+   "name": "parts_as_rows",
+   "rows": [
+    [
+     "Device",
+     "Flash (KB)",
+     "SRAM (KB)",
+     "Pins",
+     "Max freq (MHz)"
+    ],
+    [
+     "S32K142",
+     "256",
+     "32",
+     "64",
+     "112"
+    ],
+    [
+     "S32K144",
+     "512",
+     "64",
+     "100",
+     "112"
+    ],
+    [
+     "S32K146",
+     "1024",
+     "128",
+     "144",
+     "112"
+    ]
+   ]
+  },
+  {
+   "expected": null,
+   "kind": "classify_table",
+   "name": "electrical_chars",
+   "rows": [
+    [
+     "Symbol",
+     "Parameter",
+     "Conditions",
+     "Min",
+     "Typ",
+     "Max",
+     "Unit"
+    ],
+    [
+     "fHSE",
+     "External clock frequency",
+     "",
+     "4",
+     "",
+     "48",
+     "MHz"
+    ],
+    [
+     "TA",
+     "Ambient temperature",
+     "",
+     "-40",
+     "",
+     "85",
+     "C"
+    ],
+    [
+     "VDD",
+     "Operating voltage",
+     "",
+     "2.0",
+     "",
+     "3.6",
+     "V"
+    ]
+   ]
+  },
+  {
+   "expected": null,
+   "kind": "classify_table",
+   "name": "abs_max",
+   "rows": [
+    [
+     "",
+     "",
+     "MIN",
+     "MAX",
+     "UNIT"
+    ],
+    [
+     "Input voltage",
+     "VBUS",
+     "-0.3",
+     "18",
+     "V"
+    ],
+    [
+     "Operating junction temperature",
+     "TJ",
+     "-40",
+     "125",
+     "C"
+    ],
+    [
+     "Pin voltage",
+     "PG, CE",
+     "-0.3",
+     "7",
+     "V"
+    ],
+    [
+     "Timer",
+     "TMR",
+     "",
+     "10",
+     "s"
+    ]
+   ]
+  },
+  {
+   "expected": null,
+   "kind": "classify_table",
+   "name": "too_small",
+   "rows": [
+    [
+     "a",
+     "b",
+     "c"
+    ],
+    [
+     "d",
+     "e",
+     "f"
+    ]
+   ]
+  },
+  {
+   "args": {
+    "device_tables": [
+     {
+      "variant_count": 5
+     }
+    ],
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "parts_named": [
+     "STM32C011F4",
+     "STM32C011J6"
+    ],
+    "registry_stems": 3,
+    "scope_status": "read_ok",
+    "series_tokens": [
+     "STM32C011x4"
+    ]
+   },
+   "expected": [
+    "above_opn",
+    [
+     "wildcard_series_tokens_printed",
+     "parts_named=2",
+     "device_table_with_variants",
+     "registry_stems=3"
+    ]
+   ],
+   "kind": "classify_grain",
+   "name": "grain_above_opn"
+  },
+  {
+   "args": {
+    "device_tables": [],
+    "document_class": "datasheet",
+    "document_subject": "device_family",
+    "parts_named": [
+     "BQ2000T"
+    ],
+    "registry_stems": 1,
+    "scope_status": "read_ok",
+    "series_tokens": []
+   },
+   "expected": [
+    "single_opn",
+    [
+     "parts_named=1",
+     "registry_stems=1"
+    ]
+   ],
+   "kind": "classify_grain",
+   "name": "grain_single_opn"
+  },
+  {
+   "args": {
+    "device_tables": [],
+    "document_class": "programming_manual",
+    "document_subject": "cpu_core",
+    "parts_named": [],
+    "registry_stems": 1,
+    "scope_status": "read_ok",
+    "series_tokens": [
+     "STM32F4xx"
+    ]
+   },
+   "expected": [
+    "not_device_family",
+    [
+     "document_subject=cpu_core"
+    ]
+   ],
+   "kind": "classify_grain",
+   "name": "grain_not_device_family"
+  },
+  {
+   "args": {
+    "device_tables": [],
+    "document_class": "unknown",
+    "document_subject": "unknown",
+    "parts_named": [],
+    "registry_stems": 0,
+    "scope_status": "extraction_failed",
+    "series_tokens": []
+   },
+   "expected": [
+    "extraction_failed",
+    [
+     "extraction_failed"
+    ]
+   ],
+   "kind": "classify_grain",
+   "name": "grain_extraction_failed"
+  },
+  {
+   "args": {
+    "device_tables": [],
+    "document_class": "reference_manual",
+    "document_subject": "device_family",
+    "parts_named": [],
+    "registry_stems": 0,
+    "scope_status": "read_ok",
+    "series_tokens": []
+   },
+   "expected": [
+    "above_opn",
+    [
+     "document_class=reference_manual"
+    ]
+   ],
+   "kind": "classify_grain",
+   "name": "grain_reference_manual"
+  },
+  {
+   "args": {
+    "device_tables": [
+     {
+      "attributes_addressed": [
+       "code_flash_kb",
+       "sram_kb",
+       "pin_count"
+      ],
+      "variant_count": 4
+     }
+    ],
+    "document_class": "datasheet",
+    "parts_named": [],
+    "series_tokens": []
+   },
+   "expected": "family_matrix",
+   "kind": "above_opn_kind",
+   "name": "kind_family_matrix"
+  },
+  {
+   "args": {
+    "device_tables": [],
+    "document_class": "reference_manual",
+    "parts_named": [],
+    "series_tokens": [
+     "STM32F4xx"
+    ]
+   },
+   "expected": "manual",
+   "kind": "above_opn_kind",
+   "name": "kind_manual"
+  },
+  {
+   "args": {
+    "device_tables": [],
+    "document_class": "datasheet",
+    "parts_named": [
+     "BQ2000TPN",
+     "BQ2000TSN"
+    ],
+    "series_tokens": []
+   },
+   "expected": "ordering_variants",
+   "kind": "above_opn_kind",
+   "name": "kind_ordering_variants"
+  },
+  {
+   "args": {
+    "device_tables": [],
+    "document_class": "datasheet",
+    "parts_named": [],
+    "series_tokens": [
+     "GD32F405xx"
+    ]
+   },
+   "expected": "wildcard_only",
+   "kind": "above_opn_kind",
+   "name": "kind_wildcard_only"
+  },
+  {
+   "args": {
+    "device_tables": [
+     {
+      "attributes_addressed": [
+       "freq_mhz",
+       "temp_range"
+      ],
+      "variant_count": 4
+     }
+    ],
+    "document_class": "datasheet",
+    "parts_named": [],
+    "series_tokens": []
+   },
+   "expected": null,
+   "kind": "above_opn_kind",
+   "name": "kind_thin_matrix_unclassified"
+  },
+  {
+   "expected": {
+    "by_vendor": {
+     "st": {
+      "above_opn": 1,
+      "above_opn_denominator_cells": 78,
+      "above_opn_device_table_located": 1,
+      "above_opn_kind": {
+       "family_matrix": 1
+      },
+      "above_opn_parts_named_total": 6,
+      "attributes_addressed": {
+       "code_flash_kb": 1,
+       "sram_kb": 1
+      },
+      "documents": 2,
+      "grain": {
+       "above_opn": 1,
+       "single_opn": 1
+      }
+     },
+     "ti": {
+      "above_opn": 1,
+      "above_opn_denominator_cells": 0,
+      "above_opn_device_table_located": 0,
+      "above_opn_kind": {
+       "ordering_variants": 1
+      },
+      "above_opn_parts_named_total": 3,
+      "attributes_addressed": {},
+      "documents": 1,
+      "grain": {
+       "above_opn": 1
+      }
+     }
+    },
+    "overall": {
+     "above_opn": {
+      "attributes_addressed": {
+       "code_flash_kb": 1,
+       "sram_kb": 1
+      },
+      "denominator_cells_total": 78,
+      "device_table_located": 1,
+      "documents": 2,
+      "documents_with_parts_named": 2,
+      "documents_with_pin_bogeys": 1,
+      "kind": {
+       "family_matrix": 1,
+       "ordering_variants": 1
+      },
+      "parts_named_total": 9,
+      "scope_statement_printed": 1
+     },
+     "document_class": {
+      "datasheet": 3
+     },
+     "documents": 3,
+     "grain": {
+      "above_opn": 2,
+      "single_opn": 1
+     }
+    },
+    "schema": "harness.electronics-family-census-summary.v1"
+   },
+   "kind": "summarize",
+   "name": "by_vendor_and_attribute",
+   "rows": [
+    {
+     "above_opn_kind": "family_matrix",
+     "attributes_addressed": [
+      "code_flash_kb",
+      "sram_kb"
+     ],
+     "denominator_cells": 78,
+     "device_table_located": true,
+     "document_class": "datasheet",
+     "grain": "above_opn",
+     "parts_named_count": 6,
+     "pin_bogeys": [
+      20
+     ],
+     "scope_statement": null,
+     "vendor": "st"
+    },
+    {
+     "document_class": "datasheet",
+     "grain": "single_opn",
+     "vendor": "st"
+    },
+    {
+     "above_opn_kind": "ordering_variants",
+     "attributes_addressed": [],
+     "denominator_cells": 0,
+     "device_table_located": false,
+     "document_class": "datasheet",
+     "grain": "above_opn",
+     "parts_named_count": 3,
+     "pin_bogeys": [],
+     "scope_statement": "For TPS7A47xx",
+     "vendor": "ti"
+    }
+   ]
+  }
+ ]
+}

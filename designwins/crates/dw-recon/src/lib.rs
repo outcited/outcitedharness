@@ -10,6 +10,11 @@
 //!   (`harness/electronics/document_scope.py`, ported 1:1; gold from the
 //!   live reference over rendered PDFs, `tests/fixtures/gold/
 //!   document_scope_v1.json`).
+//! * [`family_census`] — the above-OPN document census: grain, parts named,
+//!   pin bogeys, device tables, denominator
+//!   (`harness/electronics/family_census.py`, ported 1:1; gold from the
+//!   live reference over rendered PDFs, `tests/fixtures/gold/
+//!   family_census_v1.json`).
 //!
 //! This crate calls no models and is `forbid(unsafe_code)`.
 
@@ -17,5 +22,7 @@
 #![deny(missing_docs)]
 
 pub mod document_scope;
+pub mod family_census;
 
 pub use document_scope::{read_scope, ScopeRow};
+pub use family_census::{census_document, CensusRow};
