@@ -1,0 +1,19 @@
+[package]
+name = "dw-queue"
+description = "The loop's engine: the SQLite-backed pipeline store (jobs, results, adjudication ledger) — port of harness/pipeline/store.py. Queue cap, sweep, visibility reclaim, bounded attempts."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+rusqlite = { version = "0.37", features = ["bundled"] }
+
+[dev-dependencies]
+
+[lints]
+workspace = true

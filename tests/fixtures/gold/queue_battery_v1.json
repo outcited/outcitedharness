@@ -1,0 +1,251 @@
+{
+ "ack_dedup_and_ledger": {
+  "adjudication_ledger": [
+   {
+    "claim_index": 0,
+    "created_at": 1700000001.0,
+    "evidence_quote": "q",
+    "extractor": "ext",
+    "failure_class": "hallucination",
+    "id": 1,
+    "judge": "judge",
+    "judge_version": "j1",
+    "reason_code": "value_not_in_quote",
+    "result_id": 1,
+    "severity": "P0",
+    "verdict": "UNSUPPORTED"
+   }
+  ],
+  "budget_spend": [],
+  "jobs": [
+   {
+    "attempts": 1,
+    "budget_tier": null,
+    "claimed_at": 1700000001.0,
+    "claimed_by": "worker-3",
+    "corpus_key": "sha256:fff",
+    "created_at": 1700000000.0,
+    "grain": null,
+    "id": 1,
+    "kind": "substrate",
+    "max_attempts": 3,
+    "payload": null,
+    "pillar": null,
+    "schema_name": null,
+    "source_path": null,
+    "state": "done",
+    "updated_at": 1700000001.0,
+    "visibility_s": 3600.0
+   }
+  ],
+  "results": [
+   {
+    "corpus_key": "sha256:fff",
+    "created_at": 1700000001.0,
+    "document_sha256": null,
+    "extractor": "ext",
+    "extractor_version": "v1",
+    "id": 1,
+    "job_id": 1,
+    "kind_hint": "substrate",
+    "output": "{\"n\": 1}",
+    "page_label_map": null
+   }
+  ]
+ },
+ "budget": {
+  "adjudication_ledger": [],
+  "budget_spend": [
+   {
+    "day": "2026-10-12",
+    "jobs": 2,
+    "tier": "frontier"
+   }
+  ],
+  "jobs": [],
+  "results": []
+ },
+ "enqueue_claim_ack": {
+  "adjudication_ledger": [],
+  "budget_spend": [],
+  "jobs": [
+   {
+    "attempts": 1,
+    "budget_tier": null,
+    "claimed_at": 1700000001.0,
+    "claimed_by": "worker-1",
+    "corpus_key": "sha256:aaa",
+    "created_at": 1700000000.0,
+    "grain": null,
+    "id": 1,
+    "kind": "substrate",
+    "max_attempts": 3,
+    "payload": null,
+    "pillar": null,
+    "schema_name": null,
+    "source_path": "/x/a.pdf",
+    "state": "done",
+    "updated_at": 1700000002.0,
+    "visibility_s": 3600.0
+   },
+   {
+    "attempts": 1,
+    "budget_tier": "local-student",
+    "claimed_at": 1700000001.0,
+    "claimed_by": "worker-1",
+    "corpus_key": "sha256:bbb",
+    "created_at": 1700000000.0,
+    "grain": null,
+    "id": 2,
+    "kind": "substrate",
+    "max_attempts": 3,
+    "payload": "{\"p\": 1}",
+    "pillar": null,
+    "schema_name": null,
+    "source_path": null,
+    "state": "done",
+    "updated_at": 1700000002.0,
+    "visibility_s": 3600.0
+   },
+   {
+    "attempts": 0,
+    "budget_tier": null,
+    "claimed_at": null,
+    "claimed_by": null,
+    "corpus_key": "sha256:ccc",
+    "created_at": 1700000000.0,
+    "grain": null,
+    "id": 3,
+    "kind": "extract",
+    "max_attempts": 3,
+    "payload": null,
+    "pillar": null,
+    "schema_name": null,
+    "source_path": null,
+    "state": "pending",
+    "updated_at": 1700000000.0,
+    "visibility_s": 3600.0
+   }
+  ],
+  "results": [
+   {
+    "corpus_key": "sha256:aaa",
+    "created_at": 1700000002.0,
+    "document_sha256": null,
+    "extractor": "ext",
+    "extractor_version": "v1",
+    "id": 1,
+    "job_id": 1,
+    "kind_hint": "substrate",
+    "output": "{\"rows\": 1}",
+    "page_label_map": null
+   },
+   {
+    "corpus_key": "sha256:bbb",
+    "created_at": 1700000002.0,
+    "document_sha256": null,
+    "extractor": "ext",
+    "extractor_version": "v1",
+    "id": 2,
+    "job_id": 2,
+    "kind_hint": "substrate",
+    "output": "{\"rows\": 2}",
+    "page_label_map": null
+   }
+  ]
+ },
+ "fail_to_dead": {
+  "adjudication_ledger": [
+   {
+    "claim_index": null,
+    "created_at": 1700000005.0,
+    "evidence_quote": null,
+    "extractor": null,
+    "failure_class": null,
+    "id": 1,
+    "judge": "queue",
+    "judge_version": null,
+    "reason_code": "boom",
+    "result_id": null,
+    "severity": "P3",
+    "verdict": "JOB_FAILED"
+   },
+   {
+    "claim_index": null,
+    "created_at": 1700000010.0,
+    "evidence_quote": null,
+    "extractor": null,
+    "failure_class": null,
+    "id": 2,
+    "judge": "queue",
+    "judge_version": null,
+    "reason_code": "boom",
+    "result_id": null,
+    "severity": "P3",
+    "verdict": "JOB_FAILED"
+   }
+  ],
+  "budget_spend": [],
+  "jobs": [
+   {
+    "attempts": 2,
+    "budget_tier": null,
+    "claimed_at": 1700000010.0,
+    "claimed_by": "worker-2",
+    "corpus_key": "sha256:ddd",
+    "created_at": 1700000000.0,
+    "grain": null,
+    "id": 1,
+    "kind": "substrate",
+    "max_attempts": 2,
+    "payload": null,
+    "pillar": null,
+    "schema_name": null,
+    "source_path": null,
+    "state": "dead",
+    "updated_at": 1700000010.0,
+    "visibility_s": 3600.0
+   }
+  ],
+  "results": []
+ },
+ "visibility_reclaim": {
+  "adjudication_ledger": [],
+  "budget_spend": [],
+  "jobs": [
+   {
+    "attempts": 2,
+    "budget_tier": null,
+    "claimed_at": 1700004101.0,
+    "claimed_by": "worker-b",
+    "corpus_key": "sha256:eee",
+    "created_at": 1700000000.0,
+    "grain": null,
+    "id": 1,
+    "kind": "substrate",
+    "max_attempts": 3,
+    "payload": null,
+    "pillar": null,
+    "schema_name": null,
+    "source_path": null,
+    "state": "done",
+    "updated_at": 1700004101.0,
+    "visibility_s": 3600.0
+   }
+  ],
+  "results": [
+   {
+    "corpus_key": "sha256:eee",
+    "created_at": 1700004101.0,
+    "document_sha256": null,
+    "extractor": "ext",
+    "extractor_version": "v1",
+    "id": 1,
+    "job_id": 1,
+    "kind_hint": "substrate",
+    "output": "{}",
+    "page_label_map": null
+   }
+  ]
+ }
+}
