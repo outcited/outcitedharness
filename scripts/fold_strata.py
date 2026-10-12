@@ -167,6 +167,8 @@ def regen_cube(root: Path) -> dict:
                 key = (row.get("aisle") or "unassigned", "cr-core", vendor)
             elif feed.name == "parts_family.jsonl":
                 key = ("mcu", "family-documents", vendor)
+            elif feed.name == "parts_burn.jsonl":
+                key = ("power/semiconductor", "burn", vendor)
             else:
                 key = ("power/semiconductor", "catalog", vendor)
             cell = cells.setdefault(key, {
@@ -185,20 +187,67 @@ def regen_cube(root: Path) -> dict:
     return {"cells": len(cube["cells"]), "sha256": sha(body)}
 
 
+BURN_DIR = Path(__file__).resolve().parents[1] / "results" / "burn-power-batch1-local"
+
+
+def fold_burn(root: Path, burn_dir: Path) -> dict:
+    """Burn outputs -> parts_burn.jsonl. The per-doc claim_data rows carry
+    quote + row + column provenance (the burn prompt mandates it); the
+    source_pdf is the pdf stem by construction (`f"{p.stem}.json"`)."""
+    if not burn_dir.is_dir():
+        return {"rows": 0}
+    rows = []
+    for f in sorted(burn_dir.glob("*.json")):
+        if f.name.startswith("_"):
+            continue
+        try:
+            rec = json.loads(f.read_text())
+        except Exception:
+            continue
+        stem = rec.get("stem") or f.stem
+        if "-" in stem:
+            vendor, part = stem.split("-", 1)
+        else:
+            vendor, part = "unknown", stem
+        claims = []
+        for c in rec.get("claim_data") or []:
+            claims.append({
+                "field": str(c.get("symbol") or "unknown")[:64],
+                "value": "" if c.get("value") is None else str(c.get("value")),
+                "quote": c.get("quote"),
+                "source": {
+                    "column_header": c.get("column_header"),
+                    "crop": None,
+                    "page": None,
+                    "row_header": c.get("row_header"),
+                    "sha": None,
+                    "doc_sha256": None,
+                    "source_pdf": f"{stem}.pdf",
+                    "provenance_tier": None,
+                },
+            })
+        rows.append({"part_number": part, "vendor": vendor, "claims": claims})
+    body = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
+    (root / "parts_burn.jsonl").write_text(body)
+    return {"rows": len(rows), "bytes": len(body), "sha256": sha(body)}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(DEFAULT_ROOT))
+    ap.add_argument("--burn-dir", default=str(BURN_DIR))
     args = ap.parse_args()
     root = Path(args.root)
     root.mkdir(parents=True, exist_ok=True)
     cr = fold_cr_core(root)
+    burn = fold_burn(root, Path(args.burn_dir))
     cube = regen_cube(root)
     files = {}
-    for f in ("parts_catalog.jsonl", "parts_family.jsonl", "parts_cr_core.jsonl", "cube.json"):
+    for f in ("parts_catalog.jsonl", "parts_family.jsonl", "parts_cr_core.jsonl", "parts_burn.jsonl", "cube.json"):
         p = root / f
         if p.exists():
             files[f] = {"sha256": sha(p.read_text()), "bytes": p.stat().st_size}
-    manifest = {"fold": "strata->served", "cr_core": cr, "cube": cube, "files": files}
+    manifest = {"fold": "strata->served", "cr_core": cr, "burn": burn, "cube": cube, "files": files}
     (root / "fold_manifest.json").write_text(json.dumps(manifest, indent=1, sort_keys=True))
     print(json.dumps(manifest, indent=1, sort_keys=True))
     return 0

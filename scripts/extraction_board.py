@@ -30,6 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 STAGING = Path("/Volumes/M5_4TB/staging/datasheet_extractions")
 OUT = ROOT / "results" / "api-coverage"
 SNAP_DIR = OUT / "board"
+EXPORT_ROOT = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/api-store-export")
 
 # What the front end can render, per part — the saleable facets.
 FACETS = [
@@ -193,6 +194,15 @@ def snapshot() -> dict:
         board["categories"][cat] = entry
         board["totals"]["records"] += len(files)
         board["totals"]["addressable"] += n
+    # Served: what the api-store-export carries right now (the fold's output).
+    served = 0
+    if EXPORT_ROOT.is_dir():
+        for feed in sorted(EXPORT_ROOT.glob("parts_*.jsonl")):
+            try:
+                served += sum(1 for l in feed.read_text().splitlines() if l.strip())
+            except Exception:
+                continue
+    board["totals"]["served_parts"] = served
     cr = cr_core_stratum()
     cat_db = catalog_stratum()
     gold = gold_stratum()
@@ -248,10 +258,17 @@ def render(cur: dict, prev: dict | None) -> str:
         "**Movement is the marker.** Δ since previous snapshot in `( )`.",
         f"Total: **{cur['totals']['addressable']:,} addressable parts** from "
         f"{cur['totals']['records']:,} extraction records.",
+        f"Served (api-store-export): **{cur['totals'].get('served_parts', 0):,}**.",
     ]
     if prev:
         d = cur["totals"]["addressable"] - prev["totals"]["addressable"]
-        lines.append(f"Since last board: **{d:+d} parts**.")
+        lines.append(f"Since last board: **{d:+d} addressable**.")
+        ps = prev["totals"].get("served_parts")
+        if ps is not None:
+            ds = cur["totals"]["served_parts"] - ps
+            lines.append(f"Served store: **{ds:+d} parts** ({ps:,} → {cur['totals']['served_parts']:,}).")
+        else:
+            lines.append(f"Served store: **{cur['totals']['served_parts']:,} parts** (new metric).")
     lines += ["", "## The headline — per category, on a part basis", ""]
     for cat, _ in AISLES:
         e = cur["categories"].get(cat)
