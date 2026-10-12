@@ -108,6 +108,76 @@ pub const AXES: &[AxisSpec] = &[
         default_near_miss_pct: 10.0,
         min_column_evidence: false,
     },
+    // ---- additive, discovered-then-curated (Sam mandate 2026-10-12: every
+    // extractable attribute is a knife; niche coverage still carves cohorts).
+    // Evidence: attribute_mine (claims counts are the ranking); ops follow the
+    // physics (leakage/threshold/drop lower-is-better; carry/survive
+    // higher-is-better). Class filters accept the measured qualifier spread on
+    // characteristics rows; ratings rows pass all classes like Vds/Id.
+    AxisSpec {
+        axis: Axis::VgsRatingV,
+        symbols: &["VGS", "VGSS", "VGSMAX"],
+        op: Op::MinRating,
+        accepts_classes: None,
+        default_near_miss_pct: 10.0,
+        min_column_evidence: true,
+    },
+    AxisSpec {
+        axis: Axis::VgsThV,
+        symbols: &["VGSTH", "VGSTHMAX"],
+        op: Op::MaxRating,
+        accepts_classes: Some(&["rated_limit", "typical", "unknown"]),
+        default_near_miss_pct: 10.0,
+        min_column_evidence: false,
+    },
+    AxisSpec {
+        axis: Axis::VsdV,
+        symbols: &["VSD", "VF"],
+        op: Op::MaxRating,
+        accepts_classes: Some(&["rated_limit", "typical", "unknown"]),
+        default_near_miss_pct: 10.0,
+        min_column_evidence: false,
+    },
+    AxisSpec {
+        axis: Axis::IdssA,
+        symbols: &["IDSS", "IDSSMAX"],
+        op: Op::MaxRating,
+        accepts_classes: Some(&["rated_limit", "typical", "unknown"]),
+        default_near_miss_pct: 10.0,
+        min_column_evidence: false,
+    },
+    AxisSpec {
+        axis: Axis::IgssA,
+        symbols: &["IGSS", "IGSSMAX"],
+        op: Op::MaxRating,
+        accepts_classes: Some(&["rated_limit", "typical", "unknown"]),
+        default_near_miss_pct: 10.0,
+        min_column_evidence: false,
+    },
+    AxisSpec {
+        axis: Axis::IsA,
+        symbols: &["IS", "ISMAX"],
+        op: Op::MinRating,
+        accepts_classes: None,
+        default_near_miss_pct: 10.0,
+        min_column_evidence: true,
+    },
+    AxisSpec {
+        axis: Axis::RgOhm,
+        symbols: &["RG"],
+        op: Op::MaxRating,
+        accepts_classes: Some(&["rated_limit", "typical", "unknown"]),
+        default_near_miss_pct: 10.0,
+        min_column_evidence: false,
+    },
+    AxisSpec {
+        axis: Axis::RthjaCperw,
+        symbols: &["RTHJA", "RTHJ-A", "RΘJA"],
+        op: Op::MaxRating,
+        accepts_classes: Some(&["rated_limit", "typical", "unknown"]),
+        default_near_miss_pct: 10.0,
+        min_column_evidence: false,
+    },
 ];
 
 /// `_norm_symbol` from the reference: strip whitespace and underscores,

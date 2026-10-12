@@ -42,7 +42,15 @@ fn axis_name(a: dw_decide::Axis) -> &'static str {
         dw_decide::Axis::RdsOnOhm => "rds_on_ohm",
         dw_decide::Axis::TjMaxC => "tj_max_c",
         dw_decide::Axis::TstgRangeC => "tstg_range_c",
-        other => panic!("the five-axis registry never mentions {other:?}"),
+        dw_decide::Axis::VgsRatingV => "vgs_rating_v",
+        dw_decide::Axis::VgsThV => "vgs_th_v",
+        dw_decide::Axis::VsdV => "vsd_v",
+        dw_decide::Axis::IdssA => "idss_a",
+        dw_decide::Axis::IgssA => "igss_a",
+        dw_decide::Axis::IsA => "is_a",
+        dw_decide::Axis::RgOhm => "rg_ohm",
+        dw_decide::Axis::RthjaCperw => "rthja_c_per_w",
+        other => panic!("registry_gold has no name for {other:?}"),
     }
 }
 
@@ -59,15 +67,19 @@ fn gold() -> serde_json::Value {
         .expect("gold parses")
 }
 
-/// The registry is 5 axes, 1:1 — same symbols, same ops, same class filters,
-/// same near-miss bands, same Min-column policy as the reference.
+/// The PORTED five are 1:1 — same symbols, same ops, same class filters,
+/// same near-miss bands, same Min-column policy as the reference. Additive
+/// axes (discovered-then-curated, Sam mandate 2026-10-12) are checked
+/// separately and never touch this parity.
 #[test]
 fn five_axes_one_to_one() {
     let g = gold();
     let axes = g["axes"].as_object().unwrap();
-    assert_eq!(AXES.len(), 5);
     assert_eq!(axes.len(), 5);
-    for spec in AXES {
+    assert!(AXES.len() >= 5, "the reference five are always present");
+    // The five are the first five (declaration order is observable: question
+    // ranking breaks ties on it) and the gold iterates exactly them.
+    for spec in &AXES[..5] {
         let ref_spec = &axes[axis_name(spec.axis)];
         let mut ours: Vec<String> = spec.symbols.iter().copied().map(norm_symbol).collect();
         let mut theirs: Vec<String> = ref_spec["symbols"]
@@ -142,4 +154,32 @@ fn negative_control_symbol_normalization() {
         axis_for_symbol("TSTG"),
         "junction and storage are different quantities (truth-audit C1)"
     );
+}
+
+/// The additive batch (Sam mandate 2026-10-12: every extractable attribute is
+/// a knife — a niche attribute still carves the cohort under semantic search).
+/// These eight resolve to the FROZEN unit kinds (dw-normalize) — the
+/// Coulomb/Farad/Second batch (QG/CISS/TF families, 804 symbols measured)
+/// waits on the additive unit kinds and is queued as a law extension.
+#[test]
+fn additive_eight_registered() {
+    let want: &[(&str, &str)] = &[
+        ("vgs_rating_v", "min_rating"),
+        ("vgs_th_v", "max_rating"),
+        ("vsd_v", "max_rating"),
+        ("idss_a", "max_rating"),
+        ("igss_a", "max_rating"),
+        ("is_a", "min_rating"),
+        ("rg_ohm", "max_rating"),
+        ("rthja_c_per_w", "max_rating"),
+    ];
+    for (name, op) in want {
+        let spec = AXES
+            .iter()
+            .find(|s| axis_name(s.axis) == *name)
+            .unwrap_or_else(|| panic!("additive axis {name} missing from AXES"));
+        assert_eq!(op_name(spec.op), *op, "op drift on {name}");
+        assert!(!spec.symbols.is_empty(), "{name} carries no symbols");
+    }
+    assert_eq!(AXES.len(), 13, "five ported + eight additive");
 }

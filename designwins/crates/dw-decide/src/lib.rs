@@ -130,6 +130,22 @@ pub enum Axis {
     FlashKb,
     /// Frequency, in megahertz.
     FreqMhz,
+    /// Gate voltage the switch must survive (abs-max VGS).
+    VgsRatingV,
+    /// Gate threshold voltage — logic-level driveability (lower is better).
+    VgsThV,
+    /// Source-drain diode forward drop (lower is better).
+    VsdV,
+    /// Drain leakage current (lower is better).
+    IdssA,
+    /// Gate leakage current (lower is better).
+    IgssA,
+    /// Continuous source current the device must carry.
+    IsA,
+    /// Gate resistance — drive strength (lower is better).
+    RgOhm,
+    /// Junction-to-ambient thermal resistance (lower is better).
+    RthjaCperw,
 }
 
 /// How a **scalar** axis is compared against a claim.
