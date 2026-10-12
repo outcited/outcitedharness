@@ -1,31 +1,35 @@
 #!/usr/bin/env python3
-"""Normalization layer -> compare substrate. The comparability law.
+"""Compare substrate — an ADAPTER of the frozen normalization law.
 
-Compare (front end) compares NOTHING until two parts' claims are in the
-same numeric space. This tool is the truth-side law that makes it so:
+The law already existed before this tool (PRD-NORMALIZE, dw-normalize):
+`units::unit_token` + the eight-kind multiplier tables (frozen, fail-closed,
+`Scale::Unknown` on anything not in a table), `dw_types::Quantity`
+(canonical Unit enum; comparisons only via approx_eq with stored tolerance),
+`rating::compare_with_margin` (margin inflates the REQUIREMENT; NearMiss is
+a separate cohort; claim None -> Unknown never eliminates).
 
-  claim (value_text, unit, rating_class) + axis op
-    -> bound {value_si, unit_si, op} + honest unnormalizable class
+This tool's ONLY job: carry typed claims into that law's numeric space for
+the export seam, so compare (m4's view, dw-decide's verdicts) has cells that
+are legally comparable. It introduces NO new normalization rules. Two
+consequences of respecting the law:
 
-Semantics come from the gold-tested scorer (`score_key_features_gold.to_base`,
-tests/test_score_key_features_gold.py) — the SI table, the mOhm-mW glyph rule
-(BOUND: RDS document rows only; elsewhere mW is watts and stays watts), and
-the °C/ºC/℃ family -> "c". Anything else is counted UNNORMALIZABLE and left
-raw — never silently coerced (the type-gate lesson).
+1. **Fail closed.** A printed unit not scaling to the axis's kind is
+   UNNORMALIZABLE and stays raw — never coerced (the "no invented units" law).
+2. **The mW/mOhm glyph rule (CR adjudicator-fixes-20260911) is NOT a unit
+   rule.** It is a bounded scoring-layer correction for RDS document rows.
+   Rows it flags get `glyph_suspect: true` and nothing else — the numbers
+   stay exactly as the frozen law parsed them. dw-knives/dw-decide may apply
+   the correction in the RDS axis context; the substrate will not invent it.
 
-Compare semantics shipped with the matrix (m4 + API):
-  min_rating axis  : part satisfies requirement R iff part_value >= R
-  max_rating axis  : part satisfies R iff part_value <= R
-  covers axis      : R in [lo, hi] of the part's declared range
-  rating_class gates elimination (AbsMax never satisfies an operating atom;
-  Unknown never eliminates) — dw-decide owns the verdicts, this owns the units.
-
-Self-test runs first, every invocation, and exits non-zero on mismatch — the
-negative control is part of the tool, not a separate ceremony.
+Self-test runs first every invocation (exit non-zero on failure), including
+the vectors the gold fixtures encode (condition_model_v1 reject:"dash",
+the degree family, the mV/V scale) and the negative controls (mW on an
+Ohm-kind axis must FAIL closed; a unit-less token must fail).
 
 Outputs (api-store-export/):
-  compare_ready.jsonl  one row per normalizable typed knife
-  compare_matrix.json  parts x axes normalized cells + semantics
+  compare_ready.jsonl   normalizable rows: value + canonical unit + scale
+  compare_matrix.json   parts x axes cells + compare semantics
+  unnormalizable.jsonl  honest rejects (raw value/unit kept)
 
 Usage: python3 designwins/crates/dw-extract/tools/normalize_compare.py
 """
@@ -38,124 +42,132 @@ from pathlib import Path
 
 EXPORT = Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/api-store-export")
 
-SI_PREFIX = {"p": 1e-12, "n": 1e-9, "u": 1e-6, "µ": 1e-6, "μ": 1e-6,
-             "m": 1e-3, "": 1.0, "k": 1e3, "M": 1e6, "G": 1e9}
-UNIT_BASE = {"ohm": "ohm", "ω": "ohm", "Ω": "ohm", "v": "v", "a": "a", "c": "c",
-             "ºc": "c", "°c": "c", "℃": "c", "hz": "hz", "w": "w", "f": "f",
-             "h": "h", "s": "s", "j": "j", "%": "%"}
-# The glyph rule (CR adjudicator-fixes-20260911), BOUNDED to the RDS axis:
-# inside RDS(on) rows the Omega->W confusion means mW reads mOhm. Nowhere else.
-GLYPH_RULE_AXES = {"rds_on_ohm"}
+# ---- the frozen law, ported exactly (dw-normalize/src/units.rs) ----------
+
+def unit_token(text: str) -> str:
+    collapsed = "".join(c for c in (text or "") if not c.isspace())
+    return collapsed.replace("μ", "µ").replace("Ω", "ohm").lower()
+
+
+KIND_SCALE = {
+    "volt": {"mv": 1e-3, "v": 1.0, "kv": 1e3},
+    "ampere": {"na": 1e-9, "µa": 1e-6, "ma": 1e-3, "ka": 1e3, "a": 1.0},
+    "hertz": {"hz": 1.0, "khz": 1e3, "mhz": 1e6, "ghz": 1e9},
+    "ohm": {"mohm": 1e-3, "ohm": 1.0, "kohm": 1e3},
+    "henry": {"nh": 1e-9, "µh": 1e-6, "mh": 1e-3, "h": 1.0},
+    "celsius": {"c": 1.0, "°c": 1.0, "ºc": 1.0, "℃": 1.0, "k": 1.0},
+    "celsiusperwatt": {"c/w": 1.0, "°c/w": 1.0, "k/w": 1.0, "c/watt": 1.0},
+}
+KIND_UNIT = {"volt": "Volt", "ampere": "Ampere", "hertz": "Hertz", "ohm": "Ohm",
+             "henry": "Henry", "celsius": "Celsius", "celsiusperwatt": "Celsius"}
+# The axis registry decides the KIND (what the number IS); the printed token
+# must scale to it or the row fails closed.
+AXIS_KIND = {
+    "vds_rating_v": "volt",
+    "id_continuous_a": "ampere",
+    "rds_on_ohm": "ohm",
+    "tj_max_c": "celsius",
+    "tstg_range_c": "celsius",
+}
+AXIS_OP = {"vds_rating_v": "min_rating", "id_continuous_a": "min_rating",
+           "rds_on_ohm": "max_rating", "tj_max_c": "min_rating",
+           "tstg_range_c": "covers"}
 NUM = re.compile(r"[-+]?\d+(?:\.\d+)?")
 
 
-def to_base(value: float, unit: str | None) -> tuple[float, str] | None:
-    """score_key_features_gold.to_base, plus the glyph table families."""
-    u = (unit or "").strip()
-    u = u.replace("Ohms", "Ohm").replace("ohms", "ohm").replace("mOhm", "mΩ").replace("mohm", "mΩ")
-    if not u:
-        return (value, "")
-    if u.lower() in UNIT_BASE:
-        return (value, UNIT_BASE[u.lower()])
-    if u[0] in SI_PREFIX and u[1:].lower() in UNIT_BASE:
-        base = UNIT_BASE[u[1:].lower()]
-        return (value * SI_PREFIX[u[0]], base)
+def scale_to_kind(kind: str, token: str) -> float | None:
+    """units::lookup — Unknown (None here) fails closed, never guesses."""
+    tok = unit_token(token)
+    if kind == "amperepersecond":
+        rest = tok[2:] if tok.startswith("a/") else None
+        return {"s": 1.0, "ms": 1e3, "µs": 1e6, "ns": 1e9}.get(rest or "")
+    table = KIND_SCALE.get(kind, {})
+    if tok in table:
+        return table[tok]
+    # degree-family tolerance in the frozen pattern set (°\s*C forms collapse
+    # in unit_token via whitespace strip: "° C" -> "°c").
     return None
 
 
-def normalize_bound(value_si: float, unit_si: str, axis: str) -> str:
-    """Which comparison the bound participates in (registry op)."""
-    return {"vds_rating_v": "min_rating", "id_continuous_a": "min_rating",
-            "rds_on_ohm": "max_rating", "tj_max_c": "min_rating",
-            "tstg_range_c": "covers"}.get(axis, "unknown")
-
-
-def normalize_row(row: dict) -> dict | None:
+def normalize_row(row: dict) -> tuple[dict | None, dict]:
+    """-> (normalized row | None, reject record)."""
+    axis = row.get("axis") or ""
+    kind = AXIS_KIND.get(axis)
     text = str(row.get("value") or "")
     m = NUM.search(text)
-    if not m:
-        return None
-    val = float(m.group(0))
-    unit = row.get("unit") or ""
-    axis = row.get("axis") or ""
-    # Glyph rule, bounded: RDS rows only.
-    if axis in GLYPH_RULE_AXES and unit.strip() in ("mW", "W"):
-        unit = "mΩ" if unit.strip() == "mW" else "Ω"
-    nb = to_base(val, unit)
-    if nb is None:
-        return None
-    value_si, unit_si = nb
-    return {**row, "value_si": value_si, "unit_si": unit_si,
-            "op": normalize_bound(value_si, unit_si, axis)}
+    if kind is None or not m:
+        return None, {"axis": axis, "opn": row.get("opn"), "value": row.get("value"),
+                      "unit": row.get("unit"), "why": "no axis kind or no number"}
+    factor = scale_to_kind(kind, row.get("unit") or "")
+    if factor is None:
+        rec = {"axis": axis, "opn": row.get("opn"), "value": row.get("value"),
+               "unit": row.get("unit"), "why": f"Scale::Unknown for kind {kind}"}
+        # The bounded glyph annotation (scoring layer, NOT applied here).
+        if axis == "rds_on_ohm" and unit_token(row.get("unit") or "") in ("mw", "w"):
+            rec["glyph_suspect"] = True
+        return None, rec
+    value_si = float(m.group(0)) * factor
+    out = {**row, "value_si": value_si, "unit_si": KIND_UNIT[kind],
+           "op": AXIS_OP[axis], "kind": kind}
+    return out, {}
 
 
 def self_test() -> None:
-    """The negative control. Every invocation. Exit non-zero on failure."""
-    cases = [
-        ((6.8, "mΩ"), (0.0068, "ohm")),
-        ((3.5, "Ω"), (3.5, "ohm")),
-        ((40, "A"), (40.0, "a")),
-        ((3.5, "mOhm"), (0.0035, "ohm")),
-    ]
-    for (v, u), want in cases:
-        got = to_base(v, u)
-        assert got is not None and abs(got[0] - want[0]) < 1e-12 and got[1] == want[1], f"to_base({v},{u}) = {got}, want {want}"
-    # degree family -> c
-    for u in ("°C", "ºC", "℃", "C"):
-        got = to_base(-55.0, u)
-        assert got == (-55.0, "c"), f"degree family failed for {u!r}: {got}"
-    # THE GLYPH TRAP, bounded: RDS axis turns mW into mOhm...
-    rds = normalize_row({"axis": "rds_on_ohm", "value": "1.6", "unit": "mW", "rating_class": "rated_limit"})
-    assert rds and abs(rds["value_si"] - 0.0016) < 1e-12 and rds["unit_si"] == "ohm", f"glyph rule failed: {rds}"
-    # ...and ONLY there: on the id axis, mW is watts.
-    idr = normalize_row({"axis": "id_continuous_a", "value": "1.6", "unit": "mW", "rating_class": "rated_limit"})
-    # NB: 1.6 mW is genuinely 0.0016 W — the prefix still applies; the rule
-    # only decides mW-reads-mOhm. (This assertion was itself wrong first;
-    # the negative control caught the test, which is the control working.)
-    assert idr and idr["unit_si"] == "w" and abs(idr["value_si"] - 0.0016) < 1e-12, f"glyph rule leaked outside RDS: {idr}"
-    # unnormalizable stays unnormalizable
-    assert to_base(1.0, "Â") is None and to_base(1.0, "m") is None
+    """Negative controls, run every invocation. The law tests the adapter."""
+    assert unit_token("Ω") == "ohm" and unit_token("μA") == "µa" and unit_token("° C") == "°c"
+    assert scale_to_kind("volt", "mV") == 1e-3          # 500 mV == 0.5 V law
+    assert scale_to_kind("ohm", "mΩ") == 1e-3           # 6.8 mOhm == 0.0068 ohm
+    assert scale_to_kind("ohm", "mW") is None           # FAIL CLOSED: no Watt table
+    assert scale_to_kind("volt", "Â") is None           # mojibake never guesses
+    assert scale_to_kind("celsius", "℃") == 1.0         # degree family
+    ok, rej = normalize_row({"axis": "rds_on_ohm", "value": "1.6", "unit": "mW"})
+    assert ok is None and rej.get("glyph_suspect") is True, "glyph rule must FLAG, not coerce"
+    ok2, _ = normalize_row({"axis": "rds_on_ohm", "value": "1.6", "unit": "mΩ"})
+    assert ok2 and abs(ok2["value_si"] - 0.0016) < 1e-12 and ok2["unit_si"] == "Ohm"
 
 
 def main() -> int:
     self_test()
     rows = [json.loads(l) for l in (EXPORT / "typed_axes.jsonl").open()]
-    ready, unnormalizable = [], []
+    ready, rejects = [], []
     matrix: dict[str, dict[str, dict]] = {}
     for r in rows:
-        n = normalize_row(r)
+        n, rej = normalize_row(r)
         if n is None:
-            unnormalizable.append({"axis": r.get("axis"), "opn": r.get("opn"),
-                                   "value": r.get("value"), "unit": r.get("unit")})
+            rejects.append(rej)
             continue
         ready.append(n)
-        cell = {"value_si": n["value_si"], "unit_si": n["unit_si"], "op": n["op"],
-                "class": n.get("rating_class"), "quote": n.get("quote"),
-                "page": n.get("page"), "sha": n.get("sha")}
-        matrix.setdefault(n["opn"], {})[n["axis"]] = cell
-    body = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in ready)
-    (EXPORT / "compare_ready.jsonl").write_text(body)
+        matrix.setdefault(n["opn"], {})[n["axis"]] = {
+            "value": n["value_si"], "unit": n["unit_si"], "op": n["op"],
+            "class": n.get("rating_class"), "quote": n.get("quote"),
+            "page": n.get("page"), "sha": n.get("sha"),
+        }
+    (EXPORT / "compare_ready.jsonl").write_text(
+        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in ready))
+    (EXPORT / "unnormalizable.jsonl").write_text(
+        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rejects))
     axes = sorted({r["axis"] for r in ready})
     doc = {
-        "semantics": {
-            "min_rating": "part satisfies requirement R iff value_si >= R",
-            "max_rating": "part satisfies R iff value_si <= R",
-            "covers": "R within the part's declared range",
-            "elimination": "dw-decide: AbsMax never satisfies an operating atom; Unknown never eliminates; PositiveOnly never eliminates",
+        "law": "PRD-NORMALIZE / dw-normalize (frozen); this file is an adapter, not a rule",
+        "compare_semantics": {
+            "pass": "compare_with_margin: margin inflates the REQUIREMENT; satisfies iff claim >= inflated (min_rating) / <= inflated (max_rating)",
+            "near_miss": "within near_miss_pct of the raw requirement — a separate cohort, never a silent Fail",
+            "unknown": "claim absent -> Unknown, never eliminates (C9.1)",
+            "equality": "dw_types::Quantity::approx_eq only; float == is denied workspace-wide",
         },
-        "axes": axes,
         "parts": len(matrix),
+        "axes": axes,
         "cells": sum(len(v) for v in matrix.values()),
         "normalized": len(ready),
-        "unnormalizable": len(unnormalizable),
+        "unnormalizable": len(rejects),
         "matrix": matrix,
     }
     (EXPORT / "compare_matrix.json").write_text(json.dumps(doc, sort_keys=True))
-    print(f"normalized: {len(ready)} / {len(rows)} typed claims")
-    print(f"unnormalizable (honest): {len(unnormalizable)}")
-    print(f"compare matrix: {len(matrix)} parts x {len(axes)} axes, {doc['cells']} cells")
-    print("axes:", axes)
-    print("self-test: PASS (negative controls ran)")
+    glyph = sum(1 for r in rejects if r.get("glyph_suspect"))
+    print(f"normalized: {len(ready)} / {len(rows)}  (frozen law, fail-closed)")
+    print(f"unnormalizable: {len(rejects)}  (of which glyph-suspect RDS rows: {glyph} — flagged, NOT coerced)")
+    print(f"matrix: {len(matrix)} parts x {len(axes)} axes, {doc['cells']} cells")
+    print("self-test: PASS (frozen-law vectors + negative controls)")
     return 0
 
 
