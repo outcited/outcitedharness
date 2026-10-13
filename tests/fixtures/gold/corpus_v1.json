@@ -1,0 +1,4270 @@
+{
+ "cases": [
+  {
+   "error": null,
+   "expected": {
+    "assets": [
+     {
+      "files": [
+       {
+        "bytes": 330,
+        "path": "$ROOT/asset.jsonl",
+        "sha256": "d4392702c1d890bd0ca92adc5d9d52b879b9001885cc336812cd976998c03b25"
+       }
+      ],
+      "joins": {
+       "ambiguous": 1,
+       "document_sha256": 1,
+       "unambiguous_part": 2,
+       "unresolved": 1
+      },
+      "kind": "jsonl",
+      "name": "facts",
+      "rows": 5,
+      "unique_record_identifiers": 8
+     }
+    ],
+    "counts": {
+     "active_ground_truth": 3,
+     "active_published_pinouts": 1,
+     "documents_with_ground_truth": 3,
+     "documents_with_published_pinouts": 1,
+     "duplicate_pdf_files": 1,
+     "ground_truth_sections": {
+      "clock_specs": 1,
+      "overview": 3,
+      "pinout": 1
+     },
+     "orphan_ground_truth": 0,
+     "orphan_published_pinouts": 0,
+     "pdf_files": 5,
+     "unique_pdf_sha256": 4
+    },
+    "documents": [
+     {
+      "asset_memberships": {},
+      "byte_size": 12,
+      "document_sha256": "4fcb06db09e3242aeb6d92244a373efcf4d14bdfdcf94286a8dda5f1b2a7dd38",
+      "ground_truth": [
+       {
+        "batch_id": null,
+        "part_numbers": [
+         "AMBIG"
+        ],
+        "path": "acme_amb2.json",
+        "record_id": "acme_amb2",
+        "sections": [
+         "overview"
+        ],
+        "sha256": "48f38ecce05569fa5dd57cd537f0a59079cb9e020078ebc1d72b9c3f63306b34",
+        "validation": null,
+        "vendor": "acme"
+       }
+      ],
+      "paths": [
+       "acme_amb2.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [
+       "acme_amb2"
+      ],
+      "stems": [
+       "acme_amb2"
+      ],
+      "vendors": [
+       "acme"
+      ]
+     },
+     {
+      "asset_memberships": {
+       "facts": [
+        "part_number:ATOM1",
+        "record_id:dup-1",
+        "record_id:part-1"
+       ]
+      },
+      "byte_size": 13,
+      "document_sha256": "6dcad4a84ba69662d8087f9d85554e5c2d7b5279ea0a174faa60fa243e7850e8",
+      "ground_truth": [
+       {
+        "batch_id": null,
+        "part_numbers": [
+         "ATOM1"
+        ],
+        "path": "acme_atom1.json",
+        "record_id": "acme_atom1",
+        "sections": [
+         "pinout",
+         "clock_specs",
+         "overview"
+        ],
+        "sha256": "fe5e78e97e6357e00d3f93b6540a1b0d48c0b748d63562c0fd9e81ea94ed5d94",
+        "validation": null,
+        "vendor": "acme"
+       }
+      ],
+      "paths": [
+       "acme_atom1.pdf",
+       "copy_atom1.pdf"
+      ],
+      "published_pinouts": [
+       {
+        "batch_id": null,
+        "part_numbers": [
+         "ATOM1"
+        ],
+        "path": "acme/acme_atom1.json",
+        "record_id": "acme_atom1",
+        "sections": [
+         "pinout",
+         "overview"
+        ],
+        "sha256": "22075285bf99608b7f01fdd7d5afc7b2b9dcd03b64a5a1af18d81fd5ff2686e1",
+        "validation": "VALIDATED_GROUND_TRUTH",
+        "vendor": "acme"
+       }
+      ],
+      "record_ids": [
+       "acme_atom1"
+      ],
+      "stems": [
+       "acme_atom1",
+       "copy_atom1"
+      ],
+      "vendors": [
+       "acme",
+       "copy"
+      ]
+     },
+     {
+      "asset_memberships": {
+       "facts": [
+        "record_id:direct-1"
+       ]
+      },
+      "byte_size": 13,
+      "document_sha256": "d3c74899c42d660be1054993be3078908713a0164dc153d916feb750a0973f29",
+      "ground_truth": [],
+      "paths": [
+       "acme_atom2.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [],
+      "stems": [
+       "acme_atom2"
+      ],
+      "vendors": [
+       "acme"
+      ]
+     },
+     {
+      "asset_memberships": {},
+      "byte_size": 12,
+      "document_sha256": "f177bfc87be8eff8f79275fdbef960691231b5b10ad50e22c1471599f915ce53",
+      "ground_truth": [
+       {
+        "batch_id": null,
+        "part_numbers": [
+         "AMBIG"
+        ],
+        "path": "acme_amb1.json",
+        "record_id": "acme_amb1",
+        "sections": [
+         "overview"
+        ],
+        "sha256": "48f38ecce05569fa5dd57cd537f0a59079cb9e020078ebc1d72b9c3f63306b34",
+        "validation": null,
+        "vendor": "acme"
+       }
+      ],
+      "paths": [
+       "acme_amb1.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [
+       "acme_amb1"
+      ],
+      "stems": [
+       "acme_amb1"
+      ],
+      "vendors": [
+       "acme"
+      ]
+     }
+    ],
+    "evidence_sha256": "a91a4dd7210075e3ae485f4fb9d6b1cee39bb818297200f6636e46ca6a3adba5",
+    "orphans": {
+     "ground_truth": [],
+     "published_pinouts": []
+    },
+    "policy": {
+     "active_ground_truth_only": true,
+     "active_published_pinouts_only": true,
+     "join_keys": [
+      "document_sha256",
+      "exact_source_stem",
+      "unambiguous_vendor_and_part"
+     ],
+     "purpose": "local_training_pair_generation",
+     "symlinks_followed": false
+    },
+    "schema": "harness.electronics-corpus-registry.v1",
+    "sources": {
+     "ground_truth_root": "$ROOT/gt",
+     "pdf_root": "$ROOT/pdfs",
+     "validated_root": "$ROOT/validated"
+    }
+   },
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "kind": "auto",
+       "name": "facts",
+       "path": "asset.jsonl"
+      }
+     ],
+     "expected_pdf_files": 5
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       100,
+       105,
+       114,
+       101,
+       99,
+       116,
+       45,
+       49,
+       34,
+       44,
+       32,
+       34,
+       112,
+       100,
+       102,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       100,
+       51,
+       99,
+       55,
+       52,
+       56,
+       57,
+       57,
+       99,
+       52,
+       50,
+       100,
+       54,
+       54,
+       48,
+       98,
+       101,
+       49,
+       48,
+       53,
+       52,
+       57,
+       57,
+       51,
+       98,
+       101,
+       51,
+       48,
+       55,
+       56,
+       57,
+       48,
+       56,
+       55,
+       49,
+       51,
+       97,
+       48,
+       49,
+       54,
+       52,
+       100,
+       99,
+       49,
+       53,
+       51,
+       100,
+       57,
+       49,
+       54,
+       102,
+       101,
+       98,
+       55,
+       53,
+       48,
+       97,
+       48,
+       57,
+       55,
+       51,
+       102,
+       50,
+       57,
+       34,
+       125,
+       10,
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       45,
+       49,
+       34,
+       44,
+       32,
+       34,
+       118,
+       101,
+       110,
+       100,
+       111,
+       114,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       46,
+       99,
+       111,
+       109,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125,
+       10,
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       97,
+       109,
+       98,
+       105,
+       103,
+       117,
+       111,
+       117,
+       115,
+       45,
+       49,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       77,
+       66,
+       73,
+       71,
+       34,
+       125,
+       10,
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       109,
+       105,
+       115,
+       115,
+       105,
+       110,
+       103,
+       45,
+       49,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       78,
+       79,
+       83,
+       85,
+       67,
+       72,
+       34,
+       125,
+       10,
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       100,
+       117,
+       112,
+       45,
+       49,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125,
+       10
+      ],
+      "path": "asset.jsonl"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       111,
+       118,
+       101,
+       114,
+       118,
+       105,
+       101,
+       119,
+       34,
+       58,
+       32,
+       123,
+       34,
+       109,
+       97,
+       110,
+       117,
+       102,
+       97,
+       99,
+       116,
+       117,
+       114,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       77,
+       66,
+       73,
+       71,
+       34,
+       125,
+       125
+      ],
+      "path": "gt/acme_amb1.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       111,
+       118,
+       101,
+       114,
+       118,
+       105,
+       101,
+       119,
+       34,
+       58,
+       32,
+       123,
+       34,
+       109,
+       97,
+       110,
+       117,
+       102,
+       97,
+       99,
+       116,
+       117,
+       114,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       77,
+       66,
+       73,
+       71,
+       34,
+       125,
+       125
+      ],
+      "path": "gt/acme_amb2.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       111,
+       118,
+       101,
+       114,
+       118,
+       105,
+       101,
+       119,
+       34,
+       58,
+       32,
+       123,
+       34,
+       109,
+       97,
+       110,
+       117,
+       102,
+       97,
+       99,
+       116,
+       117,
+       114,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125,
+       44,
+       32,
+       34,
+       112,
+       105,
+       110,
+       111,
+       117,
+       116,
+       34,
+       58,
+       32,
+       91,
+       123,
+       34,
+       112,
+       105,
+       110,
+       95,
+       110,
+       111,
+       34,
+       58,
+       32,
+       49,
+       44,
+       32,
+       34,
+       110,
+       97,
+       109,
+       101,
+       34,
+       58,
+       32,
+       34,
+       80,
+       65,
+       48,
+       34,
+       125,
+       93,
+       44,
+       32,
+       34,
+       99,
+       108,
+       111,
+       99,
+       107,
+       95,
+       115,
+       112,
+       101,
+       99,
+       115,
+       34,
+       58,
+       32,
+       91,
+       123,
+       34,
+       109,
+       97,
+       120,
+       95,
+       109,
+       104,
+       122,
+       34,
+       58,
+       32,
+       49,
+       48,
+       48,
+       125,
+       93,
+       125
+      ],
+      "path": "gt/acme_atom1.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       109,
+       98,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_amb1.pdf"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       109,
+       98,
+       45,
+       116,
+       119,
+       111
+      ],
+      "path": "pdfs/acme_amb2.pdf"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       116,
+       119,
+       111
+      ],
+      "path": "pdfs/acme_atom2.pdf"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/copy_atom1.pdf"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       73,
+       71,
+       78,
+       79,
+       82,
+       69,
+       68,
+       34,
+       125
+      ],
+      "path": "validated/_skip/ignored.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       111,
+       118,
+       101,
+       114,
+       118,
+       105,
+       101,
+       119,
+       34,
+       58,
+       32,
+       123,
+       34,
+       109,
+       97,
+       110,
+       117,
+       102,
+       97,
+       99,
+       116,
+       117,
+       114,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125,
+       44,
+       32,
+       34,
+       112,
+       105,
+       110,
+       111,
+       117,
+       116,
+       34,
+       58,
+       32,
+       91,
+       123,
+       34,
+       112,
+       105,
+       110,
+       95,
+       110,
+       111,
+       34,
+       58,
+       32,
+       49,
+       44,
+       32,
+       34,
+       110,
+       97,
+       109,
+       101,
+       34,
+       58,
+       32,
+       34,
+       80,
+       65,
+       48,
+       34,
+       125,
+       93,
+       44,
+       32,
+       34,
+       95,
+       109,
+       101,
+       116,
+       97,
+       34,
+       58,
+       32,
+       123,
+       34,
+       112,
+       114,
+       111,
+       118,
+       101,
+       110,
+       97,
+       110,
+       99,
+       101,
+       34,
+       58,
+       32,
+       123,
+       34,
+       118,
+       97,
+       108,
+       105,
+       100,
+       97,
+       116,
+       105,
+       111,
+       110,
+       34,
+       58,
+       32,
+       34,
+       86,
+       65,
+       76,
+       73,
+       68,
+       65,
+       84,
+       69,
+       68,
+       95,
+       71,
+       82,
+       79,
+       85,
+       78,
+       68,
+       95,
+       84,
+       82,
+       85,
+       84,
+       72,
+       34,
+       125,
+       125,
+       125
+      ],
+      "path": "validated/acme/acme_atom1.json"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "joins_and_duplicate_documents"
+  },
+  {
+   "error": null,
+   "expected": {
+    "assets": [
+     {
+      "files": [
+       {
+        "bytes": 251,
+        "path": "$ROOT/packs/recs.json",
+        "sha256": "2568475dffc0a36af364d2d87bc40b657433d399636fcd17d972c3b5d45c4fc1"
+       }
+      ],
+      "joins": {
+       "ambiguous": 0,
+       "document_sha256": 0,
+       "unambiguous_part": 2,
+       "unresolved": 1
+      },
+      "kind": "json",
+      "name": "recs",
+      "rows": 3,
+      "unique_record_identifiers": 4
+     },
+     {
+      "files": [
+       {
+        "bytes": 24,
+        "path": "$ROOT/packs/single.json",
+        "sha256": "6254d3436a065abcf32619e747de499ecf5857dd41f614299da91fddf04611ca"
+       }
+      ],
+      "joins": {
+       "ambiguous": 0,
+       "document_sha256": 0,
+       "unambiguous_part": 1,
+       "unresolved": 0
+      },
+      "kind": "json",
+      "name": "single",
+      "rows": 1,
+      "unique_record_identifiers": 1
+     },
+     {
+      "files": [
+       {
+        "bytes": 44,
+        "path": "$ROOT/packs/dir/one.jsonl",
+        "sha256": "fd33502fefead78fdb6371929b0bbd80fb94b0ee19e30a89cbcd001c07876fdb"
+       }
+      ],
+      "joins": {
+       "ambiguous": 0,
+       "document_sha256": 0,
+       "unambiguous_part": 1,
+       "unresolved": 0
+      },
+      "kind": "directory",
+      "name": "dir",
+      "rows": 1,
+      "unique_record_identifiers": 2
+     }
+    ],
+    "counts": {
+     "active_ground_truth": 3,
+     "active_published_pinouts": 1,
+     "documents_with_ground_truth": 2,
+     "documents_with_published_pinouts": 0,
+     "duplicate_pdf_files": 0,
+     "ground_truth_sections": {
+      "pinout": 1
+     },
+     "orphan_ground_truth": 1,
+     "orphan_published_pinouts": 1,
+     "pdf_files": 3,
+     "unique_pdf_sha256": 3
+    },
+    "documents": [
+     {
+      "asset_memberships": {
+       "dir": [
+        "custom_id:c1",
+        "part_number:ATOM1"
+       ],
+       "recs": [
+        "base_mpn:ATOM1",
+        "record_id:r1",
+        "record_id:r3"
+       ],
+       "single": [
+        "part_number:ATOM1"
+       ]
+      },
+      "byte_size": 13,
+      "document_sha256": "6dcad4a84ba69662d8087f9d85554e5c2d7b5279ea0a174faa60fa243e7850e8",
+      "ground_truth": [
+       {
+        "batch_id": null,
+        "part_numbers": [
+         "ATOM1"
+        ],
+        "path": "acme_atom1.json",
+        "record_id": "acme_atom1",
+        "sections": [
+         "pinout"
+        ],
+        "sha256": "f1083bd396c40c9ecf1851b214e707d222b113ab1ac77874c960166dbeedc01d",
+        "validation": null,
+        "vendor": "acme"
+       }
+      ],
+      "paths": [
+       "acme_atom1.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [
+       "acme_atom1"
+      ],
+      "stems": [
+       "acme_atom1"
+      ],
+      "vendors": [
+       "acme"
+      ]
+     },
+     {
+      "asset_memberships": {},
+      "byte_size": 19,
+      "document_sha256": "c725b1790f564906f487f768d4d0b8b3c11c0bf9acf3c8fd8e889afff384390d",
+      "ground_truth": [],
+      "paths": [
+       "other_atom2.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [],
+      "stems": [
+       "other_atom2"
+      ],
+      "vendors": [
+       "other"
+      ]
+     },
+     {
+      "asset_memberships": {},
+      "byte_size": 13,
+      "document_sha256": "d3c74899c42d660be1054993be3078908713a0164dc153d916feb750a0973f29",
+      "ground_truth": [
+       {
+        "batch_id": null,
+        "part_numbers": [
+         "ATOM2"
+        ],
+        "path": "acme_atom2.json",
+        "record_id": "acme_atom2",
+        "sections": [],
+        "sha256": "1e96cf3206654242514467c60801d5d886a8225e2eb785f8239811a78d5fcc88",
+        "validation": null,
+        "vendor": "acme"
+       }
+      ],
+      "paths": [
+       "acme_atom2.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [
+       "acme_atom2"
+      ],
+      "stems": [
+       "acme_atom2"
+      ],
+      "vendors": [
+       "acme"
+      ]
+     }
+    ],
+    "evidence_sha256": "9937e37553952f01db1c74297767420444f4083f6a8be57e303ef31c5add12b1",
+    "orphans": {
+     "ground_truth": [
+      {
+       "batch_id": null,
+       "part_numbers": [
+        "LOST"
+       ],
+       "path": "orphan.json",
+       "reason": "no_matching_pdf_stem",
+       "record_id": "orphan",
+       "sections": [],
+       "sha256": "634a68a672acb2203394c3c3efecba4f2073c62e1ee23eb3ba4cbaf55f09e345",
+       "validation": null,
+       "vendor": "orphan"
+      }
+     ],
+     "published_pinouts": [
+      {
+       "batch_id": null,
+       "part_numbers": [
+        "ATOM1"
+       ],
+       "path": "nested/deep.json",
+       "reason": "no_matching_pdf_stem",
+       "record_id": "deep",
+       "sections": [],
+       "sha256": "e1f8eafc409c1047d62f2336797b3b577cdf906c600bd5cbc7fd36bc1018dbab",
+       "validation": "VALIDATED_GROUND_TRUTH",
+       "vendor": "deep"
+      }
+     ]
+    },
+    "policy": {
+     "active_ground_truth_only": true,
+     "active_published_pinouts_only": true,
+     "join_keys": [
+      "document_sha256",
+      "exact_source_stem",
+      "unambiguous_vendor_and_part"
+     ],
+     "purpose": "local_training_pair_generation",
+     "symlinks_followed": false
+    },
+    "schema": "harness.electronics-corpus-registry.v1",
+    "sources": {
+     "ground_truth_root": "$ROOT/gt",
+     "pdf_root": "$ROOT/pdfs",
+     "validated_root": "$ROOT/validated"
+    }
+   },
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "kind": "json",
+       "name": "recs",
+       "path": "packs/recs.json"
+      },
+      {
+       "kind": "auto",
+       "name": "single",
+       "path": "packs/single.json"
+      },
+      {
+       "kind": "auto",
+       "name": "dir",
+       "path": "packs/dir"
+      }
+     ]
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       44,
+       32,
+       34,
+       112,
+       105,
+       110,
+       111,
+       117,
+       116,
+       34,
+       58,
+       32,
+       91,
+       93,
+       125
+      ],
+      "path": "gt/acme_atom1.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       50,
+       34,
+       125
+      ],
+      "path": "gt/acme_atom2.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       76,
+       79,
+       83,
+       84,
+       34,
+       125
+      ],
+      "path": "gt/orphan.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       99,
+       117,
+       115,
+       116,
+       111,
+       109,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       99,
+       49,
+       34,
+       44,
+       32,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125,
+       10
+      ],
+      "path": "packs/dir/one.jsonl"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       115,
+       99,
+       104,
+       101,
+       109,
+       97,
+       34,
+       58,
+       32,
+       34,
+       120,
+       34,
+       44,
+       32,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       115,
+       34,
+       58,
+       32,
+       91,
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       114,
+       49,
+       34,
+       44,
+       32,
+       34,
+       118,
+       101,
+       110,
+       100,
+       111,
+       114,
+       34,
+       58,
+       32,
+       34,
+       83,
+       105,
+       108,
+       105,
+       99,
+       111,
+       110,
+       32,
+       76,
+       97,
+       98,
+       115,
+       34,
+       44,
+       32,
+       34,
+       98,
+       97,
+       115,
+       101,
+       95,
+       109,
+       112,
+       110,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125,
+       44,
+       32,
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       114,
+       50,
+       34,
+       44,
+       32,
+       34,
+       115,
+       111,
+       117,
+       114,
+       99,
+       101,
+       95,
+       100,
+       111,
+       99,
+       117,
+       109,
+       101,
+       110,
+       116,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       101,
+       34,
+       125,
+       44,
+       32,
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       95,
+       105,
+       100,
+       34,
+       58,
+       32,
+       34,
+       114,
+       51,
+       34,
+       44,
+       32,
+       34,
+       115,
+       101,
+       114,
+       105,
+       101,
+       115,
+       34,
+       58,
+       32,
+       34,
+       97,
+       116,
+       111,
+       109,
+       49,
+       34,
+       125,
+       93,
+       125
+      ],
+      "path": "packs/recs.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125
+      ],
+      "path": "packs/single.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       116,
+       119,
+       111
+      ],
+      "path": "pdfs/acme_atom2.pdf"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       116,
+       119,
+       111,
+       45,
+       111,
+       116,
+       104,
+       101,
+       114
+      ],
+      "path": "pdfs/other_atom2.pdf"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       44,
+       32,
+       34,
+       95,
+       109,
+       101,
+       116,
+       97,
+       34,
+       58,
+       32,
+       123,
+       34,
+       118,
+       97,
+       108,
+       105,
+       100,
+       97,
+       116,
+       105,
+       111,
+       110,
+       34,
+       58,
+       32,
+       34,
+       86,
+       65,
+       76,
+       73,
+       68,
+       65,
+       84,
+       69,
+       68,
+       95,
+       71,
+       82,
+       79,
+       85,
+       78,
+       68,
+       95,
+       84,
+       82,
+       85,
+       84,
+       72,
+       34,
+       125,
+       125
+      ],
+      "path": "validated/nested/deep.json"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "assets_and_orphans"
+  },
+  {
+   "error": null,
+   "expected": {
+    "assets": [],
+    "counts": {
+     "active_ground_truth": 1,
+     "active_published_pinouts": 1,
+     "documents_with_ground_truth": 1,
+     "documents_with_published_pinouts": 0,
+     "duplicate_pdf_files": 0,
+     "ground_truth_sections": {},
+     "orphan_ground_truth": 0,
+     "orphan_published_pinouts": 1,
+     "pdf_files": 2,
+     "unique_pdf_sha256": 2
+    },
+    "documents": [
+     {
+      "asset_memberships": {},
+      "byte_size": 13,
+      "document_sha256": "6dcad4a84ba69662d8087f9d85554e5c2d7b5279ea0a174faa60fa243e7850e8",
+      "ground_truth": [
+       {
+        "batch_id": null,
+        "part_numbers": [
+         "ATOM1"
+        ],
+        "path": "acme_atom1.json",
+        "record_id": "acme_atom1",
+        "sections": [],
+        "sha256": "6254d3436a065abcf32619e747de499ecf5857dd41f614299da91fddf04611ca",
+        "validation": null,
+        "vendor": "acme"
+       }
+      ],
+      "paths": [
+       "acme_atom1.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [
+       "acme_atom1"
+      ],
+      "stems": [
+       "acme_atom1"
+      ],
+      "vendors": [
+       "acme"
+      ]
+     },
+     {
+      "asset_memberships": {},
+      "byte_size": 13,
+      "document_sha256": "d3c74899c42d660be1054993be3078908713a0164dc153d916feb750a0973f29",
+      "ground_truth": [],
+      "paths": [
+       "acme_atom2.pdf"
+      ],
+      "published_pinouts": [],
+      "record_ids": [],
+      "stems": [
+       "acme_atom2"
+      ],
+      "vendors": [
+       "acme"
+      ]
+     }
+    ],
+    "evidence_sha256": "e5ef80be1c3575560a088bca5be9d463b4c520887e2a6b73c765b4ab613ff0a9",
+    "orphans": {
+     "ground_truth": [],
+     "published_pinouts": [
+      {
+       "batch_id": null,
+       "part_numbers": [
+        "ATOM1"
+       ],
+       "path": "acme/atom1.json",
+       "reason": "no_matching_pdf_stem",
+       "record_id": "atom1",
+       "sections": [],
+       "sha256": "6254d3436a065abcf32619e747de499ecf5857dd41f614299da91fddf04611ca",
+       "validation": null,
+       "vendor": "atom1"
+      }
+     ]
+    },
+    "policy": {
+     "active_ground_truth_only": true,
+     "active_published_pinouts_only": true,
+     "join_keys": [
+      "document_sha256",
+      "exact_source_stem",
+      "unambiguous_vendor_and_part"
+     ],
+     "purpose": "local_training_pair_generation",
+     "symlinks_followed": false
+    },
+    "schema": "harness.electronics-corpus-registry.v1",
+    "sources": {
+     "ground_truth_root": "$ROOT/gt",
+     "pdf_root": "$ROOT/pdfs",
+     "row_dataset_manifest": {
+      "bytes": 160,
+      "counts": {
+       "rows": 2
+      },
+      "evidence_sha256": "0c02d1db623c471598dc121aca3340be238b8626f6fe1e25a23b448e304d34f4",
+      "path": "$ROOT/manifest.json",
+      "sha256": "202206b626bfb390f0c28f9c75434a6a9c61cb4b0affa3109194fbd2a8cb91ad"
+     },
+     "source_audit": {
+      "bytes": 337,
+      "path": "$ROOT/audit.json",
+      "sha256": "a7c489f86c783338ee6da4a5be6ed737c72ca3a50224508e5ca9560beb2c1d81"
+     },
+     "validated_root": "$ROOT/validated"
+    }
+   },
+   "input": {
+    "config": {
+     "assets": [],
+     "row_dataset_manifest": "manifest.json",
+     "source_audit": "audit.json"
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       115,
+       99,
+       104,
+       101,
+       109,
+       97,
+       34,
+       58,
+       32,
+       34,
+       104,
+       97,
+       114,
+       110,
+       101,
+       115,
+       115,
+       46,
+       112,
+       105,
+       110,
+       111,
+       117,
+       116,
+       45,
+       118,
+       105,
+       115,
+       105,
+       111,
+       110,
+       45,
+       115,
+       111,
+       117,
+       114,
+       99,
+       101,
+       45,
+       97,
+       117,
+       100,
+       105,
+       116,
+       46,
+       118,
+       49,
+       34,
+       44,
+       32,
+       34,
+       99,
+       97,
+       110,
+       100,
+       105,
+       100,
+       97,
+       116,
+       101,
+       115,
+       34,
+       58,
+       32,
+       91,
+       123,
+       34,
+       112,
+       100,
+       102,
+       95,
+       112,
+       97,
+       116,
+       104,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       95,
+       97,
+       116,
+       111,
+       109,
+       49,
+       46,
+       112,
+       100,
+       102,
+       34,
+       44,
+       32,
+       34,
+       112,
+       100,
+       102,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       54,
+       100,
+       99,
+       97,
+       100,
+       52,
+       97,
+       56,
+       52,
+       98,
+       97,
+       54,
+       57,
+       54,
+       54,
+       50,
+       100,
+       56,
+       48,
+       56,
+       55,
+       102,
+       57,
+       100,
+       56,
+       53,
+       53,
+       53,
+       52,
+       101,
+       53,
+       99,
+       50,
+       100,
+       55,
+       98,
+       53,
+       50,
+       55,
+       57,
+       101,
+       97,
+       48,
+       97,
+       49,
+       55,
+       52,
+       102,
+       97,
+       97,
+       54,
+       48,
+       102,
+       97,
+       50,
+       52,
+       51,
+       101,
+       55,
+       56,
+       53,
+       48,
+       101,
+       56,
+       34,
+       125,
+       44,
+       32,
+       123,
+       34,
+       112,
+       100,
+       102,
+       95,
+       112,
+       97,
+       116,
+       104,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       95,
+       97,
+       116,
+       111,
+       109,
+       49,
+       46,
+       112,
+       100,
+       102,
+       34,
+       44,
+       32,
+       34,
+       112,
+       117,
+       98,
+       108,
+       105,
+       115,
+       104,
+       101,
+       100,
+       95,
+       112,
+       97,
+       116,
+       104,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       47,
+       97,
+       116,
+       111,
+       109,
+       49,
+       46,
+       106,
+       115,
+       111,
+       110,
+       34,
+       125,
+       93,
+       44,
+       32,
+       34,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       97,
+       57,
+       56,
+       54,
+       97,
+       98,
+       57,
+       53,
+       101,
+       97,
+       101,
+       53,
+       101,
+       97,
+       98,
+       99,
+       97,
+       98,
+       102,
+       101,
+       101,
+       54,
+       98,
+       54,
+       57,
+       57,
+       55,
+       55,
+       48,
+       54,
+       101,
+       57,
+       52,
+       48,
+       54,
+       54,
+       50,
+       49,
+       102,
+       52,
+       101,
+       57,
+       54,
+       98,
+       97,
+       55,
+       97,
+       98,
+       97,
+       99,
+       54,
+       56,
+       102,
+       57,
+       48,
+       98,
+       98,
+       102,
+       53,
+       99,
+       99,
+       97,
+       102,
+       101,
+       34,
+       125
+      ],
+      "path": "audit.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125
+      ],
+      "path": "gt/acme_atom1.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       115,
+       99,
+       104,
+       101,
+       109,
+       97,
+       34,
+       58,
+       32,
+       34,
+       104,
+       97,
+       114,
+       110,
+       101,
+       115,
+       115,
+       46,
+       112,
+       105,
+       110,
+       111,
+       117,
+       116,
+       45,
+       118,
+       105,
+       115,
+       105,
+       111,
+       110,
+       45,
+       114,
+       111,
+       119,
+       45,
+       100,
+       97,
+       116,
+       97,
+       115,
+       101,
+       116,
+       46,
+       118,
+       49,
+       34,
+       44,
+       32,
+       34,
+       99,
+       111,
+       117,
+       110,
+       116,
+       115,
+       34,
+       58,
+       32,
+       123,
+       34,
+       114,
+       111,
+       119,
+       115,
+       34,
+       58,
+       32,
+       50,
+       125,
+       44,
+       32,
+       34,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       48,
+       99,
+       48,
+       50,
+       100,
+       49,
+       100,
+       98,
+       54,
+       50,
+       51,
+       99,
+       52,
+       55,
+       49,
+       53,
+       57,
+       56,
+       100,
+       99,
+       49,
+       50,
+       49,
+       97,
+       99,
+       97,
+       51,
+       51,
+       52,
+       48,
+       98,
+       101,
+       50,
+       51,
+       56,
+       98,
+       56,
+       54,
+       50,
+       54,
+       102,
+       54,
+       102,
+       101,
+       49,
+       101,
+       50,
+       53,
+       97,
+       50,
+       51,
+       98,
+       52,
+       52,
+       56,
+       101,
+       51,
+       48,
+       52,
+       100,
+       51,
+       52,
+       102,
+       52,
+       34,
+       125
+      ],
+      "path": "manifest.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       116,
+       119,
+       111
+      ],
+      "path": "pdfs/acme_atom2.pdf"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125
+      ],
+      "path": "validated/acme/atom1.json"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "source_audit_and_manifest"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "expected 3 PDFs, found 1"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [],
+     "expected_pdf_files": 3
+    },
+    "tree": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "expected_pdf_files_mismatch"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "source audit schema is not supported"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [],
+     "source_audit": "audit.json"
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       115,
+       99,
+       104,
+       101,
+       109,
+       97,
+       34,
+       58,
+       32,
+       34,
+       111,
+       116,
+       104,
+       101,
+       114,
+       46,
+       118,
+       57,
+       34,
+       44,
+       32,
+       34,
+       99,
+       97,
+       110,
+       100,
+       105,
+       100,
+       97,
+       116,
+       101,
+       115,
+       34,
+       58,
+       32,
+       91,
+       93,
+       125
+      ],
+      "path": "audit.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "source_audit_schema"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "source audit has an invalid evidence_sha256"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [],
+     "source_audit": "audit.json"
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       115,
+       99,
+       104,
+       101,
+       109,
+       97,
+       34,
+       58,
+       32,
+       34,
+       104,
+       97,
+       114,
+       110,
+       101,
+       115,
+       115,
+       46,
+       112,
+       105,
+       110,
+       111,
+       117,
+       116,
+       45,
+       118,
+       105,
+       115,
+       105,
+       111,
+       110,
+       45,
+       115,
+       111,
+       117,
+       114,
+       99,
+       101,
+       45,
+       97,
+       117,
+       100,
+       105,
+       116,
+       46,
+       118,
+       49,
+       34,
+       44,
+       32,
+       34,
+       99,
+       97,
+       110,
+       100,
+       105,
+       100,
+       97,
+       116,
+       101,
+       115,
+       34,
+       58,
+       32,
+       91,
+       93,
+       44,
+       32,
+       34,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       48,
+       34,
+       125
+      ],
+      "path": "audit.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "source_audit_digest"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "source audit PDF hashes differ from the live corpus: [{'path': 'acme_atom1.pdf', 'expected': 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 'actual': '6dcad4a84ba69662d8087f9d85554e5c2d7b5279ea0a174faa60fa243e7850e8'}]"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [],
+     "source_audit": "audit.json"
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       115,
+       99,
+       104,
+       101,
+       109,
+       97,
+       34,
+       58,
+       32,
+       34,
+       104,
+       97,
+       114,
+       110,
+       101,
+       115,
+       115,
+       46,
+       112,
+       105,
+       110,
+       111,
+       117,
+       116,
+       45,
+       118,
+       105,
+       115,
+       105,
+       111,
+       110,
+       45,
+       115,
+       111,
+       117,
+       114,
+       99,
+       101,
+       45,
+       97,
+       117,
+       100,
+       105,
+       116,
+       46,
+       118,
+       49,
+       34,
+       44,
+       32,
+       34,
+       99,
+       97,
+       110,
+       100,
+       105,
+       100,
+       97,
+       116,
+       101,
+       115,
+       34,
+       58,
+       32,
+       91,
+       123,
+       34,
+       112,
+       100,
+       102,
+       95,
+       112,
+       97,
+       116,
+       104,
+       34,
+       58,
+       32,
+       34,
+       97,
+       99,
+       109,
+       101,
+       95,
+       97,
+       116,
+       111,
+       109,
+       49,
+       46,
+       112,
+       100,
+       102,
+       34,
+       44,
+       32,
+       34,
+       112,
+       100,
+       102,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       102,
+       34,
+       125,
+       93,
+       44,
+       32,
+       34,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       95,
+       115,
+       104,
+       97,
+       50,
+       53,
+       54,
+       34,
+       58,
+       32,
+       34,
+       52,
+       97,
+       55,
+       101,
+       57,
+       55,
+       55,
+       52,
+       98,
+       55,
+       51,
+       53,
+       98,
+       99,
+       56,
+       57,
+       50,
+       57,
+       98,
+       57,
+       100,
+       49,
+       97,
+       56,
+       100,
+       101,
+       48,
+       100,
+       50,
+       54,
+       102,
+       50,
+       100,
+       52,
+       56,
+       52,
+       49,
+       57,
+       99,
+       57,
+       56,
+       57,
+       99,
+       99,
+       100,
+       52,
+       54,
+       49,
+       99,
+       55,
+       100,
+       54,
+       97,
+       55,
+       99,
+       54,
+       102,
+       98,
+       48,
+       53,
+       53,
+       100,
+       98,
+       56,
+       34,
+       125
+      ],
+      "path": "audit.json"
+     },
+     {
+      "bytes": [
+       123,
+       34,
+       112,
+       97,
+       114,
+       116,
+       95,
+       110,
+       117,
+       109,
+       98,
+       101,
+       114,
+       34,
+       58,
+       32,
+       34,
+       65,
+       84,
+       79,
+       77,
+       49,
+       34,
+       125
+      ],
+      "path": "gt/acme_atom1.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "source_audit_hash_mismatch"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "row dataset manifest schema is not supported"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [],
+     "row_dataset_manifest": "manifest.json"
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       115,
+       99,
+       104,
+       101,
+       109,
+       97,
+       34,
+       58,
+       32,
+       34,
+       110,
+       111,
+       112,
+       101,
+       34,
+       44,
+       32,
+       34,
+       99,
+       111,
+       117,
+       110,
+       116,
+       115,
+       34,
+       58,
+       32,
+       123,
+       125,
+       125
+      ],
+      "path": "manifest.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "row_manifest_schema"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "invalid asset name: 'bad name'"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "name": "bad name",
+       "path": "asset.jsonl"
+      }
+     ]
+    },
+    "tree": [
+     {
+      "bytes": [],
+      "path": "asset.jsonl"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "asset_name_invalid"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "invalid asset kind: 'parquet'"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "kind": "parquet",
+       "name": "facts",
+       "path": "asset.jsonl"
+      }
+     ]
+    },
+    "tree": [
+     {
+      "bytes": [],
+      "path": "asset.jsonl"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "asset_kind_invalid"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "cannot infer asset kind for $ROOT/asset.txt"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "kind": "auto",
+       "name": "facts",
+       "path": "asset.txt"
+      }
+     ]
+    },
+    "tree": [
+     {
+      "bytes": [
+       104,
+       101,
+       108,
+       108,
+       111
+      ],
+      "path": "asset.txt"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "asset_kind_uninferable"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "JSON source must contain an object: $ROOT/asset.json"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "kind": "json",
+       "name": "facts",
+       "path": "asset.json"
+      }
+     ]
+    },
+    "tree": [
+     {
+      "bytes": [
+       91,
+       49,
+       44,
+       32,
+       50,
+       93
+      ],
+      "path": "asset.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "json_source_not_object"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "$ROOT/asset.json: records entry 2 is not an object"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "kind": "json",
+       "name": "facts",
+       "path": "asset.json"
+      }
+     ]
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       114,
+       101,
+       99,
+       111,
+       114,
+       100,
+       115,
+       34,
+       58,
+       32,
+       91,
+       123,
+       34,
+       111,
+       107,
+       34,
+       58,
+       32,
+       49,
+       125,
+       44,
+       32,
+       53,
+       93,
+       125
+      ],
+      "path": "asset.json"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "records_entry_not_object"
+  },
+  {
+   "error": {
+    "match": "exact",
+    "message": "$ROOT/asset.jsonl: line 2 is not an object"
+   },
+   "expected": null,
+   "input": {
+    "config": {
+     "assets": [
+      {
+       "kind": "jsonl",
+       "name": "facts",
+       "path": "asset.jsonl"
+      }
+     ]
+    },
+    "tree": [
+     {
+      "bytes": [
+       123,
+       34,
+       111,
+       107,
+       34,
+       58,
+       32,
+       49,
+       125,
+       10,
+       53,
+       10
+      ],
+      "path": "asset.jsonl"
+     },
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       97,
+       116,
+       111,
+       109,
+       45,
+       111,
+       110,
+       101
+      ],
+      "path": "pdfs/acme_atom1.pdf"
+     }
+    ]
+   },
+   "kind": "build",
+   "name": "jsonl_line_not_object"
+  },
+  {
+   "expected": "acme",
+   "input": {
+    "value": "acme"
+   },
+   "kind": "canonical_vendor",
+   "name": "plain"
+  },
+  {
+   "expected": "st",
+   "input": {
+    "value": "STMicroelectronics"
+   },
+   "kind": "canonical_vendor",
+   "name": "casefold"
+  },
+  {
+   "expected": "acme",
+   "input": {
+    "value": "acme.com"
+   },
+   "kind": "canonical_vendor",
+   "name": "dotcom"
+  },
+  {
+   "expected": "silabs",
+   "input": {
+    "value": "Silicon Labs"
+   },
+   "kind": "canonical_vendor",
+   "name": "alias_silabs"
+  },
+  {
+   "expected": "nxp",
+   "input": {
+    "value": "Freescale/NXP"
+   },
+   "kind": "canonical_vendor",
+   "name": "alias_freescale"
+  },
+  {
+   "expected": "ti",
+   "input": {
+    "value": "Texas Instruments"
+   },
+   "kind": "canonical_vendor",
+   "name": "alias_ti"
+  },
+  {
+   "expected": "contoso",
+   "input": {
+    "value": "Contoso"
+   },
+   "kind": "canonical_vendor",
+   "name": "unknown_kept"
+  },
+  {
+   "expected": null,
+   "input": {
+    "value": ""
+   },
+   "kind": "canonical_vendor",
+   "name": "empty"
+  },
+  {
+   "expected": null,
+   "input": {
+    "value": null
+   },
+   "kind": "canonical_vendor",
+   "name": "none"
+  },
+  {
+   "expected": "123",
+   "input": {
+    "value": 123
+   },
+   "kind": "canonical_vendor",
+   "name": "numeric"
+  },
+  {
+   "expected": "1.0",
+   "input": {
+    "value": 1.0
+   },
+   "kind": "canonical_vendor",
+   "name": "float"
+  },
+  {
+   "expected": "true",
+   "input": {
+    "value": true
+   },
+   "kind": "canonical_vendor",
+   "name": "bool_true"
+  },
+  {
+   "expected": "acme",
+   "input": {
+    "value": "  acme  "
+   },
+   "kind": "canonical_vendor",
+   "name": "whitespace"
+  },
+  {
+   "expected": "ATOM1",
+   "input": {
+    "value": "atom1"
+   },
+   "kind": "part_key",
+   "name": "upper"
+  },
+  {
+   "expected": "ATMEGA1608",
+   "input": {
+    "value": "AT-MEGA1608"
+   },
+   "kind": "part_key",
+   "name": "punct"
+  },
+  {
+   "expected": "XY",
+   "input": {
+    "value": "  x y  "
+   },
+   "kind": "part_key",
+   "name": "spaces"
+  },
+  {
+   "expected": null,
+   "input": {
+    "value": ""
+   },
+   "kind": "part_key",
+   "name": "empty"
+  },
+  {
+   "expected": null,
+   "input": {
+    "value": null
+   },
+   "kind": "part_key",
+   "name": "none"
+  },
+  {
+   "expected": null,
+   "input": {
+    "value": 0
+   },
+   "kind": "part_key",
+   "name": "zero_is_falsy"
+  },
+  {
+   "expected": "12",
+   "input": {
+    "value": 12
+   },
+   "kind": "part_key",
+   "name": "int"
+  },
+  {
+   "expected": "10",
+   "input": {
+    "value": 1.0
+   },
+   "kind": "part_key",
+   "name": "float"
+  },
+  {
+   "expected": "TRUE",
+   "input": {
+    "value": true
+   },
+   "kind": "part_key",
+   "name": "bool_true"
+  },
+  {
+   "expected": [
+    "record_id:r1",
+    "queue_id:2",
+    "part_number:P1",
+    "base_mpn:B"
+   ],
+   "input": {
+    "fallback": "file:1",
+    "row": {
+     "base_mpn": "B",
+     "part_number": "P1",
+     "queue_id": 2,
+     "record_id": "r1"
+    }
+   },
+   "kind": "record_ids",
+   "name": "priority"
+  },
+  {
+   "expected": [
+    "path:file:2"
+   ],
+   "input": {
+    "fallback": "file:2",
+    "row": {
+     "record_id": "  ",
+     "series_key": ""
+    }
+   },
+   "kind": "record_ids",
+   "name": "empty_strings"
+  },
+  {
+   "expected": [
+    "custom_id:1.0"
+   ],
+   "input": {
+    "fallback": "f:3",
+    "row": {
+     "custom_id": 1.0
+    }
+   },
+   "kind": "record_ids",
+   "name": "float"
+  },
+  {
+   "expected": [
+    "record_id:True"
+   ],
+   "input": {
+    "fallback": "f:4",
+    "row": {
+     "record_id": true
+    }
+   },
+   "kind": "record_ids",
+   "name": "bool"
+  },
+  {
+   "expected": [
+    "record_id:0"
+   ],
+   "input": {
+    "fallback": "f:5",
+    "row": {
+     "record_id": 0
+    }
+   },
+   "kind": "record_ids",
+   "name": "int_zero"
+  },
+  {
+   "expected": [
+    "path:f:6"
+   ],
+   "input": {
+    "fallback": "f:6",
+    "row": {
+     "record_id": {
+      "a": 1
+     }
+    }
+   },
+   "kind": "record_ids",
+   "name": "dict_ignored"
+  },
+  {
+   "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "input": {
+    "row": {
+     "pdf_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "source_document_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+   },
+   "kind": "document_digest",
+   "name": "first_key"
+  },
+  {
+   "expected": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "input": {
+    "row": {
+     "source_document_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+   },
+   "kind": "document_digest",
+   "name": "second_key"
+  },
+  {
+   "expected": null,
+   "input": {
+    "row": {
+     "pdf_sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+   },
+   "kind": "document_digest",
+   "name": "uppercase"
+  },
+  {
+   "expected": null,
+   "input": {
+    "row": {
+     "pdf_sha256": "abc"
+    }
+   },
+   "kind": "document_digest",
+   "name": "short"
+  },
+  {
+   "expected": null,
+   "input": {
+    "row": {
+     "pdf_sha256": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+    }
+   },
+   "kind": "document_digest",
+   "name": "non_hex"
+  },
+  {
+   "expected": null,
+   "input": {
+    "row": {}
+   },
+   "kind": "document_digest",
+   "name": "missing"
+  },
+  {
+   "expected": {
+    "batch_id": "b1",
+    "part_numbers": [
+     "EFR32"
+    ],
+    "path": "acme/atom1.json",
+    "record_id": "atom1",
+    "sections": [
+     "pinout",
+     "clock_specs",
+     "overview"
+    ],
+    "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "validation": "VALIDATED_GROUND_TRUTH",
+    "vendor": "silabs"
+   },
+   "input": {
+    "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "rel_path": "acme/atom1.json",
+    "stem": "atom1",
+    "value": {
+     "_meta": {
+      "batch_id": "b1",
+      "provenance": {
+       "validation": "VALIDATED_GROUND_TRUTH"
+      }
+     },
+     "clock_specs": [],
+     "overview": {
+      "manufacturer": "Silicon Labs",
+      "part_number": "EFR32"
+     },
+     "pinout": []
+    }
+   },
+   "kind": "record_summary",
+   "name": "full"
+  },
+  {
+   "expected": {
+    "batch_id": null,
+    "part_numbers": [
+     "STM32"
+    ],
+    "path": "st_mcu.json",
+    "record_id": "st_mcu",
+    "sections": [],
+    "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "validation": null,
+    "vendor": "st"
+   },
+   "input": {
+    "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "rel_path": "st_mcu.json",
+    "stem": "st_mcu",
+    "value": {
+     "part_number": "STM32"
+    }
+   },
+   "kind": "record_summary",
+   "name": "stem_vendor_fallback"
+  },
+  {
+   "expected": "be01583f0443fc3b5583dec8d85352146f78896432bbdcddc69963f11a96c3ce",
+   "input": {
+    "value": {
+     "a": [
+      1,
+      2.5
+     ],
+     "b": "\u00fc",
+     "c": {
+      "y": null,
+      "z": true
+     }
+    }
+   },
+   "kind": "canonical_json_sha256",
+   "name": "unicode"
+  },
+  {
+   "expected": "bfa150c1af018ad547341ec41bb5e17be2e3f534a7aae4be530ed79fcc1a4554",
+   "input": {
+    "value": {
+     "a": "x",
+     "m": {
+      "10": 3,
+      "2": 1
+     }
+    }
+   },
+   "kind": "canonical_json_sha256",
+   "name": "nested_order"
+  },
+  {
+   "expected": "8ee5ef5f5bc1774c7b54c8c81e5aeade17afb1308ead34dbdbb4b787133cb424",
+   "input": {
+    "value": {
+     "f": 0.1,
+     "g": 1.0,
+     "h": -2.5
+    }
+   },
+   "kind": "canonical_json_sha256",
+   "name": "floats"
+  },
+  {
+   "expected": {
+    "message": null,
+    "ok": true
+   },
+   "input": {
+    "value": {
+     "assets": [],
+     "counts": {
+      "unique_pdf_sha256": 0
+     },
+     "created_at": "2026-09-01T00:00:00+00:00",
+     "documents": [],
+     "evidence_sha256": "dff17d007bf42e293a0f516a77f1b32f19a8f9bbcec09e1e2a4055af6bc80e70",
+     "orphans": {
+      "ground_truth": [],
+      "published_pinouts": []
+     },
+     "policy": {},
+     "schema": "harness.electronics-corpus-registry.v1",
+     "sources": {}
+    }
+   },
+   "kind": "verify",
+   "name": "ok"
+  },
+  {
+   "expected": {
+    "message": "corpus registry evidence digest is invalid",
+    "ok": false
+   },
+   "input": {
+    "value": {
+     "assets": [],
+     "counts": {
+      "unique_pdf_sha256": 1
+     },
+     "created_at": "2026-09-01T00:00:00+00:00",
+     "documents": [],
+     "evidence_sha256": "dff17d007bf42e293a0f516a77f1b32f19a8f9bbcec09e1e2a4055af6bc80e70",
+     "orphans": {
+      "ground_truth": [],
+      "published_pinouts": []
+     },
+     "policy": {},
+     "schema": "harness.electronics-corpus-registry.v1",
+     "sources": {}
+    }
+   },
+   "kind": "verify",
+   "name": "tampered"
+  },
+  {
+   "expected": {
+    "message": "corpus registry schema is not supported",
+    "ok": false
+   },
+   "input": {
+    "value": {
+     "assets": [],
+     "counts": {
+      "unique_pdf_sha256": 0
+     },
+     "created_at": "2026-09-01T00:00:00+00:00",
+     "documents": [],
+     "evidence_sha256": "dff17d007bf42e293a0f516a77f1b32f19a8f9bbcec09e1e2a4055af6bc80e70",
+     "orphans": {
+      "ground_truth": [],
+      "published_pinouts": []
+     },
+     "policy": {},
+     "schema": "other.v1",
+     "sources": {}
+    }
+   },
+   "kind": "verify",
+   "name": "bad_schema"
+  },
+  {
+   "expected": {
+    "error": "destination already exists: $ROOT/registry.json",
+    "mode": "0444"
+   },
+   "input": {
+    "value": {
+     "assets": [],
+     "counts": {
+      "unique_pdf_sha256": 0
+     },
+     "created_at": "2026-09-01T00:00:00+00:00",
+     "documents": [],
+     "evidence_sha256": "dff17d007bf42e293a0f516a77f1b32f19a8f9bbcec09e1e2a4055af6bc80e70",
+     "orphans": {
+      "ground_truth": [],
+      "published_pinouts": []
+     },
+     "policy": {},
+     "schema": "harness.electronics-corpus-registry.v1",
+     "sources": {}
+    }
+   },
+   "kind": "write",
+   "name": "exclusive_read_only"
+  }
+ ]
+}
