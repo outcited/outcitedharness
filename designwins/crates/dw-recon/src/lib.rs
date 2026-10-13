@@ -43,6 +43,7 @@ pub mod l0;
 pub mod locator;
 pub mod page_evidence;
 pub mod page_index;
+pub mod regions;
 pub mod sha256;
 pub mod table_extractors;
 pub mod word_columns;
@@ -57,6 +58,10 @@ pub use l0::{classify_document, extension_class, l0_record, PageFacts};
 pub use locator::{locate_pin_definition_pages, LocateResult};
 pub use page_evidence::{extract_profile_evidence, selected_pages, EvidencePage};
 pub use page_index::{classify_section, index_document};
+pub use regions::{
+    parametric_table_score, pin_table_score, printed_package_mentions,
+    structural_parametric_regions, structural_pin_regions, structural_text_regions,
+};
 pub use table_extractors::{
     normalize_parametric_facts, parse_parametric_table, parse_pin_table, physical_pin_identifiers,
     pin_identity_rows, pin_semantic_roles, pin_semantic_values, project_pin_table,

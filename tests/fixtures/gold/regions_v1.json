@@ -1,0 +1,706 @@
+{
+ "cases": [
+  {
+   "expected": [
+    8,
+    [
+     "pin_name_header",
+     "pin_identity_header",
+     "semantic_header",
+     "physical_identifier_column"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Pin Number",
+      "Pin Name",
+      "Type",
+      "Description"
+     ],
+     [
+      "1",
+      "VIN",
+      "Power",
+      "Input supply"
+     ],
+     [
+      "2",
+      "GND",
+      "Power",
+      "Ground"
+     ],
+     [
+      "3",
+      "EN",
+      "Input",
+      "Enable input"
+     ]
+    ]
+   },
+   "kind": "pin_table_score",
+   "name": "single_package"
+  },
+  {
+   "expected": [
+    0,
+    [
+     "register_table_veto"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Register",
+      "Offset",
+      "Reset Value"
+     ],
+     [
+      "CTRL",
+      "0x00",
+      "0x0000"
+     ],
+     [
+      "STATUS",
+      "0x04",
+      "0x0000"
+     ],
+     [
+      "DATA",
+      "0x08",
+      "0x0000"
+     ]
+    ]
+   },
+   "kind": "pin_table_score",
+   "name": "register_veto"
+  },
+  {
+   "expected": [
+    0,
+    [
+     "missing_pin_definition_header"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Ordering Part Number",
+      "Flash Memory (kB)",
+      "Digital Port I/Os (Total)",
+      "Package"
+     ],
+     [
+      "EFM8BB10F8G-A-QSOP24",
+      "8",
+      "18",
+      "QSOP24"
+     ],
+     [
+      "EFM8BB10F8G-A-QFN20",
+      "8",
+      "16",
+      "QFN20"
+     ],
+     [
+      "EFM8BB10F8G-A-SOIC16",
+      "8",
+      "13",
+      "SOIC16"
+     ]
+    ]
+   },
+   "kind": "pin_table_score",
+   "name": "ordering_missing_header"
+  },
+  {
+   "expected": [
+    8,
+    [
+     "pin_name_header",
+     "pin_identity_header",
+     "semantic_header",
+     "physical_identifier_column"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Ball",
+      "Signal Name",
+      "Description"
+     ],
+     [
+      "AA10",
+      "DDR_D0",
+      "Data"
+     ],
+     [
+      "AB11",
+      "DDR_D1",
+      "Data"
+     ],
+     [
+      "AC12",
+      "DDR_D2",
+      "Data"
+     ]
+    ]
+   },
+   "kind": "pin_table_score",
+   "name": "bga_balls"
+  },
+  {
+   "expected": [
+    18,
+    [
+     "locator_definition_table",
+     "pin_name_header",
+     "pin_identity_header",
+     "semantic_header",
+     "package_header",
+     "physical_identifier_column"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "LQFP 64",
+      "Pin Name",
+      "Description"
+     ],
+     [
+      "1",
+      "PA0",
+      "GPIO"
+     ],
+     [
+      "2",
+      "PA1",
+      "GPIO"
+     ],
+     [
+      "3",
+      "VDD",
+      "Supply"
+     ]
+    ]
+   },
+   "kind": "pin_table_score",
+   "name": "package_table"
+  },
+  {
+   "expected": [
+    0,
+    [
+     "too_few_rows"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Pin",
+      "Name"
+     ],
+     [
+      "1",
+      "PA0"
+     ]
+    ]
+   },
+   "kind": "pin_table_score",
+   "name": "too_few_rows"
+  },
+  {
+   "expected": [
+    7,
+    [
+     "pin_name_header",
+     "pin_identity_header",
+     "physical_identifier_column"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Pin Number",
+      "Pin Name",
+      "Offset"
+     ],
+     [
+      "1",
+      "VIN",
+      "0x00"
+     ],
+     [
+      "2",
+      "GND",
+      "0x04"
+     ],
+     [
+      "3",
+      "EN",
+      "0x08"
+     ]
+    ]
+   },
+   "kind": "pin_table_score",
+   "name": "pin_header_overrides_register_veto"
+  },
+  {
+   "expected": [
+    8,
+    [
+     "parameter_header",
+     "multiple_value_headers",
+     "multiple_data_rows"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Parameter",
+      "Conditions",
+      "Min",
+      "Typ",
+      "Max",
+      "Unit"
+     ],
+     [
+      "Supply voltage",
+      "",
+      "1.7",
+      "3.3",
+      "3.6",
+      "V"
+     ],
+     [
+      "Current",
+      "",
+      "",
+      "8",
+      "",
+      "mA"
+     ]
+    ]
+   },
+   "kind": "parametric_table_score",
+   "name": "electrical"
+  },
+  {
+   "expected": [
+    0,
+    [
+     "register_table_veto"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Register",
+      "Offset",
+      "Reset Value"
+     ],
+     [
+      "CTRL",
+      "0x00",
+      "0x0000"
+     ],
+     [
+      "STATUS",
+      "0x04",
+      "0x0000"
+     ],
+     [
+      "DATA",
+      "0x08",
+      "0x0000"
+     ]
+    ]
+   },
+   "kind": "parametric_table_score",
+   "name": "register_veto"
+  },
+  {
+   "expected": [
+    0,
+    [
+     "ordering_table_veto"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Ordering Part Number",
+      "Min",
+      "Max"
+     ],
+     [
+      "X",
+      "1",
+      "2"
+     ]
+    ]
+   },
+   "kind": "parametric_table_score",
+   "name": "ordering_veto"
+  },
+  {
+   "expected": [
+    7,
+    [
+     "parameter_header",
+     "multiple_value_headers"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Symbol",
+      "Min",
+      "Max"
+     ],
+     [
+      "VDD",
+      "1.7",
+      "3.6"
+     ]
+    ]
+   },
+   "kind": "parametric_table_score",
+   "name": "missing_parameter_header"
+  },
+  {
+   "expected": [
+    0,
+    [
+     "insufficient_value_headers"
+    ]
+   ],
+   "input": {
+    "rows": [
+     [
+      "Parameter",
+      "Min"
+     ],
+     [
+      "Supply voltage",
+      "1.7"
+     ]
+    ]
+   },
+   "kind": "parametric_table_score",
+   "name": "insufficient_value_headers"
+  },
+  {
+   "expected": [
+    {
+     "bbox": [
+      10.0,
+      20.0,
+      300.0,
+      500.0
+     ],
+     "package_headers": [
+      "LQFP 64"
+     ],
+     "reasons": [
+      "locator_definition_table",
+      "pin_name_header",
+      "pin_identity_header",
+      "semantic_header",
+      "package_header",
+      "physical_identifier_column"
+     ],
+     "rows": 4,
+     "score": 18,
+     "semantic_roles": [
+      "functions"
+     ],
+     "table_index": 2
+    }
+   ],
+   "input": {
+    "page_evidence": {
+     "tables": [
+      {
+       "bbox": [
+        10,
+        20,
+        300,
+        500
+       ],
+       "rows": [
+        [
+         "LQFP 64",
+         "Pin Name",
+         "Description"
+        ],
+        [
+         "1",
+         "PA0",
+         "GPIO"
+        ],
+        [
+         "2",
+         "PA1",
+         "GPIO"
+        ],
+        [
+         "3",
+         "VDD",
+         "Supply"
+        ]
+       ],
+       "table_index": 2
+      }
+     ]
+    }
+   },
+   "kind": "structural_pin_regions",
+   "name": "geometry_and_headers"
+  },
+  {
+   "expected": [
+    {
+     "bbox": [
+      10.0,
+      20.0,
+      400.0,
+      500.0
+     ],
+     "package_headers": [],
+     "reasons": [
+      "parameter_header",
+      "multiple_value_headers",
+      "multiple_data_rows"
+     ],
+     "rows": 3,
+     "score": 8,
+     "table_index": 3
+    }
+   ],
+   "input": {
+    "page_evidence": {
+     "tables": [
+      {
+       "bbox": [
+        10,
+        20,
+        400,
+        500
+       ],
+       "rows": [
+        [
+         "Parameter",
+         "Conditions",
+         "Min",
+         "Typ",
+         "Max",
+         "Unit"
+        ],
+        [
+         "Supply voltage",
+         "",
+         "1.7",
+         "3.3",
+         "3.6",
+         "V"
+        ],
+        [
+         "Current",
+         "",
+         "",
+         "8",
+         "",
+         "mA"
+        ]
+       ],
+       "table_index": 3
+      },
+      {
+       "bbox": [
+        10,
+        600,
+        400,
+        700
+       ],
+       "rows": [
+        [
+         "Register",
+         "Offset",
+         "Reset Value"
+        ],
+        [
+         "CTRL",
+         "0x00",
+         "0x0000"
+        ],
+        [
+         "STATUS",
+         "0x04",
+         "0x0000"
+        ],
+        [
+         "DATA",
+         "0x08",
+         "0x0000"
+        ]
+       ],
+       "table_index": 4
+      }
+     ]
+    }
+   },
+   "kind": "structural_parametric_regions",
+   "name": "electrical"
+  },
+  {
+   "expected": [
+    {
+     "bbox": [
+      20.0,
+      30.0,
+      500.0,
+      300.0
+     ],
+     "package_headers": [],
+     "reasons": [
+      "visible_summary_evidence"
+     ],
+     "rows": 1,
+     "score": 5,
+     "semantic_roles": [],
+     "table_index": null
+    }
+   ],
+   "input": {
+    "capability": "series_summary",
+    "page_evidence": {
+     "blocks": [
+      {
+       "bbox": [
+        20,
+        30,
+        300,
+        100
+       ],
+       "text": "Features\nLow power"
+      }
+     ],
+     "tables": [
+      {
+       "bbox": [
+        20,
+        120,
+        500,
+        300
+       ],
+       "rows": [
+        [
+         "Description",
+         "MCU family"
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   "kind": "structural_text_regions",
+   "name": "series_summary"
+  },
+  {
+   "expected": [
+    {
+     "bbox": [
+      20.0,
+      30.0,
+      500.0,
+      300.0
+     ],
+     "package_headers": [],
+     "reasons": [
+      "visible_ordering_evidence"
+     ],
+     "rows": 0,
+     "score": 5,
+     "semantic_roles": [],
+     "table_index": null
+    }
+   ],
+   "input": {
+    "capability": "opn_decoder",
+    "page_evidence": {
+     "blocks": [
+      {
+       "bbox": [
+        20,
+        30,
+        500,
+        300
+       ],
+       "text": "Ordering information"
+      }
+     ],
+     "tables": []
+    }
+   },
+   "kind": "structural_text_regions",
+   "name": "opn_decoder"
+  },
+  {
+   "expected": [],
+   "input": {
+    "capability": "opn_decoder",
+    "page_evidence": {
+     "blocks": [
+      {
+       "bbox": [
+        0,
+        0,
+        10,
+        10
+       ],
+       "text": "zzz"
+      }
+     ],
+     "tables": []
+    }
+   },
+   "kind": "structural_text_regions",
+   "name": "no_signal"
+  },
+  {
+   "expected": [
+    "40-pin TQFN",
+    "LQFP64"
+   ],
+   "input": {
+    "page_evidence": {
+     "blocks": [
+      {
+       "bbox": [
+        0,
+        0,
+        100,
+        20
+       ],
+       "text": "40-pin TQFN and 40-pin tqfn"
+      },
+      {
+       "bbox": [
+        0,
+        30,
+        100,
+        50
+       ],
+       "text": "Available in LQFP64"
+      }
+     ]
+    }
+   },
+   "kind": "printed_package_mentions",
+   "name": "dedupe_casefold"
+  }
+ ]
+}

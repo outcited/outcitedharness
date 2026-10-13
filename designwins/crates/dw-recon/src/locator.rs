@@ -79,7 +79,9 @@ fn jedec_re() -> &'static Regex {
     R.get_or_init(|| re(JEDEC))
 }
 
-fn package_key_re() -> &'static Regex {
+/// Family-then-count or count-then-family package tokens.
+#[must_use]
+pub fn package_key_re() -> &'static Regex {
     use std::sync::OnceLock;
     static R: OnceLock<Regex> = OnceLock::new();
     R.get_or_init(|| re(PACKAGE_KEY))
