@@ -1,0 +1,641 @@
+{
+ "cases": [
+  {
+   "expected": [
+    {
+     "direction": "I/O",
+     "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "expected_package_pins": 64,
+     "functions_verbatim": "ADC0; USART2",
+     "method": "pymupdf_deterministic_table",
+     "name": "PA0",
+     "package": "LQFP64",
+     "page_1based": 10,
+     "pin_no": "1",
+     "row_index": 2,
+     "table_index": 2,
+     "type": "GPIO"
+    },
+    {
+     "direction": "I/O",
+     "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "expected_package_pins": 100,
+     "functions_verbatim": "ADC0; USART2",
+     "method": "pymupdf_deterministic_table",
+     "name": "PA0",
+     "package": "LQFP100",
+     "page_1based": 10,
+     "pin_no": "2",
+     "row_index": 2,
+     "table_index": 2,
+     "type": "GPIO"
+    },
+    {
+     "direction": "I/O",
+     "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "expected_package_pins": 100,
+     "functions_verbatim": "ADC1",
+     "method": "pymupdf_deterministic_table",
+     "name": "PA1",
+     "package": "LQFP100",
+     "page_1based": 10,
+     "pin_no": "3",
+     "row_index": 3,
+     "table_index": 2,
+     "type": "GPIO"
+    }
+   ],
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "page_1based": 10,
+    "table": {
+     "rows": [
+      [
+       "",
+       "LQFP64",
+       "LQFP100",
+       "",
+       "",
+       ""
+      ],
+      [
+       "Pin name",
+       "Pin number",
+       "Pin number",
+       "Type",
+       "Direction",
+       "Function"
+      ],
+      [
+       "PA0",
+       "1",
+       "2",
+       "GPIO",
+       "I/O",
+       "ADC0; USART2"
+      ],
+      [
+       "PA1",
+       "-",
+       "3",
+       "GPIO",
+       "I/O",
+       "ADC1"
+      ]
+     ],
+     "table_index": 2
+    }
+   },
+   "kind": "parse_pin_table",
+   "name": "packages_and_verbatim"
+  },
+  {
+   "expected": [],
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "page_1based": 1,
+    "table": {
+     "rows": [
+      [
+       "Pin name",
+       "Type",
+       "Description"
+      ],
+      [
+       "PA0",
+       "GPIO",
+       "ADC0"
+      ]
+     ],
+     "table_index": 0
+    }
+   },
+   "kind": "parse_pin_table",
+   "name": "pin_name_not_pin_number"
+  },
+  {
+   "expected": [
+    "0"
+   ],
+   "input": {
+    "value": 0
+   },
+   "kind": "physical_pin_identifiers",
+   "name": "numeric_zero"
+  },
+  {
+   "expected": [
+    "A1"
+   ],
+   "input": {
+    "value": "A1"
+   },
+   "kind": "physical_pin_identifiers",
+   "name": "ball"
+  },
+  {
+   "expected": [
+    "12(1)"
+   ],
+   "input": {
+    "value": "12(1)"
+   },
+   "kind": "physical_pin_identifiers",
+   "name": "footnote"
+  },
+  {
+   "expected": [
+    "A1",
+    "B2"
+   ],
+   "input": {
+    "value": "A1, B2"
+   },
+   "kind": "physical_pin_identifiers",
+   "name": "multi"
+  },
+  {
+   "expected": [],
+   "input": {
+    "value": "-"
+   },
+   "kind": "physical_pin_identifiers",
+   "name": "dash"
+  },
+  {
+   "expected": [],
+   "input": {
+    "value": "N/A"
+   },
+   "kind": "physical_pin_identifiers",
+   "name": "na"
+  },
+  {
+   "expected": [],
+   "input": {
+    "value": "XXXXXXXXXXXXXXXXXXXXXXXXX"
+   },
+   "kind": "physical_pin_identifiers",
+   "name": "long"
+  },
+  {
+   "expected": [
+    {
+     "name": "VSS",
+     "pin_no": "0",
+     "row_index": 1,
+     "table": {
+      "rows": [
+       [
+        "Pin Name",
+        "Pin(s)",
+        "Description"
+       ],
+       [
+        "VSS",
+        0,
+        "Ground"
+       ]
+      ],
+      "table_index": 0
+     }
+    }
+   ],
+   "input": {
+    "table": {
+     "rows": [
+      [
+       "Pin Name",
+       "Pin(s)",
+       "Description"
+      ],
+      [
+       "VSS",
+       0,
+       "Ground"
+      ]
+     ],
+     "table_index": 0
+    }
+   },
+   "kind": "pin_identity_rows",
+   "name": "numeric_zero"
+  },
+  {
+   "expected": {
+    "dir": [],
+    "functions": [
+     "Ground"
+    ],
+    "supply_domain": [],
+    "type": []
+   },
+   "input": {
+    "name": "VSS",
+    "pin_no": 0,
+    "row_index": 1,
+    "table": {
+     "rows": [
+      [
+       "Pin Name",
+       "Pin(s)",
+       "Description"
+      ],
+      [
+       "VSS",
+       0,
+       "Ground"
+      ]
+     ],
+     "table_index": 0
+    }
+   },
+   "kind": "pin_semantic_values",
+   "name": "numeric_zero"
+  },
+  {
+   "expected": [
+    "dir",
+    "functions",
+    "supply_domain",
+    "type"
+   ],
+   "input": {
+    "table": {
+     "rows": [
+      [
+       "Pin name",
+       "Pin number",
+       "Type",
+       "Dir",
+       "I/O supply domain",
+       "Description"
+      ],
+      [
+       "PA0",
+       "1",
+       "GPIO",
+       "I/O",
+       "VDD",
+       "ADC0"
+      ],
+      [
+       "PA1",
+       "2",
+       "-",
+       "-",
+       "\u2014",
+       "N/A"
+      ]
+     ],
+     "table_index": 0
+    }
+   },
+   "kind": "pin_semantic_roles",
+   "name": "printed_only"
+  },
+  {
+   "expected": {
+    "dir": [
+     "I/O"
+    ],
+    "functions": [
+     "ADC0"
+    ],
+    "supply_domain": [
+     "VDD"
+    ],
+    "type": [
+     "GPIO"
+    ]
+   },
+   "input": {
+    "name": "PA0",
+    "pin_no": "1",
+    "row_index": 1,
+    "table": {
+     "rows": [
+      [
+       "Pin name",
+       "Pin number",
+       "Type",
+       "Dir",
+       "I/O supply domain",
+       "Description"
+      ],
+      [
+       "PA0",
+       "1",
+       "GPIO",
+       "I/O",
+       "VDD",
+       "ADC0"
+      ],
+      [
+       "PA1",
+       "2",
+       "-",
+       "-",
+       "\u2014",
+       "N/A"
+      ]
+     ],
+     "table_index": 0
+    }
+   },
+   "kind": "pin_semantic_values",
+   "name": "field_aligned"
+  },
+  {
+   "expected": [
+    {
+     "document_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "method": "pymupdf_deterministic_table",
+     "page_1based": 42,
+     "row_index": 1,
+     "table_index": 1,
+     "values_verbatim": {
+      "condition": "TA = 25 C",
+      "max": "3.6",
+      "min": "1.7",
+      "parameter": "Supply voltage",
+      "unit": "V"
+     }
+    }
+   ],
+   "input": {
+    "document_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "page_1based": 42,
+    "table": {
+     "rows": [
+      [
+       "Parameter",
+       "Condition",
+       "Min",
+       "Typ",
+       "Max",
+       "Unit"
+      ],
+      [
+       "Supply voltage",
+       "TA = 25 C",
+       "1.7",
+       "",
+       "3.6",
+       "V"
+      ]
+     ],
+     "table_index": 1
+    }
+   },
+   "kind": "parse_parametric_table",
+   "name": "printed_columns"
+  },
+  {
+   "expected": [],
+   "input": {
+    "document_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "page_1based": 1,
+    "table": {
+     "rows": [
+      [
+       "Parameter",
+       "Typ"
+      ],
+      [
+       "Supply voltage",
+       "3.6"
+      ]
+     ]
+    }
+   },
+   "kind": "parse_parametric_table",
+   "name": "insufficient_value_headers"
+  },
+  {
+   "expected": [
+    {
+     "conditions": {
+      "condition": "TA = 25 C"
+     },
+     "field": "Supply voltage",
+     "unit": "V",
+     "value": "1.7",
+     "value_role": "min"
+    },
+    {
+     "conditions": {
+      "condition": "TA = 25 C"
+     },
+     "field": "Supply voltage",
+     "unit": "V",
+     "value": "3.6",
+     "value_role": "max"
+    }
+   ],
+   "input": {
+    "key_order": [
+     "parameter",
+     "condition",
+     "min",
+     "max",
+     "unit"
+    ],
+    "row": {
+     "values_verbatim": {
+      "condition": "TA = 25 C",
+      "max": "3.6",
+      "min": "1.7",
+      "parameter": "Supply voltage",
+      "unit": "V"
+     }
+    }
+   },
+   "kind": "normalize_parametric_facts",
+   "name": "expands_values"
+  },
+  {
+   "expected": [
+    {
+     "conditions": {
+      "parameter": "I PVDDQ"
+     },
+     "field": "PVDD sleep mode current",
+     "unit": "uA",
+     "value": "2.25",
+     "value_role": "typ"
+    }
+   ],
+   "input": {
+    "key_order": [
+     "parameter",
+     "column_1",
+     "typ.",
+     "unit"
+    ],
+    "row": {
+     "values_verbatim": {
+      "column_1": "PVDD sleep mode current",
+      "parameter": "I PVDDQ",
+      "typ.": "2.25",
+      "unit": "uA"
+     }
+    }
+   },
+   "kind": "normalize_parametric_facts",
+   "name": "description_over_symbol"
+  },
+  {
+   "expected": [
+    {
+     "conditions": {},
+     "field": "Supply voltage",
+     "unit": "V",
+     "value": "3.6",
+     "value_role": "max"
+    }
+   ],
+   "input": {
+    "key_order": [
+     "parameter",
+     "min",
+     "typ",
+     "max",
+     "unit"
+    ],
+    "row": {
+     "values_verbatim": {
+      "max": "3.6",
+      "min": "\u2014",
+      "parameter": "Supply voltage",
+      "typ": "N/A",
+      "unit": "V"
+     }
+    }
+   },
+   "kind": "normalize_parametric_facts",
+   "name": "markers_omitted"
+  },
+  {
+   "expected": {
+    "projected_source_columns": [
+     0,
+     1,
+     3,
+     4,
+     5
+    ],
+    "rows": [
+     [
+      "",
+      "LQFP64",
+      "",
+      "",
+      ""
+     ],
+     [
+      "Pin name",
+      "Pin number",
+      "Type",
+      "Direction",
+      "Function"
+     ],
+     [
+      "PA0",
+      "1",
+      "GPIO",
+      "I/O",
+      "ADC0; USART2"
+     ],
+     [
+      "PA1",
+      "-",
+      "GPIO",
+      "I/O",
+      "ADC1"
+     ]
+    ],
+    "table_index": 2
+   },
+   "input": {
+    "selected_header": "LQFP64",
+    "table": {
+     "rows": [
+      [
+       "",
+       "LQFP64",
+       "LQFP100",
+       "",
+       "",
+       ""
+      ],
+      [
+       "Pin name",
+       "Pin number",
+       "Pin number",
+       "Type",
+       "Direction",
+       "Function"
+      ],
+      [
+       "PA0",
+       "1",
+       "2",
+       "GPIO",
+       "I/O",
+       "ADC0; USART2"
+      ],
+      [
+       "PA1",
+       "-",
+       "3",
+       "GPIO",
+       "I/O",
+       "ADC1"
+      ]
+     ],
+     "table_index": 2
+    }
+   },
+   "kind": "project_pin_table",
+   "name": "drops_other_packages"
+  },
+  {
+   "expected": {
+    "rows": [
+     [
+      "Pin name",
+      "Type",
+      "Description"
+     ],
+     [
+      "PA0",
+      "GPIO",
+      "ADC0"
+     ]
+    ],
+    "table_index": 0
+   },
+   "input": {
+    "selected_header": "Missing",
+    "table": {
+     "rows": [
+      [
+       "Pin name",
+       "Type",
+       "Description"
+      ],
+      [
+       "PA0",
+       "GPIO",
+       "ADC0"
+      ]
+     ],
+     "table_index": 0
+    }
+   },
+   "kind": "project_pin_table",
+   "name": "keeps_unmatched"
+  }
+ ]
+}

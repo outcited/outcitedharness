@@ -44,6 +44,7 @@ pub mod locator;
 pub mod page_evidence;
 pub mod page_index;
 pub mod sha256;
+pub mod table_extractors;
 pub mod word_columns;
 
 pub use corpus::{build_corpus_registry, verify_corpus_registry, write_new_registry};
@@ -56,4 +57,8 @@ pub use l0::{classify_document, extension_class, l0_record, PageFacts};
 pub use locator::{locate_pin_definition_pages, LocateResult};
 pub use page_evidence::{extract_profile_evidence, selected_pages, EvidencePage};
 pub use page_index::{classify_section, index_document};
+pub use table_extractors::{
+    normalize_parametric_facts, parse_parametric_table, parse_pin_table, physical_pin_identifiers,
+    pin_identity_rows, pin_semantic_roles, pin_semantic_values, project_pin_table,
+};
 pub use word_columns::{extract_pin_columns, package_pin_bogey, PackageColumn, Word};
