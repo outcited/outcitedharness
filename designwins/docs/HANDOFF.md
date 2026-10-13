@@ -569,8 +569,36 @@ reason, OnceLock statics at fn-top).
 When the log stops: `python3 scripts/fold_strata.py && python3
 scripts/extraction_board.py` (expect Δ ≈ +1,000 served).
 
-**Next:** `page_index` (324, the last §5.3 dw-recon item), then `dw-structure`,
-`dw-model`/`dw-learn`, `dw-controller`; fold burn batch 4 when its log stops.
+**Next:** §5.5 `dw-structure` modules (`word_columns` 462 · `regions` 618 ·
+`page_evidence` 264 · `l0` ~200 · `table_extractors` 616 · `census` 86 ·
+`pillar_map` 110 — `locator` is done), then `dw-model`/`dw-learn`,
+`dw-controller`; fold burn batch 4 when its log stops.
+
+### Session close 2026-10-13 (small hours) — dw-recon COMPLETE
+
+**`page_index` (`8792a1df`) + `locator` (`f2b58b2b`) pushed; §5.3 done** —
+all 8 dw-recon modules ported with gold (family_census · family_document ·
+family_device_matrix · document_scope · page_index · locator · corpus ·
+incremental_corpus). Gold 77 + 57 + 20 + 30 + 42 cases respectively; every
+commit passed fmt / clippy `-D warnings` / full workspace tests / `cargo deny`.
+
+- `page_index` (30 cases): TOC lanes first, page-text fallback only for
+  missed lanes (3..=180 chars), `classify_section` reports lanes in
+  `LANE_PATTERNS` order, the single-package relaxation gated on one request
+  AND front matter naming at most that family. `locator.locate_*` is §5.5 —
+  its outputs travel as `pin_results` and the gold test asserts the port
+  recomputes the SAME `single_package` decision (captured in `pin_calls`).
+- `locator` (42 cases): definition tables only (never ballout figures,
+  legends, alternate-function tables), `(continued)` walk-back, consecutive
+  pages stop at the first gap, package columns matched by identity never by
+  cousin, qualified-variant withholding, the TI 3-page single-package
+  relaxation, JEDEC corroboration, `validate_physical_pin_truth` gates.
+  `find_tables()` grids travel as inputs (the PDF-layer pattern) with
+  `None` cells as `extract()` returns them.
+
+Page walks in `locator` index exactly as the reference (per-fn
+`indexing_slicing`/`cast_*` allows, loop-bounded) — same accepted pattern as
+the other grid readers.
 
 ### Session close 2026-10-12 (later) — `corpus` + `incremental_corpus` GREEN
 
