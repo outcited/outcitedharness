@@ -569,8 +569,41 @@ reason, OnceLock statics at fn-top).
 When the log stops: `python3 scripts/fold_strata.py && python3
 scripts/extraction_board.py` (expect Δ ≈ +1,000 served).
 
-**Next:** remaining §5.5 order (`corpus`, `dw-structure`, `dw-model`/
-`dw-learn`, `dw-controller`); fold burn batch 4 when its log stops.
+**Next:** `page_index` (324, the last §5.3 dw-recon item), then `dw-structure`,
+`dw-model`/`dw-learn`, `dw-controller`; fold burn batch 4 when its log stops.
+
+### Session close 2026-10-12 (later) — `corpus` + `incremental_corpus` GREEN
+
+**Both pushed (`5fed790b`, `1f81d1d5`); smoke gate green; gold 57 + 20 cases.**
+The two are fs+hash registry builders (not page readers): gold `build` cases
+materialise fixture trees and run the live builders end to end, with
+`evidence_sha256` re-derived over `$ROOT`-normalised cores on both sides —
+each digest is a live differential check of `canonical_json` + SHA-256 against
+Python's `hashlib`. `dw-recon::sha256` is copied from `dw-extract` (policy:
+no new deps).
+
+Traps the gold pins (do not regress):
+- `corpus`: duplicate PDF bytes stay ONE document with every path;
+  `document_sha256`/`unambiguous_part`/`ambiguous`/`unresolved` count apart;
+  the source audit's multi-row-per-PDF lists join, stale hashes are an error;
+  `_`-prefixed validated dirs skipped; `records` lists vs whole-object JSON
+  assets; `write_new_registry` exclusive + 0444. `part_key` here folds ALL
+  falsy values (`0` -> None); `_record_summary` falls back to stem vendor.
+- `incremental_corpus`: sources must still hash AND size as intaked ("changed
+  after intake"); snapshot digest/count enforced; `source_path` must stay
+  under the PDF root and be a regular file; directory vendor prefixes invent
+  alias stems (`ti.com/ti_mcu.pdf` -> `ti_ti_mcu`) that join like exact stems;
+  ambiguous stems (1 stem, 2 digests) join nothing; bindings feed `record_ids`
+  + `manifested_opn`. `part_key` here keeps `0`/`False` (only `None` absent);
+  `_summary` has NO stem vendor fallback. The two modules' `part_key`/
+  summary semantics deliberately differ — gold-pinned both ways.
+- Digest-only fixtures (snapshot file hash, embedded evidence) need a FIXED
+  materialisation root (`/tmp/gold_inc_corpus_<name>`) because those digests
+  cover root-containing bytes; string normalisation cannot reach them.
+
+`dw-normalize/tests/claim_value_shapes_gold.rs` (parallel agent's untracked
+file) had a one-char `doc_markdown` lint fixed in passing to unblock the
+shared clippy gate — ride-along fix, left uncommitted in their tree.
 
 ### Ops notes (2026-10-12, learned the hard way)
 
