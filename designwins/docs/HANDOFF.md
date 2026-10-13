@@ -569,10 +569,34 @@ reason, OnceLock statics at fn-top).
 When the log stops: `python3 scripts/fold_strata.py && python3
 scripts/extraction_board.py` (expect Δ ≈ +1,000 served).
 
-**Next:** §5.5 `dw-structure` modules (`word_columns` 462 · `regions` 618 ·
-`page_evidence` 264 · `l0` ~200 · `table_extractors` 616 · `census` 86 ·
-`pillar_map` 110 — `locator` is done), then `dw-model`/`dw-learn`,
-`dw-controller`; fold burn batch 4 when its log stops.
+**Next:** §5.5 remainder — `page_evidence` (264, has 4 tests: exact pin page
+override, block/table/coordinate preservation, no-text visual flag, OCR
+fallback) · `regions` (618, 230-line test) · `table_extractors` (616,
+178-line test) — then `dw-model`/`dw-learn`, `dw-controller`; fold burn
+batch 4 when its log stops.
+
+### Session close 2026-10-13 (dawn) — §5.5 modules 4 done
+
+**Pushed: `8792a1df` page_index · `f2b58b2b` locator · `b9c01bc8`
+word_columns · `8cbb4b18` l0.** Every commit: fmt / clippy `-D warnings` /
+full workspace tests / `cargo deny` green. Gold 30 + 42 + 17 + 23 cases.
+
+- `word_columns` (17): word geometry is PDF-layer — `(x0,y0,x1,y1,text)`
+  tuples travel as inputs. Trap: `column_key` uses Python's BANKER'S
+  rounding (`py_round` ported), the `select` fallback preserves dict
+  insertion order (gold wire sorts keys so `column_order` travels
+  separately), and three header patterns are case-INSENSITIVE (`(?i)` was
+  initially missed — the pipeline returned nothing).
+- `l0` (23): extension classes beat content rules, `.bin` deliberately
+  unclassifiable, manifest prior fills only `unknown`, `toc_sections`
+  counts all while `sections` caps at 400. `l0_record` reuses the ported
+  `page_index::classify_section`.
+- `locator` (42): see the earlier close — `(continued)` walk-back,
+  consecutive-page gaps, cousin-blocked columns, TI 3-page relaxation.
+
+`PLAN.md` §5.5's `census (86)` / `pillar_map (110)` don't exist as
+standalone files — the remaining §5.5 surface is `page_evidence`, `regions`,
+`table_extractors` (all have tests).
 
 ### Session close 2026-10-13 (small hours) — dw-recon COMPLETE
 
