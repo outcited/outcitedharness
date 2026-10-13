@@ -493,7 +493,7 @@ topology + errata), the axis registry + rating projection, the
 `dw-structure` (needs the PDF text layer), `dw-model`/`dw-learn`,
 `dw-controller`, cutover.
 
-### Session close 2026-10-12 — flip state (read this first)
+### Session close 2026-10-12 — flip state (superseded by the later close below)
 
 **The chain works end to end — verified 2026-10-12.** Burn batches 1+2
 completed (550 docs, 11,919 claims), `scripts/fold_strata.py` folds every
@@ -515,6 +515,62 @@ The power lane has 9,201 PDFs; 550 are done.
 defined against; note it imports `locator.PACKAGE_KEY`, a regex table in
 `locator.py`), then `dw-structure` (needs the PDF text layer first),
 `dw-model`/`dw-learn`, `dw-controller`, cutover.
+
+### Session close 2026-10-12 (late) — `family_device_matrix` GREEN (read this first)
+
+**State: port + gold (77 cases) + gold test all green; smoke gate passes
+(fmt / clippy `-D warnings` / full workspace tests / `cargo deny`).**
+
+Two port bugs the gold caught (both fixed — do not regress them):
+- `split_composite_label`'s look-behind replay: Python checks
+  `(?<=[\w)][\w)])` at the position the match STARTS (the beginning of the
+  whitespace run before the `/`, because the pattern is `\s*/\s*`), not at
+  the slash. `"SPI / I2S"` therefore never paired and fell through to one
+  unparsed `i2s_count` leaf (gold: `spi_count` + `i2s_count` split). Also
+  `)` counts as wordish — `"I/O Pins(1)/ Peripheral Pin Select"` pairs at
+  its second slash. And the split must respect the same look-arounds (a bare
+  `/` in "I/O" must not split); `\[` is the pairing hit, `\]` alone is not.
+- `b_get_str(binding, "column_index")` read a JSON NUMBER as a string →
+  `None` → receipt `column_index` fell back to `0` where the reference
+  prints the data column (2). `b_col()` now reads it as a number.
+
+**Files:**
+- `designwins/crates/dw-recon/src/family_device_matrix.rs` — the port
+  (2,849 lines, compiles; `header_token` made `pub` + `#[must_use]`)
+- `designwins/crates/dw-recon/tests/family_device_matrix_gold.rs` — gold test
+  (census + 10 kernel kinds; `_meta` volatile keys stripped like the
+  `family_document` gold)
+- `scripts/gold_family_device_matrix.py` + `tests/fixtures/gold/
+  family_device_matrix_v1.json` — 77 cases (3 census + 74 kernel), generated
+  from the live reference
+- `designwins/crates/dw-recon/src/lib.rs` + `family_census.rs` — module
+  wiring (`pub mod family_device_matrix`, `part_tokens()` helpers,
+  `series_token` made `pub`)
+
+**Lint debt: none.** `family_device_matrix.rs` is clippy-clean under the
+workspace's `-D warnings` (house pattern: per-fn
+`#[allow(clippy::indexing_slicing, clippy::panic, reason = "grid walks…")]`
+on the grid readers, `try_from` for int conversions, inline
+`cast_possible_truncation` allow with the "reference emits int(value)"
+reason, OnceLock statics at fn-top).
+
+**Gold-PDF rendering traps (cost real time — do not re-learn):**
+- `insert_textbox` silently drops overflowing text; use per-line
+  `insert_text`.
+- A caption row must be drawn with NO vertical separators in its band and
+  at `fontsize=5`, or pymupdf splits the caption across cells and
+  `strip_title_rows` (needs exactly one filled cell) never strips it —
+  `classify_table` then rejects the whole table (0 variants).
+- `t.extract()` returns `""` (not `null`) for empty cells; the port
+  normalizes both via `norm()`/`cell()` — keep it that way.
+
+**Burn batch 4 in flight** (log `results/burn-power-batch4-20261013.log`):
+1,500/4,000 docs, 32,494 claims at 11,149s.
+When the log stops: `python3 scripts/fold_strata.py && python3
+scripts/extraction_board.py` (expect Δ ≈ +1,000 served).
+
+**Next:** remaining §5.5 order (`corpus`, `dw-structure`, `dw-model`/
+`dw-learn`, `dw-controller`); fold burn batch 4 when its log stops.
 
 ### Ops notes (2026-10-12, learned the hard way)
 

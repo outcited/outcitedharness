@@ -228,6 +228,24 @@ pub fn wildcards_from_text(text: &str) -> Vec<String> {
     found
 }
 
+/// Every `PART_TOKEN` capture in `text`, in order (the reference's
+/// `PART_TOKEN.findall`).
+#[must_use]
+pub fn part_tokens(text: &str) -> Vec<String> {
+    part_token()
+        .captures_iter(&normalize(text))
+        .filter_map(|c| c.get(1).map(|m| m.as_str().to_string()))
+        .collect()
+}
+
+/// `PART_TOKEN.fullmatch(s)` — the token is exactly a part token.
+#[must_use]
+pub fn part_token_is_fullmatch(text: &str) -> bool {
+    part_token()
+        .find(text)
+        .is_some_and(|m| m.start() == 0 && m.end() == text.len())
+}
+
 /// One printed package token: `LQFP64 -> (LQFP, 64)`.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct PackageBogey {
