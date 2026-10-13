@@ -38,6 +38,7 @@ pub mod document_scope;
 pub mod family_census;
 pub mod family_device_matrix;
 pub mod family_document;
+pub mod incremental_corpus;
 pub mod sha256;
 
 pub use corpus::{build_corpus_registry, verify_corpus_registry, write_new_registry};
@@ -45,3 +46,4 @@ pub use document_scope::{read_scope, ScopeRow};
 pub use family_census::{census_document, CensusRow};
 pub use family_device_matrix::{extract_family_matrix, MatrixInput};
 pub use family_document::{read_family_document, DocumentRow};
+pub use incremental_corpus::build_incremental_corpus_registry;
