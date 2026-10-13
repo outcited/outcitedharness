@@ -1,0 +1,907 @@
+{
+ "cases": [
+  {
+   "error": null,
+   "expected": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_sha256": "30052b05caa173d83342420ad12862ff3b504eab3e4ed98f0a08f9e2a6e3b758",
+    "exact_pin_locations": [],
+    "lane_pages": {
+     "parametrics": [
+      3
+     ],
+     "pin_or_ball": [
+      2
+     ],
+     "pin_semantics": [
+      2
+     ],
+     "series_summary": [
+      1
+     ]
+    },
+    "page_count": 3,
+    "schema": "harness.electronics-page-index.v1",
+    "section_entries": [
+     {
+      "lanes": [
+       "pin_or_ball",
+       "pin_semantics"
+      ],
+      "level": 1,
+      "page_1based": 2,
+      "source": "toc",
+      "title": "Pin descriptions"
+     },
+     {
+      "lanes": [
+       "series_summary"
+      ],
+      "level": null,
+      "page_1based": 1,
+      "source": "page_text",
+      "title": "Features"
+     },
+     {
+      "lanes": [
+       "series_summary"
+      ],
+      "level": null,
+      "page_1based": 1,
+      "source": "page_text",
+      "title": "Applications"
+     },
+     {
+      "lanes": [
+       "parametrics"
+      ],
+      "level": null,
+      "page_1based": 3,
+      "source": "page_text",
+      "title": "Absolute maximum ratings"
+     }
+    ],
+    "source_path": "/corpus/atom.pdf"
+   },
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fallback_maximum_pages": null,
+    "package_requests": [],
+    "pages": [
+     "Features\nApplications",
+     "Pin descriptions",
+     "Absolute maximum ratings"
+    ],
+    "pin_calls": [],
+    "pin_results": {},
+    "source_path": "/corpus/atom.pdf",
+    "toc": [
+     [
+      1,
+      "Pin descriptions",
+      2
+     ]
+    ]
+   },
+   "kind": "document",
+   "name": "toc_then_text_fallback"
+  },
+  {
+   "error": null,
+   "expected": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_sha256": "03fb0b98bf421c594c3b7312f25ca03fa5cde28755130d8d867b02c27d584d25",
+    "exact_pin_locations": [],
+    "lane_pages": {
+     "bom_parts": [
+      3
+     ],
+     "opn_decoder": [
+      3
+     ],
+     "pin_or_ball": [
+      2
+     ],
+     "pin_semantics": [
+      2
+     ],
+     "series_summary": [
+      1
+     ]
+    },
+    "page_count": 3,
+    "schema": "harness.electronics-page-index.v1",
+    "section_entries": [
+     {
+      "lanes": [
+       "series_summary"
+      ],
+      "level": 1,
+      "page_1based": 1,
+      "source": "toc",
+      "title": "Features"
+     },
+     {
+      "lanes": [
+       "pin_or_ball",
+       "pin_semantics"
+      ],
+      "level": 2,
+      "page_1based": 2,
+      "source": "toc",
+      "title": "Pin and ball descriptions"
+     },
+     {
+      "lanes": [
+       "opn_decoder"
+      ],
+      "level": 1,
+      "page_1based": 3,
+      "source": "toc",
+      "title": "Ordering information"
+     },
+     {
+      "lanes": [
+       "bom_parts"
+      ],
+      "level": null,
+      "page_1based": 3,
+      "source": "page_text",
+      "title": "Bill of materials"
+     }
+    ],
+    "source_path": "/corpus/atom2.pdf"
+   },
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fallback_maximum_pages": null,
+    "package_requests": [],
+    "pages": [
+     "Features",
+     "Pin and ball descriptions\nOrdering information",
+     "Bill of materials"
+    ],
+    "pin_calls": [],
+    "pin_results": {},
+    "source_path": "/corpus/atom2.pdf",
+    "toc": [
+     [
+      1,
+      "Features",
+      1
+     ],
+     [
+      2,
+      "Pin and ball descriptions",
+      2
+     ],
+     [
+      1,
+      "Ordering information",
+      3
+     ]
+    ]
+   },
+   "kind": "document",
+   "name": "toc_only_no_fallback"
+  },
+  {
+   "error": null,
+   "expected": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_sha256": "bdbcb877eb006bfa8ac20d9db4ab8d6b9444e5ed7c2f335fb1017ccafdaf21cd",
+    "exact_pin_locations": [],
+    "lane_pages": {
+     "parametrics": [
+      2
+     ]
+    },
+    "page_count": 2,
+    "schema": "harness.electronics-page-index.v1",
+    "section_entries": [
+     {
+      "lanes": [
+       "parametrics"
+      ],
+      "level": null,
+      "page_1based": 2,
+      "source": "page_text",
+      "title": "Electrical characteristics"
+     }
+    ],
+    "source_path": "/corpus/atom3.pdf"
+   },
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fallback_maximum_pages": null,
+    "package_requests": [],
+    "pages": [
+     "Ok\nElectrical characteristics xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+     "Electrical characteristics"
+    ],
+    "pin_calls": [],
+    "pin_results": {},
+    "source_path": "/corpus/atom3.pdf",
+    "toc": []
+   },
+   "kind": "document",
+   "name": "heading_window"
+  },
+  {
+   "error": null,
+   "expected": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_sha256": "6b92d0351d7ed2d563881d543c80a75b5278b6ecfc73cc860310756fd307bf68",
+    "exact_pin_locations": [
+     {
+      "column_header": "LQFP64 (64 pin)",
+      "column_headers_all": [
+       "LQFP64 (64 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 64,
+      "package": "LQFP64",
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "status": "bound"
+     }
+    ],
+    "lane_pages": {
+     "pin_or_ball": [
+      2
+     ],
+     "pin_semantics": [
+      2
+     ],
+     "series_summary": [
+      1
+     ]
+    },
+    "page_count": 2,
+    "schema": "harness.electronics-page-index.v1",
+    "section_entries": [
+     {
+      "lanes": [
+       "pin_or_ball",
+       "pin_semantics"
+      ],
+      "level": 1,
+      "page_1based": 2,
+      "source": "toc",
+      "title": "Pin descriptions"
+     },
+     {
+      "lanes": [
+       "series_summary"
+      ],
+      "level": null,
+      "page_1based": 1,
+      "source": "page_text",
+      "title": "Features"
+     }
+    ],
+    "source_path": "/corpus/atom4.pdf"
+   },
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fallback_maximum_pages": null,
+    "package_requests": [
+     [
+      "LQFP64",
+      64
+     ]
+    ],
+    "pages": [
+     "Features\nLQFP64 package",
+     "Pin descriptions"
+    ],
+    "pin_calls": [
+     {
+      "package": "LQFP64",
+      "pins": 64,
+      "single_package": true
+     }
+    ],
+    "pin_results": {
+     "LQFP64|64": {
+      "column_header": "LQFP64 (64 pin)",
+      "column_headers_all": [
+       "LQFP64 (64 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 64,
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "requested_package": "LQFP64",
+      "status": "bound"
+     }
+    },
+    "source_path": "/corpus/atom4.pdf",
+    "toc": [
+     [
+      1,
+      "Pin descriptions",
+      2
+     ]
+    ]
+   },
+   "kind": "document",
+   "name": "single_package_relaxation"
+  },
+  {
+   "error": null,
+   "expected": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_sha256": "fccd5f0c91bd60996d1982ea3dddca455cee208d698d7fd30a1d56644344d189",
+    "exact_pin_locations": [
+     {
+      "column_header": "LQFP64 (64 pin)",
+      "column_headers_all": [
+       "LQFP64 (64 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 64,
+      "package": "LQFP64",
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "status": "bound"
+     }
+    ],
+    "lane_pages": {
+     "pin_or_ball": [
+      2
+     ],
+     "pin_semantics": [
+      2
+     ]
+    },
+    "page_count": 2,
+    "schema": "harness.electronics-page-index.v1",
+    "section_entries": [
+     {
+      "lanes": [
+       "pin_or_ball",
+       "pin_semantics"
+      ],
+      "level": 1,
+      "page_1based": 2,
+      "source": "toc",
+      "title": "Pin descriptions"
+     }
+    ],
+    "source_path": "/corpus/atom5.pdf"
+   },
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fallback_maximum_pages": null,
+    "package_requests": [
+     [
+      "LQFP64",
+      64
+     ]
+    ],
+    "pages": [
+     "LQFP64 and QFN packages",
+     "Pin descriptions"
+    ],
+    "pin_calls": [
+     {
+      "package": "LQFP64",
+      "pins": 64,
+      "single_package": false
+     }
+    ],
+    "pin_results": {
+     "LQFP64|64": {
+      "column_header": "LQFP64 (64 pin)",
+      "column_headers_all": [
+       "LQFP64 (64 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 64,
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "requested_package": "LQFP64",
+      "status": "bound"
+     }
+    },
+    "source_path": "/corpus/atom5.pdf",
+    "toc": [
+     [
+      1,
+      "Pin descriptions",
+      2
+     ]
+    ]
+   },
+   "kind": "document",
+   "name": "multi_package_front_matter"
+  },
+  {
+   "error": null,
+   "expected": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_sha256": "c30959d236c90989caa05c17a92397a5a5e0387790fc4f6685b8bc9888c27cbc",
+    "exact_pin_locations": [
+     {
+      "column_header": "LQFP64 (64 pin)",
+      "column_headers_all": [
+       "LQFP64 (64 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 64,
+      "package": "LQFP64",
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "status": "bound"
+     },
+     {
+      "column_header": "QFN-32 (32 pin)",
+      "column_headers_all": [
+       "QFN-32 (32 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 32,
+      "package": "QFN-32",
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "status": "bound"
+     }
+    ],
+    "lane_pages": {
+     "pin_or_ball": [
+      2
+     ],
+     "pin_semantics": [
+      2
+     ]
+    },
+    "page_count": 2,
+    "schema": "harness.electronics-page-index.v1",
+    "section_entries": [
+     {
+      "lanes": [
+       "pin_or_ball",
+       "pin_semantics"
+      ],
+      "level": 1,
+      "page_1based": 2,
+      "source": "toc",
+      "title": "Pin descriptions"
+     }
+    ],
+    "source_path": "/corpus/atom6.pdf"
+   },
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fallback_maximum_pages": null,
+    "package_requests": [
+     [
+      "LQFP64",
+      64
+     ],
+     [
+      "LQFP64",
+      64
+     ],
+     [
+      "QFN-32",
+      32
+     ]
+    ],
+    "pages": [
+     "LQFP64 package",
+     "Pin descriptions"
+    ],
+    "pin_calls": [
+     {
+      "package": "LQFP64",
+      "pins": 64,
+      "single_package": false
+     },
+     {
+      "package": "QFN-32",
+      "pins": 32,
+      "single_package": false
+     }
+    ],
+    "pin_results": {
+     "LQFP64|64": {
+      "column_header": "LQFP64 (64 pin)",
+      "column_headers_all": [
+       "LQFP64 (64 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 64,
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "requested_package": "LQFP64",
+      "status": "bound"
+     },
+     "QFN-32|32": {
+      "column_header": "QFN-32 (32 pin)",
+      "column_headers_all": [
+       "QFN-32 (32 pin)"
+      ],
+      "corroborating_jedec_ids": [],
+      "expected_package_pins": 32,
+      "pages_1based": [
+       2
+      ],
+      "reason": "table_header_exact",
+      "requested_package": "QFN-32",
+      "status": "bound"
+     }
+    },
+    "source_path": "/corpus/atom6.pdf",
+    "toc": [
+     [
+      1,
+      "Pin descriptions",
+      2
+     ]
+    ]
+   },
+   "kind": "document",
+   "name": "two_requests_dedupe"
+  },
+  {
+   "error": null,
+   "expected": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence_sha256": "aed8fe94dc1061366ec43a5fab60da43a304834036864fc3d60b9b6702bb03b0",
+    "exact_pin_locations": [],
+    "lane_pages": {
+     "series_summary": [
+      1
+     ]
+    },
+    "page_count": 2,
+    "schema": "harness.electronics-page-index.v1",
+    "section_entries": [
+     {
+      "lanes": [
+       "series_summary"
+      ],
+      "level": null,
+      "page_1based": 1,
+      "source": "page_text",
+      "title": "Features"
+     }
+    ],
+    "source_path": "/corpus/atom7.pdf"
+   },
+   "input": {
+    "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "fallback_maximum_pages": 1,
+    "package_requests": [],
+    "pages": [
+     "Features",
+     "Absolute maximum ratings"
+    ],
+    "pin_calls": [],
+    "pin_results": {},
+    "source_path": "/corpus/atom7.pdf",
+    "toc": []
+   },
+   "kind": "document",
+   "name": "fallback_page_cap"
+  },
+  {
+   "error": "document_sha256 is invalid",
+   "expected": null,
+   "input": {
+    "document_sha256": "abc",
+    "fallback_maximum_pages": null,
+    "package_requests": [],
+    "pages": [
+     "Features"
+    ],
+    "pin_calls": [],
+    "pin_results": {},
+    "source_path": "/corpus/atom8.pdf",
+    "toc": []
+   },
+   "kind": "document",
+   "name": "invalid_sha"
+  },
+  {
+   "expected": [
+    "pin_or_ball",
+    "pin_semantics"
+   ],
+   "input": {
+    "title": "5. Pin and ball descriptions"
+   },
+   "kind": "classify_section",
+   "name": "pin_and_ball"
+  },
+  {
+   "expected": [
+    "parametrics"
+   ],
+   "input": {
+    "title": "Absolute maximum ratings"
+   },
+   "kind": "classify_section",
+   "name": "absolute_max"
+  },
+  {
+   "expected": [
+    "opn_decoder"
+   ],
+   "input": {
+    "title": "Ordering information"
+   },
+   "kind": "classify_section",
+   "name": "ordering"
+  },
+  {
+   "expected": [
+    "bom_parts"
+   ],
+   "input": {
+    "title": "Bill of materials"
+   },
+   "kind": "classify_section",
+   "name": "bom"
+  },
+  {
+   "expected": [
+    "design_specs"
+   ],
+   "input": {
+    "title": "Design requirements"
+   },
+   "kind": "classify_section",
+   "name": "design_specs"
+  },
+  {
+   "expected": [
+    "test_results"
+   ],
+   "input": {
+    "title": "Test results"
+   },
+   "kind": "classify_section",
+   "name": "test_results"
+  },
+  {
+   "expected": [
+    "schematic_layout"
+   ],
+   "input": {
+    "title": "Schematics and layout guidelines"
+   },
+   "kind": "classify_section",
+   "name": "schematic"
+  },
+  {
+   "expected": [
+    "typical_characteristics"
+   ],
+   "input": {
+    "title": "Typical operating characteristics"
+   },
+   "kind": "classify_section",
+   "name": "typical"
+  },
+  {
+   "expected": [
+    "parametrics",
+    "power_modes"
+   ],
+   "input": {
+    "title": "Power consumption"
+   },
+   "kind": "classify_section",
+   "name": "power"
+  },
+  {
+   "expected": [],
+   "input": {
+    "title": "Revision history"
+   },
+   "kind": "classify_section",
+   "name": "unknown"
+  },
+  {
+   "expected": [],
+   "input": {
+    "title": "UFBGA package"
+   },
+   "kind": "classify_section",
+   "name": "long_token"
+  },
+  {
+   "expected": [
+    "pin_or_ball"
+   ],
+   "input": {
+    "title": "Ballout"
+   },
+   "kind": "classify_section",
+   "name": "ballout"
+  },
+  {
+   "expected": [
+    "pin_or_ball"
+   ],
+   "input": {
+    "title": "Terminal assignments"
+   },
+   "kind": "classify_section",
+   "name": "terminal"
+  },
+  {
+   "expected": [
+    "pin_or_ball",
+    "pin_semantics"
+   ],
+   "input": {
+    "title": "Pin multiplexing"
+   },
+   "kind": "classify_section",
+   "name": "multiplex"
+  },
+  {
+   "expected": [
+    [
+     "144-Pin QFP (PGE)",
+     144
+    ],
+    [
+     "337-Ball BGA (ZWT)",
+     337
+    ]
+   ],
+   "input": {
+    "records": [
+     {
+      "pinout": {
+       "declared_pin_total": 144,
+       "packages": [
+        "144-Pin QFP (PGE)",
+        "337-Ball BGA (ZWT)"
+       ]
+      }
+     }
+    ]
+   },
+   "kind": "package_requests",
+   "name": "printed_counts"
+  },
+  {
+   "expected": [
+    [
+     "QFN",
+     32
+    ]
+   ],
+   "input": {
+    "records": [
+     {
+      "pinout": {
+       "declared_pin_total": 32,
+       "packages": [
+        "QFN"
+       ]
+      }
+     }
+    ]
+   },
+   "kind": "package_requests",
+   "name": "declared_fallback"
+  },
+  {
+   "expected": [
+    [
+     "BGA-100",
+     100
+    ],
+    [
+     "LQFP64",
+     64
+    ]
+   ],
+   "input": {
+    "records": [
+     {
+      "pinout": {
+       "declared_pin_total": 64,
+       "packages": [
+        "LQFP64",
+        "LQFP64"
+       ]
+      }
+     },
+     {
+      "pinout": {
+       "packages": [
+        "BGA-100"
+       ]
+      }
+     }
+    ]
+   },
+   "kind": "package_requests",
+   "name": "dedupe_and_sort"
+  },
+  {
+   "expected": [],
+   "input": {
+    "records": [
+     {
+      "part_number": "X"
+     }
+    ]
+   },
+   "kind": "package_requests",
+   "name": "no_pinout"
+  },
+  {
+   "expected": [],
+   "input": {
+    "records": [
+     {
+      "pinout": {
+       "declared_pin_total": 0,
+       "packages": [
+        "QFN"
+       ]
+      }
+     }
+    ]
+   },
+   "kind": "package_requests",
+   "name": "zero_expected_skipped"
+  },
+  {
+   "expected": [
+    "QFN",
+    "UFBGA"
+   ],
+   "input": {
+    "pages": [
+     "LQFP64 plus QFN-32 and UFBGA packages"
+    ]
+   },
+   "kind": "printed_package_families",
+   "name": "multi"
+  },
+  {
+   "expected": [],
+   "input": {
+    "pages": [
+     "no packages here"
+    ]
+   },
+   "kind": "printed_package_families",
+   "name": "none"
+  },
+  {
+   "expected": [],
+   "input": {
+    "pages": [
+     "lqfp64 and tssop"
+    ]
+   },
+   "kind": "printed_package_families",
+   "name": "case"
+  }
+ ]
+}
