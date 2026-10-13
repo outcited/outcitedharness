@@ -569,9 +569,82 @@ reason, OnceLock statics at fn-top).
 When the log stops: `python3 scripts/fold_strata.py && python3
 scripts/extraction_board.py` (expect Δ ≈ +1,000 served).
 
-**Next:** `dw-model`/`dw-learn`, `dw-controller`, cutover (the whole
-Python->Rust port surface is done — see below); fold burn batch 4 when its
-log stops.
+**Next:** `dw-learn` (in progress — see the open-session close), then
+`dw-model` deterministic core, then `dw-controller`, cutover; fold burn
+batch 4 when its log stops.
+
+### Session close 2026-10-13 (evening) — `dw-learn` IN PROGRESS (read this first)
+
+**Uncommitted work-in-progress** (all untracked, nothing pushed):
+`designwins/crates/dw-learn/` (new crate, added to workspace members),
+`scripts/gold_learn.py`, `tests/fixtures/gold/learn_v1.json` (27 cases).
+
+**Decision recorded (reviewed before starting):** dw-learn before dw-model:
+it is the load-bearing gap in the §9 learning loop (dw-truth gate and
+dw-queue engine are done; pairs + promotion gate are the missing link), its
+gate is the sharpest oracle of the three (byte-compat with the v1 2,713 /
+v2 87K pair artifacts + gate reports already on disk), and a cheaper student
+tier is what scales extraction for the board. dw-model after (deterministic
+core first: `local_prompt`/`validate_response`/`prepare_batch_bundle` —
+"prompts byte-identical"; provider HTTP shells stay thin). dw-controller
+last (`factory_control.py` state machine = same shape as the dw-queue port;
+gate is operational "unattended run").
+
+**THE OPEN BUG (fix this first):** `build_pairs_v1` in
+`dw-learn/src/pair.rs` iterates `for sha in &order` (first-seen order) where
+the reference does `for sha, entry in sorted(by_doc.items())` (sha
+ascending). Gold case `v1_multiple_rows_sorted_by_sha` fails: mine emits
+b-doc first, reference emits a-doc. **Fix:** delete the `order: Vec<String>`
+and the `order.push(...)` in the `or_insert_with`, and iterate
+`for (sha, (meta, rows)) in &by_doc` (BTreeMap gives sorted sha order =
+Python's `sorted()` for hex digests). Everything else in that record
+byte-matched at first-diff position 376 (the user message's "Part: B" vs
+"Part: A").
+
+**What is done and passing in the crate:**
+- `src/gate.rs` — `norm_value` (UNIT_TO_OHM incl. ω/µω spellings),
+  `score` (want-map by lowercased symbol-or-param; tolerance
+  `max(1e-9, |wv|*1e-4)`; fn = len(want) − |want ∩ got_syms|), `report`
+  (precision/recall/f1, round-4, `pass = f1 >= 0.90 && precision >= 0.95`).
+- `src/shuffle.rs` — CPython MT19937 (`init_by_array` on the u32 words of
+  the seed, `getrandbits`, `_randbelow` rejection loop, Fisher-Yates
+  top-down `shuffle`). UNVERIFIED against gold yet — the `shuffle` kernel
+  cases exist (`ten` must yield [5,3,9,8,4,7,0,2,1,6], `hundred` starts
+  [28,61,58,1,89,...]) but the test never reached them (fails at the v1
+  case first).
+- `src/pair.rs` — `py_dumps` (custom serde `Formatter` writing `", "` /
+  `": "` + `serde_json` `preserve_order` feature in dw-learn's Cargo.toml
+  for insertion-order keys = Python `json.dumps(ensure_ascii=False)` byte
+  shape); `build_pairs_v1`, `build_pairs_v2` (dedupe key
+  `(sym.lower(), val, unit.lower())` — Python hashes int 1 and float 1.0
+  equal; my `canonical_number` maps f64→to_string so 1 vs 1.0 would differ
+  if a fixture mixes them — untested edge).
+
+**Gold (`scripts/gold_learn.py` → `learn_v1.json`, 27 cases):**
+- 5 `pairs_v1` (simple; sha-mismatch skip; missing-symbol skip; short-text
+  skip; multi-doc sort) · 1 `pairs_v2` (`min_claims` floor 3, dedupe,
+  train/holdout from the seeded shuffle) · 6 `gate_score` (exact,
+  unit-normalized mohm→ohm, invented symbol, missed symbol, tolerance
+  miss, param/symbol alias) · 4 `gate_report` (pass/fail-precision/
+  fail-f1/empty) · 7 `norm_value` · 4 `shuffle` (10/100/1/0).
+- Generator trap learned: importing `build_lora_pairs*.py` HANGS for
+  minutes — their module level globs `/Volumes/M5_4TB/exports/...` (spun
+  volume). `gold_learn.py` stubs `Path.glob` to return nothing during
+  module exec (`_NoGlob` context). Both builders' mains are run for real
+  via monkeypatched seams (v1: `DEFAULT_DATASETS`/`index_pdfs`/
+  `pdf_text`/`sha256`; v2: `OUT_DIR`/`load_burn_claims`/`index_pdfs`/
+  `extract_pdf_text`/`BURN_DIRS`).
+
+**Then:** gold green → smoke gate (fmt / clippy `-D warnings` / full
+workspace tests / `cargo deny`) → commit + push `dw-learn` +
+`gold_learn.py` + `learn_v1.json` → update this close. After that:
+`dw-model` deterministic core (prompts byte-identical gold against
+`local_model.local_prompt`), then `dw-controller` (scenario battery against
+the live factory db, dw-queue pattern).
+
+**Burn batch 4:** 3,150/4,000 docs, 58,070 claims at 32,893s — when the
+log stops: `python3 scripts/fold_strata.py && python3
+scripts/extraction_board.py` (expect Δ ≈ +1,000).
 
 ### Session close 2026-10-13 (noon) — PORT SURFACE COMPLETE
 
