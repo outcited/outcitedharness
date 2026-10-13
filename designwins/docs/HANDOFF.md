@@ -569,11 +569,39 @@ reason, OnceLock statics at fn-top).
 When the log stops: `python3 scripts/fold_strata.py && python3
 scripts/extraction_board.py` (expect Δ ≈ +1,000 served).
 
-**Next:** §5.5 remainder — `page_evidence` (264, has 4 tests: exact pin page
-override, block/table/coordinate preservation, no-text visual flag, OCR
-fallback) · `regions` (618, 230-line test) · `table_extractors` (616,
-178-line test) — then `dw-model`/`dw-learn`, `dw-controller`; fold burn
-batch 4 when its log stops.
+**Next:** `dw-model`/`dw-learn`, `dw-controller`, cutover (the whole
+Python->Rust port surface is done — see below); fold burn batch 4 when its
+log stops.
+
+### Session close 2026-10-13 (noon) — PORT SURFACE COMPLETE
+
+**Pushed: `15ea65c0` page_evidence · `15ebb006` table_extractors ·
+`d009f42a` regions.** Every commit gated (fmt / clippy `-D warnings` / full
+workspace tests / `cargo deny`). Gold 9 + 20 + 18 cases.
+
+**Everything with tests is ported** (PLAN §5.3 + §5.5): family_census ·
+family_document · family_device_matrix · document_scope · corpus ·
+incremental_corpus · page_index · locator · word_columns · l0 ·
+page_evidence · table_extractors · regions. The only unported surface is
+`regions`' pymupdf render half (`render_*`, `pdftotext_layout_page` —
+process I/O: pixmap rasterization + a `pdftotext` subprocess; deliberately
+Python-side, no tests pin it).
+
+Traps pinned this round (do not regress):
+- `table_extractors`: printed physical ids stay verbatim (`1`, `A1`,
+  `12(1)`, numeric `0` is a real identifier); `Pin name` is never a pin
+  number; parametric facts expand WITHOUT unit conversion, `description`
+  preferred over `symbol`, and `values_verbatim` INSERTION ORDER decides the
+  fact order (the gold wire sorts object keys, so `key_order` travels
+  separately — same trap as word_columns' `column_order`).
+- `regions`: register/ordering vetoes (pin header overrides the register
+  veto), `PHYSICAL_ID` accepts BGA balls (`AA10`), the 3-hit/45%-density
+  physical column gate, `SYMBOL` counts as a parameter header, text regions
+  bound only visible evidence, `printed_package_mentions` dedupes
+  case-insensitively in first-seen order.
+- `page_evidence`: `selected_pages` caps lanes while `send` pin locations
+  override with BOTH pin lanes; the OCR chain (`ocr_failed` records
+  `Type: message`); `evidence_sha256` is a live hashlib differential.
 
 ### Session close 2026-10-13 (dawn) — §5.5 modules 4 done
 
