@@ -42,6 +42,7 @@ pub mod incremental_corpus;
 pub mod locator;
 pub mod page_index;
 pub mod sha256;
+pub mod word_columns;
 
 pub use corpus::{build_corpus_registry, verify_corpus_registry, write_new_registry};
 pub use document_scope::{read_scope, ScopeRow};
@@ -51,3 +52,4 @@ pub use family_document::{read_family_document, DocumentRow};
 pub use incremental_corpus::build_incremental_corpus_registry;
 pub use locator::{locate_pin_definition_pages, LocateResult};
 pub use page_index::{classify_section, index_document};
+pub use word_columns::{extract_pin_columns, package_pin_bogey, PackageColumn, Word};
