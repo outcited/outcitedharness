@@ -254,17 +254,74 @@ fn py_truthy(value: &Value) -> bool {
 }
 
 /// `json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
-/// allow_nan=False)` — the digest encoding. `serde_json` serialises maps in
-/// `BTreeMap` order (sorted) with the same compact separators and escaping.
+/// allow_nan=False)` — the digest encoding.
+///
+/// Sorts object keys **explicitly** rather than relying on `serde_json`'s map
+/// order. `serde_json`'s `Map` is sorted only when its `preserve_order` feature
+/// is off; Cargo unifies features across a workspace, so any crate that enables
+/// `preserve_order` (e.g. `dw-learn`, for Python insertion-order pairs) silently
+/// flips this to insertion order — changing every `evidence_sha256`. Rebuilding
+/// each object with keys inserted in sorted order yields the same bytes under
+/// either backend.
 #[must_use]
 pub fn canonical_json(value: &Value) -> String {
-    serde_json::to_string(value).unwrap_or_default()
+    serde_json::to_string(&sorted_keys(value)).unwrap_or_default()
+}
+
+/// A copy of `value` with every object's keys inserted in ascending order.
+fn sorted_keys(value: &Value) -> Value {
+    match value {
+        Value::Array(items) => Value::Array(items.iter().map(sorted_keys).collect()),
+        Value::Object(map) => {
+            let mut keys: Vec<&String> = map.keys().collect();
+            keys.sort();
+            let mut out = serde_json::Map::new();
+            for key in keys {
+                if let Some(v) = map.get(key) {
+                    out.insert(key.clone(), sorted_keys(v));
+                }
+            }
+            Value::Object(out)
+        }
+        other => other.clone(),
+    }
 }
 
 /// SHA-256 of the canonical JSON encoding of `value`, lowercase hex.
 #[must_use]
 pub fn canonical_json_sha256(value: &Value) -> String {
     sha256_hex(canonical_json(value).as_bytes())
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, reason = "control asserts on its own literals")]
+mod canonical_tests {
+    use super::canonical_json;
+    use serde_json::json;
+
+    /// Negative control for the `preserve_order` hazard: `canonical_json` must
+    /// sort keys itself, never inherit `serde_json::Map`'s order. A map built
+    /// with deliberately descending insertion order must still encode sorted —
+    /// if the explicit sort in `sorted_keys` is dropped, this goes red under
+    /// either `serde_json` backend.
+    #[test]
+    fn canonical_json_sorts_keys_independently_of_map_order() {
+        let mut map = serde_json::Map::new();
+        map.insert("zeta".to_string(), json!(1));
+        map.insert("alpha".to_string(), json!(2));
+        map.insert("mu".to_string(), json!(3));
+        assert_eq!(
+            canonical_json(&serde_json::Value::Object(map)),
+            r#"{"alpha":2,"mu":3,"zeta":1}"#
+        );
+        // Nested objects sort too (the digest walks the whole tree).
+        assert_eq!(
+            canonical_json(&json!({"b": {"y": 1, "x": 2}, "a": 3})),
+            r#"{"a":3,"b":{"x":2,"y":1}}"#
+        );
+        // Array element order is preserved (positional, not keyed).
+        assert_eq!(canonical_json(&json!([3, 1, 2])), "[3,1,2]");
+    }
 }
 
 /// `VENDOR_ALIASES` normalisation of any printed vendor spelling.
