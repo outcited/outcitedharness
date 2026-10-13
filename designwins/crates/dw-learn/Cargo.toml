@@ -1,0 +1,18 @@
+[package]
+name = "dw-learn"
+description = "The learning loop: pair materialization (v1/v2 byte-compat) + the promotion gate — Rust owns the loop, Python owns the gradient step (DECISIONS.md D3). Port of scripts/build_lora_pairs{,_v2}.py + scripts/{lora_gate,gate_v2}.py."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true, features = ["preserve_order"] }
+
+[dev-dependencies]
+
+[lints]
+workspace = true

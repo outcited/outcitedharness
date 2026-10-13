@@ -1,0 +1,836 @@
+{
+ "cases": [
+  {
+   "expected": "{\"messages\": [{\"role\": \"system\", \"content\": \"You are a datasheet parametric extraction engine. Given datasheet pages, extract the parametric table rows for the requested part as compact JSON: [{\\\"symbol\\\": str, \\\"value\\\": number, \\\"unit\\\": str, \\\"qualifier\\\": str|null, \\\"condition\\\": str|null}]. Use only values printed in the document.\"}, {\"role\": \"user\", \"content\": \"Part: ACME-LDO\\nVendor: acme\\n\\nDatasheet pages:\\nElectrical characteristics\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\n\"}, {\"role\": \"assistant\", \"content\": \"[{\\\"symbol\\\": \\\"Vout\\\", \\\"value\\\": 3.3, \\\"unit\\\": \\\"V\\\", \\\"qualifier\\\": null, \\\"condition\\\": \\\"TA=25C\\\"}]\"}], \"meta\": {\"artifact\": \"acme-ldo.pdf\", \"vendor\": \"acme\", \"part\": \"ACME-LDO\", \"dataset\": \"grids\", \"document_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"n_rows\": 1}}\n",
+   "input": {
+    "docs": [
+     {
+      "condition_verbatim": "TA=25C",
+      "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "quantity_qualifier": null,
+      "scope_as_printed": "ACME-LDO",
+      "source_artifact": "acme-ldo.pdf",
+      "symbol": "Vout",
+      "unit": "V",
+      "value": 3.3,
+      "vendor": "acme"
+     }
+    ],
+    "pdfs": {
+     "acme-ldo.pdf": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "text": "Electrical characteristics\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\n"
+     }
+    }
+   },
+   "kind": "pairs_v1",
+   "name": "v1_simple"
+  },
+  {
+   "expected": "",
+   "input": {
+    "docs": [
+     {
+      "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "scope_as_printed": "ACME-LDO",
+      "source_artifact": "acme-ldo.pdf",
+      "symbol": "Vout",
+      "unit": "V",
+      "value": 3.3,
+      "vendor": "acme"
+     }
+    ],
+    "pdfs": {
+     "acme-ldo.pdf": {
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "text": "Electrical characteristics\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\n"
+     }
+    }
+   },
+   "kind": "pairs_v1",
+   "name": "v1_sha_mismatch_skipped"
+  },
+  {
+   "expected": "",
+   "input": {
+    "docs": [
+     {
+      "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "scope_as_printed": "ACME-LDO",
+      "source_artifact": "acme-ldo.pdf",
+      "symbol": null,
+      "unit": "V",
+      "value": 3.3,
+      "vendor": "acme"
+     }
+    ],
+    "pdfs": {
+     "acme-ldo.pdf": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "text": "Electrical characteristics\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\n"
+     }
+    }
+   },
+   "kind": "pairs_v1",
+   "name": "v1_missing_symbol_skipped"
+  },
+  {
+   "expected": "",
+   "input": {
+    "docs": [
+     {
+      "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "scope_as_printed": "ACME-LDO",
+      "source_artifact": "acme-ldo.pdf",
+      "symbol": "Vout",
+      "unit": "V",
+      "value": 3.3,
+      "vendor": "acme"
+     }
+    ],
+    "pdfs": {
+     "acme-ldo.pdf": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "text": "too short"
+     }
+    }
+   },
+   "kind": "pairs_v1",
+   "name": "v1_short_text_skipped"
+  },
+  {
+   "expected": "{\"messages\": [{\"role\": \"system\", \"content\": \"You are a datasheet parametric extraction engine. Given datasheet pages, extract the parametric table rows for the requested part as compact JSON: [{\\\"symbol\\\": str, \\\"value\\\": number, \\\"unit\\\": str, \\\"qualifier\\\": str|null, \\\"condition\\\": str|null}]. Use only values printed in the document.\"}, {\"role\": \"user\", \"content\": \"Part: A\\nVendor: a\\n\\nDatasheet pages:\\nElectrical characteristics\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\n\"}, {\"role\": \"assistant\", \"content\": \"[{\\\"symbol\\\": \\\"Vout\\\", \\\"value\\\": 3.3, \\\"unit\\\": \\\"V\\\", \\\"qualifier\\\": null, \\\"condition\\\": null}]\"}], \"meta\": {\"artifact\": \"a.pdf\", \"vendor\": \"a\", \"part\": \"A\", \"dataset\": \"grids\", \"document_sha256\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"n_rows\": 1}}\n{\"messages\": [{\"role\": \"system\", \"content\": \"You are a datasheet parametric extraction engine. Given datasheet pages, extract the parametric table rows for the requested part as compact JSON: [{\\\"symbol\\\": str, \\\"value\\\": number, \\\"unit\\\": str, \\\"qualifier\\\": str|null, \\\"condition\\\": str|null}]. Use only values printed in the document.\"}, {\"role\": \"user\", \"content\": \"Part: B\\nVendor: b\\n\\nDatasheet pages:\\nElectrical characteristics\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\nVout 3.3 V\\n\"}, {\"role\": \"assistant\", \"content\": \"[{\\\"symbol\\\": \\\"Vin\\\", \\\"value\\\": 5, \\\"unit\\\": \\\"V\\\", \\\"qualifier\\\": null, \\\"condition\\\": null}]\"}], \"meta\": {\"artifact\": \"b.pdf\", \"vendor\": \"b\", \"part\": \"B\", \"dataset\": \"grids\", \"document_sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\", \"n_rows\": 1}}\n",
+   "input": {
+    "docs": [
+     {
+      "document_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "scope_as_printed": "B",
+      "source_artifact": "b.pdf",
+      "symbol": "Vin",
+      "unit": "V",
+      "value": 5,
+      "vendor": "b"
+     },
+     {
+      "document_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "scope_as_printed": "A",
+      "source_artifact": "a.pdf",
+      "symbol": "Vout",
+      "unit": "V",
+      "value": 3.3,
+      "vendor": "a"
+     }
+    ],
+    "pdfs": {
+     "a.pdf": {
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "text": "Electrical characteristics\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\n"
+     },
+     "b.pdf": {
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "text": "Electrical characteristics\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\nVout 3.3 V\n"
+     }
+    }
+   },
+   "kind": "pairs_v1",
+   "name": "v1_multiple_rows_sorted_by_sha"
+  },
+  {
+   "expected": {
+    "holdout": "{\"instruction\": \"You are a datasheet parametric extraction engine. Given datasheet pages, extract the parametric table rows for the requested part as compact JSON: [{\\\"symbol\\\": str, \\\"value\\\": number, \\\"unit\\\": str, \\\"qualifier\\\": str|null, \\\"condition\\\": str|null}]. Use only values printed in the document.\", \"input\": \"Part: ldo\\nVendor: acme\\n\\nDatasheet pages:\\nElectrical\\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\", \"output\": \"[{\\\"symbol\\\": \\\"Vout\\\", \\\"value\\\": 3.3, \\\"unit\\\": \\\"V\\\", \\\"qualifier\\\": null, \\\"condition\\\": \\\"TA=25C\\\"}, {\\\"symbol\\\": \\\"Vin\\\", \\\"value\\\": 5, \\\"unit\\\": \\\"V\\\", \\\"qualifier\\\": null, \\\"condition\\\": null}]\"}\n",
+    "train": ""
+   },
+   "input": {
+    "min_claims": 3,
+    "pdf_index": {
+     "acme-ldo.pdf": "pdfs/acme-ldo.pdf",
+     "beta-psu.pdf": "pdfs/beta-psu.pdf",
+     "gamma-part.pdf": "pdfs/gamma-part.pdf"
+    },
+    "stem_claims": {
+     "acme-ldo": [
+      {
+       "condition": "TA=25C",
+       "qualifier": null,
+       "symbol": "Vout",
+       "unit": "V",
+       "value": 3.3
+      },
+      {
+       "condition": "TA=25C",
+       "qualifier": null,
+       "symbol": "Vout",
+       "unit": "V",
+       "value": 3.3
+      },
+      {
+       "symbol": "Vin",
+       "unit": "V",
+       "value": 5
+      }
+     ],
+     "beta-psu": [
+      {
+       "symbol": "Iout",
+       "unit": "A",
+       "value": 1
+      },
+      {
+       "param": null,
+       "symbol": "Iq",
+       "unit": "uA",
+       "value": 10
+      }
+     ],
+     "gamma-part": [
+      {
+       "symbol": "Rds",
+       "unit": "mohm",
+       "value": 120
+      }
+     ]
+    },
+    "texts": {
+     "acme-ldo.pdf": "Electrical\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+     "beta-psu.pdf": "Electrical\nyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+     "gamma-part.pdf": "Electrical\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+    }
+   },
+   "kind": "pairs_v2",
+   "name": "min_claims_and_dedupe"
+  },
+  {
+   "expected": {
+    "holdout": "{\"instruction\": \"You are a datasheet parametric extraction engine. Given datasheet pages, extract the parametric table rows for the requested part as compact JSON: [{\\\"symbol\\\": str, \\\"value\\\": number, \\\"unit\\\": str, \\\"qualifier\\\": str|null, \\\"condition\\\": str|null}]. Use only values printed in the document.\", \"input\": \"Part: ldo\\nVendor: acme\\n\\nDatasheet pages:\\nElectrical\\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\", \"output\": \"[{\\\"symbol\\\": \\\"Rds\\\", \\\"value\\\": 1, \\\"unit\\\": \\\"mohm\\\", \\\"qualifier\\\": null, \\\"condition\\\": null}, {\\\"symbol\\\": \\\"Iq\\\", \\\"value\\\": 1.5, \\\"unit\\\": \\\"uA\\\", \\\"qualifier\\\": null, \\\"condition\\\": null}, {\\\"symbol\\\": \\\"V\\\", \\\"value\\\": 10, \\\"unit\\\": \\\"V\\\", \\\"qualifier\\\": null, \\\"condition\\\": null}]\"}\n",
+    "train": ""
+   },
+   "input": {
+    "min_claims": 1,
+    "pdf_index": {
+     "acme-ldo.pdf": "pdfs/acme-ldo.pdf"
+    },
+    "stem_claims": {
+     "acme-ldo": [
+      {
+       "symbol": "Rds",
+       "unit": "mohm",
+       "value": 1
+      },
+      {
+       "symbol": "Rds",
+       "unit": "mohm",
+       "value": 1.0
+      },
+      {
+       "symbol": "RDS",
+       "unit": "MOHM",
+       "value": 1.0
+      },
+      {
+       "symbol": "Iq",
+       "unit": "uA",
+       "value": 1.5
+      },
+      {
+       "symbol": "Iq",
+       "unit": "uA",
+       "value": 1.5
+      },
+      {
+       "symbol": "V",
+       "unit": "V",
+       "value": 10
+      },
+      {
+       "symbol": "V",
+       "unit": "V",
+       "value": 10.0
+      }
+     ]
+    },
+    "texts": {
+     "acme-ldo.pdf": "Electrical\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+   },
+   "kind": "pairs_v2",
+   "name": "int_float_dedupe_first_seen"
+  },
+  {
+   "expected": [
+    5,
+    3,
+    9,
+    8,
+    4,
+    7,
+    0,
+    2,
+    1,
+    6
+   ],
+   "input": {
+    "seed": 1788172800,
+    "values": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   "kind": "shuffle",
+   "name": "ten"
+  },
+  {
+   "expected": [
+    28,
+    61,
+    58,
+    1,
+    89,
+    48,
+    14,
+    31,
+    63,
+    83,
+    82,
+    4,
+    36,
+    99,
+    29,
+    60,
+    38,
+    7,
+    76,
+    57,
+    68,
+    21,
+    93,
+    43,
+    78,
+    18,
+    33,
+    3,
+    86,
+    11,
+    24,
+    0,
+    75,
+    87,
+    54,
+    80,
+    66,
+    32,
+    84,
+    17,
+    69,
+    73,
+    35,
+    71,
+    98,
+    81,
+    44,
+    41,
+    50,
+    55,
+    34,
+    5,
+    95,
+    13,
+    8,
+    85,
+    56,
+    25,
+    67,
+    79,
+    12,
+    6,
+    2,
+    46,
+    65,
+    23,
+    19,
+    9,
+    37,
+    45,
+    59,
+    40,
+    88,
+    74,
+    96,
+    72,
+    47,
+    94,
+    52,
+    42,
+    30,
+    92,
+    64,
+    62,
+    20,
+    51,
+    27,
+    70,
+    53,
+    16,
+    26,
+    77,
+    91,
+    90,
+    39,
+    15,
+    22,
+    10,
+    97,
+    49
+   ],
+   "input": {
+    "seed": 1788172800,
+    "values": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77,
+     78,
+     79,
+     80,
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99
+    ]
+   },
+   "kind": "shuffle",
+   "name": "hundred"
+  },
+  {
+   "expected": [
+    0
+   ],
+   "input": {
+    "seed": 1788172800,
+    "values": [
+     0
+    ]
+   },
+   "kind": "shuffle",
+   "name": "one"
+  },
+  {
+   "expected": [],
+   "input": {
+    "seed": 1788172800,
+    "values": []
+   },
+   "kind": "shuffle",
+   "name": "empty"
+  },
+  {
+   "expected": [
+    1,
+    0,
+    0
+   ],
+   "input": {
+    "got": [
+     {
+      "symbol": "Vout",
+      "unit": "V",
+      "value": 3.3
+     }
+    ],
+    "want": [
+     {
+      "symbol": "Vout",
+      "unit": "V",
+      "value": 3.3
+     }
+    ]
+   },
+   "kind": "gate_score",
+   "name": "exact_match"
+  },
+  {
+   "expected": [
+    1,
+    0,
+    0
+   ],
+   "input": {
+    "got": [
+     {
+      "symbol": "Rds",
+      "unit": "ohm",
+      "value": 0.12
+     }
+    ],
+    "want": [
+     {
+      "symbol": "Rds",
+      "unit": "mohm",
+      "value": 120
+     }
+    ]
+   },
+   "kind": "gate_score",
+   "name": "unit_normalized"
+  },
+  {
+   "expected": [
+    1,
+    1,
+    0
+   ],
+   "input": {
+    "got": [
+     {
+      "symbol": "Vin",
+      "unit": "V",
+      "value": 5
+     },
+     {
+      "symbol": "Ghost",
+      "unit": "V",
+      "value": 1
+     }
+    ],
+    "want": [
+     {
+      "symbol": "Vin",
+      "unit": "V",
+      "value": 5
+     }
+    ]
+   },
+   "kind": "gate_score",
+   "name": "invented_symbol"
+  },
+  {
+   "expected": [
+    1,
+    0,
+    1
+   ],
+   "input": {
+    "got": [
+     {
+      "symbol": "Vin",
+      "unit": "V",
+      "value": 5
+     }
+    ],
+    "want": [
+     {
+      "symbol": "Vin",
+      "unit": "V",
+      "value": 5
+     },
+     {
+      "symbol": "Vout",
+      "unit": "V",
+      "value": 3.3
+     }
+    ]
+   },
+   "kind": "gate_score",
+   "name": "missed_symbol"
+  },
+  {
+   "expected": [
+    0,
+    1,
+    0
+   ],
+   "input": {
+    "got": [
+     {
+      "symbol": "Vin",
+      "unit": "V",
+      "value": 5.1
+     }
+    ],
+    "want": [
+     {
+      "symbol": "Vin",
+      "unit": "V",
+      "value": 5
+     }
+    ]
+   },
+   "kind": "gate_score",
+   "name": "value_out_of_tolerance"
+  },
+  {
+   "expected": [
+    1,
+    0,
+    0
+   ],
+   "input": {
+    "got": [
+     {
+      "symbol": "vin",
+      "unit": "V",
+      "value": 5
+     }
+    ],
+    "want": [
+     {
+      "param": "Vin",
+      "unit": "V",
+      "value": 5
+     }
+    ]
+   },
+   "kind": "gate_score",
+   "name": "param_alias"
+  },
+  {
+   "expected": {
+    "f1": 0.9548,
+    "fields_matched": 95,
+    "fields_missed": 5,
+    "fields_wrong_or_extra": 4,
+    "pass": true,
+    "precision": 0.9596,
+    "recall": 0.95
+   },
+   "input": {
+    "fn": 5,
+    "fp": 4,
+    "tp": 95
+   },
+   "kind": "gate_report",
+   "name": "pass"
+  },
+  {
+   "expected": {
+    "f1": 0.9184,
+    "fields_matched": 90,
+    "fields_missed": 10,
+    "fields_wrong_or_extra": 6,
+    "pass": false,
+    "precision": 0.9375,
+    "recall": 0.9
+   },
+   "input": {
+    "fn": 10,
+    "fp": 6,
+    "tp": 90
+   },
+   "kind": "gate_report",
+   "name": "fail_precision"
+  },
+  {
+   "expected": {
+    "f1": 0.8421,
+    "fields_matched": 80,
+    "fields_missed": 20,
+    "fields_wrong_or_extra": 10,
+    "pass": false,
+    "precision": 0.8889,
+    "recall": 0.8
+   },
+   "input": {
+    "fn": 20,
+    "fp": 10,
+    "tp": 80
+   },
+   "kind": "gate_report",
+   "name": "fail_f1"
+  },
+  {
+   "expected": {
+    "f1": 0.0,
+    "fields_matched": 0,
+    "fields_missed": 0,
+    "fields_wrong_or_extra": 0,
+    "pass": false,
+    "precision": 0.0,
+    "recall": 0.0
+   },
+   "input": {
+    "fn": 0,
+    "fp": 0,
+    "tp": 0
+   },
+   "kind": "gate_report",
+   "name": "empty"
+  },
+  {
+   "expected": {
+    "f1": 0.0606,
+    "fields_matched": 1,
+    "fields_missed": 31,
+    "fields_wrong_or_extra": 0,
+    "pass": false,
+    "precision": 1.0,
+    "recall": 0.0312
+   },
+   "input": {
+    "fn": 31,
+    "fp": 0,
+    "tp": 1
+   },
+   "kind": "gate_report",
+   "name": "bankers_round_half_even"
+  },
+  {
+   "expected": 0.12,
+   "input": {
+    "unit": "mohm",
+    "value": 120
+   },
+   "kind": "norm_value",
+   "name": "mohm"
+  },
+  {
+   "expected": 1200.0,
+   "input": {
+    "unit": "kohm",
+    "value": 1.2
+   },
+   "kind": "norm_value",
+   "name": "kohm"
+  },
+  {
+   "expected": 5.0,
+   "input": {
+    "unit": "ohm",
+    "value": 5
+   },
+   "kind": "norm_value",
+   "name": "ohm"
+  },
+  {
+   "expected": 3.3,
+   "input": {
+    "unit": "V",
+    "value": 3.3
+   },
+   "kind": "norm_value",
+   "name": "plain"
+  },
+  {
+   "expected": null,
+   "input": {
+    "unit": "V",
+    "value": null
+   },
+   "kind": "norm_value",
+   "name": "none"
+  },
+  {
+   "expected": null,
+   "input": {
+    "unit": "V",
+    "value": "abc"
+   },
+   "kind": "norm_value",
+   "name": "junk"
+  },
+  {
+   "expected": 1000.0,
+   "input": {
+    "unit": "KOHM",
+    "value": 1
+   },
+   "kind": "norm_value",
+   "name": "upper"
+  }
+ ]
+}
