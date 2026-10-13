@@ -39,6 +39,7 @@ pub mod family_census;
 pub mod family_device_matrix;
 pub mod family_document;
 pub mod incremental_corpus;
+pub mod locator;
 pub mod page_index;
 pub mod sha256;
 
@@ -48,4 +49,5 @@ pub use family_census::{census_document, CensusRow};
 pub use family_device_matrix::{extract_family_matrix, MatrixInput};
 pub use family_document::{read_family_document, DocumentRow};
 pub use incremental_corpus::build_incremental_corpus_registry;
+pub use locator::{locate_pin_definition_pages, LocateResult};
 pub use page_index::{classify_section, index_document};
