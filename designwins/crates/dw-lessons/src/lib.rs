@@ -11,7 +11,7 @@
 //!
 //! | source | lessons |
 //! |---|---|
-//! | `docs/DECISIONS.md` | `D1`–`D9` — ratified rulings |
+//! | `docs/DECISIONS.md` | `D1`–`D10` — ratified rulings |
 //! | `docs/ASSURANCE.md` | `R1`–`R6` rules, `1.1`–`1.3` defect mechanisms |
 //! | `docs/HANDOFF.md` §6 | the porting gotchas table — what cost real time |
 //!

@@ -1,0 +1,2181 @@
+{
+ "cases": [
+  {
+   "expected": {
+    "_meta": {
+     "extracted_by": "harness.electronics.family_document",
+     "models_used": [],
+     "page_count": 2,
+     "pages_read": 2,
+     "vendor": "renesas"
+    },
+    "bogey": {
+     "chapter_entries": 6,
+     "chapter_feature_sections": 1,
+     "chapter_features": 3,
+     "features": 9,
+     "features_qualified": 1,
+     "instance_classes": 0,
+     "instances_asserted": 0,
+     "io_by_package_rows": 0,
+     "memory_rows": 2,
+     "peripheral_classes": 4
+    },
+    "chapter_features": [
+     {
+      "chapter": "32 Serial peripheral interface (SPI)",
+      "chapter_class": "spi",
+      "classes": [
+       "cpu_core"
+      ],
+      "count": null,
+      "label": "Arm Cortex-M33 core",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": null,
+        "value": 33
+       }
+      ],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "section": "Features",
+      "verbatim": "Arm Cortex-M33 core running at 48 MHz"
+     },
+     {
+      "chapter": "32 Serial peripheral interface (SPI)",
+      "chapter_class": "spi",
+      "classes": [
+       "flash"
+      ],
+      "count": null,
+      "label": "Up to 2 Mbytes of Flash memory",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": "Mbytes",
+        "value": 2
+       }
+      ],
+      "qualifier_verbatim": "Up to",
+      "receipt": {
+       "page": 2
+      },
+      "section": "Features",
+      "verbatim": "Up to 2 Mbytes of Flash memory with ECC"
+     },
+     {
+      "chapter": "32 Serial peripheral interface (SPI)",
+      "chapter_class": "spi",
+      "classes": [
+       "sram"
+      ],
+      "count": null,
+      "label": "640 Kbytes of SRAM",
+      "level": 2,
+      "numbers": [
+       {
+        "unit": "Kbytes",
+        "value": 640
+       }
+      ],
+      "parent": "Up to 2 Mbytes of Flash memory with ECC",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "section": "Features",
+      "verbatim": "640 Kbytes of SRAM"
+     }
+    ],
+    "chapters": {
+     "chapters": [
+      {
+       "level": 1,
+       "page": 1,
+       "title": "1. Overview"
+      },
+      {
+       "level": 1,
+       "page": 1,
+       "title": "2. Memory"
+      },
+      {
+       "level": 1,
+       "page": 2,
+       "title": "30 Universal synchronous/asynchronous receiver transmitter (USART/UART)"
+      },
+      {
+       "level": 1,
+       "page": 2,
+       "title": "31 Inter-integrated circuit (I2C)"
+      },
+      {
+       "level": 1,
+       "page": 2,
+       "title": "32 Serial peripheral interface (SPI)"
+      }
+     ],
+     "entries": 6,
+     "peripheral_classes": {
+      "flash": [
+       {
+        "level": 2,
+        "page": 1,
+        "title": "2.1 Flash"
+       }
+      ],
+      "i2c": [
+       {
+        "level": 1,
+        "page": 2,
+        "title": "31 Inter-integrated circuit (I2C)"
+       }
+      ],
+      "spi": [
+       {
+        "level": 1,
+        "page": 2,
+        "title": "32 Serial peripheral interface (SPI)"
+       }
+      ],
+      "usart": [
+       {
+        "level": 1,
+        "page": 2,
+        "title": "30 Universal synchronous/asynchronous receiver transmitter (USART/UART)"
+       }
+      ]
+     },
+     "source": "bookmarks"
+    },
+    "features": [
+     {
+      "classes": [
+       "flash"
+      ],
+      "count": null,
+      "label": "512-KB code flash memory",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": "KB",
+        "value": 512
+       }
+      ],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 1
+      },
+      "source": "features_heading_page",
+      "verbatim": "512-KB code flash memory"
+     },
+     {
+      "classes": [
+       "sram"
+      ],
+      "count": null,
+      "label": "96-KB SRAM Connectivity",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": "KB",
+        "value": 96
+       }
+      ],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 1
+      },
+      "source": "features_heading_page",
+      "verbatim": "96-KB SRAM Connectivity"
+     },
+     {
+      "classes": [
+       "usart"
+      ],
+      "count": 4,
+      "label": "Serial Communications Interface (SCI)",
+      "level": 1,
+      "numbers": [],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 1
+      },
+      "source": "features_heading_page",
+      "verbatim": "Serial Communications Interface (SCI) x 4"
+     },
+     {
+      "classes": [
+       "usart"
+      ],
+      "count": null,
+      "label": "UART",
+      "level": 2,
+      "numbers": [],
+      "parent": "Serial Communications Interface (SCI) x 4",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 1
+      },
+      "source": "features_heading_page",
+      "verbatim": "UART"
+     },
+     {
+      "classes": [
+       "spi"
+      ],
+      "count": null,
+      "label": "Simple SPI",
+      "level": 2,
+      "numbers": [],
+      "parent": "Serial Communications Interface (SCI) x 4",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 1
+      },
+      "source": "features_heading_page",
+      "verbatim": "Simple SPI"
+     },
+     {
+      "classes": [
+       "i2c"
+      ],
+      "count": 2,
+      "label": "I2C bus interface (IIC)",
+      "level": 1,
+      "numbers": [],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 1
+      },
+      "source": "features_heading_page",
+      "verbatim": "I2C bus interface (IIC) x 2"
+     },
+     {
+      "classes": [
+       "cpu_core"
+      ],
+      "count": null,
+      "label": "Arm Cortex-M33 core",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": null,
+        "value": 33
+       }
+      ],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "source": "features_heading_page",
+      "verbatim": "Arm Cortex-M33 core running at 48 MHz"
+     },
+     {
+      "classes": [
+       "flash"
+      ],
+      "count": null,
+      "label": "Up to 2 Mbytes of Flash memory",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": "Mbytes",
+        "value": 2
+       }
+      ],
+      "qualifier_verbatim": "Up to",
+      "receipt": {
+       "page": 2
+      },
+      "source": "features_heading_page",
+      "verbatim": "Up to 2 Mbytes of Flash memory with ECC"
+     },
+     {
+      "classes": [
+       "sram"
+      ],
+      "count": null,
+      "label": "640 Kbytes of SRAM",
+      "level": 2,
+      "numbers": [
+       {
+        "unit": "Kbytes",
+        "value": 640
+       }
+      ],
+      "parent": "Up to 2 Mbytes of Flash memory with ECC",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "source": "features_heading_page",
+      "verbatim": "640 Kbytes of SRAM"
+     }
+    ],
+    "identity": {
+     "document_id": "R01DS0001EU0100",
+     "lines_covered": {
+      "family_phrases": [
+       "RA4C1 Group",
+       "The RA4C1 Group"
+      ],
+      "filename_tokens": [],
+      "group_tokens": [
+       "RA4C1"
+      ],
+      "parts": [],
+      "wildcards": []
+     },
+     "pdf_title": "RA4C1 Group Datasheet",
+     "receipt": {
+      "page": 1
+     },
+     "revision": "1.00",
+     "title_verbatim": "R01DS0001EU0100 RA4C1 Group Datasheet Rev. 1.00 1. Overview The RA4C1 Group is a family of 32-bit microcontrollers. Memory"
+    },
+    "io_by_package": [],
+    "memory": [
+     {
+      "qualifier_verbatim": "Up to",
+      "receipt": {
+       "page": 2
+      },
+      "size_kb": 2048.0,
+      "verbatim": "\u00b7 Up to 2 Mbytes of Flash memory with ECC"
+     },
+     {
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "size_kb": 640.0,
+      "verbatim": "- 640 Kbytes of SRAM"
+     }
+    ],
+    "peripheral_instances": {},
+    "prose_facts": [
+     {
+      "context": "pages=1",
+      "kind": "core",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "unit": null,
+      "value": null,
+      "verbatim": "Arm Cortex-M33"
+     }
+    ],
+    "schema": "harness.electronics-family-document.v1"
+   },
+   "input": {
+    "page_count": 2,
+    "pages": {
+     "1": "R01DS0001EU0100\nRA4C1 Group Datasheet\nRev. 1.00\n1. Overview\nThe RA4C1 Group is a family of 32-bit microcontrollers.\nMemory\n\u00b7 512-KB code flash memory\n\u00b7 96-KB SRAM\nConnectivity\n\u00b7 Serial Communications Interface (SCI) x 4\n- UART\n- Simple SPI\n\u00b7 I2C bus interface (IIC) x 2\n",
+     "2": "1.1 Features\nMain features\n\u00b7 Arm Cortex-M33 core running at 48 MHz\n\u00b7 Up to 2 Mbytes of Flash memory with ECC\n- 640 Kbytes of SRAM\n"
+    },
+    "pdf_title": "RA4C1 Group Datasheet",
+    "source_stem": "renesas_reference_manual",
+    "tables": [
+     {
+      "page": 1,
+      "tables": []
+     },
+     {
+      "page": 2,
+      "tables": []
+     }
+    ],
+    "toc": [
+     [
+      1,
+      "1. Overview",
+      1
+     ],
+     [
+      1,
+      "2. Memory",
+      1
+     ],
+     [
+      2,
+      "2.1 Flash",
+      1
+     ],
+     [
+      1,
+      "30 Universal synchronous/asynchronous receiver transmitter (USART/UART)",
+      2
+     ],
+     [
+      1,
+      "31 Inter-integrated circuit (I2C)",
+      2
+     ],
+     [
+      1,
+      "32 Serial peripheral interface (SPI)",
+      2
+     ]
+    ]
+   },
+   "kind": "census",
+   "max_text_pages": null,
+   "name": "renesas_reference_manual",
+   "vendor": "renesas"
+  },
+  {
+   "expected": {
+    "_meta": {
+     "extracted_by": "harness.electronics.family_document",
+     "models_used": [],
+     "page_count": 3,
+     "pages_read": 3,
+     "vendor": "st"
+    },
+    "bogey": {
+     "chapter_entries": 2,
+     "chapter_feature_sections": 0,
+     "chapter_features": 0,
+     "features": 2,
+     "features_qualified": 1,
+     "instance_classes": 3,
+     "instances_asserted": 0,
+     "io_by_package_rows": 0,
+     "memory_rows": 0,
+     "peripheral_classes": 1
+    },
+    "chapter_features": [],
+    "chapters": {
+     "chapters": [
+      {
+       "level": 1,
+       "page": 430,
+       "title": "CPU"
+      },
+      {
+       "level": 1,
+       "page": 512,
+       "title": "Memories"
+      }
+     ],
+     "entries": 2,
+     "peripheral_classes": {
+      "cpu_core": [
+       {
+        "level": 1,
+        "page": 430,
+        "title": "CPU"
+       }
+      ]
+     },
+     "source": "printed_toc"
+    },
+    "features": [
+     {
+      "classes": [
+       "flash"
+      ],
+      "count": null,
+      "label": "Up to 32-Kbyte Flash memory",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": "Kbyte",
+        "value": 32
+       }
+      ],
+      "qualifier_verbatim": "Up to",
+      "receipt": {
+       "page": 2
+      },
+      "source": "features_heading_page",
+      "verbatim": "Up to 32-Kbyte Flash memory"
+     },
+     {
+      "classes": [
+       "sram",
+       "usart"
+      ],
+      "count": null,
+      "label": "12-Kbyte SRAM USART1, USART2 and SPI1 peripherals",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": "Kbyte",
+        "value": 12
+       },
+       {
+        "unit": null,
+        "value": 1
+       },
+       {
+        "unit": null,
+        "value": 2
+       },
+       {
+        "unit": null,
+        "value": 1
+       }
+      ],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "source": "features_heading_page",
+      "verbatim": "12-Kbyte SRAM USART1, USART2 and SPI1 peripherals with DMA1. Operating voltage 2.0 to 3.6 V -40 to +85 C temperature range"
+     }
+    ],
+    "identity": {
+     "document_id": "DS13543",
+     "lines_covered": {
+      "family_phrases": [
+       "x6 microcontrollers"
+      ],
+      "filename_tokens": [],
+      "group_tokens": [],
+      "parts": [],
+      "wildcards": [
+       "STM32C011x4/x6"
+      ]
+     },
+     "pdf_title": "STM32C011 Datasheet",
+     "receipt": {
+      "page": 1
+     },
+     "revision": "3",
+     "title_verbatim": "DS13543 Rev 3 STM32C011x4/x6 Datasheet For STM32C011x4/x6 microcontrollers. Contents 3 CPU .......... 430 4 Memories .......... 512"
+    },
+    "io_by_package": [],
+    "memory": [],
+    "peripheral_instances": {
+     "DMA": {
+      "count_asserted": 0,
+      "instances": [
+       {
+        "first_page": 2,
+        "instance": "DMA1",
+        "pages": 1,
+        "weak": true
+       }
+      ]
+     },
+     "SPI": {
+      "count_asserted": 0,
+      "instances": [
+       {
+        "first_page": 2,
+        "instance": "SPI1",
+        "pages": 1,
+        "weak": true
+       }
+      ]
+     },
+     "USART": {
+      "count_asserted": 0,
+      "instances": [
+       {
+        "first_page": 2,
+        "instance": "USART1",
+        "pages": 1,
+        "weak": true
+       },
+       {
+        "first_page": 2,
+        "instance": "USART2",
+        "pages": 1,
+        "weak": true
+       }
+      ]
+     }
+    },
+    "prose_facts": [
+     {
+      "kind": "packages",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 3
+      },
+      "unit": null,
+      "value": [
+       "LQFP48",
+       "SOIC-8"
+      ],
+      "verbatim": "LQFP48, SOIC-8"
+     },
+     {
+      "context": "Operating voltage 2.0 to 3.6 V -40 to +85 C temperature range",
+      "kind": "supply_range",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "unit": "V",
+      "value": [
+       2.0,
+       3.6
+      ],
+      "verbatim": "2.0 to 3.6 V"
+     }
+    ],
+    "schema": "harness.electronics-family-document.v1"
+   },
+   "input": {
+    "page_count": 3,
+    "pages": {
+     "1": "DS13543 Rev 3\nSTM32C011x4/x6 Datasheet\nFor STM32C011x4/x6 microcontrollers.\nContents\n3 CPU .......... 430\n4 Memories .......... 512\n",
+     "2": "Features\n\u00b7 Up to 32-Kbyte Flash memory\n\u00b7 12-Kbyte SRAM\nUSART1, USART2 and SPI1 peripherals with DMA1.\nOperating voltage 2.0 to 3.6 V -40 to +85 C temperature range\n",
+     "3": "Device summary. Available in LQFP48 and SOIC-8 packages.\nFeature\nDescription\nCommunication Interfaces\nI2C\nUp to 1 Mbit/s I2C interface\nTimers\n16-bit general purpose timers\nOperating Range (Ambient)\n2.0 to 3.6 V operating voltage\n"
+    },
+    "pdf_title": "STM32C011 Datasheet",
+    "source_stem": "st_datasheet_with_device_table",
+    "tables": [
+     {
+      "page": 1,
+      "tables": []
+     },
+     {
+      "page": 2,
+      "tables": []
+     },
+     {
+      "page": 3,
+      "tables": [
+       [
+        [
+         "Feature",
+         "Description"
+        ],
+        [
+         "Communication Interfaces",
+         ""
+        ],
+        [
+         "I2C",
+         "Up to 1 Mbit/s I2C interface"
+        ],
+        [
+         "Timers",
+         "16-bit general purpose timers"
+        ],
+        [
+         "Operating Range (Ambient)",
+         "2.0 to 3.6 V operating voltage"
+        ]
+       ]
+      ]
+     }
+    ],
+    "toc": []
+   },
+   "kind": "census",
+   "max_text_pages": null,
+   "name": "st_datasheet_with_device_table",
+   "vendor": "st"
+  },
+  {
+   "expected": {
+    "_meta": {
+     "extracted_by": "harness.electronics.family_document",
+     "models_used": [],
+     "page_count": 2,
+     "pages_read": 2,
+     "vendor": "ti"
+    },
+    "bogey": {
+     "chapter_entries": 0,
+     "chapter_feature_sections": 0,
+     "chapter_features": 0,
+     "features": 2,
+     "features_qualified": 0,
+     "instance_classes": 0,
+     "instances_asserted": 0,
+     "io_by_package_rows": 0,
+     "memory_rows": 0,
+     "peripheral_classes": 0
+    },
+    "chapter_features": [],
+    "chapters": {
+     "chapters": [],
+     "entries": 0,
+     "peripheral_classes": {},
+     "source": "printed_toc"
+    },
+    "features": [
+     {
+      "classes": [
+       "usart"
+      ],
+      "count": 8,
+      "label": "UARTs",
+      "level": 1,
+      "numbers": [],
+      "parent": "UART",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "section_class": null,
+      "source": "features_table",
+      "vendor_section": "Communication Interfaces",
+      "verbatim": "Eight UARTs with IrDA support"
+     },
+     {
+      "classes": [
+       "adc"
+      ],
+      "count": 2,
+      "label": "12-bit ADC modules",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": "bit",
+        "value": 12
+       }
+      ],
+      "parent": "ADC",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "section_class": null,
+      "source": "features_table",
+      "vendor_section": "Analog Support",
+      "verbatim": "Two 12-bit ADC modules"
+     }
+    ],
+    "identity": {
+     "document_id": null,
+     "lines_covered": {
+      "family_phrases": [],
+      "filename_tokens": [],
+      "group_tokens": [],
+      "parts": [
+       "SLMS715",
+       "TM4C123GH6PM"
+      ],
+      "wildcards": []
+     },
+     "pdf_title": "TM4C123 Datasheet",
+     "receipt": {
+      "page": 1
+     },
+     "revision": null,
+     "title_verbatim": "SLMS715 TM4C123GH6PM Microcontroller Product Overview The TM4C123GH6PM is a 32-bit microcontroller. Core: ARM Cortex-M4F with FPU running up to 80 MHz."
+    },
+    "io_by_package": [],
+    "memory": [],
+    "peripheral_instances": {},
+    "prose_facts": [
+     {
+      "context": "pages=1",
+      "kind": "core",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 1
+      },
+      "unit": null,
+      "value": null,
+      "verbatim": "ARM Cortex-M4F with FPU"
+     },
+     {
+      "kind": "max_frequency",
+      "qualifier_verbatim": "up to",
+      "receipt": {
+       "page": 1
+      },
+      "unit": "MHz",
+      "value": 80,
+      "verbatim": "up to 80 MHz"
+     }
+    ],
+    "schema": "harness.electronics-family-document.v1"
+   },
+   "input": {
+    "page_count": 2,
+    "pages": {
+     "1": "SLMS715\nTM4C123GH6PM Microcontroller\nProduct Overview\nThe TM4C123GH6PM is a 32-bit microcontroller.\nCore: ARM Cortex-M4F with FPU running up to 80 MHz.\n",
+     "2": "Table 2-1. TM4C123GH6PM Microcontroller Features\nFeature\nDescription\nCommunication Interfaces\nUART\nEight UARTs with IrDA support\nAnalog Support\nADC\nTwo 12-bit ADC modules\n"
+    },
+    "pdf_title": "TM4C123 Datasheet",
+    "source_stem": "ti_features_table",
+    "tables": [
+     {
+      "page": 1,
+      "tables": []
+     },
+     {
+      "page": 2,
+      "tables": [
+       [
+        [
+         "Feature",
+         "Description"
+        ],
+        [
+         "Communication Interfaces",
+         ""
+        ],
+        [
+         "UART",
+         "Eight UARTs with IrDA support"
+        ],
+        [
+         "Analog Support",
+         ""
+        ],
+        [
+         "ADC",
+         "Two 12-bit ADC modules"
+        ]
+       ]
+      ]
+     }
+    ],
+    "toc": []
+   },
+   "kind": "census",
+   "max_text_pages": null,
+   "name": "ti_features_table",
+   "vendor": "ti"
+  },
+  {
+   "expected": {
+    "_meta": {
+     "extracted_by": "harness.electronics.family_document",
+     "models_used": [],
+     "page_count": 2,
+     "pages_read": 2,
+     "vendor": "renesas"
+    },
+    "bogey": {
+     "chapter_entries": 0,
+     "chapter_feature_sections": 0,
+     "chapter_features": 0,
+     "features": 3,
+     "features_qualified": 0,
+     "instance_classes": 0,
+     "instances_asserted": 0,
+     "io_by_package_rows": 0,
+     "memory_rows": 0,
+     "peripheral_classes": 0
+    },
+    "chapter_features": [],
+    "chapters": {
+     "chapters": [],
+     "entries": 0,
+     "peripheral_classes": {},
+     "source": "printed_toc"
+    },
+    "features": [
+     {
+      "classes": [
+       "cpu_core"
+      ],
+      "count": null,
+      "label": "ARM Cortex-A15 Quad MPCore 1.4 GHz",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": null,
+        "value": 15
+       },
+       {
+        "unit": "GHz",
+        "value": 1.4
+       }
+      ],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "section_class": "cpu_core",
+      "source": "item_description",
+      "vendor_section": "System CPU Cortex-A15",
+      "verbatim": "ARM Cortex-A15 Quad MPCore 1.4 GHz"
+     },
+     {
+      "classes": [],
+      "count": null,
+      "label": "L1 I/D cache 32/32 KBytes, L2 cache 2 MBytes",
+      "level": 2,
+      "numbers": [
+       {
+        "unit": null,
+        "value": 1
+       },
+       {
+        "unit": null,
+        "value": 32
+       },
+       {
+        "unit": "KBytes",
+        "value": 32
+       },
+       {
+        "unit": null,
+        "value": 2
+       },
+       {
+        "unit": "MBytes",
+        "value": 2
+       }
+      ],
+      "parent": "ARM Cortex-A15 Quad MPCore 1.4 GHz",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "section_class": "cpu_core",
+      "source": "item_description",
+      "vendor_section": "System CPU Cortex-A15",
+      "verbatim": "L1 I/D cache 32/32 KBytes, L2 cache 2 MBytes"
+     },
+     {
+      "classes": [
+       "cpu_core"
+      ],
+      "count": null,
+      "label": "ARM Cortex-A7 Quad MPCore 780 MHz",
+      "level": 1,
+      "numbers": [
+       {
+        "unit": null,
+        "value": 7
+       },
+       {
+        "unit": "MHz",
+        "value": 780
+       }
+      ],
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "section_class": "cpu_core",
+      "source": "item_description",
+      "vendor_section": "System CPU Cortex-A7",
+      "verbatim": "ARM Cortex-A7 Quad MPCore 780 MHz"
+     }
+    ],
+    "identity": {
+     "document_id": null,
+     "lines_covered": {
+      "family_phrases": [],
+      "filename_tokens": [],
+      "group_tokens": [],
+      "parts": [],
+      "wildcards": []
+     },
+     "pdf_title": "RZ/G1H",
+     "receipt": {
+      "page": 1
+     },
+     "revision": null,
+     "title_verbatim": "Contents 1.3 List of Specifications ............................. 1-3"
+    },
+    "io_by_package": [],
+    "memory": [],
+    "peripheral_instances": {},
+    "prose_facts": [
+     {
+      "context": "pages=1",
+      "kind": "core",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "unit": null,
+      "value": null,
+      "verbatim": "Cortex-A15"
+     },
+     {
+      "context": "pages=1",
+      "kind": "core",
+      "qualifier_verbatim": null,
+      "receipt": {
+       "page": 2
+      },
+      "unit": null,
+      "value": null,
+      "verbatim": "Cortex-A7"
+     }
+    ],
+    "schema": "harness.electronics-family-document.v1"
+   },
+   "input": {
+    "page_count": 2,
+    "pages": {
+     "1": "Contents\n1.3 List of Specifications ............................. 1-3\n",
+     "2": "1.3 List of Specifications\n1.3.1 ARM Core\nItem\nDescription\nSystem CPU Cortex-A15\n- ARM Cortex-A15 Quad MPCore 1.4 GHz\n- L1 I/D cache 32/32 KBytes, L2 cache 2 MBytes\nSystem CPU Cortex-A7\n- ARM Cortex-A7 Quad MPCore 780 MHz\n"
+    },
+    "pdf_title": "RZ/G1H",
+    "source_stem": "renesas_item_spec_list",
+    "tables": [
+     {
+      "page": 1,
+      "tables": []
+     },
+     {
+      "page": 2,
+      "tables": []
+     }
+    ],
+    "toc": []
+   },
+   "kind": "census",
+   "max_text_pages": null,
+   "name": "renesas_item_spec_list",
+   "vendor": "renesas"
+  },
+  {
+   "expected": {
+    "_meta": {
+     "extracted_by": "harness.electronics.family_document",
+     "models_used": [],
+     "page_count": 1,
+     "pages_read": 1,
+     "vendor": "acme"
+    },
+    "bogey": {
+     "chapter_entries": 0,
+     "chapter_feature_sections": 0,
+     "chapter_features": 0,
+     "features": 0,
+     "features_qualified": 0,
+     "instance_classes": 0,
+     "instances_asserted": 0,
+     "io_by_package_rows": 0,
+     "memory_rows": 0,
+     "peripheral_classes": 0
+    },
+    "chapter_features": [],
+    "chapters": {
+     "chapters": [],
+     "entries": 0,
+     "peripheral_classes": {},
+     "source": "printed_toc"
+    },
+    "features": [],
+    "identity": {
+     "document_id": null,
+     "lines_covered": {
+      "family_phrases": [],
+      "filename_tokens": [],
+      "group_tokens": [],
+      "parts": [],
+      "wildcards": []
+     },
+     "pdf_title": null,
+     "receipt": {
+      "page": 1
+     },
+     "revision": null,
+     "title_verbatim": "tiny"
+    },
+    "io_by_package": [],
+    "memory": [],
+    "peripheral_instances": {},
+    "prose_facts": [],
+    "schema": "harness.electronics-family-document.v1"
+   },
+   "input": {
+    "page_count": 1,
+    "pages": {
+     "1": "tiny\n"
+    },
+    "pdf_title": null,
+    "source_stem": "no_text_layer",
+    "tables": [
+     {
+      "page": 1,
+      "tables": []
+     }
+    ],
+    "toc": []
+   },
+   "kind": "census",
+   "max_text_pages": null,
+   "name": "no_text_layer",
+   "vendor": "acme"
+  },
+  {
+   "expected": "usart",
+   "kind": "classify_chapter_title",
+   "name": "chapter_30 Universal synchronous",
+   "title": "30 Universal synchronous/asynchronous receiver transmitter (USART/UART)"
+  },
+  {
+   "expected": "flash",
+   "kind": "classify_chapter_title",
+   "name": "chapter_6 NVM (Flash)",
+   "title": "6 NVM (Flash)"
+  },
+  {
+   "expected": "can",
+   "kind": "classify_chapter_title",
+   "name": "chapter_31 CAN-FD",
+   "title": "31 CAN-FD"
+  },
+  {
+   "expected": "npu",
+   "kind": "classify_chapter_title",
+   "name": "chapter_11 TinyEngineTM NPU",
+   "title": "11 TinyEngineTM NPU"
+  },
+  {
+   "expected": null,
+   "kind": "classify_chapter_title",
+   "name": "chapter_9 Dual-Clock Comparator ",
+   "title": "9 Dual-Clock Comparator (DCC) Module"
+  },
+  {
+   "expected": null,
+   "kind": "classify_chapter_title",
+   "name": "chapter_22.10 Trip-Zone (TZ) Sub",
+   "title": "22.10 Trip-Zone (TZ) Submodule"
+  },
+  {
+   "expected": null,
+   "kind": "classify_chapter_title",
+   "name": "chapter_25.14 Message RAM",
+   "title": "25.14 Message RAM"
+  },
+  {
+   "expected": "timer",
+   "kind": "classify_chapter_title",
+   "name": "chapter_3.9 32-Bit CPU Timers 0/",
+   "title": "3.9 32-Bit CPU Timers 0/1/2"
+  },
+  {
+   "expected": [
+    "Full-duplex synchronous transfers on three lines",
+    "4-bit to 16-bit data size selection",
+    "Up to 8 slaves"
+   ],
+   "kind": "bullets",
+   "name": "wrapped_lines_stop_at_heading",
+   "text": "\u2022 Full-duplex synchronous transfers on three lines\n\u2022 4-bit to 16-bit data size\nselection\n\u2022 Up to 8 slaves\n30.4 SPI implementation\n\u2022 not part of features\n"
+  },
+  {
+   "expected": [
+    {
+     "level": 1,
+     "section": null,
+     "text": "Up to 2 Mbytes of Flash"
+    },
+    {
+     "level": 1,
+     "section": null,
+     "text": "640 Kbytes of SRAM"
+    }
+   ],
+   "kind": "bullet_items",
+   "name": "single_glyph_no_header_level",
+   "text": "\u2022 Up to 2 Mbytes of Flash\n\u2022 640 Kbytes of SRAM\n"
+  },
+  {
+   "expected": [
+    {
+     "level": 1,
+     "section": "Memory",
+     "text": "512-KB code flash memory"
+    },
+    {
+     "level": 1,
+     "section": "Memory",
+     "text": "96-KB SRAM"
+    },
+    {
+     "level": 1,
+     "section": "Connectivity",
+     "text": "Serial Communications Interface (SCI) \u00d7 4"
+    },
+    {
+     "level": 2,
+     "parent": "Serial Communications Interface (SCI) \u00d7 4",
+     "section": "Connectivity",
+     "text": "UART"
+    },
+    {
+     "level": 2,
+     "parent": "Serial Communications Interface (SCI) \u00d7 4",
+     "section": "Connectivity",
+     "text": "Simple SPI"
+    },
+    {
+     "level": 1,
+     "section": "Connectivity",
+     "text": "I2C bus interface (IIC) \u00d7 2"
+    }
+   ],
+   "kind": "bullet_items",
+   "name": "renesas_cover_hierarchy",
+   "text": "Features\n\u25a0 Memory\n\uf0b7512-KB code flash memory\n\uf0b796-KB SRAM\n\u25a0 Connectivity\n\uf0b7Serial Communications Interface (SCI) \u00d7 4\n- UART\n- Simple SPI\n\uf0b7I2C bus interface (IIC) \u00d7 2\n"
+  },
+  {
+   "expected": [
+    "Serial Communications Interface (SCI)",
+    4
+   ],
+   "kind": "split_count",
+   "name": "count_Serial Communication",
+   "text": "Serial Communications Interface (SCI) \u00d7 4"
+  },
+  {
+   "expected": [
+    "8-bit D/A Converter (DAC8) (for ACMPLP)",
+    2
+   ],
+   "kind": "split_count",
+   "name": "count_8-bit D/A Converter ",
+   "text": "8-bit D/A Converter (DAC8) \u00d72 (for ACMPLP)"
+  },
+  {
+   "expected": [
+    "DMA",
+    8
+   ],
+   "kind": "split_count",
+   "name": "count_DMA x8",
+   "text": "DMA x8"
+  },
+  {
+   "expected": [
+    "Temperature Sensor",
+    null
+   ],
+   "kind": "split_count",
+   "name": "count_Temperature Sensor",
+   "text": "Temperature Sensor"
+  },
+  {
+   "expected": {
+    "classes": [
+     "flash"
+    ],
+    "count": null,
+    "label": "Up to 2 Mbytes of Flash memory",
+    "numbers": [
+     {
+      "unit": "Mbytes",
+      "value": 2
+     }
+    ],
+    "qualifier_verbatim": "Up to",
+    "receipt": {
+     "page": 1
+    },
+    "verbatim": "Up to 2 Mbytes of Flash memory with ECC"
+   },
+   "kind": "feature",
+   "level": null,
+   "name": "typed_numbers_and_qualifier",
+   "page": 1,
+   "parent": null,
+   "section": null,
+   "text": "Up to 2 Mbytes of Flash memory with ECC"
+  },
+  {
+   "expected": {
+    "classes": [
+     "sram"
+    ],
+    "count": null,
+    "label": "640 Kbytes of SRAM",
+    "numbers": [
+     {
+      "unit": "Kbytes",
+      "value": 640
+     }
+    ],
+    "qualifier_verbatim": null,
+    "receipt": {
+     "page": 1
+    },
+    "verbatim": "640 Kbytes of SRAM"
+   },
+   "kind": "feature",
+   "level": null,
+   "name": "bare_numbers",
+   "page": 1,
+   "parent": null,
+   "section": null,
+   "text": "640 Kbytes of SRAM"
+  },
+  {
+   "expected": {
+    "FDCAN": {
+     "count_asserted": 1,
+     "instances": [
+      {
+       "first_page": 1,
+       "instance": "FDCAN1",
+       "pages": 2,
+       "weak": false
+      }
+     ]
+    },
+    "GPIO": {
+     "count_asserted": 2,
+     "instances": [
+      {
+       "first_page": 1,
+       "instance": "GPIOA",
+       "pages": 2,
+       "weak": false
+      },
+      {
+       "first_page": 1,
+       "instance": "GPIOB",
+       "pages": 2,
+       "weak": false
+      }
+     ]
+    },
+    "SPI": {
+     "count_asserted": 3,
+     "instances": [
+      {
+       "first_page": 1,
+       "instance": "SPI1",
+       "pages": 2,
+       "weak": false
+      },
+      {
+       "first_page": 1,
+       "instance": "SPI2",
+       "pages": 2,
+       "weak": false
+      },
+      {
+       "first_page": 1,
+       "instance": "SPI3",
+       "pages": 2,
+       "weak": false
+      },
+      {
+       "first_page": 3,
+       "instance": "SPI6",
+       "pages": 1,
+       "weak": true
+      }
+     ]
+    },
+    "TIM": {
+     "count_asserted": 2,
+     "instances": [
+      {
+       "first_page": 1,
+       "instance": "TIM1",
+       "pages": 2,
+       "weak": false
+      },
+      {
+       "first_page": 1,
+       "instance": "TIM2",
+       "pages": 2,
+       "weak": false
+      },
+      {
+       "first_page": 2,
+       "instance": "TIM15",
+       "pages": 1,
+       "weak": true
+      },
+      {
+       "first_page": 3,
+       "instance": "TIM17",
+       "pages": 1,
+       "weak": true
+      }
+     ]
+    },
+    "USART": {
+     "count_asserted": 1,
+     "instances": [
+      {
+       "first_page": 1,
+       "instance": "USART1",
+       "pages": 2,
+       "weak": false
+      }
+     ]
+    },
+    "USB": {
+     "count_asserted": 0,
+     "instances": [
+      {
+       "first_page": 1,
+       "instance": "USB_OTG_HS",
+       "pages": 1,
+       "weak": true
+      }
+     ]
+    }
+   },
+   "kind": "read_instances",
+   "name": "multi_page_names_only",
+   "pages": {
+    "1": "SPI1 SPI2 SPI3 TIM1 TIM2 USART1 GPIOA GPIOB FDCAN1 USB_OTG_HS",
+    "2": "SPI1, SPI2 and SPI3 support I2S. TIM1 TIM2 TIM15. USART1 GPIOA GPIOB FDCAN1",
+    "3": "SPI6 is quoted once here only. TIM17 too."
+   },
+   "weak_pages": 2
+  },
+  {
+   "chapters": {
+    "all_entries": [
+     {
+      "level": 1,
+      "page": 100,
+      "title": "30 Serial peripheral interface (SPI)"
+     },
+     {
+      "level": 1,
+      "page": 140,
+      "title": "31 Inter-integrated circuit (I2C)"
+     }
+    ]
+   },
+   "expected": [
+    {
+     "chapter": "30 Serial peripheral interface (SPI)",
+     "chapter_class": "spi",
+     "classes": [],
+     "count": null,
+     "label": "Full-duplex synchronous transfers",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 101
+     },
+     "section": "SPI",
+     "verbatim": "Full-duplex synchronous transfers"
+    },
+    {
+     "chapter": "30 Serial peripheral interface (SPI)",
+     "chapter_class": "spi",
+     "classes": [],
+     "count": 8,
+     "label": "slaves",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": "Up to",
+     "receipt": {
+      "page": 101
+     },
+     "section": "SPI",
+     "verbatim": "Up to 8 slaves"
+    }
+   ],
+   "kind": "read_chapter_features",
+   "name": "section_and_enclosing_chapter",
+   "page_count": 200,
+   "pages": {
+    "101": "30.1 Introduction\ntext\n30.3 SPI main features\n\u2022 Full-duplex synchronous transfers\n\u2022 Up to 8 slaves\n30.4 SPI implementation\n",
+    "141": "Refer to the data sheet for device-specific features\n\u2022 stray bullet\n"
+   }
+  },
+  {
+   "expected": [
+    {
+     "context": "pages=2",
+     "kind": "core",
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "unit": null,
+     "value": null,
+     "verbatim": "Arm\u00ae Cortex\u00ae-M4 with FPU"
+    },
+    {
+     "kind": "max_frequency",
+     "qualifier_verbatim": "up to",
+     "receipt": {
+      "page": 1
+     },
+     "unit": "MHz",
+     "value": 168,
+     "verbatim": "up to 168 MHz"
+    },
+    {
+     "context": "The supply voltage range is 2.7 to 3.6 V for the USB block. -40 to +105 \u00b0C",
+     "kind": "temperature_range",
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 3
+     },
+     "unit": "\u00b0C",
+     "value": [
+      -40,
+      105
+     ],
+     "verbatim": "-40 to +105 \u00b0C"
+    },
+    {
+     "context": "ARM Cortex-M4 core. Operating voltage VDD: 1.8 to 3.6 V. ADC range 2.4 to 3.6 V (not a supply line).",
+     "kind": "supply_range",
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 2
+     },
+     "unit": "V",
+     "value": [
+      1.8,
+      3.6
+     ],
+     "verbatim": "1.8 to 3.6 V"
+    }
+   ],
+   "kind": "read_prose_facts",
+   "max_pages": 160,
+   "name": "core_freq_supply_temp",
+   "pages": {
+    "1": "Arm\u00ae Cortex\u00ae-M4 with FPU running up to 168 MHz\nCortex\u00ae-M4\n",
+    "2": "ARM Cortex-M4 core. Operating voltage VDD: 1.8 to 3.6 V. ADC range 2.4 to 3.6 V (not a supply line).",
+    "3": "The supply voltage range is 2.7 to 3.6 V for the USB block. -40 to +105 \u00b0C\n"
+   }
+  },
+  {
+   "expected": [
+    {
+     "classes": [
+      "cpu_core"
+     ],
+     "count": null,
+     "label": "Arm\u00ae Cortex\u00ae-M4 32-bit processor core",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 4
+      },
+      {
+       "unit": "bit",
+       "value": 32
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "Arm\u00ae Cortex\u00ae-M4 32-bit processor core"
+    },
+    {
+     "classes": [],
+     "count": null,
+     "label": "168 MHz frequency",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "MHz",
+       "value": 168
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "168 MHz frequency with Flash accesses zero wait states"
+    },
+    {
+     "classes": [
+      "flash"
+     ],
+     "count": null,
+     "label": "up to 3072 KB on-chip Flash memory",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "KB",
+       "value": 3072
+      }
+     ],
+     "qualifier_verbatim": "up to",
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "up to 3072 KB on-chip Flash memory"
+    },
+    {
+     "classes": [
+      "sram"
+     ],
+     "count": null,
+     "label": "128 KB SRAM memory",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "KB",
+       "value": 128
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "128 KB SRAM memory"
+    },
+    {
+     "classes": [
+      "adc"
+     ],
+     "count": 3,
+     "label": "12-bit 2.6M MSPS ADCs",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "bit",
+       "value": 12
+      },
+      {
+       "unit": null,
+       "value": 2
+      }
+     ],
+     "qualifier_verbatim": "up to",
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "up to three 12-bit 2.6M MSPS ADCs"
+    },
+    {
+     "classes": [
+      "dac"
+     ],
+     "count": 2,
+     "label": "12-bit DACs",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "bit",
+       "value": 12
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "two 12-bit DACs"
+    },
+    {
+     "classes": [
+      "timer"
+     ],
+     "count": 8,
+     "label": "general-purpose 16-bit timers",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "bit",
+       "value": 16
+      }
+     ],
+     "qualifier_verbatim": "up to",
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "up to eight general-purpose 16-bit timers"
+    },
+    {
+     "classes": [
+      "spi"
+     ],
+     "count": 3,
+     "label": "SPIs",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": "up to",
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "up to three SPIs"
+    },
+    {
+     "classes": [
+      "i2c"
+     ],
+     "count": 2,
+     "label": "I2Cs",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "two I2Cs"
+    },
+    {
+     "classes": [
+      "can"
+     ],
+     "count": 2,
+     "label": "CANs",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "two CANs"
+    },
+    {
+     "classes": [
+      "sdmmc"
+     ],
+     "count": null,
+     "label": "SDIO",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "SDIO"
+    },
+    {
+     "classes": [],
+     "count": null,
+     "label": "USBFS",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "USBFS"
+    },
+    {
+     "classes": [
+      "power"
+     ],
+     "count": null,
+     "label": "2.6 to 3.6 V power supply",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 2.6
+      },
+      {
+       "unit": "V",
+       "value": 3.6
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "2.6 to 3.6 V power supply"
+    },
+    {
+     "classes": [],
+     "count": null,
+     "label": "\u201340 to +85 \u00b0C temperature range",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 40
+      },
+      {
+       "unit": "\u00b0C",
+       "value": 85
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 1
+     },
+     "section_class": null,
+     "source": "description",
+     "vendor_section": "Description",
+     "verbatim": "\u201340 to +85 \u00b0C temperature range"
+    }
+   ],
+   "kind": "read_description_facts",
+   "max_pages": 14,
+   "name": "gd32_description",
+   "pages": {
+    "1": "1. \nGeneral description \nThe GD32F403xx device belongs to the performance line of GD32 MCU Family. It is a new 32-bit general-purpose microcontroller based on the Arm\u00ae Cortex\u00ae-M4 RISC core with best cost-performance ratio in terms of enhanced processing capacity. The GD32F403xx device incorporates the Arm\u00ae Cortex\u00ae-M4 32-bit processor core operating at 168 MHz frequency with Flash accesses zero wait states to obtain maximum efficiency. It provides up to 3072 KB on-chip Flash memory and 128 KB SRAM memory. The devices offer up to three 12-bit 2.6M MSPS ADCs, two 12-bit DACs, up to eight general-purpose 16-bit timers, as well as standard and advanced communication interfaces: up to three SPIs, two I2Cs, two CANs, a SDIO, and an USBFS. The device operates from a 2.6 to 3.6 V power supply and available in \u201340 to +85 \u00b0C temperature range. Each TC can be configured to perform frequency generation. The above features make GD32F403xx devices suitable for a wide range of applications."
+   }
+  },
+  {
+   "expected": [
+    {
+     "classes": [
+      "cpu_core"
+     ],
+     "count": 4,
+     "label": "1.4-GHz ARM Cortex\u00ae-A15 MPCore\u00ae cores",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "GHz",
+       "value": 1.4
+      },
+      {
+       "unit": null,
+       "value": 15
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 9
+     },
+     "section_class": null,
+     "source": "includes_list",
+     "vendor_section": "Introduction",
+     "verbatim": "Four 1.4-GHz ARM Cortex\u00ae-A15 MPCore\u00ae cores"
+    },
+    {
+     "classes": [
+      "cpu_core"
+     ],
+     "count": 4,
+     "label": "780-MHz ARM Cortex\u00ae-A7 MPCore\u00ae cores",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "MHz",
+       "value": 780
+      },
+      {
+       "unit": null,
+       "value": 7
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 9
+     },
+     "section_class": null,
+     "source": "includes_list",
+     "vendor_section": "Introduction",
+     "verbatim": "Four 780-MHz ARM Cortex\u00ae-A7 MPCore\u00ae cores"
+    },
+    {
+     "classes": [
+      "display"
+     ],
+     "count": null,
+     "label": "3 channels Display Output",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": "channels",
+       "value": 3
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 9
+     },
+     "section_class": null,
+     "source": "includes_list",
+     "vendor_section": "Introduction",
+     "verbatim": "3 channels Display Output"
+    }
+   ],
+   "kind": "read_includes_list",
+   "max_pages": 20,
+   "name": "rzg_product_card",
+   "pages": {
+    "9": "1.1 Introduction\nThe RZ/G1H includes:\n\u2022\nFour 1.4-GHz ARM Cortex\u00ae-A15 MPCore\u00ae cores,\n\u2022\nFour 780-MHz ARM Cortex\u00ae-A7 MPCore\u00ae cores,\n\u2022\n3 channels Display Output,\n1.2 System Configuration Diagram\n"
+   }
+  },
+  {
+   "expected": [
+    {
+     "classes": [
+      "cpu_core"
+     ],
+     "count": null,
+     "label": "ARM Cortex-A15 Quad MPCore 1.4 GHz",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 15
+      },
+      {
+       "unit": "GHz",
+       "value": 1.4
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 11
+     },
+     "section_class": "cpu_core",
+     "source": "item_description",
+     "vendor_section": "System CPU Cortex-A15",
+     "verbatim": "ARM Cortex-A15 Quad MPCore 1.4 GHz"
+    },
+    {
+     "classes": [],
+     "count": null,
+     "label": "L1 I/D cache 32/32 KBytes, L2 cache 2 MBytes",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 1
+      },
+      {
+       "unit": null,
+       "value": 32
+      },
+      {
+       "unit": "KBytes",
+       "value": 32
+      },
+      {
+       "unit": null,
+       "value": 2
+      },
+      {
+       "unit": "MBytes",
+       "value": 2
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 11
+     },
+     "section_class": "cpu_core",
+     "source": "item_description",
+     "vendor_section": "System CPU Cortex-A15",
+     "verbatim": "L1 I/D cache 32/32 KBytes, L2 cache 2 MBytes"
+    },
+    {
+     "classes": [
+      "cpu_core"
+     ],
+     "count": null,
+     "label": "ARM Cortex-A7 Quad MPCore 780 MHz",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 7
+      },
+      {
+       "unit": "MHz",
+       "value": 780
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 11
+     },
+     "section_class": "cpu_core",
+     "source": "item_description",
+     "vendor_section": "System CPU Cortex-A7",
+     "verbatim": "ARM Cortex-A7 Quad MPCore 780 MHz"
+    },
+    {
+     "classes": [],
+     "count": null,
+     "label": "L1 I/D cache 32/32 KBytes, L2 cache 512 KBytes",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 1
+      },
+      {
+       "unit": null,
+       "value": 32
+      },
+      {
+       "unit": "KBytes",
+       "value": 32
+      },
+      {
+       "unit": null,
+       "value": 2
+      },
+      {
+       "unit": "KBytes",
+       "value": 512
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 11
+     },
+     "section_class": "cpu_core",
+     "source": "item_description",
+     "vendor_section": "System CPU Cortex-A7",
+     "verbatim": "L1 I/D cache 32/32 KBytes, L2 cache 512 KBytes"
+    },
+    {
+     "classes": [
+      "gpio"
+     ],
+     "count": null,
+     "label": "General-purpose I/O ports: 188 ports",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 188
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 12
+     },
+     "section_class": "gpio",
+     "source": "item_description",
+     "vendor_section": "General-purpose I/O (GPIO)",
+     "verbatim": "General-purpose I/O ports: 188 ports"
+    },
+    {
+     "classes": [
+      "gpio",
+      "interrupts"
+     ],
+     "count": null,
+     "label": "Supports GPIO interrupts.",
+     "level": 1,
+     "numbers": [],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 12
+     },
+     "section_class": "gpio",
+     "source": "item_description",
+     "vendor_section": "General-purpose I/O (GPIO)",
+     "verbatim": "Supports GPIO interrupts."
+    },
+    {
+     "classes": [],
+     "count": null,
+     "label": "28-nm Si-CMOS",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 28
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 31
+     },
+     "section_class": null,
+     "source": "item_description",
+     "vendor_section": "Process",
+     "verbatim": "28-nm Si-CMOS"
+    },
+    {
+     "classes": [],
+     "count": null,
+     "label": "FC-BGA2727-831",
+     "level": 1,
+     "numbers": [
+      {
+       "unit": null,
+       "value": 2727
+      },
+      {
+       "unit": null,
+       "value": 831
+      }
+     ],
+     "qualifier_verbatim": null,
+     "receipt": {
+      "page": 32
+     },
+     "section_class": null,
+     "source": "item_description",
+     "vendor_section": "Package",
+     "verbatim": "FC-BGA2727-831"
+    }
+   ],
+   "kind": "read_item_description_specs",
+   "max_pages": 40,
+   "name": "cores_cache_gpio",
+   "pages": {
+    "7": "Contents\n1.3 List of Specifications ......................................................... 1-3\n1.4 Power Supply Voltages and Temperature Range ............. 1-24\n",
+    "11": "1.3 List of Specifications\n1.3.1 ARM Core\nItem\nDescription\nSystem CPU Cortex-A15\n\u2022 ARM Cortex-A15 Quad MPCore 1.4 GHz\n\u2022 L1 I/D cache 32/32 KBytes, L2 cache 2 MBytes\nSystem CPU Cortex-A7\n\u2022 ARM Cortex-A7 Quad MPCore 780 MHz\n\u2022 L1 I/D cache 32/32 KBytes, L2 cache 512 KBytes\n",
+    "12": "Item\nDescription\nGeneral-purpose I/O (GPIO)\n\u2022 General-purpose I/O ports: 188 ports\n\u2022 Supports GPIO interrupts.\n",
+    "31": "Item\nDescription\nProcess\n28-nm Si-CMOS\nPackage\nFC-BGA2727-831\n",
+    "32": "1.4 Power Supply Voltages and Temperature Range\n\u2022 Temperature range\n"
+   }
+  },
+  {
+   "expected": [
+    {
+     "io_count": 188,
+     "package": "FCBGA",
+     "pattern": "stated_gpio_and_fcbga",
+     "pin_count": 831,
+     "receipt": {
+      "page": 12,
+      "pages": [
+       12,
+       31
+      ]
+     },
+     "verbatim": "General-purpose I/O ports: 188 ports; FC-BGA2727-831"
+    }
+   ],
+   "kind": "read_io_by_package",
+   "name": "stated_gpio_fcbga",
+   "pages": {
+    "12": "General-purpose I/O (GPIO)\n\u2022 General-purpose I/O ports: 188 ports\n",
+    "31": "Package\nFC-BGA2727-831\n",
+    "35": "3.1 Top View (Left)\nA1 A2 A3 B1 B2 B3\nVSS VDD GPIO0 GPIO1\n"
+   }
+  }
+ ]
+}

@@ -47,7 +47,7 @@ fn the_index_carries_every_known_lesson() {
         .iter()
         .filter(|l| l.source.starts_with("HANDOFF"))
         .count();
-    assert_eq!(decisions, 9, "DECISIONS.md must yield D1-D9");
+    assert_eq!(decisions, 10, "DECISIONS.md must yield D1-D10");
     assert_eq!(rules, 6, "ASSURANCE.md must yield R1-R6");
     assert_eq!(defects, 3, "ASSURANCE.md must yield mechanisms 1.1-1.3");
     assert!(

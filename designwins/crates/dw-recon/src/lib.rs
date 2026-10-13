@@ -15,6 +15,12 @@
 //!   (`harness/electronics/family_census.py`, ported 1:1; gold from the
 //!   live reference over rendered PDFs, `tests/fixtures/gold/
 //!   family_census_v1.json`).
+//! * [`family_document`] — the family-document reader: cover identity,
+//!   chapters, peripheral instances, features with typed numbers and
+//!   verbatim qualifiers, memory rows, package-qualified I/O
+//!   (`harness/electronics/family_document.py`, ported 1:1; gold from the
+//!   live reference over rendered PDFs, `tests/fixtures/gold/
+//!   family_document_v1.json`).
 //!
 //! This crate calls no models and is `forbid(unsafe_code)`.
 
@@ -23,6 +29,8 @@
 
 pub mod document_scope;
 pub mod family_census;
+pub mod family_document;
 
 pub use document_scope::{read_scope, ScopeRow};
 pub use family_census::{census_document, CensusRow};
+pub use family_document::{read_family_document, DocumentRow};
