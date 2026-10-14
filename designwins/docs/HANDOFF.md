@@ -7,6 +7,79 @@ is right you do not need to rediscover it.
 
 ---
 
+### Session close 2026-10-14 — §5.5 COMPLETE (port surface done; dw-model + dw-controller finished)
+
+**All 21 crates ported, gold-gated, and pushed. The §5.5 roadmap is finished;
+what remains is cutover.** Smoke at close: fmt / clippy -D warnings /
+92 binaries 271 tests / cargo deny — green.
+
+**This session's commits** (all on `curve/07e-evidence-supply`, remote is now
+**github.com/outcited/outcitedharness** as `origin`; cursor.com demoted to
+`cursor`. GitHub `main` fast-forwarded to tip; all 10 branches mirrored —
+nothing was on GitHub since 10/08 because Cursor auto-pushed to its own
+remote; fixed 2026-10-14):
+
+- `d190ba04` dw-normalize regex-cache fix (N4a hung: 8 fancy_regex patterns
+  rebuilt per parse_condition call -> OnceLock; 75s for 9,551 rows) +
+  dw-api export-test fixture race (two tests shared one temp dir).
+- `4c3104df` dw-model phase 1: RESPONSE_SCHEMAS / validate_response /
+  parse_json_response / local_prompt / focused_page_context (24 gold cases,
+  prompts byte-identical). TWO JSON encodings in local_prompt — evidence
+  compact vs schema default-separators — pinned by negative control.
+- `52f5e70b` dw-model phase 2: `prepare_batch_bundle` — the sealed frontier
+  batch writer (13 gold cases at FIXED root /tmp/gold_model_bundle_fixed;
+  write-once negative control: sealed bundle refuses re-preparation AND
+  naive rmtree — the generator hit this first). `python_float_repr` made
+  pub in dw-extract (documented) for the manifest's Python float shapes.
+- `8e375eb0` dw-controller phase 1: discovery (stability windows, PDF
+  inspect with TOCTOU re-verify, sha dedupe), register_queue, the lease
+  lifecycle (claim/renew/complete/fail/recover_expired), status/summaries.
+  Schema VERBATIM so Python + Rust share one factory.sqlite3. 27-step
+  battery vs the live factory; no chrono (self-contained civil-date
+  timestamp engine, byte-equal to Python isoformat).
+- `a8dbedd7` dw-controller phase 2: both snapshot sealers, corpus seeding
+  (through dw-recon's REAL registry verifier), frontier-run lifecycle.
+  Battery 27 -> 43 steps; it caught TWO real port bugs: observations keyed
+  the UNresolved walk path (mixed /var + /private prefixes flip sort order
+  on macOS) and seed_corpus_registry resolving registry paths strictly
+  where the reference counts missing files, not errors.
+
+**Burn / board:** power aisle 100% burned (5 batches, 9,201/9,201 docs,
+69k+ claims); served store 14,754 -> 17,455. Fold + board when a batch log
+stops; the board's total-addressable jumped to 106k from the OTHER
+session's feed-collect lanes — not ours.
+
+**e10b / DGX1 (hardware):** chronic hard power-offs under load AND a failed
+cold power-on after AC reseat (journal: boot died 4 s in, zero load;
+second attempt fine). Firmware IDENTICAL to healthy siblings dgx2/dgx3 on
+every ESRT/fwupd component; AMI string 0ACUM018 vs 027 is a BUILD
+IDENTIFIER (forum 369711), serial batch differs (1983 825 vs 1980 526).
+NO flashing; NVIDIA support case open (evidence pack:
+`results/dgx1-diagnostics/` — DIAGNOSIS.md with the full corrected record,
+SUPPORT-CASE.md, boot/kernel logs, loadtest). Serving as a SECONDARY
+embedder meanwhile (bge-m3-fae-search-v4, checkpoint-identical to asus4's,
+vectors verified identical). asus2 (gx10-26b6) is the idle spare/trainer.
+
+**Fleet notes:** e10b's old embedder role revived via
+`systemctl enable --now bge-m3-embed` (healthz :8800); asus2 available as
+extraction CPU; TP4 untouched.
+
+**Open (mine, next session):**
+1. **HUMAN CALLS (Sam's, they gate the roadmap):** axis-expansion vote
+   (VGS(TH)/IDSS/QG/CISS/COSS would ~double classified fraction) and the
+   volume target (docs/week; 211k delivery rows waiting per
+   factory_targets.json).
+2. **Cutover plan** — the last §5.5 item. dw-controller can now orchestrate
+   the M3 factory soak (PLAN-machine-v2 §5) end to end in Rust.
+3. **Reply owed to cursor-tapes** (inbox 20261013T225406Z): their SMB
+   vindication mail asks two questions — rsync-over-SSH from launchd
+   sidesteps the TCC read wall (answer: yes, SSH-out does not touch
+   mounted-volume TCC), and my key-auth offer stands. Inbox writes are
+   read-only over NFS here — reply via SSH to the NAS per §8.
+4. HANDOFF-AGENT tabs: the m5 planning docs live at
+   Electronicdataassets/plans/ (PLAN-machine-v2, HANDOFF-m5-20261012,
+   PLAN-drilldown) — all owned by m5-opencode (this lane).
+
 ## 0. Start here — prove the workspace is green
 
 ```bash
