@@ -78,35 +78,41 @@ fn is_number_token(t: &str) -> bool {
 /// header binding.
 #[must_use]
 pub fn tokens(s: &str) -> Vec<String> {
+    // Mirror the reference exactly: `\d+(?:\.\d+)?|[a-z]+`.
+    // A token is either an ASCII digit-run with at most one decimal group, or
+    // an ASCII alpha-run. Anything else (dots, parens, `~`, `‑`, ellipsis) is a
+    // separator and never enters a token — so `"QG(0V...4.5V)"` yields
+    // `["qg","0","v","4.5","v"]`, NOT `["qg","0","v","...4.5","v"]`. The
+    // leading-dot token broke the hit count vs the reference (Gate N4: 48966).
     let n = norm(s);
+    let chars: Vec<char> = n.chars().collect();
     let mut out = Vec::new();
-    let mut cur = String::new();
-    let mut cur_num = false;
-    let flush = |cur: &mut String, cur_num: &mut bool, out: &mut Vec<String>| {
-        if !cur.is_empty() {
-            out.push(std::mem::take(cur));
-        }
-        *cur_num = false;
-    };
-    for ch in n.chars() {
-        let is_digit = ch.is_ascii_digit() || ch == '.';
-        let is_alpha = ch.is_ascii_alphabetic();
-        if !is_digit && !is_alpha {
-            flush(&mut cur, &mut cur_num, &mut out);
-            continue;
-        }
-        if cur.is_empty() {
-            cur.push(ch);
-            cur_num = is_digit && !is_alpha;
-        } else if (is_digit && !is_alpha) == cur_num {
-            cur.push(ch);
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if c.is_ascii_digit() {
+            let start = i;
+            while i < chars.len() && chars[i].is_ascii_digit() {
+                i += 1;
+            }
+            // one optional decimal group: '.' followed by >=1 digit
+            if i + 1 < chars.len() && chars[i] == '.' && chars[i + 1].is_ascii_digit() {
+                i += 1;
+                while i < chars.len() && chars[i].is_ascii_digit() {
+                    i += 1;
+                }
+            }
+            out.push(chars[start..i].iter().collect());
+        } else if c.is_ascii_alphabetic() {
+            let start = i;
+            while i < chars.len() && chars[i].is_ascii_alphabetic() {
+                i += 1;
+            }
+            out.push(chars[start..i].iter().collect());
         } else {
-            flush(&mut cur, &mut cur_num, &mut out);
-            cur.push(ch);
-            cur_num = is_digit && !is_alpha;
+            i += 1;
         }
     }
-    flush(&mut cur, &mut cur_num, &mut out);
     out
 }
 
