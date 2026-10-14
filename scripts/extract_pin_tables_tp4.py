@@ -37,6 +37,7 @@ if str(ROOT) not in sys.path:
 PIPELINE_DB = os.environ.get(
     "PIPELINE_DB", str(ROOT / "results/pipeline-live.db"))
 TP4_URL = "http://100.116.221.82:8888/v1/chat/completions"
+SUB_URL = "https://token-plan.maas.qwencloudapi.com/compatible-mode/v1/chat/completions"
 MODEL = "deepseek-v4.1-flash"
 
 PIN_PROMPT = """You are a datasheet pin-table extraction engine. Given datasheet
@@ -86,15 +87,20 @@ def load_substrate_text(sha: str) -> str | None:
     return "\n".join(p.get("text") or "" for p in pages)
 
 
+_ENDPOINT = {"url": TP4_URL, "key": None}
+
+
 def call_tp4(text: str, timeout: int = 120) -> dict:
     body = {"model": MODEL,
             "messages": [{"role": "user",
                           "content": PIN_PROMPT + "\n\n<datasheet>\n" + text[:MAX_CHARS] + "\n</datasheet>"}],
             "max_tokens": 3000,
             "reasoning": {"enabled": False}}
+    headers = {"Content-Type": "application/json"}
+    if _ENDPOINT["key"]:
+        headers["Authorization"] = "Bearer " + _ENDPOINT["key"]
     req = urllib.request.Request(
-        TP4_URL, data=json.dumps(body).encode(),
-        headers={"Content-Type": "application/json"})
+        _ENDPOINT["url"], data=json.dumps(body).encode(), headers=headers)
     try:
         d = json.load(urllib.request.urlopen(req, timeout=timeout))
     except urllib.error.HTTPError as e:
@@ -159,7 +165,16 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--endpoint", choices=["tp4", "sub"], default="tp4",
+                    help="tp4 = local cluster; sub = qwen token-plan subscription")
     args = ap.parse_args()
+    if args.endpoint == "sub":
+        _ENDPOINT["url"] = SUB_URL
+        _ENDPOINT["key"] = os.environ.get("SUB_API_KEY") or next(
+            (l.split("=", 1)[1].strip() for l in (ROOT / ".env").read_text().splitlines()
+             if l.startswith("SUB_API_KEY=")), None)
+        if not _ENDPOINT["key"]:
+            raise SystemExit("SUB_API_KEY missing (env or .env)")
 
     docs = json.loads(args.queue.read_text())
     docs = docs.get("documents") or docs.get("parts") or docs
