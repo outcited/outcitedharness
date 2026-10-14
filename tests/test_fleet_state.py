@@ -217,3 +217,44 @@ def test_diff_reports_added_and_changed_keys() -> None:
         "harness_gci: None -> ['ALIVE']",
         "spark_embedder: [] -> ['READY']",
     ]
+
+
+def test_inbox_root_never_returns_the_frozen_m5_tree(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv("AGENT_INBOX", raising=False)
+    monkeypatch.setattr(fleet_state, "NAS_INBOX", tmp_path / "nas" / "agent-inbox")
+    monkeypatch.setattr(fleet_state, "SPOOL", tmp_path / "spool")
+    root, note = fleet_state.inbox_root()
+    assert root == tmp_path / "spool"
+    assert "NOT mounted" in note
+    (tmp_path / "nas" / "agent-inbox").mkdir(parents=True)
+    assert fleet_state.inbox_root() == (tmp_path / "nas" / "agent-inbox", "")
+    assert fleet_state.Path("/Volumes/M5_4TB/agent-inbox") not in (root,)
+
+
+def test_inbox_root_honours_env_override(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("AGENT_INBOX", str(tmp_path / "custom"))
+    assert fleet_state.inbox_root() == (tmp_path / "custom", "")
+
+
+def test_mail_writes_every_box_and_indexes_only_on_the_nas_root(monkeypatch, tmp_path) -> None:
+    nas = tmp_path / "nas" / "agent-inbox"
+    monkeypatch.setattr(fleet_state, "NAS_INBOX", nas)
+    monkeypatch.delenv("AGENT_INBOX", raising=False)
+    nas.mkdir(parents=True)
+    assert fleet_state.mail(["x: a -> b"], "2026-10-10T00:00:00Z") == ""
+    for box in fleet_state.MAIL_BOXES:
+        assert len(list((nas / box).glob("*_fleet-state-probe_*.md"))) == 1
+    rows = [json.loads(l) for l in (tmp_path / "nas" / "INDEX.jsonl").read_text().splitlines()]
+    assert len(rows) == len(fleet_state.MAIL_BOXES)
+    assert {r["to"] for r in rows} == set(fleet_state.MAIL_BOXES)
+    assert all(r["from"] == "fleet-state-probe" and r["path"].startswith("agent-inbox/") for r in rows)
+
+
+def test_mail_spools_without_an_index_when_the_share_is_down(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(fleet_state, "NAS_INBOX", tmp_path / "absent" / "agent-inbox")
+    monkeypatch.setattr(fleet_state, "SPOOL", tmp_path / "spool")
+    monkeypatch.delenv("AGENT_INBOX", raising=False)
+    note = fleet_state.mail(["x: a -> b"], "2026-10-10T00:00:00Z")
+    assert "spooled" in note
+    assert len(list((tmp_path / "spool").rglob("*.md"))) == len(fleet_state.MAIL_BOXES)
+    assert not list((tmp_path / "spool").rglob("INDEX.jsonl"))
