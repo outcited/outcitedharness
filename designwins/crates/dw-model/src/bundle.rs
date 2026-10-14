@@ -704,8 +704,13 @@ fn base64_standard(data: &[u8]) -> String {
 }
 
 /// `json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2,
-/// allow_nan=False)` — the manifest encoding.
-fn py_dumps_indent2_sorted(value: &Value) -> Result<String, BundleError> {
+/// allow_nan=False)` — the sealed-manifest encoding. Public so sibling
+/// crates writing Python-shaped read-only JSON share one writer.
+///
+/// # Errors
+///
+/// [`CanonicalError::NonFinite`] on NaN/±inf, mirroring `allow_nan=False`.
+pub fn py_dumps_indent2_sorted(value: &Value) -> Result<String, BundleError> {
     let mut out = String::new();
     write_pretty(value, &mut out, 0)?;
     Ok(out)

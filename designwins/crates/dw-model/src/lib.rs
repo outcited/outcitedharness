@@ -20,7 +20,9 @@ pub mod prompt;
 pub mod schemas;
 pub mod validate;
 
-pub use bundle::{prepare_batch_bundle, BundleError, BundleSpec, PREPARED_SCHEMA};
+pub use bundle::{
+    prepare_batch_bundle, py_dumps_indent2_sorted, BundleError, BundleSpec, PREPARED_SCHEMA,
+};
 pub use parse::parse_json_response;
 pub use prompt::{focused_page_context, local_prompt, PromptError};
 pub use schemas::{response_schemas, schema_for};

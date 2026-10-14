@@ -59,6 +59,7 @@ struct Normalizer {
     root: String,
     source_map: BTreeMap<String, String>,
     event_map: BTreeMap<String, String>,
+    registry_sha: Option<String>,
 }
 
 #[allow(
@@ -76,7 +77,19 @@ impl Normalizer {
             root: root.display().to_string(),
             source_map: BTreeMap::new(),
             event_map: BTreeMap::new(),
+            registry_sha: None,
         }
+    }
+
+    /// The registry digest covers the root-containing pdf_root; mask it and
+    /// the 24-char baseline-cohort carveout.
+    fn mask_registry(&self, value: &str) -> String {
+        if let Some(sha) = &self.registry_sha {
+            return value
+                .replace(sha.as_str(), "<REGISTRY_SHA>")
+                .replace(&sha[..24], "<REGISTRY24>");
+        }
+        value.to_string()
     }
 
     fn text(&self, value: &str) -> String {
@@ -140,7 +153,31 @@ fn payload_sha(payload: &Value) -> String {
 
 fn write_tree(root: &Path, files: &[Value]) {
     for entry in files {
-        let target = root.join(entry["rel"].as_str().unwrap());
+        let rel = entry["rel"].as_str().unwrap();
+        let target = root.join(rel.trim_end_matches('/'));
+        if entry.get("mkdir").and_then(Value::as_bool) == Some(true) {
+            std::fs::create_dir_all(&target).unwrap();
+            continue;
+        }
+        if let Some(core) = entry.get("registry_core") {
+            // Rebuild the registry for THIS root: substitute $ROOT/sealed,
+            // recompute the evidence digest over the substituted core (the
+            // reference's digest covers pdf_root), append the fixed
+            // created_at, and write in the generator's dump shape.
+            let mut core = core.clone();
+            substitute_root(&mut core, root);
+            let digest = {
+                let bytes = dw_extract::canonical::canonical_json(&core).unwrap();
+                dw_extract::sha256::sha256_hex(&bytes)
+            };
+            let mut registry = core;
+            let fields = registry.as_object_mut().unwrap();
+            fields.insert("created_at".into(), json!("2026-10-14T01:00:00+00:00"));
+            fields.insert("evidence_sha256".into(), json!(digest));
+            let payload = dw_model::py_dumps_indent2_sorted(&registry).unwrap();
+            std::fs::write(&target, format!("{payload}\n")).unwrap();
+            continue;
+        }
         std::fs::create_dir_all(target.parent().unwrap()).unwrap();
         if let Some(link_to) = entry.get("symlink_to") {
             std::os::unix::fs::symlink(root.join(link_to.as_str().unwrap()), &target).unwrap();
@@ -153,6 +190,28 @@ fn write_tree(root: &Path, files: &[Value]) {
                 .collect();
             std::fs::write(&target, bytes).unwrap();
         }
+    }
+}
+
+/// Replace `$ROOT`/`$ROOT/sealed` prefixes in every string under `value`.
+fn substitute_root(value: &mut Value, root: &Path) {
+    let root_str = root.display().to_string();
+    match value {
+        Value::String(text) => {
+            *text = text.replace("$ROOT/sealed", &format!("{root_str}/sealed"));
+            *text = text.replace("$ROOT", &root_str);
+        }
+        Value::Array(items) => {
+            for item in items {
+                substitute_root(item, root);
+            }
+        }
+        Value::Object(map) => {
+            for (_, item) in map.iter_mut() {
+                substitute_root(item, root);
+            }
+        }
+        _ => {}
     }
 }
 
@@ -309,9 +368,13 @@ fn dump(state: &FactoryState, normalizer: &mut Normalizer) -> Value {
                 if let Some(mtime) = map.get_mut("mtime_ns") {
                     *mtime = json!(0);
                 }
+                if let Some(sha) = map.get_mut("snapshot_sha256") {
+                    *sha = json!("<SNAPSHOT_SHA>");
+                }
                 for (_, value) in map.iter_mut() {
                     if let Value::String(text) = value {
-                        *value = json!(normalizer.text(text));
+                        let masked = normalizer.mask_registry(&normalizer.text(text));
+                        *value = json!(masked);
                     }
                 }
             }
@@ -326,11 +389,54 @@ fn dump(state: &FactoryState, normalizer: &mut Normalizer) -> Value {
             }));
         }
     }
+    let mut batches: Vec<Value> = Vec::new();
+    {
+        let mut statement = connection
+            .prepare(
+                "SELECT observation_id, cohort_id, snapshot_path, snapshot_sha256,
+                        created_at
+                 FROM factory_source_batches
+                 ORDER BY cohort_id, created_at, snapshot_path",
+            )
+            .unwrap();
+        let rows = statement
+            .query_map([], |row| {
+                Ok(json!({
+                    "observation_id": row.get::<_, String>(0)?,
+                    "cohort_id": row.get::<_, String>(1)?,
+                    "snapshot_path": row.get::<_, String>(2)?,
+                    "snapshot_sha256": row.get::<_, String>(3)?,
+                    "created_at": row.get::<_, String>(4)?,
+                }))
+            })
+            .unwrap();
+        for row in rows.flatten() {
+            batches.push(normalize_batch_row(row, normalizer));
+        }
+    }
+    // Rows can tie on every ORDER BY key; sort by the NORMALIZED id, which
+    // is stable (mirrors the generator).
+    batches.sort_by_key(|row| {
+        (
+            row.get("cohort_id")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string(),
+            row.get("observation_id")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string(),
+            row.get("snapshot_path")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string(),
+        )
+    });
     json!({
         "observations": observations,
         "chunks": chunks,
         "events": events,
-        "batches": [],
+        "batches": batches,
     })
 }
 
@@ -352,7 +458,8 @@ fn normalize_observation(mut row: Value, normalizer: &Normalizer) -> Value {
     for key in ["sha256", "canonical_observation_id", "reason"] {
         if let Some(Value::String(text)) = map.get(key) {
             let text = text.clone();
-            map.insert(key.to_string(), json!(normalizer.text(&text)));
+            let masked = normalizer.mask_registry(&normalizer.text(&text));
+            map.insert(key.to_string(), json!(masked));
         }
     }
     row
@@ -369,6 +476,67 @@ fn normalize_chunk(mut row: Value, normalizer: &Normalizer) -> Value {
             let text = text.clone();
             map.insert(key.to_string(), json!(normalizer.text(&text)));
         }
+    }
+    row
+}
+
+/// The generator's `snapshot_manifest`: wall-clock created_at masked, id
+/// ordinals, zeroed mtimes, $ROOT paths, evidence recomputed over the
+/// normalized core.
+fn snapshot_manifest(mut manifest: Value, normalizer: &mut Normalizer) -> Value {
+    let map = manifest.as_object_mut().unwrap();
+    map.insert("created_at".into(), json!("<CREATED_AT>"));
+    if let Some(documents) = map.get_mut("documents").and_then(Value::as_array_mut) {
+        for document in documents {
+            if let Some(fields) = document.as_object_mut() {
+                if let Some(Value::String(id)) = fields.get("observation_id") {
+                    let id = id.clone();
+                    // First sight ASSIGNS the ordinal (Python setdefault) —
+                    // the seal steps run before the dump's seeding loop.
+                    fields.insert(
+                        "observation_id".into(),
+                        json!(normalizer.remember_source(&id)),
+                    );
+                }
+                if let Some(Value::String(path)) = fields.get("source_path") {
+                    let path = path.clone();
+                    fields.insert("source_path".into(), json!(normalizer.text(&path)));
+                }
+                fields.insert("mtime_ns".into(), json!(0));
+            }
+        }
+    }
+    let core: Value = {
+        let mut fields = map.clone();
+        fields.remove("created_at");
+        fields.remove("evidence_sha256");
+        Value::Object(fields)
+    };
+    let bytes = dw_extract::canonical::canonical_json(&core).unwrap();
+    let evidence = dw_extract::sha256::sha256_hex(&bytes);
+    manifest
+        .as_object_mut()
+        .unwrap()
+        .insert("evidence_sha256".into(), json!(evidence));
+    manifest
+}
+
+fn normalize_batch_row(mut row: Value, normalizer: &Normalizer) -> Value {
+    let map = row.as_object_mut().unwrap();
+    if let Some(Value::String(sha)) = map.get("snapshot_sha256") {
+        let _ = sha;
+        map.insert("snapshot_sha256".into(), json!("<SNAPSHOT_SHA>"));
+    }
+    for key in ["cohort_id", "snapshot_path"] {
+        if let Some(Value::String(text)) = map.get(key) {
+            let text = text.clone();
+            let masked = normalizer.mask_registry(&normalizer.text(&text));
+            map.insert(key.to_string(), json!(masked));
+        }
+    }
+    if let Some(Value::String(id)) = map.get("observation_id") {
+        let id = id.clone();
+        map.insert("observation_id".into(), json!(normalizer.text(&id)));
     }
     row
 }
@@ -701,6 +869,211 @@ fn battery_matches_the_live_reference() {
             .collect();
         actual.push(record("completed_paths", vec![("paths", json!(paths))]));
     }
+    // ── phase 2: snapshot sealing ─────────────────────────────────────
+    {
+        let manifest = state
+            .seal_ready_source_snapshot(&root.join("ready.json"))
+            .unwrap();
+        actual.push(record(
+            "seal_ready",
+            vec![("manifest", snapshot_manifest(manifest, &mut normalizer))],
+        ));
+    }
+    {
+        let error = state
+            .seal_ready_source_snapshot(&root.join("ready.json"))
+            .unwrap_err();
+        expect_err(
+            "seal_exists",
+            error,
+            &want_step(&g, "error_seal_exists"),
+            &normalizer,
+        );
+        let got = record("error_seal_exists", vec![("error", json!(()))]);
+        actual.push(rewrite_error(
+            got,
+            &want_step(&g, "error_seal_exists"),
+            &normalizer,
+        ));
+    }
+    {
+        let manifest = state
+            .seal_unassigned_source_snapshot(
+                &root.join("cohort-a.json"),
+                "cohort-alpha",
+                5000,
+                Some(&t(500)),
+            )
+            .unwrap()
+            .expect("one unassigned ready source");
+        actual.push(record(
+            "seal_unassigned",
+            vec![("manifest", snapshot_manifest(manifest, &mut normalizer))],
+        ));
+    }
+    {
+        let empty = state
+            .seal_unassigned_source_snapshot(
+                &root.join("cohort-b.json"),
+                "cohort-beta",
+                5000,
+                Some(&t(510)),
+            )
+            .unwrap();
+        actual.push(record(
+            "seal_unassigned_empty",
+            vec![("manifest", json!(empty))],
+        ));
+    }
+    for (name, error) in [
+        (
+            "error_bad_cohort",
+            state
+                .seal_unassigned_source_snapshot(&root.join("x.json"), " padded ", 5, Some(&t(0)))
+                .unwrap_err(),
+        ),
+        (
+            "error_bad_maximum",
+            state
+                .seal_unassigned_source_snapshot(&root.join("x.json"), "ok", 0, Some(&t(0)))
+                .unwrap_err(),
+        ),
+    ] {
+        expect_err(name, error, &want_step(&g, name), &normalizer);
+        let got = record(name, vec![("error", json!(()))]);
+        actual.push(rewrite_error(got, &want_step(&g, name), &normalizer));
+    }
+
+    // ── phase 2: corpus seeding ───────────────────────────────────────
+    let registry_sha = {
+        let bytes = std::fs::read(root.join("registry.json")).unwrap();
+        dw_extract::sha256::sha256_hex(&bytes)
+    };
+    normalizer.registry_sha = Some(registry_sha);
+    {
+        let counts = state
+            .seed_corpus_registry(&root.join("registry.json"), Some(&t(600)))
+            .unwrap();
+        actual.push(record("seed_registry", vec![("counts", counts)]));
+    }
+    {
+        let counts = state
+            .seed_corpus_registry(&root.join("registry.json"), Some(&t(610)))
+            .unwrap();
+        actual.push(record("seed_registry_idempotent", vec![("counts", counts)]));
+    }
+
+    // ── phase 2: frontier runs ────────────────────────────────────────
+    {
+        let registered = state
+            .register_frontier_run(
+                "run-1",
+                &root.join("frontier_bundle"),
+                &root.join("frontier_state"),
+                &root.join("frontier_lifecycle"),
+                Some(&t(700)),
+            )
+            .unwrap();
+        actual.push(record(
+            "frontier_register",
+            vec![("registered", json!(registered))],
+        ));
+    }
+    {
+        let again = state
+            .register_frontier_run(
+                "run-1",
+                &root.join("frontier_bundle"),
+                &root.join("frontier_state"),
+                &root.join("frontier_lifecycle"),
+                Some(&t(701)),
+            )
+            .unwrap();
+        actual.push(record(
+            "frontier_register_idempotent",
+            vec![("registered", json!(again))],
+        ));
+    }
+    {
+        let error = state
+            .register_frontier_run(
+                "run-1",
+                &root.join("frontier_bundle"),
+                &root.join("frontier_state"),
+                &root.join("frontier_lifecycle2"),
+                Some(&t(702)),
+            )
+            .unwrap_err();
+        expect_err(
+            "frontier_conflict",
+            error,
+            &want_step(&g, "frontier_register_conflict"),
+            &normalizer,
+        );
+        let got = record("frontier_register_conflict", vec![("error", json!(()))]);
+        actual.push(rewrite_error(
+            got,
+            &want_step(&g, "frontier_register_conflict"),
+            &normalizer,
+        ));
+    }
+    {
+        state
+            .record_frontier_status(
+                "run-1",
+                &json!({"batches": [{"id": "b1", "processing_status": "in_progress"}]}),
+                None,
+                None,
+                Some(&t(710)),
+            )
+            .unwrap();
+        actual.push(record(
+            "frontier_status_processing",
+            vec![("ok", json!(true))],
+        ));
+    }
+    {
+        state
+            .record_frontier_status(
+                "run-1",
+                &json!({"batches": [
+                    {"id": "b1", "processing_status": "ended"},
+                    {"id": "b2", "processing_status": "ended"},
+                ]}),
+                None,
+                None,
+                Some(&t(720)),
+            )
+            .unwrap();
+        actual.push(record(
+            "frontier_status_ended_inferred",
+            vec![("ok", json!(true))],
+        ));
+    }
+    for (name, error) in [
+        (
+            "error_frontier_stage",
+            state
+                .record_frontier_status("run-1", &json!({}), Some("bogus"), None, Some(&t(0)))
+                .unwrap_err(),
+        ),
+        (
+            "error_frontier_unknown_run",
+            state
+                .record_frontier_status("run-x", &json!({}), None, None, Some(&t(0)))
+                .unwrap_err(),
+        ),
+    ] {
+        expect_err(name, error, &want_step(&g, name), &normalizer);
+        let got = record(name, vec![("error", json!(()))]);
+        actual.push(rewrite_error(got, &want_step(&g, name), &normalizer));
+    }
+    {
+        let mut status = state.status().unwrap();
+        status.as_object_mut().unwrap().remove("created_at");
+        actual.push(record("status_with_frontier", vec![("status", status)]));
+    }
+
     actual.push(record(
         "tables",
         vec![("dump", dump(&state, &mut normalizer))],
@@ -711,7 +1084,11 @@ fn battery_matches_the_live_reference() {
     assert_eq!(actual.len(), expected_steps.len(), "step count");
     for (index, (got, want)) in actual.iter().zip(expected_steps).enumerate() {
         let step = want["step"].as_str().unwrap();
-        assert_eq!(got["step"], want["step"], "step {index}: name");
+        assert_eq!(
+            got["step"], want["step"],
+            "step {index}: name (got {:?}, want {:?})",
+            got["step"], want["step"]
+        );
         match step {
             "events_immutable" => continue, // contains-check above
             _ => assert_eq!(got, want, "step {index} ({step})"),
@@ -719,6 +1096,16 @@ fn battery_matches_the_live_reference() {
     }
 
     let _ = std::fs::remove_dir_all(&root);
+}
+
+fn want_step(gold: &Value, step: &str) -> Value {
+    gold["steps"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|s| s["step"] == step)
+        .cloned()
+        .unwrap_or_else(|| panic!("gold step missing: {step}"))
 }
 
 /// Replace the placeholder error slot with the fixture's recorded string

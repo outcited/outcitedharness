@@ -30,6 +30,7 @@
     clippy::cast_possible_truncation,
     clippy::indexing_slicing,
     clippy::manual_let_else,
+    clippy::single_match_else,
     reason = "stat identities into i64 columns; timestamp slices are fixed-width"
 )]
 
@@ -64,7 +65,7 @@ use std::path::{Path, PathBuf};
 
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use serde::Serialize;
-use serde_json::{json, Value};
+use serde_json::{json, Map, Value};
 
 use dw_extract::canonical::canonical_json;
 use dw_extract::sha256::sha256_hex;
@@ -1399,15 +1400,16 @@ fn walk_pdfs(root: &Path) -> (Vec<(PathBuf, FileIdentity)>, usize) {
                 unsafe_paths += 1;
                 continue;
             }
-            // `meta` is the lstat; stat the resolved file for the identity
-            // (a hard-linked path stats identically, matching Python's
-            // resolve-then-stat order).
             let Ok(info) = std::fs::metadata(&path) else {
                 unsafe_paths += 1;
                 continue;
             };
+            // Python: `resolved = path.resolve(strict=True)` — observations
+            // key and store the RESOLVED path (/tmp -> /private/tmp on
+            // macOS), which also fixes cross-prefix sort order.
+            let resolved = std::fs::canonicalize(&path).unwrap_or(path.clone());
             out.push((
-                path.clone(),
+                resolved,
                 (info.dev(), info.ino(), info.len(), mtime_ns(&info)),
             ));
         }
@@ -1848,6 +1850,720 @@ fn fill_pseudo(bytes: &mut [u8]) {
             .wrapping_add(1_442_695_040_888_963_407);
         *byte = (state >> 33) as u8;
     }
+}
+
+// ── phase 2: snapshot sealing, corpus seeding, frontier runs ─────────────
+
+impl FactoryState {
+    /// `seal_ready_source_snapshot` — write the ready-source manifest
+    /// exactly once (`created_at` is wall-clock, as in the reference).
+    ///
+    /// # Errors
+    ///
+    /// [`FactoryError::State`] when the destination exists;
+    /// [`FactoryError::Sqlite`] on failure.
+    pub fn seal_ready_source_snapshot(&self, destination: &Path) -> Result<Value, FactoryError> {
+        let connection = self.connect()?;
+        let mut statement = connection.prepare(
+            "SELECT observation_id, source_path, byte_size, mtime_ns, sha256
+             FROM factory_source_observations
+             WHERE status = 'ready'
+             ORDER BY sha256, source_path",
+        )?;
+        let rows = statement.query_map([], |row| {
+            Ok(json!({
+                "observation_id": row.get::<_, String>(0)?,
+                "source_path": row.get::<_, String>(1)?,
+                "byte_size": row.get::<_, i64>(2)?,
+                "mtime_ns": row.get::<_, i64>(3)?,
+                "sha256": row.get::<_, Option<String>>(4)?,
+            }))
+        })?;
+        let mut documents = Vec::new();
+        for row in rows {
+            documents.push(row?);
+        }
+        drop(statement);
+        let core = json!({
+            "schema": "harness.electronics-incremental-source-snapshot.v1",
+            "purpose": "stable_deduplicated_datasheet_intake",
+            "counts": {"documents": documents.len()},
+            "documents": documents,
+        });
+        let evidence =
+            sha256_hex(&canonical_json(&core).map_err(|e| FactoryError::State(e.to_string()))?);
+        let manifest = {
+            let mut map = Map::new();
+            map.insert("created_at".into(), json!(fmt(ts::now_micros())));
+            if let Value::Object(fields) = core {
+                for (key, value) in fields {
+                    map.insert(key, value);
+                }
+            }
+            map.insert("evidence_sha256".into(), json!(evidence));
+            Value::Object(map)
+        };
+        write_new_json(destination, &manifest)?;
+        Ok(manifest)
+    }
+
+    /// `seal_unassigned_source_snapshot` — assign each unassigned ready
+    /// source to exactly one cohort, sealing the snapshot file first.
+    ///
+    /// # Errors
+    ///
+    /// Validation errors, [`FactoryError::State`] on assignment conflicts
+    /// (the snapshot file is removed), or [`FactoryError::Sqlite`].
+    #[allow(clippy::too_many_lines, reason = "one transaction, reference-shaped")]
+    pub fn seal_unassigned_source_snapshot(
+        &self,
+        destination: &Path,
+        cohort_id: &str,
+        maximum_documents: i64,
+        now: Option<&str>,
+    ) -> Result<Option<Value>, FactoryError> {
+        if cohort_id.is_empty() || cohort_id != cohort_id.trim() || cohort_id.len() > 160 {
+            return Err(FactoryError::Value(
+                "cohort_id must be non-empty, trimmed, and bounded".into(),
+            ));
+        }
+        if !(1..=100_000).contains(&maximum_documents) {
+            return Err(FactoryError::Value(
+                "maximum_documents must be within 1..100000".into(),
+            ));
+        }
+        let connection = self.connect()?;
+        let mut statement = connection.prepare(
+            "SELECT source.observation_id, source.source_path,
+                    source.byte_size, source.mtime_ns, source.sha256
+             FROM factory_source_observations AS source
+             LEFT JOIN factory_source_batches AS assigned
+                 ON assigned.observation_id = source.observation_id
+             WHERE source.status = 'ready' AND assigned.observation_id IS NULL
+             ORDER BY source.first_seen_at, source.observation_id
+             LIMIT ?1",
+        )?;
+        let rows = statement.query_map(params![maximum_documents], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, i64>(2)?,
+                row.get::<_, i64>(3)?,
+                row.get::<_, Option<String>>(4)?,
+            ))
+        })?;
+        let mut selected: Vec<(String, String, i64, i64, Option<String>)> = Vec::new();
+        for row in rows {
+            selected.push(row?);
+        }
+        drop(statement);
+        drop(connection);
+        if selected.is_empty() {
+            return Ok(None);
+        }
+        let documents: Vec<Value> = selected
+            .iter()
+            .map(|(id, path, size, mtime, sha)| {
+                json!({
+                    "observation_id": id,
+                    "source_path": path,
+                    "byte_size": size,
+                    "mtime_ns": mtime,
+                    "sha256": sha,
+                })
+            })
+            .collect();
+        let sealed_at = fmt(resolve_now(now)?);
+        let core = json!({
+            "schema": "harness.electronics-incremental-source-snapshot.v1",
+            "purpose": "stable_deduplicated_datasheet_intake",
+            "cohort_id": cohort_id,
+            "counts": {"documents": documents.len()},
+            "documents": documents,
+        });
+        let evidence =
+            sha256_hex(&canonical_json(&core).map_err(|e| FactoryError::State(e.to_string()))?);
+        let manifest = {
+            let mut map = Map::new();
+            map.insert("created_at".into(), json!(sealed_at.clone()));
+            if let Value::Object(fields) = core {
+                for (key, value) in fields {
+                    map.insert(key, value);
+                }
+            }
+            map.insert("evidence_sha256".into(), json!(evidence));
+            Value::Object(map)
+        };
+        write_new_json(destination, &manifest)?;
+        let snapshot_path = std::fs::canonicalize(destination).map_err(|_| {
+            FactoryError::FileNotFound(format!(
+                "[Errno 2] No such file or directory: '{}'",
+                destination.display()
+            ))
+        })?;
+        let snapshot_sha = dw_recon::corpus::sha256_file(&snapshot_path)
+            .map_err(|e| FactoryError::State(e.to_string()))?;
+
+        let assign = (|| -> Result<(), FactoryError> {
+            let mut connection = self.connect()?;
+            let transaction =
+                connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
+            for (observation_id, _, _, _, _) in &selected {
+                let current: Option<(String, String)> = transaction
+                    .query_row(
+                        "SELECT cohort_id, snapshot_sha256
+                         FROM factory_source_batches WHERE observation_id = ?1",
+                        params![observation_id],
+                        |row| Ok((row.get(0)?, row.get(1)?)),
+                    )
+                    .optional()?;
+                if let Some((existing_cohort, existing_sha)) = current {
+                    if existing_cohort != cohort_id || existing_sha != snapshot_sha {
+                        return Err(FactoryError::State(
+                            "source was concurrently assigned to another cohort".into(),
+                        ));
+                    }
+                    continue;
+                }
+                transaction.execute(
+                    "INSERT INTO factory_source_batches (
+                         observation_id, cohort_id, snapshot_path,
+                         snapshot_sha256, created_at
+                     ) VALUES (?1, ?2, ?3, ?4, ?5)",
+                    params![
+                        observation_id,
+                        cohort_id,
+                        snapshot_path.display().to_string(),
+                        snapshot_sha,
+                        sealed_at,
+                    ],
+                )?;
+            }
+            append_event(
+                &transaction,
+                "source_cohort_sealed",
+                cohort_id,
+                &json!({
+                    "snapshot_path": snapshot_path.display().to_string(),
+                    "snapshot_sha256": snapshot_sha,
+                    "documents": documents.len(),
+                }),
+                &sealed_at,
+            )?;
+            transaction.commit()?;
+            Ok(())
+        })();
+        if let Err(error) = assign {
+            // The reference: chmod 0600, unlink, re-raise.
+            let _ =
+                std::fs::set_permissions(&snapshot_path, std::fs::Permissions::from_mode(0o600));
+            let _ = std::fs::remove_file(&snapshot_path);
+            return Err(error);
+        }
+        Ok(Some(manifest))
+    }
+
+    /// `seed_corpus_registry` — backfill already-sealed PDFs so discovery
+    /// hashes only genuinely new files.
+    ///
+    /// # Errors
+    ///
+    /// Registry-shape errors (from the corpus verifier), root-resolution
+    /// failures, or [`FactoryError::Sqlite`].
+    #[allow(clippy::too_many_lines, reason = "one transaction, reference-shaped")]
+    pub fn seed_corpus_registry(
+        &self,
+        registry_path: &Path,
+        now: Option<&str>,
+    ) -> Result<Value, FactoryError> {
+        let path = resolve_or_not_found(registry_path)?;
+        secure_regular_file(&path)?;
+        let registry: Value =
+            serde_json::from_slice(&std::fs::read(&path).map_err(|source| FactoryError::Io {
+                context: format!("read {}", path.display()),
+                source,
+            })?)
+            .map_err(|e| FactoryError::Value(e.to_string()))?;
+        dw_recon::corpus::verify_corpus_registry(&registry)
+            .map_err(|e| FactoryError::Value(e.to_string()))?;
+        let pdf_root = registry
+            .pointer("/sources/pdf_root")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        let root = resolve_or_not_found(Path::new(pdf_root))?;
+        if !root.is_dir() {
+            return Err(FactoryError::State(
+                "sealed corpus PDF root is unavailable".into(),
+            ));
+        }
+        let registry_bytes = std::fs::read(&path).map_err(|source| FactoryError::Io {
+            context: format!("read {}", path.display()),
+            source,
+        })?;
+        let registry_sha = sha256_hex(&registry_bytes);
+        let seeded_at = fmt(resolve_now(now)?);
+        let baseline_cohort = format!("baseline-{}", &registry_sha[..24]);
+
+        let mut inserted = 0i64;
+        let mut existing = 0i64;
+        let mut missing = 0i64;
+        let mut unsafe_count = 0i64;
+        let mut canonical_by_digest: BTreeMap<String, String> = BTreeMap::new();
+
+        let mut connection = self.connect()?;
+        let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        for document in registry
+            .get("documents")
+            .and_then(Value::as_array)
+            .map(Vec::as_slice)
+            .unwrap_or_default()
+        {
+            let digest = document
+                .get("document_sha256")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string();
+            let paths = document
+                .get("paths")
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default();
+            let declared_size = document.get("byte_size").and_then(Value::as_i64);
+            for relative in paths {
+                let relative = relative.as_str().unwrap_or_default();
+                // Python: `(root / relative).resolve()` — NON-strict; a
+                // missing target is the `missing` counter, not an error.
+                let joined = root.join(relative);
+                let candidate = std::fs::canonicalize(&joined).unwrap_or_else(|_| joined.clone());
+                if !candidate.starts_with(&root) {
+                    unsafe_count += 1;
+                    continue;
+                }
+                // Missing targets are the `missing` counter (Python checks
+                // `not candidate.exists()` after the non-strict resolve).
+                let Some(meta) = candidate.symlink_metadata().ok() else {
+                    missing += 1;
+                    continue;
+                };
+                if meta.file_type().is_symlink() || !meta.is_file() {
+                    missing += 1;
+                    continue;
+                }
+                let identity = (meta.dev(), meta.ino(), meta.len(), mtime_ns(&meta));
+                if Some(identity.2 as i64) != declared_size {
+                    unsafe_count += 1;
+                    continue;
+                }
+                let observation_id = observation_id(&candidate, &identity);
+                let current: Option<Option<String>> = transaction
+                    .query_row(
+                        "SELECT sha256 FROM factory_source_observations
+                         WHERE observation_id = ?1",
+                        params![observation_id],
+                        |row| row.get(0),
+                    )
+                    .optional()?;
+                match current {
+                    Some(recorded_sha) => {
+                        if recorded_sha.as_deref().is_some_and(|s| s != digest) {
+                            return Err(FactoryError::State(
+                                "seeded corpus conflicts with source observation".into(),
+                            ));
+                        }
+                        existing += 1;
+                        canonical_by_digest
+                            .entry(digest.clone())
+                            .or_insert_with(|| observation_id.clone());
+                    }
+                    None => {
+                        let canonical = canonical_by_digest.get(&digest).cloned();
+                        let status = if canonical.is_some() {
+                            "duplicate"
+                        } else {
+                            "ready"
+                        };
+                        transaction.execute(
+                            "INSERT INTO factory_source_observations (
+                                 observation_id, source_path, device, inode,
+                                 byte_size, mtime_ns, first_seen_at,
+                                 stable_after_at, last_seen_at, status, sha256,
+                                 canonical_observation_id, reason, updated_at
+                             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7, ?7,
+                                      ?8, ?9, ?10, ?11, ?7)",
+                            params![
+                                observation_id,
+                                candidate.display().to_string(),
+                                identity.0 as i64,
+                                identity.1 as i64,
+                                identity.2 as i64,
+                                identity.3,
+                                seeded_at,
+                                status,
+                                digest,
+                                canonical,
+                                format!("seeded from sealed registry {registry_sha}"),
+                            ],
+                        )?;
+                        append_event(
+                            &transaction,
+                            "source_seeded_from_registry",
+                            &observation_id,
+                            &json!({
+                                "path": candidate.display().to_string(),
+                                "sha256": digest,
+                                "registry_sha256": registry_sha,
+                                "status": status,
+                                "canonical_observation_id": canonical,
+                            }),
+                            &seeded_at,
+                        )?;
+                        canonical_by_digest
+                            .entry(digest.clone())
+                            .or_insert_with(|| observation_id.clone());
+                        inserted += 1;
+                    }
+                }
+                transaction.execute(
+                    "INSERT OR IGNORE INTO factory_source_batches (
+                         observation_id, cohort_id, snapshot_path,
+                         snapshot_sha256, created_at
+                     ) VALUES (?1, ?2, ?3, ?4, ?5)",
+                    params![
+                        observation_id,
+                        baseline_cohort,
+                        path.display().to_string(),
+                        registry_sha,
+                        seeded_at,
+                    ],
+                )?;
+            }
+        }
+        transaction.commit()?;
+        Ok(json!({
+            "inserted": inserted,
+            "existing": existing,
+            "missing": missing,
+            "unsafe": unsafe_count,
+        }))
+    }
+
+    /// `register_frontier_run` — idempotent registration of a prepared
+    /// bundle; `Ok(false)` means an identical run was already registered.
+    ///
+    /// # Errors
+    ///
+    /// Bundle/state shape errors, identity conflicts, or
+    /// [`FactoryError::Sqlite`].
+    #[allow(clippy::too_many_lines, reason = "one transaction, reference-shaped")]
+    pub fn register_frontier_run(
+        &self,
+        run_id: &str,
+        prepared_bundle: &Path,
+        submission_state: &Path,
+        lifecycle_root: &Path,
+        now: Option<&str>,
+    ) -> Result<bool, FactoryError> {
+        let prepared = resolve_or_not_found(prepared_bundle)?;
+        let state = resolve_or_not_found(submission_state)?;
+        let manifest_path = prepared.join("manifest.json");
+        secure_regular_file(&manifest_path)?;
+        let manifest: Value =
+            serde_json::from_slice(&std::fs::read(&manifest_path).map_err(|source| {
+                FactoryError::Io {
+                    context: format!("read {}", manifest_path.display()),
+                    source,
+                }
+            })?)
+            .map_err(|e| FactoryError::State(e.to_string()))?;
+        if manifest.get("schema").and_then(Value::as_str)
+            != Some("harness.electronics-frontier-batch.v1")
+        {
+            return Err(FactoryError::State(
+                "unsupported prepared frontier bundle".into(),
+            ));
+        }
+        if !state.join("submission-intent.json").is_file() {
+            return Err(FactoryError::State(
+                "frontier submission state is incomplete".into(),
+            ));
+        }
+        let created_at = fmt(resolve_now(now)?);
+        let lifecycle =
+            std::fs::canonicalize(lifecycle_root).unwrap_or_else(|_| lifecycle_root.to_path_buf());
+        let mut connection = self.connect()?;
+        let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let current: Option<(String, String, String)> = transaction
+            .query_row(
+                "SELECT prepared_evidence_sha256, submission_state,
+                        lifecycle_root
+                 FROM factory_frontier_runs WHERE run_id = ?1",
+                params![run_id],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+            )
+            .optional()?;
+        if let Some((recorded_evidence, recorded_state, recorded_lifecycle)) = current {
+            if recorded_evidence
+                != manifest
+                    .get("evidence_sha256")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+            {
+                return Err(FactoryError::State(format!(
+                    "frontier run identity conflict: {run_id}"
+                )));
+            }
+            if recorded_state != state.display().to_string()
+                || recorded_lifecycle != lifecycle.display().to_string()
+            {
+                return Err(FactoryError::State(format!(
+                    "frontier run identity conflict: {run_id}"
+                )));
+            }
+            transaction.commit()?;
+            return Ok(false);
+        }
+        let requests = manifest
+            .pointer("/counts/requests")
+            .and_then(Value::as_i64)
+            .unwrap_or_default();
+        let estimated = manifest
+            .pointer("/pricing/estimated_maximum_usd")
+            .and_then(Value::as_f64)
+            .unwrap_or_default();
+        transaction.execute(
+            "INSERT INTO factory_frontier_runs (
+                 run_id, prepared_bundle, prepared_evidence_sha256,
+                 submission_state, lifecycle_root, status, request_count,
+                 estimated_maximum_usd, created_at, updated_at
+             ) VALUES (?1, ?2, ?3, ?4, ?5, 'submitted', ?6, ?7, ?8, ?8)",
+            params![
+                run_id,
+                prepared.display().to_string(),
+                manifest
+                    .get("evidence_sha256")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+                state.display().to_string(),
+                lifecycle.display().to_string(),
+                requests,
+                estimated,
+                created_at,
+            ],
+        )?;
+        append_event(
+            &transaction,
+            "frontier_run_registered",
+            run_id,
+            &json!({
+                "prepared_evidence_sha256":
+                    manifest.get("evidence_sha256").cloned()
+                        .unwrap_or(Value::Null),
+                "request_count": requests,
+                "estimated_maximum_usd": estimated,
+            }),
+            &created_at,
+        )?;
+        transaction.commit()?;
+        Ok(true)
+    }
+
+    /// `record_frontier_status` — advance a frontier run's status, inferring
+    /// `ended` when every batch reports `processing_status` of `ended`.
+    ///
+    /// # Errors
+    ///
+    /// [`FactoryError::Value`] for unsupported stages,
+    /// [`FactoryError::State`] for unknown runs, [`FactoryError::Sqlite`].
+    pub fn record_frontier_status(
+        &self,
+        run_id: &str,
+        status_payload: &Value,
+        stage: Option<&str>,
+        error: Option<&str>,
+        now: Option<&str>,
+    ) -> Result<(), FactoryError> {
+        let recorded_at = fmt(resolve_now(now)?);
+        let batches = status_payload
+            .get("batches")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        let mut processing: Vec<String> = batches
+            .iter()
+            .filter(|batch| batch.is_object())
+            .map(|batch| {
+                batch
+                    .get("processing_status")
+                    .map_or_else(|| "null".to_string(), py_str_of)
+            })
+            .collect();
+        processing.sort();
+        processing.dedup();
+        let inferred = if !processing.is_empty() && processing == ["ended".to_string()] {
+            "ended"
+        } else {
+            "processing"
+        };
+        let new_status = stage.unwrap_or(inferred);
+        let allowed = [
+            "submitted",
+            "processing",
+            "ended",
+            "retrieved",
+            "reconciled",
+            "verified",
+            "finalized",
+            "failed",
+        ];
+        if !allowed.contains(&new_status) {
+            return Err(FactoryError::Value(format!(
+                "unsupported frontier run stage: {new_status}"
+            )));
+        }
+        let encoded = String::from_utf8(
+            canonical_json(status_payload).map_err(|e| FactoryError::State(e.to_string()))?,
+        )
+        .map_err(|e| FactoryError::State(e.to_string()))?;
+        let mut connection = self.connect()?;
+        let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let current: Option<String> = transaction
+            .query_row(
+                "SELECT status FROM factory_frontier_runs WHERE run_id = ?1",
+                params![run_id],
+                |row| row.get(0),
+            )
+            .optional()?;
+        let Some(previous_status) = current else {
+            return Err(FactoryError::State(format!(
+                "unknown frontier run: {run_id}"
+            )));
+        };
+        transaction.execute(
+            "UPDATE factory_frontier_runs
+             SET status = ?1, latest_status_json = ?2, error = ?3,
+                 updated_at = ?4
+             WHERE run_id = ?5",
+            params![new_status, encoded, error, recorded_at, run_id],
+        )?;
+        append_event(
+            &transaction,
+            "frontier_status_recorded",
+            run_id,
+            &json!({
+                "previous_status": previous_status,
+                "new_status": new_status,
+                "error": error,
+            }),
+            &recorded_at,
+        )?;
+        transaction.commit()?;
+        Ok(())
+    }
+}
+
+/// Python `str(value)` for the `processing_status` set membership check.
+fn py_str_of(value: &Value) -> String {
+    match value {
+        Value::Null => "None".to_string(),
+        Value::Bool(b) => if *b { "True" } else { "False" }.to_string(),
+        Value::String(s) => s.clone(),
+        other => other.to_string(),
+    }
+}
+
+/// `Path.resolve(strict=True)` with Python's errno message on `NotFound`.
+fn resolve_or_not_found(path: &Path) -> Result<PathBuf, FactoryError> {
+    match std::fs::canonicalize(path) {
+        Ok(resolved) => Ok(resolved),
+        Err(source) if source.kind() == std::io::ErrorKind::NotFound => {
+            Err(FactoryError::FileNotFound(format!(
+                "[Errno 2] No such file or directory: '{}'",
+                path.display()
+            )))
+        }
+        Err(source) => Err(FactoryError::Io {
+            context: format!("resolve {}", path.display()),
+            source,
+        }),
+    }
+}
+
+/// `_secure_regular_file` — a real, non-symlink file.
+fn secure_regular_file(path: &Path) -> Result<(), FactoryError> {
+    let meta = path.symlink_metadata().map_err(|source| FactoryError::Io {
+        context: format!("stat {}", path.display()),
+        source,
+    })?;
+    if meta.file_type().is_symlink() || !meta.is_file() {
+        return Err(FactoryError::State(format!(
+            "expected a regular non-symlink file: {}",
+            path.display()
+        )));
+    }
+    Ok(())
+}
+
+/// `_write_new_json` — write-once JSON: temp file, fsync, chmod 0444,
+/// hardlink into place (atomic appearance), temp removed.
+fn write_new_json(path: &Path, value: &Value) -> Result<(), FactoryError> {
+    use std::io::Write as _;
+    let destination = std::fs::canonicalize(path.parent().unwrap_or(path)).map_or_else(
+        |_| path.to_path_buf(),
+        |parent| parent.join(path.file_name().unwrap_or_default()),
+    );
+    if destination.symlink_metadata().is_ok() {
+        return Err(FactoryError::State(format!(
+            "immutable output already exists: {}",
+            destination.display()
+        )));
+    }
+    if let Some(parent) = destination.parent() {
+        std::fs::create_dir_all(parent).map_err(|source| FactoryError::Io {
+            context: format!("mkdir {}", parent.display()),
+            source,
+        })?;
+    }
+    let payload =
+        dw_model::py_dumps_indent2_sorted(value).map_err(|e| FactoryError::State(e.to_string()))?;
+    let temporary = destination.with_file_name(format!(
+        ".{}.{}.tmp",
+        destination.file_name().map_or_else(
+            || "snapshot".to_string(),
+            |n| n.to_string_lossy().into_owned()
+        ),
+        std::process::id()
+    ));
+    {
+        let mut handle = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&temporary)
+            .map_err(|source| FactoryError::Io {
+                context: format!("create {}", temporary.display()),
+                source,
+            })?;
+        handle
+            .write_all(payload.as_bytes())
+            .and_then(|()| handle.write_all(b"\n"))
+            .and_then(|()| handle.sync_all())
+            .map_err(|source| FactoryError::Io {
+                context: format!("write {}", temporary.display()),
+                source,
+            })?;
+    }
+    std::fs::set_permissions(&temporary, std::fs::Permissions::from_mode(0o444)).map_err(
+        |source| FactoryError::Io {
+            context: format!("chmod 444 {}", temporary.display()),
+            source,
+        },
+    )?;
+    let linked = std::fs::hard_link(&temporary, &destination);
+    let _ = std::fs::remove_file(&temporary);
+    linked.map_err(|source| FactoryError::Io {
+        context: format!("link {}", destination.display()),
+        source,
+    })?;
+    Ok(())
 }
 
 #[cfg(test)]

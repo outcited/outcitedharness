@@ -150,6 +150,8 @@ name = "dw-controller"
 version = "0.1.0"
 dependencies = [
  "dw-extract",
+ "dw-model",
+ "dw-recon",
  "rusqlite",
  "serde",
  "serde_json",

@@ -13,6 +13,8 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 rusqlite = { version = "0.37", features = ["bundled"] }
 dw-extract = { path = "../dw-extract" }
+dw-model = { path = "../dw-model" }
+dw-recon = { path = "../dw-recon" }
 
 [dev-dependencies]
 
