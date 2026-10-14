@@ -79,6 +79,12 @@ CORPUS_PATHS = [Path(x) for x in [
     "/Volumes/M5_4TB/vault/cas",
     "/Volumes/M5_4TB/exports/power-datasheet-pairs",
     "/Volumes/M5_4TB/exports/corpus-deliveries",
+    # NVMe mirror (yosemiteraid5): Sam directive 2026-10-14 — the PDF factory
+    # lands new deliveries here as well; corpus_key dedupe makes double-scan
+    # safe (same sha-stem never enqueues twice).
+    "/Users/samkim/mnt/yosemiteraid5-nfs2/m5-opencode/corpus-mirror/exports/corpus-deliveries",
+    "/Users/samkim/mnt/yosemiteraid5-nfs2/m5-opencode/corpus-mirror/cas",
+    "/Users/samkim/mnt/yosemiteraid5-nfs2/m5-opencode/corpus-mirror/landing",
 ]]
 BATCH = 480
 SCAN_INTERVAL = 21600  # seconds between full corpus rescans (6h); full walk over the
