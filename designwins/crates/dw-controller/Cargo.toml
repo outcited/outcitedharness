@@ -1,0 +1,20 @@
+[package]
+name = "dw-controller"
+description = "The factory's durable operational state: SQLite-backed source observations with stability windows, chunk leases, and the immutable event ledger — port of harness/electronics/factory_control.py. Both engines share one db file."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+rusqlite = { version = "0.37", features = ["bundled"] }
+dw-extract = { path = "../dw-extract" }
+
+[dev-dependencies]
+
+[lints]
+workspace = true

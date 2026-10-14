@@ -77,6 +77,13 @@ fn is_number_token(t: &str) -> bool {
 /// it would make `drain-source` tokenize as `["-source"]` and silently fail
 /// header binding.
 #[must_use]
+// Char walk: every index is guarded by a `while i < chars.len()` bound or a
+// preceding `i + 1 < chars.len()` check in the same expression; slices are
+// [start..i] with start <= i <= len by construction (2d54afaf).
+#[allow(
+    clippy::indexing_slicing,
+    reason = "guarded char walk, same accepted pattern as the grid readers"
+)]
 pub fn tokens(s: &str) -> Vec<String> {
     // Mirror the reference exactly: `\d+(?:\.\d+)?|[a-z]+`.
     // A token is either an ASCII digit-run with at most one decimal group, or

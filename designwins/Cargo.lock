@@ -146,6 +146,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-controller"
+version = "0.1.0"
+dependencies = [
+ "dw-extract",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-coverage"
 version = "0.1.0"
 dependencies = [
