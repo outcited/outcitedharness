@@ -9,15 +9,18 @@
 //! * [`parse`] — `parse_json_response`: fence-strip + raw JSON decode.
 //! * [`prompt`] — `local_prompt` / `focused_page_context`: byte-identical
 //!   instruction strings.
+//! * [`bundle`] — `prepare_batch_bundle`: the sealed frontier batch writer.
 //!
 //! Provider HTTP shells (`LocalExtractionClient`, `cloud_vision`) stay thin
 //! and are deliberately not ported here — no oracle pins them.
 
+pub mod bundle;
 pub mod parse;
 pub mod prompt;
 pub mod schemas;
 pub mod validate;
 
+pub use bundle::{prepare_batch_bundle, BundleError, BundleSpec, PREPARED_SCHEMA};
 pub use parse::parse_json_response;
 pub use prompt::{focused_page_context, local_prompt, PromptError};
 pub use schemas::{response_schemas, schema_for};

@@ -129,7 +129,14 @@ fn write_string(s: &str, out: &mut Vec<u8>) {
 /// decimal exponents `-4..=15` (`0.0001`, `1000000000000000.0`), scientific
 /// otherwise with a signed, zero-padded, two-digit-minimum exponent
 /// (`1e-05`, `1.5e-08`, `1e+16`). Negative zero keeps its sign (`-0.0`).
-fn python_float_repr(v: f64) -> Result<String, CanonicalError> {
+///
+/// Public so sibling crates that emit Python-shaped JSON at other densities
+/// (e.g. `dw-model`'s indent-2 manifest writer) share one float repr.
+///
+/// # Errors
+///
+/// [`CanonicalError::NonFinite`] for NaN/±inf, mirroring `allow_nan=False`.
+pub fn python_float_repr(v: f64) -> Result<String, CanonicalError> {
     if !v.is_finite() {
         return Err(CanonicalError::NonFinite);
     }

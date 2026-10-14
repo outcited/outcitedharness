@@ -1,0 +1,2277 @@
+{
+ "alt_file": {
+  "bytes": [
+   111,
+   117,
+   116,
+   115,
+   105,
+   100,
+   101,
+   45,
+   114,
+   111,
+   111,
+   116,
+   115,
+   32,
+   102,
+   105,
+   120,
+   116,
+   117,
+   114,
+   101,
+   10
+  ],
+  "rel": "ev/outside.png"
+ },
+ "alt_root": "/tmp/gold_model_bundle_fixed_alt",
+ "cases": [
+  {
+   "dest_absent_after": false,
+   "expected": {
+    "candidates": "{\"candidate_id\":\"candidate-b2473195a3c9e04fa5e8377b32b5e3a3\",\"capability\":\"pin_semantics\",\"document_sha256\":\"abababababababababababababababababababababababababababababababab\",\"entity_hint\":\"LMG1020\",\"estimated_input_tokens\":12000,\"evidence\":[{\"bbox\":null,\"media_type\":\"application/pdf\",\"page_1based\":4,\"path\":\"/tmp/gold_model_bundle_fixed/ev/doc.pdf\",\"sha256\":\"b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa\"},{\"bbox\":[1.0,2.0,400.0,300.0],\"media_type\":\"image/png\",\"page_1based\":4,\"path\":\"/tmp/gold_model_bundle_fixed/ev/page.png\",\"sha256\":\"a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1\"}],\"local_attempts\":[{\"model\":\"deepseek-v4.1-flash\",\"output_sha256\":null,\"provider\":\"local\",\"reason\":\"evidence gate passed\",\"receipt_sha256\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"status\":\"passed_evidence_gate\"}],\"max_output_tokens\":6000,\"prompt\":\"Extract pin semantics for LMG1020 page 4 from the rendered page.\",\"purpose\":\"local_training_pair_generation\",\"response_schema\":{\"properties\":{\"pins\":{\"type\":\"array\"}},\"required\":[\"pins\"],\"type\":\"object\"},\"schema\":\"harness.electronics-frontier-candidate.v1\"}\n{\"candidate_id\":\"candidate-bcb439138323df0b1f6f7cce7737535b\",\"capability\":\"parametrics\",\"document_sha256\":\"abababababababababababababababababababababababababababababababab\",\"entity_hint\":\"LMG1020\",\"estimated_input_tokens\":8000,\"evidence\":[{\"bbox\":[10.5,20.25,110.5,220.75],\"media_type\":\"image/png\",\"page_1based\":2,\"path\":\"/tmp/gold_model_bundle_fixed/ev/page.png\",\"sha256\":\"a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1\"}],\"local_attempts\":[{\"model\":\"deepseek-v4.1-flash\",\"output_sha256\":null,\"provider\":\"local\",\"reason\":\"response failed schema gate\",\"receipt_sha256\":\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"status\":\"schema_failed\"},{\"model\":\"deepseek-v4.1-flash\",\"output_sha256\":\"3434343434343434343434343434343434343434343434343434343434343434\",\"provider\":\"local\",\"reason\":\"gate passed on retry\",\"receipt_sha256\":\"1212121212121212121212121212121212121212121212121212121212121212\",\"status\":\"passed_evidence_gate\"}],\"max_output_tokens\":3000,\"prompt\":\"Extract parametric table rows for LMG1020 page 2.\",\"purpose\":\"local_training_pair_generation\",\"response_schema\":{\"properties\":{\"facts\":{\"type\":\"array\"}},\"required\":[\"facts\"],\"type\":\"object\"},\"schema\":\"harness.electronics-frontier-candidate.v1\"}\n",
+    "manifest": "{\n  \"artifacts\": {\n    \"candidates.jsonl\": {\n      \"bytes\": 2402,\n      \"sha256\": \"e549a75ee875e773d53082a269bd95be3095d85d4468d650354f971685fedf8e\"\n    },\n    \"requests.jsonl\": {\n      \"bytes\": 4145,\n      \"sha256\": \"66a96f198526bcc7fbdc7eb98bb16f70c8c73083d7510e0dc0af5b615ebdc672\"\n    }\n  },\n  \"counts\": {\n    \"capabilities\": {\n      \"parametrics\": 1,\n      \"pin_semantics\": 1\n    },\n    \"requests\": 2\n  },\n  \"created_at\": \"2026-10-14T01:02:03\",\n  \"evidence_sha256\": \"b8e091fdfcc15c28d60cc044115c7809b1b262b868179c1552e4085ec3eac6cb\",\n  \"model\": \"qwen3.8-max\",\n  \"pricing\": {\n    \"batch_discount_multiplier\": 0.5,\n    \"estimated_maximum_usd\": 0.0975,\n    \"input_per_million_usd\": 3.0,\n    \"output_per_million_usd\": 15.0,\n    \"spend_cap_usd\": 25.0\n  },\n  \"purpose\": \"local_training_pair_generation\",\n  \"schema\": \"harness.electronics-frontier-batch.v1\",\n  \"token_budget\": {\n    \"estimated_input_tokens\": 20000,\n    \"maximum_output_tokens\": 9000\n  }\n}\n",
+    "requests": "{\"_harness\":{\"candidate_id\":\"candidate-b2473195a3c9e04fa5e8377b32b5e3a3\",\"capability\":\"pin_semantics\",\"document_sha256\":\"abababababababababababababababababababababababababababababababab\",\"evidence\":[{\"bbox\":null,\"media_type\":\"application/pdf\",\"page_1based\":4,\"path\":\"/private/tmp/gold_model_bundle_fixed/ev/doc.pdf\",\"sha256\":\"b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa\"},{\"bbox\":[1.0,2.0,400.0,300.0],\"media_type\":\"image/png\",\"page_1based\":4,\"path\":\"/private/tmp/gold_model_bundle_fixed/ev/page.png\",\"sha256\":\"a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1\"}],\"local_attempt_receipts\":[\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\"],\"purpose\":\"local_training_pair_generation\"},\"custom_id\":\"teach-b2473195a3c9e04fa5e8377b32b5e3a3\",\"params\":{\"max_tokens\":6000,\"messages\":[{\"content\":[{\"text\":\"Extract pin semantics for LMG1020 page 4 from the rendered page.\\n\\nReturn only JSON matching this schema:\\n{\\\"properties\\\":{\\\"pins\\\":{\\\"type\\\":\\\"array\\\"}},\\\"required\\\":[\\\"pins\\\"],\\\"type\\\":\\\"object\\\"}\",\"type\":\"text\"},{\"source\":{\"data\":\"JVBERi0xLjQgZml4dHVyZSBldmlkZW5jZSAwMDIK\",\"media_type\":\"application/pdf\",\"type\":\"base64\"},\"type\":\"document\"},{\"source\":{\"data\":\"iVBORyBmaXh0dXJlIGV2aWRlbmNlIDAwMSAobm90IHBhcnNlZCwgb25seSBoYXNoZWQpCg==\",\"media_type\":\"image/png\",\"type\":\"base64\"},\"type\":\"image\"}],\"role\":\"user\"}],\"model\":\"qwen3.8-max\",\"system\":\"You extract electronics facts from supplied source evidence. Do not infer an absent value. Preserve printed units and package identity. Your output is teacher data for a local model and will be independently verified before admission. For pin semantics, omit any row whose selected-package pin or ball cell is blank, -, \u2014, or N/A. Use dir only for a printed direction or pin-category value such as I, O, I/O, P, or S. Use type only for a printed electrical I/O structure or level. Use supply_domain only for a value under an explicit supply-domain header. Put Description and Function column values in functions. Never copy a description or supply domain into type. Every semantic value must come from the matching identity row and its corresponding semantic column.\",\"thinking\":{\"type\":\"disabled\"}}}\n{\"_harness\":{\"candidate_id\":\"candidate-bcb439138323df0b1f6f7cce7737535b\",\"capability\":\"parametrics\",\"document_sha256\":\"abababababababababababababababababababababababababababababababab\",\"evidence\":[{\"bbox\":[10.5,20.25,110.5,220.75],\"media_type\":\"image/png\",\"page_1based\":2,\"path\":\"/private/tmp/gold_model_bundle_fixed/ev/page.png\",\"sha256\":\"a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1\"}],\"local_attempt_receipts\":[\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\",\"1212121212121212121212121212121212121212121212121212121212121212\"],\"purpose\":\"local_training_pair_generation\"},\"custom_id\":\"teach-bcb439138323df0b1f6f7cce7737535b\",\"params\":{\"max_tokens\":3000,\"messages\":[{\"content\":[{\"text\":\"Extract parametric table rows for LMG1020 page 2.\\n\\nReturn only JSON matching this schema:\\n{\\\"properties\\\":{\\\"facts\\\":{\\\"type\\\":\\\"array\\\"}},\\\"required\\\":[\\\"facts\\\"],\\\"type\\\":\\\"object\\\"}\",\"type\":\"text\"},{\"source\":{\"data\":\"iVBORyBmaXh0dXJlIGV2aWRlbmNlIDAwMSAobm90IHBhcnNlZCwgb25seSBoYXNoZWQpCg==\",\"media_type\":\"image/png\",\"type\":\"base64\"},\"type\":\"image\"}],\"role\":\"user\"}],\"model\":\"qwen3.8-max\",\"system\":\"You extract electronics facts from supplied source evidence. Do not infer an absent value. Preserve printed units and package identity. Your output is teacher data for a local model and will be independently verified before admission. For parametrics, omit blank cells and non-values such as -, \u2014, or N/A. Copy field exactly from one printed Parameter or Symbol cell; never construct a field by joining cells. Put printed size, test, and operating qualifiers in conditions. Copy every condition value verbatim; do not paraphrase, expand an acronym, interpret a label, or combine qualifiers from separate cells. Omit any fact that requires such a transformation. Emit only facts whose field, value, role, unit, and conditions can be traced to the same table row and its headers.\",\"thinking\":{\"type\":\"disabled\"}}}\n"
+   },
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     },
+     {
+      "candidate_id": "candidate-bcb439138323df0b1f6f7cce7737535b",
+      "capability": "parametrics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 8000,
+      "evidence": [
+       {
+        "bbox": [
+         10.5,
+         20.25,
+         110.5,
+         220.75
+        ],
+        "media_type": "image/png",
+        "page_1based": 2,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "response failed schema gate",
+        "receipt_sha256": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+        "status": "schema_failed"
+       },
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": "3434343434343434343434343434343434343434343434343434343434343434",
+        "provider": "local",
+        "reason": "gate passed on retry",
+        "receipt_sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 3000,
+      "prompt": "Extract parametric table rows for LMG1020 page 2.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "facts": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "facts"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "happy",
+   "name": "two_candidates_sealed"
+  },
+  {
+   "dest_absent_after": false,
+   "expected_msg": "ValueError: batch bundle already exists: /private/tmp/gold_model_bundle_fixed/bundle",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "precreate_dest": true,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "destination_exists"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: model cannot be blank",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "  ",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "blank_model"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: input_price_per_million must be finite and positive",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": -1.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "invalid_price"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: batch_discount must be within (0, 1]",
+   "input": {
+    "batch_discount": 1.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "invalid_discount"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: cannot prepare an empty frontier batch",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "empty_batch"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: duplicate candidate: candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     },
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "duplicate_candidate"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: candidate identity mismatch: candidate-b2473195a3c9e04fa5e8377b32b5e3ae",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3ae",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "identity_mismatch"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: evidence SHA-256 mismatch: /private/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-029cfbb46e637e6f2e5f8bb4c9d13c13",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "evidence_sha_mismatch"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: evidence is outside allowed roots: /private/tmp/gold_model_bundle_fixed_alt/ev/outside.png",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-8a5d2c617b967ba90abbf8a39aab7374",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed_alt/ev/outside.png",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "evidence_outside_roots"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: evidence is not a regular file: /private/tmp/gold_model_bundle_fixed",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-c23f2912461a4691f30ad124515d28aa",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "evidence_not_regular_file"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/gold_model_bundle_fixed/ev/nope.png'",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-435eff7e8a43dbbebb3a17ab74cca9ce",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/nope.png",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 25.0
+   },
+   "kind": "error",
+   "name": "evidence_missing"
+  },
+  {
+   "dest_absent_after": true,
+   "expected_msg": "ValueError: estimated batch cost $0.097500 exceeds $0.000001 cap",
+   "input": {
+    "batch_discount": 0.5,
+    "candidates": [
+     {
+      "candidate_id": "candidate-b2473195a3c9e04fa5e8377b32b5e3a3",
+      "capability": "pin_semantics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 12000,
+      "evidence": [
+       {
+        "bbox": null,
+        "media_type": "application/pdf",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/doc.pdf",
+        "sha256": "b882e8b5ea0aa2a1c70ca65cdd56e39c401541da237c92afdfca30c86f59e2aa"
+       },
+       {
+        "bbox": [
+         1.0,
+         2.0,
+         400.0,
+         300.0
+        ],
+        "media_type": "image/png",
+        "page_1based": 4,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "evidence gate passed",
+        "receipt_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 6000,
+      "prompt": "Extract pin semantics for LMG1020 page 4 from the rendered page.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "pins": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "pins"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     },
+     {
+      "candidate_id": "candidate-bcb439138323df0b1f6f7cce7737535b",
+      "capability": "parametrics",
+      "document_sha256": "abababababababababababababababababababababababababababababababab",
+      "entity_hint": "LMG1020",
+      "estimated_input_tokens": 8000,
+      "evidence": [
+       {
+        "bbox": [
+         10.5,
+         20.25,
+         110.5,
+         220.75
+        ],
+        "media_type": "image/png",
+        "page_1based": 2,
+        "path": "/tmp/gold_model_bundle_fixed/ev/page.png",
+        "sha256": "a0de0b2bf1314e0b3a590de00ea61ea0f46c99cea6d76ac4fcc5041df0ac5bc1"
+       }
+      ],
+      "local_attempts": [
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": null,
+        "provider": "local",
+        "reason": "response failed schema gate",
+        "receipt_sha256": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef",
+        "status": "schema_failed"
+       },
+       {
+        "model": "deepseek-v4.1-flash",
+        "output_sha256": "3434343434343434343434343434343434343434343434343434343434343434",
+        "provider": "local",
+        "reason": "gate passed on retry",
+        "receipt_sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+        "status": "passed_evidence_gate"
+       }
+      ],
+      "max_output_tokens": 3000,
+      "prompt": "Extract parametric table rows for LMG1020 page 2.",
+      "purpose": "local_training_pair_generation",
+      "response_schema": {
+       "properties": {
+        "facts": {
+         "type": "array"
+        }
+       },
+       "required": [
+        "facts"
+       ],
+       "type": "object"
+      },
+      "schema": "harness.electronics-frontier-candidate.v1"
+     }
+    ],
+    "created_at": "2026-10-14T01:02:03",
+    "dest_rel": "bundle",
+    "files": [
+     {
+      "bytes": [
+       37,
+       80,
+       68,
+       70,
+       45,
+       49,
+       46,
+       52,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       50,
+       10
+      ],
+      "rel": "ev/doc.pdf"
+     },
+     {
+      "bytes": [
+       137,
+       80,
+       78,
+       71,
+       32,
+       102,
+       105,
+       120,
+       116,
+       117,
+       114,
+       101,
+       32,
+       101,
+       118,
+       105,
+       100,
+       101,
+       110,
+       99,
+       101,
+       32,
+       48,
+       48,
+       49,
+       32,
+       40,
+       110,
+       111,
+       116,
+       32,
+       112,
+       97,
+       114,
+       115,
+       101,
+       100,
+       44,
+       32,
+       111,
+       110,
+       108,
+       121,
+       32,
+       104,
+       97,
+       115,
+       104,
+       101,
+       100,
+       41,
+       10
+      ],
+      "rel": "ev/page.png"
+     }
+    ],
+    "input_price_per_million": 3.0,
+    "model": "qwen3.8-max",
+    "output_price_per_million": 15.0,
+    "spend_cap_usd": 1e-06
+   },
+   "kind": "error",
+   "name": "cost_cap_exceeded"
+  }
+ ],
+ "fixed_root": "/tmp/gold_model_bundle_fixed"
+}
