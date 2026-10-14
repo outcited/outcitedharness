@@ -1,0 +1,19 @@
+error[E0451]: fields `part`, `attribute`, `new_value`, `base_doc`, `base_rev_code`, `quote` and `source` of struct `dw_types::ClaimDelta` are private
+  --> tests/compile_fail/claim_delta_struct_literal.rs:17:9
+   |
+16 |     let _delta = ClaimDelta {
+   |                  ---------- in this type
+17 |         part: "BSC009".into(),
+   |         ^^^^ private field
+18 |         attribute: "ID".into(),
+   |         ^^^^^^^^^ private field
+19 |         new_value: "18 A".into(),
+   |         ^^^^^^^^^ private field
+20 |         base_doc: sha,
+   |         ^^^^^^^^ private field
+21 |         base_rev_code: None,
+   |         ^^^^^^^^^^^^^ private field
+22 |         quote,
+   |         ^^^^^ private field
+23 |         source,
+   |         ^^^^^^ private field

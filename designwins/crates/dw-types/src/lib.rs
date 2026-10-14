@@ -359,6 +359,181 @@ impl Claim {
 }
 
 // ---------------------------------------------------------------------------
+// S4 (PLAN-unseen-doc-types 2026-10-12) — the errata delta and PCN event grains
+// ---------------------------------------------------------------------------
+
+/// A change to a previously printed fact (errata).
+///
+/// The unit of a delta is a **change**, not a level — so it must name the
+/// document it corrects. **Unconstructible without [`Verbatim`],
+/// [`SourceRef`] (crop, `C13`), and the base document's [`Sha256`].** A
+/// delta with no base is a rumor of a change and cannot be built. C3's law,
+/// applied to the delta grain; elimination reads deltas as overrides.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClaimDelta {
+    part: String,
+    attribute: String,
+    new_value: String,
+    base_doc: Sha256,
+    base_rev_code: Option<String>,
+    quote: Verbatim,
+    source: SourceRef,
+}
+
+impl ClaimDelta {
+    /// Build a delta. Requires the quote, the provenance, and the base.
+    ///
+    /// # Errors
+    ///
+    /// [`LawError::Empty`] for an empty `part`/`attribute`/`new_value`;
+    /// [`LawError::MissingProvenance`] if `source` carries no crop (`C13`)
+    /// or `base_doc` is not given — it is always given by type, and the
+    /// error class exists for the base *rev* being unnameable in tests that
+    /// mock the law.
+    pub fn new(
+        part: impl Into<String>,
+        attribute: impl Into<String>,
+        new_value: impl Into<String>,
+        base_doc: Sha256,
+        quote: Verbatim,
+        source: SourceRef,
+    ) -> Result<Self, LawError> {
+        let (part, attribute, new_value) = (part.into(), attribute.into(), new_value.into());
+        for (field, v) in [
+            ("part", &part),
+            ("attribute", &attribute),
+            ("new_value", &new_value),
+        ] {
+            if v.is_empty() {
+                return Err(LawError::Empty { field });
+            }
+        }
+        if source.crop.is_none() {
+            return Err(LawError::MissingProvenance("source.crop (C13)"));
+        }
+        Ok(Self {
+            part,
+            attribute,
+            new_value,
+            base_doc,
+            base_rev_code: None,
+            quote,
+            source,
+        })
+    }
+
+    /// The document revision this delta corrects.
+    #[must_use]
+    pub fn base_doc(&self) -> &Sha256 {
+        &self.base_doc
+    }
+
+    /// The corrected value as printed by the errata.
+    #[must_use]
+    pub fn new_value(&self) -> &str {
+        &self.new_value
+    }
+
+    /// What the errata said, verbatim.
+    #[must_use]
+    pub fn quote(&self) -> &Verbatim {
+        &self.quote
+    }
+
+    /// Where it came from.
+    #[must_use]
+    pub fn source(&self) -> &SourceRef {
+        &self.source
+    }
+
+    /// Name the base revision code (`A3`, `Rev 4`, …) when the errata did.
+    #[must_use]
+    pub fn with_base_rev(mut self, rev: impl Into<String>) -> Self {
+        self.base_rev_code = Some(rev.into());
+        self
+    }
+}
+
+/// A lifecycle event affecting a part (PCN / PDN / discontinuation).
+///
+/// The unit of an event claim is an **event**: what changed, when, and to
+/// which parts. **Unconstructible without [`Verbatim`] + [`SourceRef`]**
+/// (crop, `C13`) — a pending discontinuation with no receipt is a rumor,
+/// and Path-2 elimination never acts on rumors.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct EventClaim {
+    event_id: String,
+    part: String,
+    change: String,
+    effective: Option<String>,
+    quote: Verbatim,
+    source: SourceRef,
+}
+
+impl EventClaim {
+    /// Build an event claim. Requires the quote and the provenance.
+    ///
+    /// # Errors
+    ///
+    /// [`LawError::Empty`] for an empty `event_id`/`part`/`change`;
+    /// [`LawError::MissingProvenance`] if `source` carries no crop (`C13`).
+    pub fn new(
+        event_id: impl Into<String>,
+        part: impl Into<String>,
+        change: impl Into<String>,
+        quote: Verbatim,
+        source: SourceRef,
+    ) -> Result<Self, LawError> {
+        let (event_id, part, change) = (event_id.into(), part.into(), change.into());
+        for (field, v) in [
+            ("event_id", &event_id),
+            ("part", &part),
+            ("change", &change),
+        ] {
+            if v.is_empty() {
+                return Err(LawError::Empty { field });
+            }
+        }
+        if source.crop.is_none() {
+            return Err(LawError::MissingProvenance("source.crop (C13)"));
+        }
+        Ok(Self {
+            event_id,
+            part,
+            change,
+            effective: None,
+            quote,
+            source,
+        })
+    }
+
+    /// The event identifier (PCN number) as printed.
+    #[must_use]
+    pub fn event_id(&self) -> &str {
+        &self.event_id
+    }
+
+    /// What changed.
+    #[must_use]
+    pub fn change(&self) -> &str {
+        &self.change
+    }
+
+    /// Where it came from.
+    #[must_use]
+    pub fn source(&self) -> &SourceRef {
+        &self.source
+    }
+
+    /// Name the printed effective date when the document stated one.
+    #[must_use]
+    pub fn with_effective(mut self, date: impl Into<String>) -> Self {
+        self.effective = Some(date.into());
+        self
+    }
+}
+
+// ---------------------------------------------------------------------------
 // §16.3 — no unverified promotion
 // ---------------------------------------------------------------------------
 
@@ -684,6 +859,8 @@ pub enum Unit {
     Farad,
     /// Henrys.
     Henry,
+    /// Joules (D10 — avalanche energy evidence `EAS` mJ×816).
+    Joule,
     /// Dimensionless.
     None,
 }
@@ -840,6 +1017,42 @@ mod tests {
             Claim::new("", quote, source()),
             Err(LawError::Empty { .. })
         ));
+    }
+
+    #[test]
+    fn claim_delta_requires_provenance_and_nonempty_fields() {
+        let quote = Verbatim::new("ID dropped from 20 A to 18 A").expect("non-empty");
+        let bare = SourceRef::page(sha(), 3);
+        assert!(matches!(
+            ClaimDelta::new("BSC009", "ID", "18 A", sha(), quote.clone(), bare),
+            Err(LawError::MissingProvenance(_))
+        ));
+        assert!(matches!(
+            ClaimDelta::new("", "ID", "18 A", sha(), quote.clone(), source()),
+            Err(LawError::Empty { .. })
+        ));
+        let ok =
+            ClaimDelta::new("BSC009", "ID", "18 A", sha(), quote, source()).expect("lawful delta");
+        assert_eq!(ok.new_value(), "18 A");
+        assert_eq!(ok.base_doc(), &sha());
+    }
+
+    #[test]
+    fn event_claim_requires_provenance_and_nonempty_fields() {
+        let quote = Verbatim::new("PCN-2026-014: die attach change").expect("non-empty");
+        let bare = SourceRef::page(sha(), 5);
+        assert!(matches!(
+            EventClaim::new("PCN-2026-014", "BSC009", "die attach", quote.clone(), bare),
+            Err(LawError::MissingProvenance(_))
+        ));
+        assert!(matches!(
+            EventClaim::new("", "BSC009", "die attach", quote.clone(), source()),
+            Err(LawError::Empty { .. })
+        ));
+        let ok = EventClaim::new("PCN-2026-014", "BSC009", "die attach", quote, source())
+            .expect("lawful event");
+        assert_eq!(ok.event_id(), "PCN-2026-014");
+        assert_eq!(ok.change(), "die attach");
     }
 
     #[test]
