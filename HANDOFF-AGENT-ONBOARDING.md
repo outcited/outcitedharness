@@ -192,8 +192,11 @@ free. Management NICs negotiate 1G on a dumb LAN switch.
 - Fabric check: `ib_write_bw -d rocep1s0f1 -R -F -q 4 -s 65536 -D 5
   --report_gbits <peer 10.77.0.x>` with the box under test as client. Expect
   ~111 Gb/s; ~13 Gb/s means the throttle is back -> physical power drain.
-- Switch: RouterOS REST at `https://192.168.4.50/rest/...` with the admin
-  password from `~/.secrets/crs812-admin`. Read-only unless Sam approves.
+- Switch: RouterOS REST at `http://192.168.4.50/rest/...` (plain **http**, not
+  https — 443/www-ssl is closed on this box, verified 2026-10-10; an `https://`
+  call returns curl exit 000 and looks like the switch is down when it is not)
+  with the admin password from `~/.secrets/crs812-admin`. Read-only unless Sam
+  approves.
 
 ## 8. Open items and skeletons
 

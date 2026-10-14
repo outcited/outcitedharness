@@ -3,6 +3,50 @@
 # Local fleet URLs use stable Tailscale addresses; DHCP LAN leases are not identities.
 
 models:
+  # Qwen MaaS (token-plan subscription, staged 2026-10-12): the cloud Qwen
+  # box. Generic Qwen inference offloaded here so local boxes stay
+  # extraction-CPU + training (Sam's split). Determinism measured 3/3 at
+  # temp 0 (qwen3.8-flash) — judge/canon role is gated on verdict parity
+  # before it may adjudicate. Key lives in .env (QWEN_CLOUD_API_KEY).
+  qwen_cloud:
+    enabled: true
+    tier: 0
+    display_name: "Qwen MaaS qwen3.8-flash (token-plan subscription)"
+    short_name: "QWEN_CLOUD"
+    provider: openai_compatible
+    base_url: https://token-plan.maas.qwencloudapi.com/compatible-mode/v1
+    model: qwen3.8-flash
+    temperature: 0
+    timeout_s: 180
+    capabilities:
+      vision: false
+
+  qwen_cloud_max:
+    enabled: true
+    tier: 0
+    display_name: "Qwen MaaS qwen3.8-max (token-plan subscription)"
+    short_name: "QWEN_CLOUD_MAX"
+    provider: openai_compatible
+    base_url: https://token-plan.maas.qwencloudapi.com/compatible-mode/v1
+    model: qwen3.8-max
+    temperature: 0
+    timeout_s: 240
+    capabilities:
+      vision: false
+
+  qwen_cloud_dsv41:
+    enabled: true
+    tier: 0
+    display_name: "Qwen MaaS deepseek-v4.1-flash (second vendor for the burn)"
+    short_name: "QWEN_CLOUD_DSV41"
+    provider: openai_compatible
+    base_url: https://token-plan.maas.qwencloudapi.com/compatible-mode/v1
+    model: deepseek-v4.1-flash
+    temperature: 0
+    timeout_s: 240
+    capabilities:
+      vision: true
+
   # Retired as coder: spark-e10b (.38) is embedding/search/training only.
   dgx_qwen:
     enabled: false

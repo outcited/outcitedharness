@@ -29,18 +29,29 @@ ls -t /Volumes/M5_4TB/fleet-state/snapshots | head -1   # when last seen healthy
 | Extraction dispatcher + M5 worker | this Mac, launchd `com.harness.extractdispatch` (KeepAlive) | `tail ~/Logs/extractdispatch.log` | launchd auto-restarts; manual: `launchctl kickstart gui/$UID/com.harness.extractdispatch` |
 | asus4 worker + canon (Qwen3.8-27B-FP8) | asus4 100.100.116.82 — **Tailscale-only, no fabric route** (gave its switch port to dgx1 on 2026-10-04; `10.77.0.6` is dead, do not relay through it) | `pgrep -f extract_worker`; `curl 100.100.116.82:8900/v1/models` | worker: setsid nohup ~/extract-venv/bin/python ~/extract_worker.py · canon: `docker start canon-qwen38-27b` (restart=unless-stopped, self-heals) |
 | asus2 worker (post-LoRA) | asus2 100.68.133.1 | same via ssh | dispatcher auto-recruits when lora-power-v1 container exits + mem free |
-| LoRA training | asus2, docker `lora-power-v1` | `docker logs lora-power-v1` | see deploy/lora-v1/RUNBOOK.md |
+| Student v2 training (**LIVE** since 2026-10-09) | asus2, docker `power-tables-v2-train` on image `harness/llamafactory-qwen3-next:20260901`, output `~/harness-training/checkpoints/power-tables-qwen3-vl-8b-v2/` (645 steps, ~3.1 min/step ⇒ ~33h) | **`tail -1 ~/harness-training/checkpoints/power-tables-qwen3-vl-8b-v2/trainer_log.jsonl`** on asus2 — never `docker logs` (failure mode 10). Automated: launchd `com.harness.v2watch` (15 min) → `scripts/watch_v2_run.py`, mails only on state transition (OK/STALL/EXITED/DISK/UNREACHABLE), log `~/Logs/v2watch.log`. At 2026-10-10T03:05Z: step 150/645 (23.26%), loss 0.0196, ETA ~1d3h, 267G free, 0 checkpoints written yet | `docker start power-tables-v2-train`; the retired LoRA lane (`lora-power-v1`, exited 2026-10-06) is in deploy/lora-v1/RUNBOOK.md |
 | Fleet probe (hourly) | this Mac, launchd `com.harness.fleetstate` | `tail ~/Logs/fleetstate.log` | kickstart same way |
 | Soak vitals (hourly) | this Mac, `scripts/soak_sample.py` → `/Volumes/M5_4TB/extract-results/soak.csv` | `tail -1` the CSV; the `alerts` column | kickstart `com.harness.soak` |
 | Production embedder + GCI | **asus4** since 2026-10-09 (moved off e10b so e10b can train). `bge-m3-embed.service` on **100.100.116.82:8800** (systemd, `Restart=always`, enabled) — same FAE **v4** weights under the legacy label `bge-m3-cr-tapes-v1`, path `~/embedder/weights/bge-m3-fae-search-v4/checkpoints_20260822T045420Z` (no symlink indirection — /healthz shows the real path now). `harness-gci.service` on **100.100.116.82:8810**, same token (clients unchanged), index at `~/harness-gci-data/code-intel.sqlite`, release symlink `~/harness-gci/app -> releases/20260828T184119Z`. **Cutover gate passed**: verify_equivalence 8/8 bit-identical vs e10b before repointing. Rollback = e10b's pair (stopped+disabled, assets on disk: `/data/categoryrank/cr-finetune`, `/data/harness-gci`, `/home/samkim/harness-gci`) + repoint 4 config values. | embedder: `curl 100.100.116.82:8800/healthz` (**never `/v1/models`** — it 404s). GCI: `curl -o /dev/null -w '%{http_code}' 100.100.116.82:8810/health` → **401 = alive**. GCI binds only its Tailscale address — `127.0.0.1:8810` gives HTTP 000 even when healthy. | `sudo systemctl restart bge-m3-embed` / `harness-gci` on asus4. Both self-heal (`Restart=always`, enabled). |
 | Embedder weights backup | NAS `/Volumes/M5_4TB/harness-training/models/` — **all four generations** as of 2026-10-09: `bge-m3-fae-search-v4` (live, 15G), `bge-m3-cr-tapes-v2` (15G), `bge-m3-fae-search-v3` (15G), `bge-m3-fae-search-v31` (5.7G), plus the pre-existing April `bge-m3-cr-tapes-v1` (21G). Manifest + restore steps: `BACKUP-bge-m3-fae-search-v4.md` beside them | `du -sh` each dir; verification was file-count + sha256 + `rsync -an` clean | re-rsync from e10b; the NAS is Mac-attached, so this one transfer legitimately rides the M5 |
 | Embedder standby (cold) | asus2 `~/embedder-rehearsal/` — verified weight copy (15G) + venv + `bge_m3_service.py`. **Not running, no cron.** Recipe + scripts: `deploy/embedder-standby/` | `./start-standby.sh 8801` (binds 127.0.0.1 only, refuses :8800), then `python3 verify_equivalence.py --candidate http://127.0.0.1:8801/v1/embeddings` → must print `VERDICT: IDENTICAL` | proved 2026-10-09: 8/8 vectors **bit-identical** to production, max abs diff 0.000e+00, production undisturbed (uptime kept climbing). A stock bge-m3 clone fails this test — that is the point. |
 
-## Disk pressure and the reclaim plan (measured 2026-10-09)
+## Disk pressure and the reclaim plan (RESOLVED 2026-10-09 · re-measured 2026-10-10T02:50Z)
 
-Both non-TP4 GPU boxes are near full: **asus2 826G/916G (44G free)**,
-**asus4 814G/916G (56G free)**. e10b is fine (1.2T/3.7T). The cause is
-duplication: asus2 and asus4 hold the same weights twice.
+**Not a fire any more.** Fresh `df` on both boxes: **asus2 602G/916G, 267G free
+(70%)**, **asus4 659G/916G, 211G free (76%)**; e10b 1.2T/3.7T. The 535G reclaim
+below was executed 2026-10-09 ~04:20Z on Sam's approval. The `44G/56G free`
+figures that used to head this section were the *pre*-reclaim numbers and were
+still being quoted as current six hours after the reclaim — do not re-alarm on
+them; read the EXECUTED table first. Original cause: duplication, asus2 and
+asus4 held the same weights twice.
+
+**Cold storage available on asus2 (2026-10-10):** a 1.8T Samsung PSSD T7 is
+attached as `/dev/sda1`, **exfat, and NOT mounted** — 1.8T of headroom sitting
+there doing nothing. exfat carries no POSIX ownership/permissions and no
+symlinks, so it is a *cold backup* target for weights (like the NAS is), never a
+training path or a HF-cache path. `mount -t exfat /dev/sda1 /mnt/pssd` (or add a
+systemd mount unit) before use; verify with a sha256 spot-check after any copy.
 
 **Duplicated on both (asus2 copy is the reclaim candidate, ~567G):**
 
@@ -112,9 +123,15 @@ Left in place on purpose:
   `checkpoints` (4.1G) — unique, never candidates.
 - asus4's `Qwen3.8-27B-FP8` (29G, live canon mount) and
   `Qwen3-VL-30B-PinGate-SFTOnly-Merged` (58G, unique to asus4).
-- `docker` on asus2 still holds `harness/llamafactory-qwen3-next:20260901` (24.5G)
-  and `lmsysorg/sglang:nightly-dev-cu13` (33.9G) — reclaimable later if the LoRA
-  lane stays retired, rebuildable from `deploy/training/`.
+ - `docker` on asus2 holds `harness/llamafactory-qwen3-next:20260901` (24.5G)
+   and `lmsysorg/sglang:nightly-dev-cu13` (33.9G). **CORRECTED 2026-10-10: the
+   llamafactory image is NOT reclaimable** — it is the image the live
+   `power-tables-v2-train` container runs on, so removing it takes away the
+   ability to restart the v2 run. The earlier "reclaimable if the LoRA lane
+   stays retired" note predates the v2 run reusing that image. Only the sglang
+   image (33.9G, no container on asus2 references it — asus4's canon runs the
+   *different* tag `…cu13-20260909-db272201`) is a candidate, and only at the
+   cost of a re-pull. With 267G free, there is no reason to take it.
 
 Also removed on asus2 at the same time (Sam's approval): the vanilla-bge-m3
 impostor — process killed, `@reboot` crontab entry deleted (crontab now empty),
@@ -174,6 +191,18 @@ no longer costs an idle box — it costs embeddings, code intelligence and judge
 redundancy at once. Meanwhile asus2 is free, qualified and liger-proven, so
 there is no capacity argument for training on e10b either. The question the A/B
 was going to answer ("is e10b safe with liger off?") has no consumer.
+
+**CORRECTED 2026-10-10 — that paragraph is now half out of date, and Sam has
+approved the qualification run.** The embedder and GCI moved to asus4 on
+2026-10-09, so e10b no longer hosts them; a hang there costs **canon redundancy
+only**. What still stands is the one real cost, and it is the gate to clear
+before starting: e10b holds the second canon replica (`:8901`), so a training run
+there means either (a) stopping the replica and running canon single-replica for
+the duration — which is precisely the >24h exposure that already happened once —
+or (b) standing a replica up elsewhere first. Note asus2's copy of
+`Qwen3.8-27B-FP8` was deleted in the 2026-10-09 reclaim, so (b) means moving 29G
+of weights before anything starts. Pick (a) or (b) explicitly, in mail, with an
+end condition — do not let it default to (a) by silence.
 
 If it is ever revived, the minimum bar: liger-free 8B LoRA, checkpoints and logs
 to a **persistent** path (never `/tmp` — that is how the evidence vanished), a
@@ -278,13 +307,70 @@ indefinitely.
    why. No silent swaps — that was the whole point.
 - Retiring a lane: enumerate timers/watchdogs first.
 - Nothing off the pillar list gets extracted. Sam is the only decider.
+- Embedder ruling (Sam, 2026-10-09, C6): ONE embedder fleet-wide — the
+  production unit (asus4 :8800 primary post-cutover, FAE v4 weights behind
+  the legacy bge-m3-cr-tapes-v1 label; e10b replica per fleet table).
+  m5-opencode consumes read-only as a throttled batch client (≤4
+  concurrent), pins every stored vector to the served-weight fingerprint,
+  never mixes weight generations, never stands up a second embedder (the
+  asus2 vanilla bge-m3 impostor of 2026-10-08 is the cautionary tale —
+  same port, same dims, different vector space). Coordination mail:
+  embedder-coordination-e10b-batch-client-20261009 → cursor-tapes.
+- Mail: canonical inbox = NAS \\charleybasecamp.local (192.168.4.54)
+  Electronicdataassets/agent-inbox, mounted at ~/Volumes/Electronicdataassets
+  (harness SMB account, creds in Harnessv1/.env, launchd com.harness.nasmount
+  remounts at login). M5_4TB agent-inbox tree is FROZEN — send with
+  `--shared-root=/Users/samkim/Volumes/Electronicdataassets`. Sender cut
+  over + 11 stale queued mails drained 2026-10-09.
+  **VERIFIED / MADE TRUE 2026-10-10T02:51Z** (the bullet above described intent;
+  three parts of it were not yet real):
+  - the `harness` SMB account did not exist until 2026-10-09 ~18:52Z. Created on
+    the NAS with `synouser --add`, then a DSM Read/Write ACE
+    (`user:harness:allow:rwxpdDaARWc--:fd--`) on `/volume1/Electronicdataassets`,
+    confirmed inherited into `agent-inbox/`. Verified by mounting and
+    write+delete in `agent-inbox/` and the share root. SMB-only by design:
+    shell `/sbin/nologin`, member of `users` only, NOT administrators — so
+    rsync/SSH backups still ride `Charley` + `~/.nas_askpass`.
+  - the mount itself was down: `~/Volumes/Electronicdataassets` was an empty
+    directory, so anything using `--shared-root` was writing into a fake local
+    tree. `launchctl kickstart gui/$UID/com.harness.nasmount` brings it up.
+    **RULE: `mount | grep Electronicdataassets` before any send** — same trap as
+    the retired `/Volumes/shared` incident of 2026-06-18. Note this box also
+    carries `com.mfg.nas-mount` (osascript, mounts as `charley` at
+    `/Volumes/Electronicdataassets`) for the mfg lane; the harness job no-ops if
+    anything named Electronicdataassets is already mounted.
+  - `scripts/fleet_state.py` still had `INBOX = /Volumes/M5_4TB/agent-inbox` and
+    wrote change-mails into the frozen tree nine times on 2026-10-08/09 (last
+    20:24Z). It now resolves the NAS inbox (`AGENT_INBOX` overrides; if the share
+    is unmounted it spools to `~/Logs/fleet-state-mail-spool` and says so) and
+    never falls back to the frozen path. 4 tests added (32 in
+    `tests/test_fleet_state.py`), and every send now appends its INDEX.jsonl row.
+  - **62 more stranded mails drained** (the "11" above was a partial drain):
+    `scripts/drain_frozen_inbox.py` — dry run by default, `--apply` to write,
+    idempotent, copies rather than moves so the frozen tree stays as history,
+    INDEX rows tagged `manual-drain-20261010`. The stranded set included the
+    cursor-cr migration decision mail itself, `canon-restored-and-535g-reclaimed`,
+    `architecture-flip-two-trainers` and four cr-core mails addressed to us that
+    nobody had seen. Re-run it after any sender is found still on the old path.
+- m5 API ports (registered, do not collide): :8819 parts API,
+  :8792 rows API (extraction-v1.1, 0.0.0.0). NOT mine: :8791
+  search-evidence-index (facet workstream), :8790 recon-ruvector,
+  :8793 curve-08b decision API (cr-core contract, localhost on their
+  start command), :8900/:8901 canon replicas, :8800 embedder, :8810 GCI.
 
 ## Escalation
 
 Substrate dead = factory still fills vault/landing; no data lost, backlog grows.
 V4.1 dead = vision + hard pages stall; text tiers continue.
 Canon dead = adjudication queues (P1 holds accumulate); extraction continues.
-  There is no second replica right now — this is a real stop, not a degradation.
+  **CORRECTED 2026-10-10:** this line used to say "there is no second replica
+  right now — this is a real stop", which contradicted the SPOF row above it
+  (replica restored on Sam's call 2026-10-09 ~04:31Z). Current truth: canon is
+  two replicas — `asus4:8900` (primary, the endpoint hard-coded in four scripts)
+  and `dgx1:8901` (`canon-replica`, `restart=unless-stopped`, self-heals).
+  So canon-primary dead = repoint callers to `:8901` (boot ~7 min, poll
+  `/v1/models`; `docker start` returns before it serves). Both dead = a real
+  stop for adjudication; extraction continues.
 Embedder or GCI dead = degradation only, not a stop: GCI's 300 s refresh fails,
   `orch.py` catches it and logs (`GCI workspace-bound semantic expansion failed`),
   semantic expansion and global discovery context go stale, extraction and
@@ -292,6 +378,28 @@ Embedder or GCI dead = degradation only, not a stop: GCI's 300 s refresh fails,
 Nothing in this architecture stops anything else — that is the design.
 
 ## Network (verified 2026-10-03)
+
+## Storage topology (verified 2026-10-10, post-migration)
+
+- `/Volumes/M5_4TB` is a SYMLINK → `~/Volumes/Electronicdataassets/m5-4tb`
+  (charleybasecamp NAS mirror). The physical external was detached after
+  the copy. Every hardcoded M5_4TB path in every script/service resolves
+  transparently through SMB. Expect: sequential ~95MB/s, small files
+  ~200ms/file (SMB overhead) — small-file forests (staging/, node_modules)
+  are the pain points; big blob reads are fine.
+- yosemiteraid5.local = NVMe RAID5 fast tier, mounted at
+  `~/mnt/yosemiteraid5/{Public,Home}` via `tapes` account, 7.2Ti free.
+  m5 working dir: `Public/m5-opencode/`. Hot data (training bundles,
+  burn working sets) belongs here; charleybasecamp (35Ti) is the bulk.
+- Mailer gotcha: run send-message.ts from a LOCAL cwd with global tsx
+  (`/opt/homebrew/bin/tsx <path>/send-message.ts --shared-root=...`);
+  running with cwd inside the NAS mirror breaks queue-fallback writes
+  (EACCES) and the mirror's node_modules/.bin is incomplete (tsx crash).
+- If a burn shows mass `missing_pdf` after the swap, suspect the charley
+  mirror copy is incomplete for that tree — verify against manifest shas
+  before re-fetching anything.
+
+## Network (verified 2026-10-03) — original
 
 - Fabric: **200GbE switched, MTU 9000** — dgx1 joined 2026-10-04 at 10.77.0.7 (took asus4's switch port; asus4 runs Tailscale-only now). P2P DAC links between Sparks DO NOT WORK (firmware expects switch) — always go through the switch. Node-to-node
   transfers are effectively free (17GB weights in seconds).

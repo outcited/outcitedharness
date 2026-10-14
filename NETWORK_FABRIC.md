@@ -25,6 +25,15 @@ DHCP on its management bridge through `ether2`. Treat that address as a lease
 until the router has a reservation for the switch. Never store its RouterOS
 password in this repository or in command-line history.
 
+**Management access, verified live 2026-10-10:** identity `sw-crs812`, board
+`CRS812-8DS-2DQ-2DDQ`, arm64, RouterOS `7.24.1 (stable)`, uptime 5w4d, lease
+still `bound` at `192.168.4.50/22` on `bridge`. One account only: `admin`
+(group `full`), password in `~/.secrets/crs812-admin` on the Mac — confirmed
+still valid (REST 200). Open services: `22` ssh, `23` telnet, `80` www,
+`8291` winbox, `8728` api, `8729` api-ssl. **`443` is closed**: the REST API is
+`http://192.168.4.50/rest/...`, so an `https://` call fails with curl exit 000
+and masquerades as "switch down". Read-only unless Sam approves a change.
+
 All six non-protected nodes are connected and operational:
 
 - `qsfp56-1-1` → ASUS1 (`gx10-fc2e`), NADDOD `Q56-200G-CU1`, 200 Gb/s,

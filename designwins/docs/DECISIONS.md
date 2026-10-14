@@ -613,6 +613,68 @@ of 18,789 parts have a family document at all.
 * It does not raise Gate D4's floor. `core_family` has **no phrase binding
   yet** — a `ProvenFit` knife with no phrase still narrows nothing.
 
+## D10 — Additive unit kinds (Coulomb, Farad, Second, Watt, Joule), corpus-evidenced
+
+**Ruling.** §5's kind vocabulary grows 8 → 13 and the symbol table gains
+**appended** rows only: `QG`, `CISS`, `COSS`, `CRSS`, `TF`, `TR`, `PTOT`,
+`PD`, `EAS`. The amendment uses §5's own mechanism: **this entry + gold
+fixture + implementation land in one commit.** `SYMBOLS`/`_SYMBOLS` rows are
+appended — **never reordered** (L4: order is semantic). Frozen multiplier
+tables gain per-kind rows; nothing else moves.
+
+**Reason.** Units can only scale against a kind that exists. 804 registry
+candidates were stranded at `Scale::Unknown` — among them the named unbound
+knives (`QG`, `CISS`) that `factory_targets` fetch logic already hunts, and
+the capacitor tier (42,011 docs, the biggest inventory gap) which is
+Farad-first. Both payoffs grow these columns.
+
+**Evidence — measured 2026-10-12 against `claims_canonical` (86,736 claims),
+unit spread per symbol (E11):**
+
+| symbol | printed units (claims) | ruling |
+|---|---|---|
+| `QG`, `Q_G` | nC×1,837 | Coulomb — one kind, uncontested |
+| `CISS` | pF×1,551, nF×4 | Farad |
+| `COSS` | pF×1,608 | Farad |
+| `CRSS` | pF×1,253 | Farad |
+| `TF` | ns×962, µs×2, nS×2, ms×2 | Second — see case law |
+| `TR` | ns×962, µs×2, nS×2, ms×1 | Second |
+| `PTOT` | W×833 | Watt |
+| `PD` | W×364, mW×80 | Watt (mW is the same kind) |
+| `EAS` | mJ×816 | **Joule — added at review; the corpus named it** |
+
+Frozen multipliers: Coulomb `nC 1e-9, µC 1e-6, mC 1e-3, C 1.0` · Farad
+`pF 1e-12, nF 1e-9, µF 1e-6, mF 1e-3, F 1.0` · Second `ns 1e-9, µs 1e-6,
+ms 1e-3, s 1.0` · Watt `mW 1e-3, W 1.0, kW 1e3` · Joule `mJ 1e-3, J 1.0`.
+
+**What this makes structurally impossible:**
+
+1. **Cross-kind coercion.** A value scales only against its symbol's kind
+   table. `VGS = 10 nC` cannot type (Volt's value-regex cannot bind `nC`);
+   neither can the G4 case `RG = 5 mW`. Gold negatives pin both.
+2. **Dual-use `TF` cannot become Hz.** `TF = 50 MHz` cannot type — `MHz`
+   is not in Second's token list — so a transition-frequency printing fails
+   closed and stays untyped instead of corrupting fall-time cells.
+3. **Contested symbols cannot acquire a kind.** Measured dual-kind spreads
+   stay out of the table: `T` (Second×25/Celsius×10), `TST` (37/12), `RCS`
+   (28/2), `R` (26/6/3), `RDSON` (Ohm×3,483/Watt×506 — the G4 glyph rows;
+   **mW-on-ohm stays `Unknown` forever at the type layer**, the scoring
+   layer corrects), `RTHJA`/`RTHJC` (Watt/Celsius splits = `°C/W` print
+   fragmentation — already owned by §5.7 thermal metrics, no new kind).
+4. **A table reorder changes gold** and fails the same-commit gate.
+
+**Case law (an L10 extension).** `TF`/`TR`: the corpus prints `nS`×2 beside
+`ns`×962 (Siemens vs Second reading). Following L10 (`mV`/`MV` → milli,
+dominant in power tables), case collapses to the **Second** reading on
+`TF`/`TR` rows. Recorded here rather than hidden in a regex.
+
+**Gate.** `tests/fixtures/gold/condition_model_additive_kinds_v1.jsonl`
+(18 rows: 14 positive, 4 negative) generated from the amended Python
+reference (D8: a fixture samples the reference), gated by
+`additive_kinds_gold.rs` — byte-parity + executable negative controls.
+**N1 167/167 passes unchanged (the no-reorder proof)**; N4a (9,551) and N4b
+(10,270/64,245) corpus gates re-run green after the change.
+
 ## Superseded / not decided here
 
 | item | status |
@@ -639,3 +701,4 @@ of 18,789 parts have a family document at all.
 | E8 | `harness/discovery/evaluator.py` `AXES` (5 power axes) + `service.next_question` expected-reduction ranking (D4, D5) |
 | E9 | **PDF spike 2026-10-10** — LMR33610 p.8, `document_sha256 777b3966…e39611`, PyMuPDF 1.28.2 vs `pypdfium2`. G1–G6 measured, G7 untestable via the Python binding (D1) |
 | E10 | `harness/electronics/*` PDF surface — 8,406 LOC across `word_columns` `regions` `locator` `page_evidence` `extraction` `family_*` `power_datasheet`; API used: `get_text(text/words/dict/blocks)`, `get_drawings()`, `get_pixmap`, `get_images`, `fitz.Rect/Matrix`, `page.rect` (D1 port scope) |
+| E11 | `claims_canonical` unit-spread census 2026-10-12 (86,736 claims; snapshot of `catalog.db`) — per-symbol printed-unit counts behind D10; contested dual-kind sets named in the entry |
