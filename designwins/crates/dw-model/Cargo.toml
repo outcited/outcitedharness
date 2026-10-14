@@ -1,0 +1,21 @@
+[package]
+name = "dw-model"
+description = "The deterministic model layer: response schemas, validation, prompt construction, batch bundles — port of harness/electronics/{local_model,cloud_vision,frontier_batch}.py. The only crate that may call a model (PLAN.md)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+regex = "1"
+dw-extract = { path = "../dw-extract" }
+dw-recon = { path = "../dw-recon" }
+
+[dev-dependencies]
+
+[lints]
+workspace = true
