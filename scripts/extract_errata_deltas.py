@@ -133,6 +133,8 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--doc-timeout", type=float, default=60.0,
+                    help="seconds per document before it is abandoned as hung")
     args = ap.parse_args()
 
     documents = _queue_documents(args.queue)
@@ -140,6 +142,14 @@ def main() -> int:
         documents = documents[: args.limit]
     out_rows = []
     tally: Counter[str] = Counter()
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    # Stream rows to disk as they arrive so a later hang/fault cannot lose the
+    # work already done (the lane previously held ~2GB and wrote once at the end).
+    _fh = args.out.open("w")
+
+    def _emit(row):
+        _fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+        _fh.flush()
 
     def _absorb(item, result):
         if result["error"]:
@@ -156,17 +166,41 @@ def main() -> int:
             row["pdf_sha"] = sha
             row["source_path"] = item["source_path"]
             row["source_url"] = item["source_url"]
+            _emit(row)
             out_rows.append(row)
             tally[row["record_kind"]] += 1
             if row.get("affected_silicon"):
                 tally["with_affected_silicon"] += 1
 
     if args.workers > 1:
-        from concurrent.futures import ProcessPoolExecutor
+        from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+        from concurrent.futures import wait, FIRST_COMPLETED
 
-        with ProcessPoolExecutor(max_workers=args.workers) as pool:
-            for item, result in zip(documents, pool.map(_scan, documents)):
-                _absorb(item, result)
+        # pymupdf can hang forever in C on a malformed PDF (get_text never
+        # returns). Under a plain pool.map (ordered, unbounded) ONE bad file
+        # stalls the whole lane — the 6-hour stall of 2026-10-13. Instead: push
+        # docs into a bounded pool and collect with a batch timeout; every doc
+        # still pending after the timeout window is abandoned as hung and the
+        # stuck pool is torn down (its workers cannot be reused).
+        DOC_TIMEOUT = args.doc_timeout
+        docs = list(documents)
+        i = 0
+        while i < len(docs):
+            batch = docs[i:i + args.workers * 2]
+            pool = ProcessPoolExecutor(max_workers=args.workers)
+            futures = {pool.submit(_scan, item): item for item in batch}
+            try:
+                done, pending = wait(futures, timeout=DOC_TIMEOUT * 2)
+                for fut in done:
+                    _absorb(futures[fut], fut.result())
+                for fut in pending:
+                    fut.cancel()
+                    tally["error:doc_timeout"] += 1
+            finally:
+                for p in list(getattr(pool, "_processes", {}).values()):
+                    p.terminate()
+                pool.shutdown(wait=False, cancel_futures=True)
+            i += len(batch)
     else:
         for item in documents:
             pdf = Path(item["source_path"])
@@ -174,10 +208,7 @@ def main() -> int:
                 tally["missing_pdf"] += 1
                 continue
             _absorb(item, _scan(item))
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(
-        "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in out_rows)
-    )
+    _fh.close()
     print(json.dumps({"documents": len(documents), "rows": len(out_rows), **dict(sorted(tally.items()))}, indent=1))
     return 0
 
