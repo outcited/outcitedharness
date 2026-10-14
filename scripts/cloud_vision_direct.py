@@ -57,16 +57,32 @@ def _key() -> str:
     raise SystemExit("OPENROUTER_API_KEY missing")
 
 
+_SHA_CACHE: dict[str, str | None] = {}
+
+
+def _doc_sha16(path: str) -> str | None:
+    """sha256(path)[:16], cached — one full read per DOCUMENT, not per region.
+
+    The naive per-region hash re-read multi-MB PDFs over NFS for every one of
+    tens of thousands of regions (the 800-in-6-hours stall of 2026-10-14)."""
+    if path not in _SHA_CACHE:
+        import hashlib
+        try:
+            _SHA_CACHE[path] = hashlib.sha256(Path(path).read_bytes()).hexdigest()[:16]
+        except OSError:
+            _SHA_CACHE[path] = None
+    return _SHA_CACHE[path]
+
+
 def _render_path(render_dir: Path, meta: dict) -> Path | None:
     """Map a figure-meta row to its render PNG filename.
 
     prepare names renders `{doc_sha16}-p{page}-f{fig}.png`; meta carries
-    source_path + page + figure_index, so derive the sha16 from the file."""
-    import hashlib
-    src = Path(meta["source_path"])
-    if not src.exists():
+    source_path + page + figure_index, so derive the sha16 from the file
+    (cached per document)."""
+    sha16 = _doc_sha16(meta["source_path"])
+    if sha16 is None:
         return None
-    sha16 = hashlib.sha256(src.read_bytes()).hexdigest()[:16]
     cand = render_dir / f"{sha16}-p{meta['page_1based']}-f{meta['figure_index']}.png"
     return cand if cand.exists() else None
 
