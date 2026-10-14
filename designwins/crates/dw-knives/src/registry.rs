@@ -200,12 +200,16 @@ pub fn norm_symbol(symbol: &str) -> String {
     out
 }
 
-/// Which axis a datasheet symbol answers, through [`norm_symbol`].
-/// `None` when the symbol is not in the registry — an unmapped symbol is an
-/// unknown axis (D5's honesty), never a silent best-guess.
+/// Which axis a datasheet symbol answers.
+///
+/// Lookup order (E1, G1): the **alias table first** ([`crate::alias`] —
+/// spelling folds `norm_symbol` cannot see: `Θ`/`TH`, `Δ`/`D`, word
+/// labels), then `norm_symbol` matching against [`AXES`]. `None` when the
+/// symbol is not in the registry — an unmapped symbol is an unknown axis
+/// (D5's honesty), never a silent best-guess.
 #[must_use]
 pub fn axis_for_symbol(symbol: &str) -> Option<Axis> {
-    let n = norm_symbol(symbol);
+    let n = crate::alias::canonical_key(symbol);
     AXES.iter()
         .find(|spec| spec.symbols.iter().any(|s| norm_symbol(s) == n))
         .map(|spec| spec.axis)

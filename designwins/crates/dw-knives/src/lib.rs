@@ -24,10 +24,13 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+pub mod alias;
 pub mod category;
 pub mod phrase;
 pub mod rating;
 pub mod registry;
+
+pub use alias::{alias_rows, canonical_key, fold_symbol};
 
 pub use category::{Assignment, CategoryGraph, Closure};
 pub use phrase::{
