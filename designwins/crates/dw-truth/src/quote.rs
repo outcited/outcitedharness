@@ -42,9 +42,16 @@ use serde::{Deserialize, Serialize};
 /// Comparison is done on this form only, so that a quote survives ligatures,
 /// non-breaking spaces, and case differences without losing its claim to being
 /// verbatim.
+///
+/// NFKC is load-bearing, not cosmetic: the reference applies it, and it folds
+/// characters like U+2010 `‐` to `-`, which **changes string length**. A norm
+/// that skips it lands `find(quote)` at a different offset, so the header
+/// neighbourhood window covers different text and the verdict diverges (the
+/// exact class Gate N4 caught: subject 496 and 24 siblings).
 #[must_use]
 pub fn norm(s: &str) -> String {
-    let folded = s;
+    use unicode_normalization::UnicodeNormalization;
+    let folded: String = s.nfkc().collect();
     let collapsed: String = folded.split_whitespace().collect::<Vec<_>>().join(" ");
     collapsed.to_lowercase()
 }
@@ -414,6 +421,58 @@ pub const QUALIFIER_COLUMN_TOKENS: &[(&str, &[&str])] = &[
     ("rated", &["rated", "rating"]),
 ];
 
+/// Extract numbers the way the reference does: `-?\d+(?:\.\d+)?`.
+///
+/// A split-on-delimiters approach is NOT equivalent — `"15...18"` is a single
+/// token under a char-class split (dots are in the class) and fails to parse,
+/// so the reference's two numbers (`15`, `18`) were lost. This scans for the
+/// pattern directly, which also correctly handles `-55～+150` (minus sign binds
+/// to its own number, `+`/`～` separate them).
+fn extract_numbers(s: &str) -> Vec<f64> {
+    // Byte-scanning loop: every index below is guarded by an `i < bytes.len()`
+    // or `i + 1 < bytes.len()` bound checked in the same expression, and
+    // `s[start..i]` is in-range by construction (start <= i <= len). Same
+    // accepted pattern as the dw-recon grid readers.
+    #[allow(
+        clippy::indexing_slicing,
+        reason = "byte walk, every index guarded by a loop bound"
+    )]
+    {
+        let bytes = s.as_bytes();
+        let mut out = Vec::new();
+        let mut i = 0;
+        while i < bytes.len() {
+            let c = bytes[i] as char;
+            if c.is_ascii_digit()
+                || (c == '-' && i + 1 < bytes.len() && bytes[i + 1].is_ascii_digit())
+            {
+                let start = i;
+                if c == '-' {
+                    i += 1;
+                }
+                while i < bytes.len() && bytes[i].is_ascii_digit() {
+                    i += 1;
+                }
+                if i < bytes.len() && bytes[i] == b'.' {
+                    // only consume a decimal point if a digit follows
+                    if i + 1 < bytes.len() && bytes[i + 1].is_ascii_digit() {
+                        i += 1;
+                        while i < bytes.len() && bytes[i].is_ascii_digit() {
+                            i += 1;
+                        }
+                    }
+                }
+                if let Ok(n) = s[start..i].parse::<f64>() {
+                    out.push(n);
+                }
+            } else {
+                i += 1;
+            }
+        }
+        out
+    }
+}
+
 /// Ordinal wrong-cell guard.
 ///
 /// When a header line shows an ordered column set (`min/typ/max…`) and the
@@ -479,11 +538,7 @@ pub fn column_position_binds(
     let col_index = header_line.iter().position(|t| t == col_tok)?;
 
     let q = norm(quote);
-    let quote_nums: Vec<f64> = q
-        .split(|c: char| !(c.is_ascii_digit() || c == '.' || c == '-' || c == '+'))
-        .filter(|s| !s.is_empty())
-        .filter_map(|s| s.parse::<f64>().ok())
-        .collect();
+    let quote_nums: Vec<f64> = extract_numbers(&q);
     let val = value?;
 
     let val_positions: Vec<usize> = quote_nums
