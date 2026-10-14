@@ -245,7 +245,10 @@ def main() -> int:
             base = it["_meta"]
         if "error" in r:
             return {**base, "verdict": "held", "reason": r["error"], "detail": r.get("body")}
-        raw = r["content"].strip()
+        raw = (r["content"] or "").strip()
+        # models often wrap JSON in markdown fences — strip to the outer object
+        if raw.startswith("```"):
+            raw = raw.strip("`").lstrip("json").strip()
         try:
             payload = json.loads(raw)
             verdict = "ok"
