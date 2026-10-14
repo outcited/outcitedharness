@@ -54,6 +54,46 @@ def _quote():
         sys.stdout.write(json.dumps(verdicts, ensure_ascii=False, sort_keys=True) + "\n")
 
 
+def _claims():
+    """`verify_claims` over the whole live catalog (Gate N4 — the 87K claim diff).
+
+    Corpus paths come from env so both engines read identical evidence:
+      N4_CLAIMS   path to claims.jsonl   (one claim per line, keyed by `id`)
+      N4_DOCTEXT  path to doctext.json   ({sha256: full document text})
+
+    Each subject on stdin is a claim `id`.
+    """
+    import os
+
+    sys.path.insert(0, ".")
+    from harness.pipeline.quote_verify import verify_claims
+
+    claims_path = os.environ["N4_CLAIMS"]
+    doctext_path = os.environ["N4_DOCTEXT"]
+    by_id: dict[str, dict] = {}
+    with open(claims_path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            rec = json.loads(line)
+            by_id[rec["id"]] = rec
+    doctext = json.loads(open(doctext_path, encoding="utf-8").read())
+
+    for line in sys.stdin:
+        subject = line.rstrip("\n")
+        if not subject:
+            sys.stdout.write("[]\n")
+            continue
+        rec = by_id.get(subject)
+        if rec is None:
+            sys.stdout.write("[]\n")
+            continue
+        doc_text = doctext.get(rec["doc_sha256"], "")
+        verdicts = verify_claims({rec["field"]: rec["claim"]}, doc_text)
+        sys.stdout.write(json.dumps(verdicts, ensure_ascii=False, sort_keys=True) + "\n")
+
+
 def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "condition"
     if mode == "condition":
@@ -61,6 +101,9 @@ def main() -> int:
         return 0
     if mode == "quote":
         _quote()
+        return 0
+    if mode == "claims":
+        _claims()
         return 0
     print(f"unknown mode: {mode}", file=sys.stderr)
     return 2

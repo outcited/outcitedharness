@@ -29,7 +29,6 @@ import argparse
 import json
 import sqlite3
 import sys
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -108,13 +107,15 @@ def main() -> int:
     print(f"distinct docs to extract: {len(shas)}", flush=True)
     doctext: dict[str, str] = {}
 
-    def one(sha: str):
+    # pymupdf is not thread-safe across a large concurrent pool (it segfaults
+    # the whole process on some inputs). Extract sequentially — 1.6k docs is a
+    # few minutes and the gate corpus is built once.
+    for i, sha in enumerate(sorted(shas)):
         t = _doc_text(args.vault, sha)
         if t is not None:
             doctext[sha] = t
-
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        list(pool.map(one, sorted(shas)))
+        if (i + 1) % 200 == 0:
+            print(f"  extracted {i+1}/{len(shas)}", flush=True)
 
     (args.out_dir / "doctext.json").write_text(json.dumps(doctext, ensure_ascii=False))
     print(f"doc text extracted: {len(doctext)}/{len(shas)} -> {args.out_dir/'doctext.json'}", flush=True)

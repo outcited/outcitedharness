@@ -29,12 +29,14 @@ use dw_truth::verify_claims;
 use serde_json::Value;
 
 fn usage() -> &'static str {
-    "usage: dw-replace --mode <condition|quote> --corpus <jsonl> [--field <key>] [--limit N] [--out <ledger.json>]\n\n\
+    "usage: dw-replace --mode <condition|quote|claims> --corpus <jsonl> [--field <key>] [--limit N] [--out <ledger.json>]\n\n\
      Runs the Python reference and the Rust candidate on the same subjects and\n\
      reports the discrepancy ledger. Empty ledger = the Rust port replaces the\n\
      Python for that surface.\n\
      mode=condition  subject is a condition string; --field names its column\n\
-     mode=quote      subject is a case path under tests/fixtures/gold/quote_parity/\n"
+     mode=quote      subject is a case path under tests/fixtures/gold/quote_parity/\n\
+     mode=claims     subject is a claim id; --corpus is claims.jsonl and the\n\
+                     doc text map comes from $N4_DOCTEXT (Gate N4, the 87K diff)\n"
 }
 
 /// CLI entry: parse arguments, run both engines, report, exit.
@@ -77,7 +79,7 @@ fn main() -> ExitCode {
         }
     }
 
-    if corpus.as_os_str().is_empty() || !matches!(mode.as_str(), "condition" | "quote") {
+    if corpus.as_os_str().is_empty() || !matches!(mode.as_str(), "condition" | "quote" | "claims") {
         eprintln!("{}", usage());
         return ExitCode::from(2);
     }
@@ -116,6 +118,7 @@ fn main() -> ExitCode {
             "python:harness.electronics.condition_model.parse_condition",
             "rust:dw_normalize::parse_condition",
         ),
+        // `quote` and `claims` share the same engine pair.
         _ => (
             "python:harness.pipeline.quote_verify.verify_claims",
             "rust:dw_truth::verify_claims",
@@ -136,11 +139,86 @@ fn main() -> ExitCode {
 
     let cases_root = repo_root.join("tests/fixtures/gold/quote_parity");
     let mode_for_candidate = mode.clone();
+
+    // Gate N4: load the claim corpus + doc text once, shared by every subject.
+    // Paths come from env so the Python reference reads byte-identical evidence.
+    let (n4_by_id, n4_doctext) = if mode_for_candidate == "claims" {
+        let claims_path = std::env::var("N4_CLAIMS").expect("N4_CLAIMS env");
+        let doctext_path = std::env::var("N4_DOCTEXT").expect("N4_DOCTEXT env");
+        let mut by_id: std::collections::HashMap<String, Value> = std::collections::HashMap::new();
+        for line in std::fs::read_to_string(&claims_path)
+            .expect("claims readable")
+            .lines()
+        {
+            if line.trim().is_empty() {
+                continue;
+            }
+            let rec: Value = serde_json::from_str(line).expect("claim parses");
+            if let Some(id) = rec.get("id").and_then(|v| v.as_str()) {
+                by_id.insert(id.to_string(), rec);
+            }
+        }
+        let doctext: Value = serde_json::from_str(
+            &std::fs::read_to_string(&doctext_path).expect("doctext readable"),
+        )
+        .expect("doctext parses");
+        (by_id, doctext)
+    } else {
+        (std::collections::HashMap::new(), Value::Null)
+    };
+
     let candidate = ClosureCandidate {
         name: cand_name.to_string(),
         run: move |s: &str| -> Value {
             if mode_for_candidate == "condition" {
                 return serde_json::to_value(parse_condition(s)).expect("serialises");
+            }
+            if mode_for_candidate == "claims" {
+                let Some(rec) = n4_by_id.get(s) else {
+                    return Value::Array(vec![]);
+                };
+                let doc_sha = rec
+                    .get("doc_sha256")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default();
+                let doc_text = n4_doctext
+                    .get(doc_sha)
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default();
+                let field = rec
+                    .get("field")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default()
+                    .to_string();
+                let c = rec.get("claim").cloned().unwrap_or_default();
+                let input = dw_truth::ClaimInput {
+                    value: c.get("value").cloned(),
+                    quote: c
+                        .get("quote")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
+                    table: c
+                        .get("table")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or_default()
+                        .to_string(),
+                    column_header: c
+                        .get("column_header")
+                        .and_then(|v| v.as_str())
+                        .map(str::to_string),
+                    row_header: c
+                        .get("row_header")
+                        .and_then(|v| v.as_str())
+                        .map(str::to_string),
+                    qualifier: c
+                        .get("qualifier")
+                        .and_then(|v| v.as_str())
+                        .map(str::to_string),
+                };
+                let mut claims = std::collections::BTreeMap::new();
+                claims.insert(field, input);
+                return serde_json::to_value(verify_claims(&claims, doc_text)).expect("serialises");
             }
             // Same case file the reference read — the gate is only meaningful
             // if both engines saw identical evidence.
