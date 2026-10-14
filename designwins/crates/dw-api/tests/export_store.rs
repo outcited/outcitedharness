@@ -103,7 +103,9 @@ fn cube_reads_cube_json_and_picks_up_fresh_exports() {
 /// page resolves to renderable evidence.
 #[test]
 fn negative_control_resolution_never_invents_a_page() {
-    let root = fixture_export("walk");
+    // Distinct fixture name from `part_walks_the_feeds_and_404s_honestly` —
+    // both would otherwise share one temp dir and race its `remove_dir_all`.
+    let root = fixture_export("resolve");
     let store = ExportStore::open(&root);
 
     let cat = store.part("2N7002L").unwrap();

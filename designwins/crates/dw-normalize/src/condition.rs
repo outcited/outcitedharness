@@ -309,26 +309,36 @@ const RANGE_SEP: &str = r"(?:to|/|~|–|—)";
 const TEMP_UNIT: &str = r"(?:°\s*C(?![A-Za-z])|℃|º\s*C(?![A-Za-z]))";
 const CMP_CHARS: &str = "≤≥≦≧<>＜＞";
 
-fn sep_re() -> Regex {
+fn sep_re() -> &'static Regex {
     // Python: `_SEP_RE.match(tail)` — anchored at the start of `tail`.
-    re::build(&format!(r"^(?:\s*[{SEP_CLASS}]\s*|\s*[≈⋍]\s*)"))
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| re::build(&format!(r"^(?:\s*[{SEP_CLASS}]\s*|\s*[≈⋍]\s*)")))
 }
 
-fn dash_only() -> Regex {
-    re::build(r"^[\s\-–—―‒]+$")
+fn dash_only() -> &'static Regex {
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| re::build(r"^[\s\-–—―‒]+$"))
 }
 
-fn punct_only() -> Regex {
-    re::build(r"^[\s\-–—.();:]*$")
+fn punct_only() -> &'static Regex {
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| re::build(r"^[\s\-–—.();:]*$"))
 }
 
-fn mode_re() -> Regex {
+fn mode_re() -> &'static Regex {
     // Reference compiles with `re.I`.
-    re::build(r"(?i)\b(static|ac|dynamic)\b")
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| re::build(r"(?i)\b(static|ac|dynamic)\b"))
 }
 
-fn ambig_single() -> Regex {
-    re::build(&format!(r"\b[VI]\s*[{SEP_CLASS}]\s*[-+]?\d"))
+fn ambig_single() -> &'static Regex {
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| re::build(&format!(r"\b[VI]\s*[{SEP_CLASS}]\s*[-+]?\d")))
 }
 
 /// Unit regex per kind (`_UNIT_RE` in the reference).
@@ -371,15 +381,19 @@ fn value_regex(kind: Kind) -> Regex {
 
 /// Reversed bounds (`2.5 V≤VOUT`, `1.0V≦VOUT＜1.2V`) — scanned BEFORE symbol
 /// anchors so the bound value is not stolen as a plain anchor (L9).
-fn rev_bound() -> Regex {
+fn rev_bound() -> &'static Regex {
     // The reference compiles this with `re.I`. Without the inline flag, `Vcc`
     // fails to match the `CC` alternative and the reversed bound is never
     // recognised — `4.0V <= Vcc <= 26.5V` then degrades to a scalar plus
     // residue. Caught by Gate N4a against the 9,551-row corpus, not by the
     // 167-row curated gold, which never exercised a lowercase symbol here.
-    re::build(&format!(
-        "(?i)(?P<rb_lo>{NUM})\\s*(?P<rb_lu>mV|kV|V)\\s*[≤≥≦<＜]\\s*(?P<rb_sym>V\\s*_?\\s*(?:OUT|O|IN|DD|CC|DS|GS))(?:\\s*[≤≥≦<＜]\\s*(?P<rb_hi>{NUM})\\s*(?P<rb_hu>mV|kV|V))?"
-    ))
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| {
+        re::build(&format!(
+            "(?i)(?P<rb_lo>{NUM})\\s*(?P<rb_lu>mV|kV|V)\\s*[≤≥≦<＜]\\s*(?P<rb_sym>V\\s*_?\\s*(?:OUT|O|IN|DD|CC|DS|GS))(?:\\s*[≤≥≦<＜]\\s*(?P<rb_hi>{NUM})\\s*(?P<rb_hu>mV|kV|V))?"
+        ))
+    })
 }
 
 const REV_KEY: &[(&str, &str)] = &[
@@ -402,10 +416,21 @@ fn v_mult_by_token(tok: &str) -> Option<f64> {
 }
 
 /// Bare number + `°C` is unambiguous in kind and types as `t_c` flagged `bare` (L3).
-fn bare_temp() -> Regex {
-    re::build(&format!(
-        "(?<![\\w.])(?P<bt_lo>{NUM})\\s*(?:~|–|—|to)?\\s*(?:(?P<bt_mid>{NUM})\\s*)?(?P<bt_u>{TEMP_UNIT})(?![\\w/])"
-    ))
+fn bare_temp() -> &'static Regex {
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| {
+        re::build(&format!(
+            "(?<![\\w.])(?P<bt_lo>{NUM})\\s*(?:~|–|—|to)?\\s*(?:(?P<bt_mid>{NUM})\\s*)?(?P<bt_u>{TEMP_UNIT})(?![\\w/])"
+        ))
+    })
+}
+
+/// L1: a bare number at the tail (`^\s*NUM\s*([,;]|$)`) marks a unitless hit.
+fn unitless_tail() -> &'static Regex {
+    use std::sync::OnceLock;
+    static CELL: OnceLock<Regex> = OnceLock::new();
+    CELL.get_or_init(|| re::build(&format!(r"^\s*{NUM}\s*(?:[,;]|$)")))
 }
 
 /// Cached per-symbol compiled regexes, built once (L4 still applies: the
@@ -673,10 +698,7 @@ pub fn parse_condition(text: &str) -> ParseOutcome {
             let any_unit = grab("lu").is_some() || grab("unit").is_some() || grab("hu").is_some();
             if !any_unit {
                 let rest = &after_sep[match_start..];
-                if re::build(&format!(r"^\s*{NUM}\s*(?:[,;]|$)"))
-                    .is_match(rest)
-                    .unwrap_or(false)
-                {
+                if unitless_tail().is_match(rest).unwrap_or(false) {
                     unitless_hit = true;
                 }
                 continue;
