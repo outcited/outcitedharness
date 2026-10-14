@@ -108,6 +108,24 @@ pub enum ConditionKey {
     ROhm,
     /// Bare number + `°C` — unambiguous in kind (L3).
     TC,
+    /// `Q_G` — D10 additive kinds (corpus evidence: nC×1,837).
+    QgCoulomb,
+    /// `C_ISS` — D10 (pF×1,551, nF×4).
+    CissFarad,
+    /// `C_OSS` — D10 (pF×1,608).
+    CossFarad,
+    /// `C_RSS` — D10 (pF×1,253).
+    CrssFarad,
+    /// `T_F` fall time — D10 (ns×962; case-collapse `nS` per L10).
+    TfSecond,
+    /// `T_R` rise time — D10 (ns×962).
+    TrSecond,
+    /// `P_TOT` — D10 (W×833).
+    PtotWatt,
+    /// `P_D` — D10 (W×364, mW×80).
+    PdWatt,
+    /// `E_AS` — D10 (mJ×816; evidence added Joule to the kind set).
+    EasJoule,
 }
 
 impl ConditionKey {
@@ -152,6 +170,15 @@ impl ConditionKey {
             Self::LH => "l_h",
             Self::ROhm => "r_ohm",
             Self::TC => "t_c",
+            Self::QgCoulomb => "qg_coulomb",
+            Self::CissFarad => "ciss_farad",
+            Self::CossFarad => "coss_farad",
+            Self::CrssFarad => "crss_farad",
+            Self::TfSecond => "tf_second",
+            Self::TrSecond => "tr_second",
+            Self::PtotWatt => "ptot_watt",
+            Self::PdWatt => "pd_watt",
+            Self::EasJoule => "eas_joule",
         }
     }
 }
@@ -315,6 +342,12 @@ fn unit_re(kind: Kind) -> String {
         Kind::Ohm => r"(?:mΩ|kΩ|MΩ|Ω|mohm|kohm|ohm)\b".to_string(),
         Kind::Henry => r"(?:nH|µH|μH|uH|mH|H)\b".to_string(),
         Kind::AmperePerSecond => r"(?:A\s*/\s*(?:µs|μs|us|ns|ms|s))\b".to_string(),
+        // D10 additive kinds — token lists mirror the frozen multiplier tables.
+        Kind::Coulomb => r"(?:nC|µC|μC|uC|mC|C)\b".to_string(),
+        Kind::Farad => r"(?:pF|nF|µF|μF|uF|mF|F)\b".to_string(),
+        Kind::Second => r"(?:ns|µs|μs|us|ms|s)\b".to_string(),
+        Kind::Watt => r"(?:mW|kW|W)\b".to_string(),
+        Kind::Joule => r"(?:mJ|J)\b".to_string(),
     }
 }
 
@@ -466,6 +499,19 @@ const SYMBOLS: &[(&str, ConditionKey, Kind)] = &[
     (r"\bR\s*_?\s*G\b", ConditionKey::RgOhm, Kind::Ohm),
     (r"\bL\b", ConditionKey::LH, Kind::Henry),
     (r"\bR\b", ConditionKey::ROhm, Kind::Ohm),
+    // ---- D10 additive kinds (2026-10-12), appended — never reordered.
+    // Evidence: claims_canonical unit spread (QG nC×1837, CISS/COSS/CRSS pF,
+    // TF/TR ns×962 each, PTOT/PD W, EAS mJ×816). Contested symbols (T, TST,
+    // RCS, R with dual unit kinds) deliberately absent — fail closed.
+    (r"\bQ\s*_?\s*G\b", ConditionKey::QgCoulomb, Kind::Coulomb),
+    (r"\bC\s*_?\s*ISS", ConditionKey::CissFarad, Kind::Farad),
+    (r"\bC\s*_?\s*OSS", ConditionKey::CossFarad, Kind::Farad),
+    (r"\bC\s*_?\s*RSS", ConditionKey::CrssFarad, Kind::Farad),
+    (r"\bT\s*_?\s*F\b", ConditionKey::TfSecond, Kind::Second),
+    (r"\bT\s*_?\s*R\b", ConditionKey::TrSecond, Kind::Second),
+    (r"\bP\s*_?\s*TOT", ConditionKey::PtotWatt, Kind::Watt),
+    (r"\bP\s*_?\s*D\b", ConditionKey::PdWatt, Kind::Watt),
+    (r"\bE\s*_?\s*AS", ConditionKey::EasJoule, Kind::Joule),
 ];
 
 // ---------------------------------------------------------------------------

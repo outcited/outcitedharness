@@ -78,6 +78,42 @@ fn lookup(kind: Kind, tok: &str) -> Scale {
                 _ => return Scale::Unknown,
             }
         }
+        // D10 additive kinds (2026-10-12) — frozen multipliers, evidence in
+        // `DECISIONS.md`. A token outside its own kind's table stays
+        // `Scale::Unknown`: `RDS(ON)`-style cross-kind prints can never coerce.
+        Kind::Coulomb => match tok {
+            "nc" => 1e-9,
+            "µc" | "uc" => 1e-6,
+            "mc" => 1e-3,
+            "c" => 1.0,
+            _ => return Scale::Unknown,
+        },
+        Kind::Farad => match tok {
+            "pf" => 1e-12,
+            "nf" => 1e-9,
+            "µf" | "uf" => 1e-6,
+            "mf" => 1e-3,
+            "f" => 1.0,
+            _ => return Scale::Unknown,
+        },
+        Kind::Second => match tok {
+            "ns" => 1e-9,
+            "µs" | "us" => 1e-6,
+            "ms" => 1e-3,
+            "s" => 1.0,
+            _ => return Scale::Unknown,
+        },
+        Kind::Watt => match tok {
+            "mw" => 1e-3,
+            "w" => 1.0,
+            "kw" => 1e3,
+            _ => return Scale::Unknown,
+        },
+        Kind::Joule => match tok {
+            "mj" => 1e-3,
+            "j" => 1.0,
+            _ => return Scale::Unknown,
+        },
     };
     Scale::Known(factor)
 }
@@ -101,6 +137,16 @@ pub enum Kind {
     Henry,
     /// Amperes per second (`di/dt`).
     AmperePerSecond,
+    /// Coulombs (gate charge) — D10.
+    Coulomb,
+    /// Farads (capacitances) — D10.
+    Farad,
+    /// Seconds (switching times) — D10.
+    Second,
+    /// Watts (power dissipation) — D10.
+    Watt,
+    /// Joules (avalanche energy) — D10.
+    Joule,
 }
 
 impl Kind {
@@ -115,11 +161,16 @@ impl Kind {
             Self::Ohm => Unit::Ohm,
             Self::Henry => Unit::Henry,
             Self::AmperePerSecond => Unit::None,
+            Self::Coulomb => Unit::Coulomb,
+            Self::Farad => Unit::Farad,
+            Self::Second => Unit::Second,
+            Self::Watt => Unit::Watt,
+            Self::Joule => Unit::Joule,
         }
     }
 
     /// Every kind, in index order. Must match [`Self::index`].
-    pub const ALL: [Self; 8] = [
+    pub const ALL: [Self; 13] = [
         Self::Volt,
         Self::Ampere,
         Self::Hertz,
@@ -128,6 +179,11 @@ impl Kind {
         Self::Ohm,
         Self::Henry,
         Self::AmperePerSecond,
+        Self::Coulomb,
+        Self::Farad,
+        Self::Second,
+        Self::Watt,
+        Self::Joule,
     ];
 
     /// Stable index into the value-regex table. Exhaustive, so adding a kind
@@ -143,6 +199,11 @@ impl Kind {
             Self::Ohm => 5,
             Self::Henry => 6,
             Self::AmperePerSecond => 7,
+            Self::Coulomb => 8,
+            Self::Farad => 9,
+            Self::Second => 10,
+            Self::Watt => 11,
+            Self::Joule => 12,
         }
     }
 
@@ -158,6 +219,11 @@ impl Kind {
             Self::Ohm => "o",
             Self::Henry => "ind",
             Self::AmperePerSecond => "dds",
+            Self::Coulomb => "q",
+            Self::Farad => "cap",
+            Self::Second => "tms",
+            Self::Watt => "pw",
+            Self::Joule => "en",
         }
     }
 }

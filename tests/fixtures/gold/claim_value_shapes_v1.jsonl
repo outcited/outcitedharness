@@ -1,0 +1,12 @@
+{"condition_verbatim": "VDS = -0.3 to +45 V", "expected": {"keys": {"vds_v": [-0.3, 45.0]}}, "note": "G3 range: corpus-printed ('-0.3 to +45 V', x13 class) -> Value::Range", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "VGS = 2.7 to 3.6 V", "expected": {"keys": {"vgs_v": [2.7, 3.6]}}, "note": "G3 range: spec-window shape", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "TJ,TSTG = -55 to 175", "expected": {"reject": "no_anchors"}, "note": "G3 compound anchor + bare range — measure, never guess", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "TC = 25", "expected": {"reject": "units_absent"}, "note": "G3: bare number + no unit on a known symbol -> units_absent (L1)", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "VGS = 0 ,VDS = 80", "expected": {"reject": "units_absent"}, "note": "L1 corpus case: both sides unit-less, both reject", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "-", "expected": {"reject": "dash"}, "note": "L8: dash-only -> dash", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "–", "expected": {"reject": "dash"}, "note": "L8: en-dash-only -> dash", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "?", "expected": {"reject": "no_anchors"}, "note": "G3: question-mark value -> no_anchors (never a number)", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "VDS = 1,2 V", "expected": {"reject": "units_absent"}, "note": "G3 comma-decimal (EU printing) — measure the law, fail closed if untyped", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "TF = 5 nS", "expected": {"keys": {"tf_second": 5e-09}}, "note": "D10 case-law already pinned: collapses to Second on TF", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "QG = 25 nC, VDS = 40 V", "expected": {"keys": {"vds_v": 40.0, "qg_coulomb": 2.5000000000000002e-08}}, "note": "D10 kinds with a range-free scalar pair", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
+{"condition_verbatim": "VOUT = 1.0V≦VOUT＜1.2V", "expected": {"keys": {"vout_v": [1.0, 1.2]}, "comparators": ["1.0V≦VOUT＜1.2V"], "residue": ["VOUT ="]}, "note": "L9 reversed bounds — pinned", "freq": 1, "stem": "e5-value-shapes", "vendor": "corpus-evidence"}
