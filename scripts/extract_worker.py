@@ -96,13 +96,22 @@ def main():
         if not pdfs:
             time.sleep(2)
             continue
+        # Atomic claim (2026-10-12): multi-instance safe — rename into a
+        # per-worker dir (stem preserved) or another worker took it.
+        workdir = IN / f"w{os.getpid()}"
+        workdir.mkdir(exist_ok=True)
         for pdf in pdfs[:64]:
             try:
-                process(pdf)
+                pdf.rename(workdir / pdf.name)
+            except OSError:
+                continue
+            claimed = workdir / pdf.name
+            try:
+                process(claimed)
             except Exception as e:
-                print(f"ERR {pdf.name}: {e}", flush=True)
+                print(f"ERR {claimed.name}: {e}", flush=True)
                 try:
-                    pdf.rename(ERR / pdf.name)
+                    claimed.rename(ERR / claimed.name)
                 except OSError:
                     pass
 

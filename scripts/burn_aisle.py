@@ -24,7 +24,8 @@ from harness.pipeline.quote_verify import verify_claims
 
 RESULTS = Path("/Volumes/M5_4TB/extract-results")
 ROUTES = RESULTS / "routes"
-SUBSTRATE_DIRS = [RESULTS / "collected", RESULTS / "runs"]
+SUBSTRATE_DIRS = [RESULTS / "collected", RESULTS / "runs",
+                  Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/dispatch/collected")]  # ASUSTOR NVMe shared store
 # The NFS transport is a read-only mirror; writes land locally and
 # stage to the NAS later. BURN_OUT is fully overridable.
 BURN_OUT = _os.PathLike and _os.environ.get("BURN_OUT") or None
@@ -59,11 +60,18 @@ Return ONLY the corrected JSON array."""
 
 import os as _os
 PREFER_LOCAL = _os.environ.get("BURN_PREFER_LOCAL", "0") == "1"
+# The routing law (2026-10-12, Sam): text extraction runs locally. The
+# OpenRouter batch is approved for VISION only — text must never wander onto
+# it. BURN_TEXT_LOCAL_ONLY=1 truncates the chain at the local TP4: a total
+# local failure skips the doc (fail closed), it does not buy cloud text.
+TEXT_LOCAL_ONLY = _os.environ.get("BURN_TEXT_LOCAL_ONLY", "0") == "1"
 
 LOCAL_CHAIN = [
     (V41, "deepseek-v4.1-flash"),
     (OPENROUTER, CLOUD_MODEL),
 ]
+if TEXT_LOCAL_ONLY:
+    LOCAL_CHAIN = [(V41, "deepseek-v4.1-flash")]
 CLOUD_CHAIN = [
     (OPENROUTER, CLOUD_MODEL),
     (V41, "deepseek-v4.1-flash"),
@@ -143,11 +151,44 @@ def load_substrate(stem):
     return None
 
 
+def _join_with_page_spans(sub, cap=28000):
+    """Join per-page text exactly as before, keeping char spans -> page.
+
+    Provenance fix (2026-10-12): the page number exists in the substrate
+    (`pages[i].page`) and died in the join. Byte-identical text output; the
+    spans are the receipt chain.
+    """
+    pages = sub.get("pages", [])
+    texts = [p.get("text", "") or "" for p in pages]
+    full = "\n".join(texts)[:cap]
+    spans = []
+    off = 0
+    for p, t in zip(pages, texts):
+        spans.append((off, off + len(t), str(p.get("page", ""))))
+        off += len(t) + 1
+    return full, spans
+
+
+def _page_for(quote, text, spans):
+    """The page a verbatim quote sits on. None when unlocatable — never invent."""
+    if not quote:
+        return None
+    idx = text.find(quote)
+    if idx < 0:
+        return None
+    mid = idx + max(1, len(quote)) // 2
+    for start, end, page in spans:
+        if start <= mid <= end + 1:
+            return page
+    return None
+
+
 def burn_doc(stem, source_path, route, con, job_meta):
     sub = load_substrate(stem)
     if sub is None:
         return {"stem": stem, "skip": "no_substrate"}
-    text = "\n".join(p.get("text", "") for p in sub.get("pages", []))[:28000]
+    text, page_spans = _join_with_page_spans(sub)
+    doc_sha = sub.get("sha256") or None
     part = sub.get("filename", stem).rsplit(".", 1)[0]
 
     try:
@@ -197,8 +238,13 @@ def burn_doc(stem, source_path, route, con, job_meta):
                          "severity": "P2" if ok else "P0"})
 
     p0_idx = {v["i"] for v in verdicts if v["severity"] == "P0"}
-    surviving_claims = [c for i, c in enumerate(claims)
-                        if isinstance(c, dict) and i not in p0_idx and c.get("value") is not None]
+    surviving_claims = []
+    for i, c in enumerate(claims):
+        if isinstance(c, dict) and i not in p0_idx and c.get("value") is not None:
+            c = dict(c)
+            c["page"] = _page_for(c.get("quote") or "", text, page_spans)
+            c["doc_sha256"] = doc_sha
+            surviving_claims.append(c)
     return {"stem": stem, "tier": tier, "claims": len(claims),
             "surviving": len(surviving_claims),
             "p0": sum(1 for v in verdicts if v["severity"] == "P0"),

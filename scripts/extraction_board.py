@@ -251,6 +251,25 @@ def _delta(now: int, prev: int | None) -> str:
     return f" ({d:+d})" if d else " (±0)"
 
 
+def _movement(snap: dict) -> tuple:
+    """The fields the board's Δ is defined over, as a hashable key.
+
+    `generated_at` is deliberately excluded: two runs that differ only by
+    timestamp are the same movement state.
+    """
+    totals = snap.get("totals", {})
+    categories = snap.get("categories", {})
+    return (
+        totals.get("addressable"),
+        totals.get("records"),
+        totals.get("served_parts"),
+        tuple(
+            (cat, (categories.get(cat) or {}).get("addressable_parts"))
+            for cat, _ in AISLES
+        ),
+    )
+
+
 def render(cur: dict, prev: dict | None) -> str:
     lines = [
         f"# Extraction board — {cur['generated_at']}",
@@ -405,8 +424,16 @@ def main() -> int:
     cur = snapshot()
     prev = None
     snaps = sorted(SNAP_DIR.glob("*.json"))
-    if snaps:
-        prev = json.loads(snaps[-1].read_text())
+    # Compare against the most recent snapshot whose *movement* content differs
+    # from now — not simply the last file written. A rerun seconds after the
+    # previous board (e.g. fold then board, twice) would otherwise Δ against its
+    # own output and print +0 while the store had actually grown. A snapshot
+    # that differs only in `generated_at` is still "no movement".
+    for snap in reversed(snaps):
+        candidate = json.loads(snap.read_text())
+        if _movement(candidate) != _movement(cur):
+            prev = candidate
+            break
     ts = cur["generated_at"]
     (SNAP_DIR / f"{ts}.json").write_text(json.dumps(cur, indent=1, sort_keys=True))
     if args.json:

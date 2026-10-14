@@ -14,6 +14,7 @@ import re
 import sys
 import time
 import urllib.request
+import zlib
 from pathlib import Path
 
 sys.path.insert(0, "/Users/samkim/Harnessv1")
@@ -22,9 +23,23 @@ from harness.pipeline import store
 from harness.pipeline.region_detect import render_regions
 
 ROUTES = Path(os.environ.get("ROUTES_DIR", "/Volumes/M5_4TB/extract-results/routes"))
-OUT = Path("/Volumes/M5_4TB/extract-results/vision-v2")
+OUT = Path(os.environ.get("VISION_OUT", "/Volumes/M5_4TB/extract-results/vision-v2"))
 V41 = "http://100.116.221.82:8888/v1/chat/completions"
-MODEL = "deepseek-v4.1-flash"
+OPENROUTER = "https://openrouter.ai/api/v1/chat/completions"
+CLOUD_MODEL = "deepseek/deepseek-v4.1-flash"
+# Catch-up mode (Sam, 2026-10-12): "do not wait for local and free
+# resources — we are paying to catch up." VISION_TARGET=cloud routes every
+# vision call to OpenRouter DeepSeek 4.1 Flash; local TP4 stays the default
+# for steady state. The measured OpenRouter recipe (MODEL_SETTINGS): the
+# model reasons by default — `reasoning: {effort: low}` + a budget that
+# holds thinking + answer, or the content comes back empty.
+VISION_TARGET = os.environ.get("VISION_TARGET", "local")
+# Sharding (catch-up scale): VISION_SHARD=i/n routes each instance a slice of
+# the backlog so N workers run without double-processing (the done-set is
+# per-OUT-dir, shared).
+SHARD = os.environ.get("VISION_SHARD", "0/1")
+_SHARD_I, _SHARD_N = (int(x) for x in SHARD.split("/"))
+MODEL = CLOUD_MODEL if VISION_TARGET == "cloud" else "deepseek-v4.1-flash"
 MAX_REGIONS_PER_DOC = 10
 DPI = 200
 
@@ -40,15 +55,32 @@ Output ONLY the JSON array."""
 
 def v41_image(b64_png, timeout=300):
     last_err = None
-    for attempt in range(2):
+    if VISION_TARGET == "cloud":
+        key = [l.split("=", 1)[1].strip() for l in open("/Users/samkim/Harnessv1/.env")
+               if l.startswith("OPENROUTER_API_KEY")][0]
+        endpoint, model = OPENROUTER, CLOUD_MODEL
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {key}",
+                   "HTTP-Referer": "https://localhost/harness", "X-Title": "vision-burn"}
         body = json.dumps({
-            "model": MODEL, "temperature": 0, "max_tokens": 3000,
+            "model": model, "temperature": 0, "max_tokens": 16000,
+            "reasoning": {"effort": "low"},
             "messages": [{"role": "user", "content": [
                 {"type": "text", "text": PROMPT},
                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64_png}"}},
             ]}],
         }).encode()
-        req = urllib.request.Request(V41, data=body, headers={"Content-Type": "application/json"})
+    else:
+        endpoint, model = V41, MODEL
+        headers = {"Content-Type": "application/json"}
+        body = json.dumps({
+            "model": model, "temperature": 0, "max_tokens": 3000,
+            "messages": [{"role": "user", "content": [
+                {"type": "text", "text": PROMPT},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64_png}"}},
+            ]}],
+        }).encode()
+    for attempt in range(2):
+        req = urllib.request.Request(endpoint, data=body, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 c = json.loads(r.read())["choices"][0]["message"]["content"] or ""
@@ -74,16 +106,49 @@ def v41_image(b64_png, timeout=300):
 
 
 def resolve_path(stem, con):
-    row = con.execute("SELECT source_path FROM jobs WHERE corpus_key=? LIMIT 1",
-                      (f"pdf:{stem}",)).fetchone()
+    if con is None:
+        return None
+    try:
+        row = con.execute("SELECT source_path FROM jobs WHERE corpus_key=? LIMIT 1",
+                          (f"pdf:{stem}",)).fetchone()
+    except Exception:
+        return None
     if row and row["source_path"] and Path(row["source_path"]).exists():
         return row["source_path"]
     return None
 
 
+_BLOB_ROOT = Path("/Volumes/M5_4TB/exports/corpus-deliveries")
+
+
+def resolve_by_sha(sha):
+    """Content-addressed fallback: the corpus blobs are named by sha256."""
+    if not sha or len(sha) != 64:
+        return None
+    hits = list(_BLOB_ROOT.glob(f"*/blobs/{sha[:2]}/{sha[2:4]}/{sha}.pdf"))
+    return str(hits[0]) if hits else None
+
+
+def open_jobs_ro():
+    """Read-only jobs lookups. The burn holds the pipeline.db write lock, and
+    `store.connect()` writes (WAL + schema) — never call it from this worker.
+    """
+    import sqlite3
+    path = os.environ.get("PIPELINE_DB", "/Volumes/M5_4TB/extract-results/pipeline.db")
+    # immutable=1 is required while the burn holds the write lock (mode=ro
+    # alone still fails on a locked WAL). Torn-read risk is bounded: this
+    # worker only reads stable jobs rows, never the burn's write hot zone.
+    try:
+        con = sqlite3.connect(f"file:{path}?mode=ro&immutable=1", uri=True, timeout=5)
+        con.row_factory = sqlite3.Row
+        return con
+    except Exception:
+        return None
+
+
 def process(route, con):
     stem = Path(route["filename"]).stem
-    pdf = resolve_path(stem, con)
+    pdf = resolve_by_sha(route.get("sha256")) or resolve_path(stem, con)
     if not pdf:
         return None, "no_source_path"
     pages = route["route"]["vision_pages"][:6]
@@ -131,13 +196,15 @@ def process(route, con):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    con = store.connect()
+    con = open_jobs_ro()
     done = {p.stem for p in OUT.glob("*.json")}
     while True:
         routes = sorted(ROUTES.glob("*.json"))
         ocr_first, flagged = [], []
         for rf in routes:
             if rf.stem in done:
+                continue
+            if zlib.crc32(rf.stem.encode()) % _SHARD_N != _SHARD_I:
                 continue
             r = json.loads(rf.read_text())
             (ocr_first if r.get("needs_ocr") else flagged).append(r)

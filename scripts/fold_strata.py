@@ -246,10 +246,14 @@ def _burn_rows(burn_dir: Path) -> list:
                 "source": {
                     "column_header": c.get("column_header"),
                     "crop": None,
-                    "page": None,
+                    # Provenance fix (2026-10-12): the chain rides on the claim
+                    # when the burn stamped it (page via substrate spans, sha
+                    # from the substrate record). Old rows without it keep
+                    # saying None — absence is named, never invented.
+                    "page": c.get("page"),
                     "row_header": c.get("row_header"),
-                    "sha": None,
-                    "doc_sha256": None,
+                    "sha": c.get("doc_sha256"),
+                    "doc_sha256": c.get("doc_sha256"),
                     "source_pdf": f"{stem}.pdf",
                     "provenance_tier": None,
                 },

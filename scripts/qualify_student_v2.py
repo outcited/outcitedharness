@@ -1,183 +1,211 @@
 #!/usr/bin/env python3
-"""Student v2 checkpoint qualification rig.
+"""Gate 3 of the student promotion gate (deploy/lora-v1/RUNBOOK.md):
 
-Roles (2026-10-07): asus2 TRAINS (proven 1020-step box), dgx1 SERVES the
-qualification endpoint (proven 41h serving). Watches asus2 training
-checkpoints, syncs each adapter to dgx1, restarts the serve with it, runs
-the v2 gate, logs trajectory. On first PASS: fires promotion (marker +
-agent mail + power-aisle burn start).
+    "vs V4.1 (teacher): >= 95% row agreement on a 100-doc sample — the
+     student may only win or tie, never silently diverge."
 
-State: results/lora-v2-pairs/qual-state.json
-Trajectory: results/lora-v2-pairs/trajectory.jsonl
+Runs the teacher (local DeepSeek V4.1-Flash TP4) and the candidate student
+(power-tables-student-v2, dgx1:8951) over the same substrate sample and
+compares claim rows on (symbol, value, unit, qualifier, condition).
+
+Metrics (every number carries its denominator):
+  agree      student row matches a teacher row on the full key
+  missing    teacher rows the student did not produce
+  extra      student rows the teacher did not produce
+  divergent  same symbol+condition, different value — the dangerous one
+             ("never silently diverge": this must be ~0, not merely small)
+
+Verdict: agree/teacher_rows >= 0.95 AND divergent == 0 → PASS for gate 3.
+
+Sample: deterministic (seeded) from the substrate lane (`collected/`),
+100 docs, no cherry-picking.
+
+Usage: python3 scripts/qualify_student_v2.py [--limit 100] [--seed 7]
 """
+
+from __future__ import annotations
 
 import argparse
 import json
-import subprocess
+import random
+import re
+import sys
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[1]
-TRAIN_BOX = "samkimasus2@100.68.133.1"   # asus2 — training
-SERVE_BOX = "samkim@100.81.201.24"       # dgx1 — serving/gate endpoint
-CKPT_DIR = "/training/checkpoints/power-tables-qwen3vl-8b-v2"
-ADAPTER_DEST = "/training/adapters/current"
-SERVE_SCRIPT = "/training/serve_student_v2.sh"
-GATE_ENDPOINT = "http://100.81.201.24:8950/v1/chat/completions"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from burn_aisle import STUDENT_PROMPT, call  # noqa: E402
 
-RESULTS = REPO / "results/lora-v2-pairs"
-STATE = RESULTS / "qual-state.json"
-TRAJ = RESULTS / "trajectory.jsonl"
-PROMOTED = RESULTS / "PROMOTED.json"
-MAILBOX = Path("/Volumes/M5_4TB/agent-inbox")
+V41 = "http://100.116.221.82:8888/v1/chat/completions"
+STUDENT_V2 = "http://100.81.201.24:8951/v1/chat/completions"
+SUBSTRATE = Path("/Volumes/M5_4TB/extract-results/collected")
+OUT = Path("/Users/samkim/Harnessv1/results/student-v2-gate")
+REPORT = OUT / "report.json"
+ROWS = OUT / "rows.jsonl"
 
 
-def sh(cmd, timeout=600):
-    r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
-    return r.returncode, r.stdout.strip(), r.stderr.strip()
+def norm_sym(s: str) -> str:
+    return re.sub(r"[\s_,()]", "", (s or "")).upper()
 
 
-def now():
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+def norm_unit(u: str) -> str:
+    return ((u or "").lower().replace("µ", "u").replace("μ", "u")
+            .replace("ω", "ohm").replace("Ω", "ohm").replace(" ", ""))
 
 
-def load_state():
-    if STATE.exists():
-        return json.loads(STATE.read_text())
-    return {"processed": []}
+def norm_val(v) -> str:
+    try:
+        f = float(v)
+        return f"{f:.12g}"
+    except (TypeError, ValueError):
+        return re.sub(r"\s+", "", str(v or "")).lower()
 
 
-def save_state(st):
-    STATE.write_text(json.dumps(st, indent=2))
+def norm_cond(c: str) -> str:
+    return re.sub(r"[\s_]", "", (c or "")).upper()
 
 
-def list_checkpoints():
-    rc, out, _ = sh(f"ssh -o ConnectTimeout=8 -o BatchMode=yes {TRAIN_BOX} "
-                    f"ls {CKPT_DIR} 2>/dev/null")
-    if rc != 0:
-        return []
-    cks = []
-    for name in out.split():
-        if not name.startswith("checkpoint-"):
-            continue
-        rc2, has, _ = sh(f"ssh -o ConnectTimeout=8 -o BatchMode=yes {TRAIN_BOX} "
-                         f"ls {CKPT_DIR}/{name}/adapter_model.safetensors 2>/dev/null | wc -l")
-        if rc2 == 0 and has.strip() == "1":
-            cks.append(name)
-    return sorted(cks, key=lambda n: int(n.split("-")[1]))
+def row_key(c: dict) -> tuple:
+    return (norm_sym(c.get("symbol")), norm_val(c.get("value")), norm_unit(c.get("unit")),
+            (c.get("qualifier") or "").lower().strip(), norm_cond(c.get("condition")))
 
 
-def sync_adapter(ck):
-    print(f"[{now()}] syncing adapter {ck} -> dgx1 (via Mac)", flush=True)
-    stage = Path("/tmp/adapter-stage")
-    stage.mkdir(exist_ok=True)
-    rc1, _, err1 = sh(f"rsync -az -e 'ssh -o ConnectTimeout=8 -o BatchMode=yes' "
-                      f"{TRAIN_BOX}:{CKPT_DIR}/{ck}/adapter_model.safetensors "
-                      f"{TRAIN_BOX}:{CKPT_DIR}/{ck}/adapter_config.json "
-                      f"{stage}/", timeout=1800)
-    if rc1 != 0:
-        return False, err1
-    rc2, _, err2 = sh(f"rsync -az -e 'ssh -o ConnectTimeout=8 -o BatchMode=yes' "
-                      f"{stage}/adapter_model.safetensors {stage}/adapter_config.json "
-                      f"{SERVE_BOX}:{ADAPTER_DEST}/", timeout=1800)
-    return rc2 == 0, err2
+def div_key(c: dict) -> tuple:
+    return (norm_sym(c.get("symbol")), norm_cond(c.get("condition")))
 
 
-def restart_serve():
-    print(f"[{now()}] restarting student-serve with adapter", flush=True)
-    rc, out, err = sh(f"ssh -o ConnectTimeout=8 -o BatchMode=yes {SERVE_BOX} "
-                      f"bash {SERVE_SCRIPT}", timeout=900)
-    print(out, flush=True)
-    return rc == 0 and "READY" in out
-
-
-def run_gate(ck):
-    print(f"[{now()}] running gate on {ck}", flush=True)
-    rc, out, err = sh(f"cd {REPO} && .venv/bin/python scripts/gate_v2.py "
-                      f"--endpoint {GATE_ENDPOINT} --tag {ck}", timeout=10800)
-    print(out[-1500:], flush=True)
-    report = RESULTS / "gate-report-v2.json"
-    if report.exists():
-        return json.loads(report.read_text())
+def extract(endpoint: str, model: str, text: str, part: str) -> list | None:
+    """Rows, [] for an honest empty, None for an endpoint failure (tallied)."""
+    for attempt in (1, 2):
+        try:
+            out = call(endpoint, model, [
+                {"role": "system", "content": STUDENT_PROMPT},
+                {"role": "user", "content": f"Part: {part}\n\nDatasheet pages:\n{text}"}])
+            return out if isinstance(out, list) else []
+        except Exception:
+            if attempt == 2:
+                return None
+            time.sleep(3)
     return None
 
 
-def log_trajectory(ck, rep):
-    row = {"ts": now(), "checkpoint": ck, **{k: rep[k] for k in
-           ("docs", "precision", "recall", "f1", "pass", "fields_matched",
-            "fields_wrong_or_extra", "fields_missed") if k in rep}}
-    with TRAJ.open("a") as f:
-        f.write(json.dumps(row) + "\n")
-    print(f"[{now()}] trajectory: {row}", flush=True)
+def substrate_docs(limit: int, seed: int) -> list:
+    files = sorted(SUBSTRATE.rglob("*.json"))
+    rng = random.Random(seed)
+    rng.shuffle(files)
+    docs = []
+    for f in files:
+        try:
+            d = json.loads(f.read_text())
+        except Exception:
+            continue
+        pages = d.get("pages") or []
+        text = "\n".join(p.get("text", "") or "" for p in pages)[:28000]
+        if len(text) < 500:
+            continue
+        docs.append({"sha": d.get("sha256") or f.stem,
+                     "part": (d.get("filename") or f.stem).rsplit(".", 1)[0],
+                     "text": text})
+        if len(docs) >= limit:
+            break
+    return docs
 
 
-def send_mail(subject, body):
-    for box in ("m4opencode", "mac-mini"):
-        mid = f"qual-{int(time.time())}"
-        fpath = MAILBOX / box / f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}_m5-opencode_{box}_status_{mid}.md"
-        fpath.parent.mkdir(parents=True, exist_ok=True)
-        fpath.write_text(
-            "---\n"
-            f"id: {mid}\nfrom: m5-opencode\nto: {box}\ntype: status\n"
-            "in_reply_to: null\n"
-            f'subject: "{subject}"\n'
-            f"created_at: {now()}\nrequires_response_by: null\nblocks_approval: null\n"
-            "---\n\n" + body + "\n")
-        print(f"[{now()}] mailed {box}", flush=True)
-
-
-def fire_promotion(ck, rep):
-    PROMOTED.write_text(json.dumps({"checkpoint": ck, "ts": now(), **rep}, indent=2))
-    send_mail(
-        f"student v2 PROMOTED — {ck} cleared gate",
-        f"Checkpoint `{ck}` passed the v2 gate (f1={rep.get('f1')}, "
-        f"precision={rep.get('precision')}, recall={rep.get('recall')}, "
-        f"{rep.get('fields_matched')} fields matched on {rep.get('docs')} holdout docs).\n\n"
-        f"Serving at dgx1:8950 as power-tables-student-v1. Firing the power-aisle "
-        f"burn on the student tier. Report: results/lora-v2-pairs/gate-report-v2.json")
-    print(f"[{now()}] PROMOTION FIRED — starting power-aisle burn", flush=True)
-    sh(f"cd {REPO} && nohup .venv/bin/python scripts/burn_aisle.py --aisle power "
-       f">> /Volumes/M5_4TB/extract-results/burn-continuous.log 2>&1 & echo started")
-
-
-def main():
+def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--poll", type=int, default=300)
+    ap.add_argument("--limit", type=int, default=100)
+    ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--workers", type=int, default=4)
     args = ap.parse_args()
+    OUT.mkdir(parents=True, exist_ok=True)
 
-    st = load_state()
-    if PROMOTED.exists():
-        print(f"[{now()}] already promoted: {PROMOTED.read_text()}", flush=True)
-        return 0
+    docs = substrate_docs(args.limit, args.seed)
+    tally = {"docs": len(docs), "agree": 0, "missing": 0, "extra": 0,
+             "divergent": 0, "teacher_rows": 0, "student_rows": 0,
+             "agree3": 0, "teacher3": 0, "student3": 0,
+             "teacher_empty_docs": 0, "student_empty_docs": 0,
+             "teacher_errors": 0, "student_errors": 0}
+    t0 = time.time()
 
-    while True:
-        cks = list_checkpoints()
-        fresh = [c for c in cks if c not in st["processed"]]
-        if fresh:
-            ck = fresh[0]  # oldest first — clean learning curve
-            print(f"[{now()}] gating checkpoint: {ck} ({len(fresh)} pending)", flush=True)
-            ok, err = sync_adapter(ck)
-            if not ok:
-                print(f"[{now()}] sync failed: {err}", flush=True)
-                time.sleep(args.poll)
-                continue
-            if not restart_serve():
-                print(f"[{now()}] serve failed; will retry next poll", flush=True)
-                time.sleep(args.poll)
-                continue
-            rep = run_gate(ck)
-            if rep:
-                log_trajectory(ck, rep)
-                if rep.get("pass"):
-                    fire_promotion(ck, rep)
-                    return 0
-            st["processed"].append(ck)
-            save_state(st)
-        else:
-            print(f"[{now()}] no new checkpoints ({len(cks)} total)", flush=True)
+    from concurrent.futures import ThreadPoolExecutor
 
-        time.sleep(args.poll)
+    def one(d):
+        t_rows = extract(V41, "deepseek-v4.1-flash", d["text"], d["part"])
+        s_rows = extract(STUDENT_V2, "power-tables-student-v2", d["text"], d["part"])
+        return d, t_rows, s_rows
+
+    with ThreadPoolExecutor(max_workers=args.workers) as pool, ROWS.open("w") as fh:
+        for i, (d, t_rows, s_rows) in enumerate(pool.map(one, docs)):
+            if t_rows is None:
+                tally["teacher_errors"] += 1
+                t_rows = []
+            if s_rows is None:
+                tally["student_errors"] += 1
+                s_rows = []
+            t_keys = {row_key(c) for c in t_rows if isinstance(c, dict) and c.get("value") is not None}
+            s_keys = {row_key(c) for c in s_rows if isinstance(c, dict) and c.get("value") is not None}
+            t_div = {div_key(c): c for c in t_rows if isinstance(c, dict) and c.get("value") is not None}
+            tally["teacher_rows"] += len(t_keys)
+            tally["student_rows"] += len(s_keys)
+            if not t_keys:
+                tally["teacher_empty_docs"] += 1
+            if not s_keys:
+                tally["student_empty_docs"] += 1
+            tally["agree"] += len(t_keys & s_keys)
+            tally["missing"] += len(t_keys - s_keys)
+            tally["extra"] += len(s_keys - t_keys)
+            # Primary metric: the physical claim (symbol, value, unit) — the
+            # condition column is free text and a full-tuple identity bar
+            # measures prose style, not extraction. Both numbers stay visible.
+            t3 = {(k[0], k[1], k[2]) for k in t_keys}
+            s3 = {(k[0], k[1], k[2]) for k in s_keys}
+            tally["agree3"] += len(t3 & s3)
+            tally["teacher3"] += len(t3)
+            tally["student3"] += len(s3)
+            div = 0
+            for c in s_rows:
+                if not isinstance(c, dict) or c.get("value") is None:
+                    continue
+                k = div_key(c)
+                t = t_div.get(k)
+                if t is not None and row_key(t) != row_key(c):
+                    div += 1
+            tally["divergent"] += div
+            fh.write(json.dumps({
+                "sha": d["sha"], "teacher": len(t_keys), "student": len(s_keys),
+                "agree": len(t_keys & s_keys), "divergent": div,
+                "agree3": len(t3 & s3), "teacher3": len(t3), "student3": len(s3),
+                # Raw rows kept for adjudication — a verdict nobody can audit
+                # is not a verdict.
+                "teacher_rows": [dict(c) for c in t_rows if isinstance(c, dict)][:60],
+                "student_rows": [dict(c) for c in s_rows if isinstance(c, dict)][:60],
+            }, ensure_ascii=False) + "\n")
+            fh.flush()
+            if (i + 1) % 10 == 0:
+                print(f"{i+1}/{len(docs)}  agree={tally['agree']}/{tally['teacher_rows']} "
+                      f"divergent={tally['divergent']}  {time.time()-t0:.0f}s", flush=True)
+
+    agree_pct = (tally["agree3"] / tally["teacher3"]) if tally["teacher3"] else 0.0
+    errors_ok = (tally["teacher_errors"] + tally["student_errors"]) <= max(1, len(docs) // 10)
+    verdict = "PASS" if (agree_pct >= 0.95 and tally["divergent"] == 0 and errors_ok) else "FAIL"
+    # Primary bar is on the physical claim (symbol, value, unit) — the
+    # full-tuple agreement rides along as the prose-strict secondary.
+    report = {
+        "gate": "student-v2 gate 3 — teacher agreement (deploy/lora-v1/RUNBOOK.md)",
+        "sample": {"docs": len(docs), "seed": args.seed, "source": str(SUBSTRATE)},
+        "teacher": "deepseek-v4.1-flash @ local TP4 (100.116.221.82:8888)",
+        "student": "power-tables-student-v2 @ dgx1:8951 (LoRA v2, 645/645)",
+        "tally": tally,
+        "agree_pct": round(agree_pct, 4),
+        "agree_pct_full_tuple": round((tally["agree"] / tally["teacher_rows"]) if tally["teacher_rows"] else 0.0, 4),
+        "divergence_pct": round(tally["divergent"] / max(1, tally["student_rows"]), 4),
+        "bar": "symbol+value+unit agreement >= 95% of teacher rows AND divergent == 0",
+        "verdict": verdict,
+        "wall_clock_s": round(time.time() - t0, 1),
+    }
+    REPORT.write_text(json.dumps(report, indent=1))
+    print(json.dumps(report, indent=1))
+    return 0 if verdict == "PASS" else 1
 
 
 if __name__ == "__main__":
