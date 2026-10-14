@@ -40,8 +40,8 @@ from pathlib import Path
 REPO = Path("/Users/samkim/Harnessv1")
 sys.path.insert(0, str(REPO))
 
-OUT = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/api-store-export")
-CATALOG = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/scratch/catalog.db")
+OUT = Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/api-store-export")
+CATALOG = Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/scratch/catalog.db")
 RECORDS = REPO / "results" / "family-documents-cr-20260908" / "records.jsonl"
 CLAIM_PAGES = REPO / "tests" / "fixtures" / "gold" / "claim_pages_v1.jsonl"
 

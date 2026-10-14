@@ -57,9 +57,18 @@ KIND_SCALE = {
     "henry": {"nh": 1e-9, "µh": 1e-6, "mh": 1e-3, "h": 1.0},
     "celsius": {"c": 1.0, "°c": 1.0, "ºc": 1.0, "℃": 1.0, "k": 1.0},
     "celsiusperwatt": {"c/w": 1.0, "°c/w": 1.0, "k/w": 1.0, "c/watt": 1.0},
+    # D10 additive kinds (DECISIONS.md, 2026-10-12) — frozen multipliers,
+    # ported exactly from units.rs. Cross-kind tokens still fail closed.
+    "coulomb": {"nc": 1e-9, "µc": 1e-6, "uc": 1e-6, "mc": 1e-3, "c": 1.0},
+    "farad": {"pf": 1e-12, "nf": 1e-9, "µf": 1e-6, "uf": 1e-6, "mf": 1e-3, "f": 1.0},
+    "second": {"ns": 1e-9, "µs": 1e-6, "us": 1e-6, "ms": 1e-3, "s": 1.0},
+    "watt": {"mw": 1e-3, "w": 1.0, "kw": 1e3},
+    "joule": {"mj": 1e-3, "j": 1.0},
 }
 KIND_UNIT = {"volt": "Volt", "ampere": "Ampere", "hertz": "Hertz", "ohm": "Ohm",
-             "henry": "Henry", "celsius": "Celsius", "celsiusperwatt": "Celsius"}
+             "henry": "Henry", "celsius": "Celsius", "celsiusperwatt": "Celsius",
+             "coulomb": "Coulomb", "farad": "Farad", "second": "Second",
+             "watt": "Watt", "joule": "Joule"}
 # The axis registry decides the KIND (what the number IS); the printed token
 # must scale to it or the row fails closed.
 AXIS_KIND = {
@@ -68,10 +77,26 @@ AXIS_KIND = {
     "rds_on_ohm": "ohm",
     "tj_max_c": "celsius",
     "tstg_range_c": "celsius",
+    # E3: the eight additive knives (registry.rs, 155ae227) — the Python
+    # adapter grows cells with the Rust registry, never beside it.
+    "vgs_rating_v": "volt",
+    "vgs_th_v": "volt",
+    "vsd_v": "volt",
+    "idss_a": "ampere",
+    "igss_a": "ampere",
+    "is_a": "ampere",
+    "rg_ohm": "ohm",
+    "rthja_c_per_w": "celsiusperwatt",
+    "rthja_cperw": "celsiusperwatt",  # typed_axes spelling of the same axis
 }
 AXIS_OP = {"vds_rating_v": "min_rating", "id_continuous_a": "min_rating",
            "rds_on_ohm": "max_rating", "tj_max_c": "min_rating",
-           "tstg_range_c": "covers"}
+           "tstg_range_c": "covers",
+           "vgs_rating_v": "min_rating", "vgs_th_v": "max_rating",
+           "vsd_v": "max_rating", "idss_a": "max_rating",
+           "igss_a": "max_rating", "is_a": "min_rating",
+           "rg_ohm": "max_rating", "rthja_c_per_w": "max_rating",
+           "rthja_cperw": "max_rating"}
 NUM = re.compile(r"[-+]?\d+(?:\.\d+)?")
 
 

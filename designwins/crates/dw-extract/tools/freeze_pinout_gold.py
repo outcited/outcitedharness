@@ -31,7 +31,7 @@ import sys
 from pathlib import Path
 
 REPO = Path("/Users/samkim/Harnessv1")
-WORK = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/pinout-gold")
+WORK = Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/pinout-gold")
 NAS = Path("/Users/samkim/Volumes/Electronicdataassets/m5-4tb/pinout-gold")
 RELEASE = "pinout-gold-r1.1-20261012"
 

@@ -26,7 +26,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-EXPORT = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/api-store-export")
+EXPORT = Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/api-store-export")
 
 MCU_GROUPS = [
     "processing", "memory", "peripherals", "connectivity", "analogue",

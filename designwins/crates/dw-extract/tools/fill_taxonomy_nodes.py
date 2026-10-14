@@ -28,10 +28,10 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO = Path("/Users/samkim/Harnessv1")
-OUT = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/api-store-export/nodes_filled.jsonl")
+OUT = Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/api-store-export/nodes_filled.jsonl")
 GRAPH = REPO / "tests" / "fixtures" / "gold" / "category_graph_v1.json"
 CRAWL = Path("/Users/samkim/Volumes/Electronicdataassets/agent-inbox/claude-code-browser")
-CATALOG = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/scratch/catalog.db")
+CATALOG = Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/scratch/catalog.db")
 
 
 def norm(key: str) -> str:

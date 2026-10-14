@@ -35,6 +35,15 @@ AXES = [
     ("rds_on_ohm", "max_rating", ["RDSON", "RDS(ON)MAX"]),
     ("tj_max_c", "min_rating", ["TJ", "TJMAX"]),
     ("tstg_range_c", "covers", ["TSTG"]),
+    # additive batch (registry expansion 2026-10-12)
+    ("vgs_rating_v", "min_rating", ["VGS", "VGSS", "VGSMAX"]),
+    ("vgs_th_v", "max_rating", ["VGSTH", "VGSTHMAX"]),
+    ("vsd_v", "max_rating", ["VSD", "VF"]),
+    ("idss_a", "max_rating", ["IDSS", "IDSSMAX"]),
+    ("igss_a", "max_rating", ["IGSS", "IGSSMAX"]),
+    ("is_a", "min_rating", ["IS", "ISMAX"]),
+    ("rg_ohm", "max_rating", ["RG"]),
+    ("rthja_cperw", "max_rating", ["RTHJA", "RTHJ-A"]),
 ]
 
 
@@ -46,6 +55,19 @@ def norm_symbol(symbol: str) -> str:
             continue
         out.append(c.upper())
     return "".join(out)
+
+
+# L1 alias fold — the frozen table shared with dw-knives (same JSONL the Rust
+# law reads; adapter layers never re-derive the fold, they consume it).
+_ALIASES = {}
+for _line in open("/Users/samkim/Harnessv1/designwins/crates/dw-knives/data/symbol_aliases.jsonl"):
+    _row = json.loads(_line)
+    _ALIASES[_row["alias_norm"]] = norm_symbol(_row["canonical"])
+
+
+def fold_alias(normed: str) -> str:
+    """alias.rs `canonical_key`: the canonical key when folded, else the norm."""
+    return _ALIASES.get(normed, normed)
 
 
 def main() -> int:
@@ -77,7 +99,7 @@ def main() -> int:
             prov = json.loads(provenance or "{}")
         except Exception:
             prov = {}
-        ns = norm_symbol(symbol or "")
+        ns = fold_alias(norm_symbol(symbol or ""))
         hit = bind.get(ns)
         if hit is None:
             unbound[symbol or "?"] += 1
