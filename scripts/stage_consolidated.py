@@ -33,6 +33,23 @@ LANE_TO_SECTION = {
 }
 
 
+def apply_sections(data: dict, sections: dict) -> None:
+    """Merge lane sections into a per-part record without clobbering others.
+
+    `pillars` is a full replace (stale v1 artifacts like line-wrap package
+    names must not survive a corrected re-run); every other section merges
+    key-by-key."""
+    for section, axes in sections.items():
+        if section == "pillars":
+            data[section] = axes
+            continue
+        cur = data.get(section)
+        if not isinstance(cur, dict):
+            cur = {}
+        cur.update(axes)
+        data[section] = cur
+
+
 def existing_file(pn: str) -> Path | None:
     for d in (MCU_DIR, PWR_DIR):
         f = d / f"{pn}.json"
@@ -47,6 +64,10 @@ def main() -> int:
     ap.add_argument("--aec", type=Path, default=None,
                     help="aec-rows-enriched.jsonl (grade/qualified per part)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--out-dir", type=Path, default=None,
+                    help="write merged per-part files into this local dir instead of"
+                         " in-place staging (staging is read-only for this uid since"
+                         " 2026-10-12); rsync the dir up separately")
     args = ap.parse_args()
 
     tally: Counter[str] = Counter()
@@ -103,22 +124,30 @@ def main() -> int:
     created = merged = 0
     for pn, sections in updates.items():
         f = existing_file(pn)
+        if args.out_dir is not None:
+            # local-delta mode: read existing from staging (RO NFS), write the
+            # merged file into the delta dir keyed by where it must land
+            target_dir = MCU_DIR
+            data = {"part_number": pn}
+            if f:
+                target_dir = f.parent
+                try:
+                    data = json.loads(f.read_text())
+                except Exception:
+                    data = {"part_number": pn}
+            out_root = args.out_dir / target_dir.parent.name / "datasheet_extractions"
+            out_root.mkdir(parents=True, exist_ok=True)
+            apply_sections(data, sections)
+            (out_root / f"{pn}.json").write_text(
+                json.dumps(data, ensure_ascii=False, sort_keys=True))
+            merged += 1
+            continue
         if f:
             try:
                 data = json.loads(f.read_text())
             except Exception:
                 data = {"part_number": pn}
-            for section, axes in sections.items():
-                if section == "pillars":
-                    # full replace: stale v1 artifacts (line-wrap package
-                    # names) must not survive a corrected re-run
-                    data[section] = axes
-                    continue
-                cur = data.get(section)
-                if not isinstance(cur, dict):
-                    cur = {}
-                cur.update(axes)
-                data[section] = cur
+            apply_sections(data, sections)
             data.setdefault("part_number", pn)
             f.write_text(json.dumps(data, ensure_ascii=False, sort_keys=True))
             merged += 1
