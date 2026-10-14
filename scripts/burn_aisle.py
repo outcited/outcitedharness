@@ -59,12 +59,16 @@ Return ONLY the corrected JSON array."""
 
 
 import os as _os
-PREFER_LOCAL = _os.environ.get("BURN_PREFER_LOCAL", "0") == "1"
+# 2026-10-14 (Sam): the DEFAULT was cloud-first at direct rates, which
+# silently violated the routing law below and burned ~$36/day of OpenRouter on
+# burn waves batch1-5. Defaults now enforce the law: local-first, text
+# fail-closed. Cloud text requires BOTH env flags set explicitly.
+PREFER_LOCAL = _os.environ.get("BURN_PREFER_LOCAL", "1") == "1"
 # The routing law (2026-10-12, Sam): text extraction runs locally. The
 # OpenRouter batch is approved for VISION only — text must never wander onto
 # it. BURN_TEXT_LOCAL_ONLY=1 truncates the chain at the local TP4: a total
 # local failure skips the doc (fail closed), it does not buy cloud text.
-TEXT_LOCAL_ONLY = _os.environ.get("BURN_TEXT_LOCAL_ONLY", "0") == "1"
+TEXT_LOCAL_ONLY = _os.environ.get("BURN_TEXT_LOCAL_ONLY", "1") == "1"
 
 LOCAL_CHAIN = [
     (V41, "deepseek-v4.1-flash"),
