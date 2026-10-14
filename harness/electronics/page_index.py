@@ -84,6 +84,38 @@ LANE_PATTERNS: dict[str, tuple[re.Pattern[str], ...]] = {
         re.compile(r"\bNOMENCLATURE\b", re.IGNORECASE),
         re.compile(r"\bORDERABLE\s+(?:PART|DEVICE)", re.IGNORECASE),
     ),
+    # design-guide lanes (reference designs / eval boards, 2026-10-09)
+    "design_specs": (
+        re.compile(r"\b(?:TOP[- ]LEVEL\s+)?SPECIFICATIONS?\b", re.IGNORECASE),
+        re.compile(r"\bDESIGN\s+REQUIREMENTS?\b", re.IGNORECASE),
+        re.compile(r"\bVOLTAGE\s+AND\s+CURRENT\s+REQUIREMENTS?\b", re.IGNORECASE),
+        re.compile(r"\bSYSTEM\s+(?:DESCRIPTION|OVERVIEW)\b", re.IGNORECASE),
+        re.compile(r"\bDESIGN\s+OVERVIEW\b", re.IGNORECASE),
+    ),
+    "test_results": (
+        re.compile(r"\bTEST(?:ING)?\s+(?:AND\s+)?RESULTS?\b", re.IGNORECASE),
+        re.compile(r"\bTEST\s+(?:DATA|SETUP|PREREQUISITES?)\b", re.IGNORECASE),
+        re.compile(r"\bMEASURED\s+PERFORMANCE\b", re.IGNORECASE),
+        re.compile(r"\bWAVEFORMS?\b", re.IGNORECASE),
+        re.compile(r"\bTHERMAL\s+(?:IMAGES?|RESULTS?)\b", re.IGNORECASE),
+        re.compile(r"\bPERFORMANCE\s+(?:DATA|RESULTS?)\b", re.IGNORECASE),
+    ),
+    "bom_parts": (
+        re.compile(r"\bBILL\s+OF\s+MATERIALS?\b", re.IGNORECASE),
+        re.compile(r"\bBOM\b", re.IGNORECASE),
+        re.compile(r"\bPREFERRED\s+COMPONENTS?\b", re.IGNORECASE),
+        re.compile(r"\bCOMPONENTS?\s+(?:LIST|SELECTION|TABLE)\b", re.IGNORECASE),
+        re.compile(r"\bKEY\s+COMPONENTS?\b", re.IGNORECASE),
+    ),
+    "schematic_layout": (
+        re.compile(r"\bSCHEMATICS?\b", re.IGNORECASE),
+        re.compile(r"\bLAYOUT\s+(?:GUIDELINES?|CONSIDERATIONS?|RECOMMENDATIONS?)\b", re.IGNORECASE),
+        re.compile(r"\bDESIGN\s+FILES?\b", re.IGNORECASE),
+        re.compile(r"\bPCB\s+(?:LAYOUT|DESIGN|FABRICATION)\b", re.IGNORECASE),
+        re.compile(r"\bGERBER\b", re.IGNORECASE),
+        re.compile(r"\bBLOCK\s+DIAGRAM\b", re.IGNORECASE),
+        re.compile(r"\bTOPOLOGY\b", re.IGNORECASE),
+    ),
 }
 HEADING_MAX_LENGTH = 180
 

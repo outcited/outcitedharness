@@ -40,8 +40,9 @@ _LABELS: dict[str, tuple[re.Pattern[str], ...]] = {
     ),
     "temp_range_c": (
         re.compile(
-            r"operating\s+temperature\D{0,40}?(-?\d+(?:\.\d+)?)\s*°?\s*c?\s*"
-            r"(?:to|–|-|~)\s*([+-]?\d+(?:\.\d+)?)\s*°?\s*c",
+            r"(?:operating|limiting|ambient)\s+temperature\D{0,40}?"
+            r"(-?\d+(?:\.\d+)?)\s*°?\s*c?\s*"
+            r"(?:to|–|-|~|\.\.\.|…)\s*([+-]?\d+(?:\.\d+)?)\s*°?\s*c",
             re.I,
         ),
     ),
@@ -58,7 +59,12 @@ def connector_parametric_rows(
     rows: list[dict[str, Any]] = []
     for page_index, text in enumerate(page_texts, 1):
         lines = [" ".join(raw.split()) for raw in (text or "").splitlines()]
-        for line in lines:
+        # table cells often split label and value across lines
+        # ("Rated current ⏎ 4 A"): also scan adjacent-line joins
+        scan = list(enumerate(lines, 1))
+        scan += [(i, f"{lines[i - 1]} {lines[i]}")
+                 for i in range(1, len(lines))]
+        for line_no, line in scan:
             if not line or not re.search(r"\d", line):
                 continue
             for axis, patterns in _LABELS.items():

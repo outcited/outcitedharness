@@ -55,8 +55,42 @@ _FILENAME_HINTS: tuple[tuple[str, re.Pattern[str]], ...] = (
 _MIN_TEXT_CHARS = 120
 _HEADING_Y_MAX_LINES = 40
 
+# Non-document files: classified by extension, BEFORE any content rule.
+# A zip is always a container whatever its bytes say (PLAN-unseen-doc-types
+# S1, 2026-10-12). `.bin` is deliberately absent — a firmware blob is not an
+# EDA model, and guessing it one would be inventing evidence (fail closed).
+# S2: the ref-design bundle children (measured 2026-10-12 in
+# refdesigns-eval zips: gerbers, drill, OrCAD/Cadence, netlists) map to the
+# existing `gerber` / `design_file` classes — additive, never guessed.
+_EXTENSION_CLASSES: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("zip", "7z", "rar", "tar", "gz", "tgz"), "container"),
+    (("png", "gif", "jpg", "jpeg", "tif", "tiff", "bmp", "svg", "webp"), "image_only"),
+    (("txt", "md", "log", "rep"), "sidecar_text"),
+    (("xlsx", "xls", "xlsm", "csv", "tsv"), "tabular_sheet"),
+    (("s1p", "s2p", "s3p", "s4p", "snp", "sp", "spi", "sp3", "sp4", "lib", "mod", "ibs", "sin", "cir"),
+     "eda_model"),
+    (("gbr", "gpi", "art", "pho", "dri", "drl", "gto", "gbo", "gts", "gbs", "gtp", "gbp",
+      "gko", "gm1", "gm2", "gtl", "gbl"), "gerber"),
+    (("asy", "olb", "sxsch", "sxslb", "sch", "brd", "kicad_sch", "kicad_pcb", "pcb", "dsn",
+      "net", "v", "vhd", "edf", "prj", "prjpcb"), "design_file"),
+)
+
+
+def extension_class(filename: str) -> str | None:
+    """The class a non-document extension forces, or None for documents."""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if not ext:
+        return None
+    for exts, label in _EXTENSION_CLASSES:
+        if ext in exts:
+            return label
+    return None
+
 
 def classify_document(front_text: str, filename: str, toc_titles: str) -> str:
+    forced = extension_class(filename)
+    if forced is not None:
+        return forced
     evidence = f"{front_text[:4000]}\n{toc_titles[:2000]}"
     for label, pattern in _CLASS_RULES:
         if pattern.search(evidence):
@@ -67,7 +101,30 @@ def classify_document(front_text: str, filename: str, toc_titles: str) -> str:
     return "unknown"
 
 
-def l0_record(document: Any, *, source_path: str) -> dict[str, Any]:
+_PRIOR_CLASS_MAP = {
+    "reference_design": "reference_design",
+    "design_file": "design_file",
+    "eval_schematic": "schematic",
+    "eval_bom": "bom",
+    "eval_gerber": "gerber",
+    "bom": "bom",
+    "user_manual": "user_manual",
+    "application_note": "application_note",
+    "errata": "errata",
+    "datasheet": "datasheet",
+    "fact_sheet": "fact_sheet",
+    "reliability_report": "reliability_report",
+    "product_brief": "product_brief",
+    "pcn": "pcn",
+    "simulation_model": "simulation_model",
+    "reference_manual": "reference_manual",
+    "package_drawing": "package_drawing",
+    "white_paper": "white_paper",
+}
+
+
+def l0_record(document: Any, *, source_path: str,
+              manifest_prior: str | None = None) -> dict[str, Any]:
     """What is this document and where are the extractable parts."""
 
     from harness.electronics.page_index import classify_section
@@ -77,6 +134,12 @@ def l0_record(document: Any, *, source_path: str) -> dict[str, Any]:
     toc = document.get_toc() or []
     toc_titles = " ".join(str(item[1]) for item in toc if len(item) >= 2)
     doc_class = classify_document(front_text, source_path.split("/")[-1], toc_titles)
+    class_source = "text"
+    if doc_class == "unknown" and manifest_prior:
+        prior = _PRIOR_CLASS_MAP.get(str(manifest_prior).lower())
+        if prior:
+            doc_class = prior
+            class_source = "manifest_prior"
 
     sections: list[dict[str, Any]] = []
     seen: set[tuple[str, int]] = set()
@@ -122,6 +185,7 @@ def l0_record(document: Any, *, source_path: str) -> dict[str, Any]:
         "schema": L0_SCHEMA,
         "source_path": source_path,
         "doc_class": doc_class,
+        "class_source": class_source,
         "page_count": page_count,
         "toc_sections": len(sections),
         "sections": sections if len(sections) <= 400 else sections[:400],
@@ -135,4 +199,4 @@ def l0_record(document: Any, *, source_path: str) -> dict[str, Any]:
     }
 
 
-__all__ = ["L0_SCHEMA", "classify_document", "l0_record"]
+__all__ = ["L0_SCHEMA", "classify_document", "extension_class", "l0_record"]

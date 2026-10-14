@@ -69,6 +69,15 @@ _HZ_MULT = {"hz": 1.0, "khz": 1e3, "mhz": 1e6, "ghz": 1e9}
 _OHM_MULT = {"mohm": 1e-3, "ohm": 1.0, "kohm": 1e3}
 _H_MULT = {"nh": 1e-9, "µh": 1e-6, "uh": 1e-6, "mh": 1e-3, "h": 1.0}
 _A_PER_S_MULT = {"µs": 1e6, "us": 1e6, "ns": 1e9, "ms": 1e3, "s": 1.0}
+# D10 additive kinds (2026-10-12, DECISIONS.md) — frozen multipliers.
+# Corpus evidence: QG nC×1837 · CISS/COSS/CRSS pF · TF/TR ns×962 ·
+# PTOT/PD W · EAS mJ×816. A token outside its kind's table scales to None
+# (fail closed) — cross-kind prints can never coerce (mW-on-ohm law).
+_C_MULT = {"nc": 1e-9, "µc": 1e-6, "uc": 1e-6, "mc": 1e-3, "c": 1.0}
+_F_MULT = {"pf": 1e-12, "nf": 1e-9, "µf": 1e-6, "uf": 1e-6, "mf": 1e-3, "f": 1.0}
+_S_MULT = {"ns": 1e-9, "µs": 1e-6, "us": 1e-6, "ms": 1e-3, "s": 1.0}
+_W_MULT = {"mw": 1e-3, "w": 1.0, "kw": 1e3}
+_J_MULT = {"mj": 1e-3, "j": 1.0}
 
 # --- symbol vocabulary (order matters) --------------------------------------
 # (symbol regex WITHOUT separator, canonical key, kind)
@@ -114,6 +123,19 @@ _SYMBOLS: tuple[tuple[str, str, str], ...] = (
     (r"\bR\s*_?\s*G\b", "rg_ohm", "ohm"),
     (r"\bL\b", "l_h", "h"),
     (r"\bR\b", "r_ohm", "ohm"),
+    # ---- D10 additive kinds (2026-10-12), appended — never reordered.
+    # Evidence: claims_canonical unit spread (QG nC×1837, CISS/COSS/CRSS pF,
+    # TF/TR ns×962 each, PTOT/PD W, EAS mJ×816). Contested symbols (T, TST,
+    # RCS, R with dual unit kinds) deliberately absent — fail closed.
+    (r"\bQ\s*_?\s*G\b", "qg_coulomb", "coulomb"),
+    (r"\bC\s*_?\s*ISS", "ciss_farad", "farad"),
+    (r"\bC\s*_?\s*OSS", "coss_farad", "farad"),
+    (r"\bC\s*_?\s*RSS", "crss_farad", "farad"),
+    (r"\bT\s*_?\s*F\b", "tf_second", "second"),
+    (r"\bT\s*_?\s*R\b", "tr_second", "second"),
+    (r"\bP\s*_?\s*TOT", "ptot_watt", "watt"),
+    (r"\bP\s*_?\s*D\b", "pd_watt", "watt"),
+    (r"\bE\s*_?\s*AS", "eas_joule", "joule"),
 )
 _COMPILED_SYMBOLS = tuple((re.compile(p, re.I), k, kind)
                           for p, k, kind in _SYMBOLS)
@@ -127,9 +149,17 @@ _UNIT_RE = {
     "ohm": r"(?:mΩ|kΩ|MΩ|Ω|mohm|kohm|ohm)\b",
     "h": r"(?:nH|µH|μH|uH|mH|H)\b",
     "a_per_s": r"(?:A\s*/\s*(?:µs|μs|us|ns|ms|s))\b",
+    # D10 additive kinds — token lists mirror the frozen multiplier tables.
+    "coulomb": r"(?:nC|µC|μC|uC|mC|C)\b",
+    "farad": r"(?:pF|nF|µF|μF|uF|mF|F)\b",
+    "second": r"(?:ns|µs|μs|us|ms|s)\b",
+    "watt": r"(?:mW|kW|W)\b",
+    "joule": r"(?:mJ|J)\b",
 }
 _PREFIX = {"v": "v", "a": "a", "hz": "hz", "c": "c",
-           "c_per_w": "cw", "ohm": "o", "h": "ind", "a_per_s": "dds"}
+           "c_per_w": "cw", "ohm": "o", "h": "ind", "a_per_s": "dds",
+           "coulomb": "q", "farad": "cap", "second": "tms",
+           "watt": "pw", "joule": "en"}
 _CMP_CHARS = "≤≥≦≧<>＜＞"
 
 
@@ -194,7 +224,10 @@ def _scale(kind: str, unit_text: str | None) -> float | None:
         m = re.match(r"a/(µs|us|ns|ms|s)", tok)
         return _A_PER_S_MULT[m.group(1)] if m else None
     table = {"v": _V_MULT, "a": _A_MULT, "hz": _HZ_MULT,
-             "ohm": _OHM_MULT, "h": _H_MULT}
+             "ohm": _OHM_MULT, "h": _H_MULT,
+             # D10 additive kinds.
+             "coulomb": _C_MULT, "farad": _F_MULT, "second": _S_MULT,
+             "watt": _W_MULT, "joule": _J_MULT}
     return table[kind].get(tok)
 
 
