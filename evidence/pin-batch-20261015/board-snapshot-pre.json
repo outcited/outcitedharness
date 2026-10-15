@@ -1,0 +1,186 @@
+{
+ "categories": {
+  "connector": {
+   "addressable_parts": 401,
+   "facets": {
+    "connectors": 401
+   },
+   "pillar_fields": {},
+   "records": 401
+  },
+  "mcu": {
+   "addressable_parts": 64272,
+   "facets": {
+    "aec": 4662,
+    "claude_ground_truth": 683,
+    "curves": 825,
+    "deep_specs": 318,
+    "description": 1,
+    "electrical": 256,
+    "enriched_specs": 430,
+    "fine_tune_facets": 143,
+    "mistral_compatibility": 1381,
+    "overview": 2181,
+    "parametric_specs": 1142,
+    "peripheral_features": 37,
+    "pillars": 50779,
+    "pinout": 2858,
+    "thermal": 199,
+    "vision_electrical": 266,
+    "vout_iq": 175
+   },
+   "pillar_fields": {
+    "clk_max_mhz": 7219,
+    "eeprom_kb": 1787,
+    "esd_cdm_v": 1046,
+    "esd_hbm_v": 3182,
+    "flash_kb": 6866,
+    "has_aes": 2678,
+    "has_secure_boot": 1216,
+    "has_trng": 1829,
+    "has_trustzone": 876,
+    "has_unique_id": 5064,
+    "latchup_ma": 1129,
+    "n_adc": 3397,
+    "n_can": 653,
+    "n_dma": 2144,
+    "n_ethernet": 130,
+    "n_gpio": 6573,
+    "n_i2c": 854,
+    "n_spi": 659,
+    "n_timer": 8687,
+    "n_uart": 724,
+    "n_usb": 465,
+    "package": 18570,
+    "sram_kb": 7197,
+    "supply_v": 8394,
+    "temp_range_c": 5197
+   },
+   "records": 97718
+  },
+  "power": {
+   "addressable_parts": 36636,
+   "facets": {
+    "curves": 303,
+    "description": 3179,
+    "thermal": 1080,
+    "vout_iq": 1028
+   },
+   "pillar_fields": {},
+   "records": 37899
+  },
+  "refdesign": {
+   "addressable_parts": 20386,
+   "facets": {
+    "overview": 8390
+   },
+   "pillar_fields": {},
+   "records": 35533
+  }
+ },
+ "generated_at": "20261014T202714Z",
+ "merged": {
+  "connector": {
+   "extracted_evidence": 0,
+   "staging_parts": 401
+  },
+  "mcu": {
+   "cr_core_parts": 3821,
+   "extracted_evidence": 3821,
+   "staging_parts": 64272
+  },
+  "power": {
+   "catalog_parts_with_claims": 1881,
+   "extracted_evidence": 1881,
+   "staging_parts": 36636
+  },
+  "refdesign": {
+   "extracted_evidence": 0,
+   "staging_parts": 20386
+  },
+  "unassigned_cr_core": {
+   "cr_core_parts": 1900,
+   "extracted_evidence": 1900,
+   "staging_parts": 0
+  }
+ },
+ "provenance": {
+  "catalog_claims_quote_sha": 86736,
+  "catalog_claims_with_page": null,
+  "note": "catalog claim pages ride the claim_pages chain (99.6% located); gold rows are quote+page+sha verified; cr-core rows carry T1 source provenance but no page chain yet",
+  "pinout_gold_docs": 174,
+  "pinout_gold_rows_quote_page_sha": 16378
+ },
+ "strata": {
+  "catalog_claims": {
+   "claims": 86736,
+   "parts_with_claims": 1881,
+   "symbol_parts": {
+    "COSS": 984,
+    "ID": 1149,
+    "QG": 989,
+    "RDS(ON)": 1100,
+    "VGS(TH)": 856
+   }
+  },
+  "cr_core": {
+   "addressable_parts": 5718,
+   "aisles": {
+    "mcu": 3821,
+    "unassigned": 1900
+   },
+   "facets": {
+    "claude_ground_truth": 2249,
+    "deep_specs": 506,
+    "mistral_compatibility": 3821,
+    "overview": 3971,
+    "parametric_specs": 3498,
+    "peripheral_features": 45,
+    "pinout": 5473
+   },
+   "records": 5721
+  },
+  "pinout_gold": {
+   "available": true,
+   "manifest": {
+    "counts": {
+     "docs_heldout": 43,
+     "docs_total": 174,
+     "rows_exact": 16072,
+     "rows_experiment": 12614,
+     "rows_gold": 16378,
+     "rows_heldout": 3764,
+     "rows_normalized": 306,
+     "rows_seen": 17292,
+     "rows_unverified_rejected": 914,
+     "strata": {
+      "connector": 0,
+      "mcu_pinout": 12316,
+      "qfn_ballout": 4062
+     }
+    },
+    "files": {
+     "heldout_rows.jsonl": {
+      "rows": 3764,
+      "sha256": "3addbb5b77538f7aaa7bbac2881be7155591e801646feecf4a9fa01fa3e8c393"
+     },
+     "negative_controls.jsonl": {
+      "rows": 20,
+      "sha256": "8c7e5b022c1d510e27b2c3c1dbec5586227275e762f503dd070436ce9cc75a69"
+     },
+     "rows.jsonl": {
+      "rows": 12614,
+      "sha256": "ccf4dfb161da3ed9acb4a77d50c9ad07aa7036f5182936c31ea990cd818e9962"
+     }
+    },
+    "manifest_sha256": "d47b3948eea2c3fe31b7692dc32ab24a4891c07b1b20951f4b1ed651897eb87d",
+    "release": "pinout-gold-r1-20261011"
+   }
+  }
+ },
+ "totals": {
+  "addressable": 121695,
+  "records": 171551,
+  "served_parts": 17455
+ }
+}
