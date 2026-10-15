@@ -102,23 +102,23 @@ def main() -> int:
             if status != "completed":
                 print(f"{stem}: {status} {b.get('request_counts')}", flush=True)
                 continue
-            results_url = (b.get("results") or {}).get("url") if isinstance(b.get("results"), dict) else b.get("results")
-            if not results_url:
-                print(f"{stem}: completed but no results url", flush=True)
-                continue
-            try:
-                data = urllib.request.urlopen(results_url, timeout=300).read().decode()
-            except Exception as e:
-                print(f"{stem}: download failed {e}", flush=True)
-                continue
-            for line in data.splitlines():
-                line = line.strip()
-                if not line:
+            results = b.get("results")
+            rows_iter = []
+            if isinstance(results, list):
+                # inline results: [{custom_id, response:{status_code, body:{choices}}}]
+                rows_iter = results
+            else:
+                results_url = (results or {}).get("url") if isinstance(results, dict) else results
+                if not results_url:
+                    print(f"{stem}: completed but no results", flush=True)
                     continue
                 try:
-                    row = json.loads(line)
-                except Exception:
+                    data = urllib.request.urlopen(results_url, timeout=300).read().decode()
+                except Exception as e:
+                    print(f"{stem}: download failed {e}", flush=True)
                     continue
+                rows_iter = [json.loads(l) for l in data.splitlines() if l.strip()]
+            for row in rows_iter:
                 cid = row.get("custom_id") or ""
                 if not cid.startswith("pin-batch-"):
                     continue
