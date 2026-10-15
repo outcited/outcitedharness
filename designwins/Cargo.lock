@@ -152,6 +152,7 @@ dependencies = [
  "dw-extract",
  "dw-model",
  "dw-recon",
+ "dw-truth",
  "rusqlite",
  "serde",
  "serde_json",
