@@ -78,6 +78,8 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--doc-timeout", type=float, default=60.0,
+                    help="seconds per doc batch before hung docs are abandoned")
     args = ap.parse_args()
 
     parts = _queue_parts(args.queue)
@@ -90,7 +92,7 @@ def main() -> int:
     # a malformed PDF; ordered pool.map + write-at-end once lost 4.7 days to it.
     from concurrent.futures import wait
     fh = args.out.open("w")
-    DOC_TIMEOUT = 60.0
+    DOC_TIMEOUT = args.doc_timeout
     items = list(zip(parts, [str(args.pdf_root)] * len(parts)))
     i = 0
     while i < len(items):
