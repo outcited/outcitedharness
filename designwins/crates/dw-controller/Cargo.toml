@@ -28,3 +28,7 @@ path = "src/bin/dw-shadow.rs"
 [[bin]]
 name = "dw-discovery-canary"
 path = "src/bin/dw-discovery-canary.rs"
+
+[[bin]]
+name = "dw-factory"
+path = "src/bin/dw-factory.rs"

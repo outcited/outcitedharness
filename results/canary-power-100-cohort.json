@@ -1,0 +1,607 @@
+{
+  "cohort": "canary-power-100",
+  "selected_at": "2026-10-16T12:00:00Z",
+  "total": 100,
+  "documents": [
+    {
+      "stem": "infineon-2N7002DW",
+      "batch": "burn-power-batch1-local",
+      "claims": 58,
+      "substrate_sha256": "123f9b03c11c0b0248ff534c13365ec466abc4bbaabe912e50a6df68202e1ca8"
+    },
+    {
+      "stem": "infineon-AIMBG120R020M1",
+      "batch": "burn-power-batch1-local",
+      "claims": 76,
+      "substrate_sha256": "0d43d121895a2b5d2ab136ac98a49308fc94949663abf8c18c72908a21248f19"
+    },
+    {
+      "stem": "infineon-AIMBG120R030M1",
+      "batch": "burn-power-batch1-local",
+      "claims": 74,
+      "substrate_sha256": "00aef12161a20993d210f46dea6a7b8a97c2b49718a37faa839d4212839a1a34"
+    },
+    {
+      "stem": "infineon-AIMBG75R007M2H",
+      "batch": "burn-power-batch1-local",
+      "claims": 76,
+      "substrate_sha256": "af8a7d183aaeb1dcfab21342a0a17f97ffcdbf0f35ee3af1012b3b0b25c57146"
+    },
+    {
+      "stem": "infineon-AIMBG75R033M2H",
+      "batch": "burn-power-batch1-local",
+      "claims": 76,
+      "substrate_sha256": "2bed588c21c894bc8783766c013e5dddd2647f2e3ebbce6789fab5272d2cfccc"
+    },
+    {
+      "stem": "infineon-AIMBG75R050M2H",
+      "batch": "burn-power-batch1-local",
+      "claims": 76,
+      "substrate_sha256": "18595df22fe8a25b9e76477c5c7b9fabe9e1adc9367cb5aab287df0491899738"
+    },
+    {
+      "stem": "infineon-AIMDQ75R016M1H",
+      "batch": "burn-power-batch1-local",
+      "claims": 69,
+      "substrate_sha256": "2cfa4f12e7c8ab6ff09cc5c9ca35a17c1c5b83ce97523edcbce0c50213119596"
+    },
+    {
+      "stem": "infineon-2N7002DW",
+      "batch": "burn-power-batch2-local",
+      "claims": 55,
+      "substrate_sha256": "123f9b03c11c0b0248ff534c13365ec466abc4bbaabe912e50a6df68202e1ca8"
+    },
+    {
+      "stem": "infineon-AIMBG120R010M1",
+      "batch": "burn-power-batch2-local",
+      "claims": 76,
+      "substrate_sha256": "1b8a6ec67af964533c4193f5740baac086f03f339c4af6d82746af6da0a9a595"
+    },
+    {
+      "stem": "infineon-AIMBG120R020M1",
+      "batch": "burn-power-batch2-local",
+      "claims": 74,
+      "substrate_sha256": "0d43d121895a2b5d2ab136ac98a49308fc94949663abf8c18c72908a21248f19"
+    },
+    {
+      "stem": "infineon-AIMBG120R030M1",
+      "batch": "burn-power-batch2-local",
+      "claims": 76,
+      "substrate_sha256": "00aef12161a20993d210f46dea6a7b8a97c2b49718a37faa839d4212839a1a34"
+    },
+    {
+      "stem": "infineon-AIMBG120R160M1",
+      "batch": "burn-power-batch2-local",
+      "claims": 74,
+      "substrate_sha256": "3df20a1b267a83cded8f4b8135b1e40422d8d95256da0dbfb752fab8833e8b3f"
+    },
+    {
+      "stem": "infineon-AIMBG75R007M2H",
+      "batch": "burn-power-batch2-local",
+      "claims": 70,
+      "substrate_sha256": "af8a7d183aaeb1dcfab21342a0a17f97ffcdbf0f35ee3af1012b3b0b25c57146"
+    },
+    {
+      "stem": "infineon-AIMBG75R025M2H",
+      "batch": "burn-power-batch2-local",
+      "claims": 76,
+      "substrate_sha256": "0fe2939005f6ba27ca95d8f4ac8b2939e54acbc3b96bc9c0ef31a14a1d89b748"
+    },
+    {
+      "stem": "infineon-AIMBG75R050M2H",
+      "batch": "burn-power-batch2-local",
+      "claims": 76,
+      "substrate_sha256": "18595df22fe8a25b9e76477c5c7b9fabe9e1adc9367cb5aab287df0491899738"
+    },
+    {
+      "stem": "infineon-AIMBG75R060M1H",
+      "batch": "burn-power-batch2-local",
+      "claims": 69,
+      "substrate_sha256": "2c8a53364574d116e757ca245fe987594966fe75263d9db8b3d0ac4b756121c0"
+    },
+    {
+      "stem": "infineon-AIMCQ120R030M1T",
+      "batch": "burn-power-batch2-local",
+      "claims": 76,
+      "substrate_sha256": "c368196856b28c0a17028649481d23e4c9c424c144e72e01996311e7a3869403"
+    },
+    {
+      "stem": "infineon-AIMDQ75R020M2H",
+      "batch": "burn-power-batch2-local",
+      "claims": 76,
+      "substrate_sha256": "34af7d4d19507bf01fce564bac19abf38c2ee440ed464a7b83ad33e4c4b1bedd"
+    },
+    {
+      "stem": "infineon-AIMDQ75R027M1H",
+      "batch": "burn-power-batch2-local",
+      "claims": 68,
+      "substrate_sha256": "4bdc250582ada8a3af990e7ae7107e48ddee63ff238732e5031f5c50b6cef09f"
+    },
+    {
+      "stem": "infineon-AIMDQ75R090M1H",
+      "batch": "burn-power-batch2-local",
+      "claims": 69,
+      "substrate_sha256": "3d23db9835f5f29954957d60fbdd030fc2000b6c9530ce03e54f9f1062a54c3f"
+    },
+    {
+      "stem": "infineon-AUIRFP4110",
+      "batch": "burn-power-batch2-local",
+      "claims": 54,
+      "substrate_sha256": "ba1796c0ba672de516cfaf7b3482977eb95dd981ab6cc07bb58df32e01ea9847"
+    },
+    {
+      "stem": "infineon-AUIRFP4568",
+      "batch": "burn-power-batch2-local",
+      "claims": 46,
+      "substrate_sha256": "811af4be4b0e53ceb1cc9e6835c143782b72ae1347b45e0dd3c00c6dd60e3883"
+    },
+    {
+      "stem": "infineon-BSC005N03LS5",
+      "batch": "burn-power-batch2-local",
+      "claims": 57,
+      "substrate_sha256": "4bb9260a121e361163190aaf175def59fa83b88f1b77d0892bd52dfe3e84ab6f"
+    },
+    {
+      "stem": "infineon-BSC007N04LS6SC",
+      "batch": "burn-power-batch2-local",
+      "claims": 67,
+      "substrate_sha256": "0ed516ec2f23a2d264d61ffdd176ae5d0943c82be450591b1e412b732ae9e356"
+    },
+    {
+      "stem": "infineon-BSC009NE2LS5",
+      "batch": "burn-power-batch2-local",
+      "claims": 65,
+      "substrate_sha256": "a68e4cf3abc2d925c57fdf63850ba060d9d25aee111a3bf772e1c40a4bf5c753"
+    },
+    {
+      "stem": "infineon-BSC012N06NS",
+      "batch": "burn-power-batch2-local",
+      "claims": 67,
+      "substrate_sha256": "2277374946e703b820205ef12929a6bc82fd358eba80630b35dabde65760420a"
+    },
+    {
+      "stem": "infineon-BSC014N04LS",
+      "batch": "burn-power-batch2-local",
+      "claims": 71,
+      "substrate_sha256": "eeb4bc776ffc64957912724f827f9215004aa42de9a0a20b89dce4a7e20990af"
+    },
+    {
+      "stem": "infineon-BSC014N04LSI",
+      "batch": "burn-power-batch2-local",
+      "claims": 68,
+      "substrate_sha256": "302999cc1e2579afc90606ab3ed7ec76b5696c71f5ee570d70d317deb0857658"
+    },
+    {
+      "stem": "infineon-BSC023N08NS5SC",
+      "batch": "burn-power-batch2-local",
+      "claims": 68,
+      "substrate_sha256": "58910f51230d353896b0495c7bef78695427db1c8bdf06015eebb762c9ac4336"
+    },
+    {
+      "stem": "infineon-BSC037N08NS5",
+      "batch": "burn-power-batch2-local",
+      "claims": 67,
+      "substrate_sha256": "5baddd718272cbd115938ce2bcffa692b7f96aa539973627dd3d085203bd6ed9"
+    },
+    {
+      "stem": "infineon-BSC040N08NS5",
+      "batch": "burn-power-batch2-local",
+      "claims": 67,
+      "substrate_sha256": "9348bff289fece5f6e29d25a8be66d491e4f87bc7ef52b68ed9657cb7d30952a"
+    },
+    {
+      "stem": "infineon-BSC0500NSI",
+      "batch": "burn-power-batch2-local",
+      "claims": 64,
+      "substrate_sha256": "083b56f2208b9f42bd9f7aeed7485af1420b66a6b8a438b21d13f9c2b9431d04"
+    },
+    {
+      "stem": "infineon-BSC059N04LS6",
+      "batch": "burn-power-batch2-local",
+      "claims": 62,
+      "substrate_sha256": "0936de0a7ec8a86d8f57ff9e0c45160c11f0714fb5000e5128ed4cb585210460"
+    },
+    {
+      "stem": "infineon-BSC096N10LS5",
+      "batch": "burn-power-batch2-local",
+      "claims": 66,
+      "substrate_sha256": "6b8ebec967fc4100f24b79940d8e1182453326308e54e6db7e9f5233c95d83f6"
+    },
+    {
+      "stem": "infineon-BSC097N06NS",
+      "batch": "burn-power-batch2-local",
+      "claims": 66,
+      "substrate_sha256": "65978f6478169ae65db00f45ab1788443ec3c93f55e692611283b40834de26d7"
+    },
+    {
+      "stem": "infineon-BSC110N15NS5SC",
+      "batch": "burn-power-batch2-local",
+      "claims": 63,
+      "substrate_sha256": "1cfed815e00e027d9e51537ae8a0a9e44f0e40fc240584a518258c9048c72d16"
+    },
+    {
+      "stem": "infineon-BSC12DN20NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 52,
+      "substrate_sha256": "6d16f1fe7c827379726eb1f936330ba8437b82424402a0b338fde8e15fb9b8ac"
+    },
+    {
+      "stem": "infineon-BSC152N15LS5",
+      "batch": "burn-power-batch2-local",
+      "claims": 67,
+      "substrate_sha256": "8743a93da45017dfb46eab6c452e187f50faba04d2d8e045bc57395ba9364e7b"
+    },
+    {
+      "stem": "infineon-BSC160N10NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 54,
+      "substrate_sha256": "1364e66e735bb33135b687b1c7888c16db5768c40ab1f694c5817772b92d13fd"
+    },
+    {
+      "stem": "infineon-BSC190N15NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 23,
+      "substrate_sha256": "cdb10e2c250b1c735aaa0c14b8568ad3a45c48142bc917456bbf049b83d53a60"
+    },
+    {
+      "stem": "infineon-BSC320N20NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 52,
+      "substrate_sha256": "485ba9ea7b95460317da770b530314dd12a2b1765f6e0ab22e7763aa8d3241bc"
+    },
+    {
+      "stem": "infineon-BSC600N25NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 52,
+      "substrate_sha256": "cb3b7a10d1c0190741c6901aea1d8879dbc25c38bc3a1aff27074295685e8774"
+    },
+    {
+      "stem": "infineon-BSC900N20NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 52,
+      "substrate_sha256": "1efaf51c6bce84b4070fb8d5de2be82793b6159784c18e2e24b858c8caeb80e0"
+    },
+    {
+      "stem": "infineon-BSD235N",
+      "batch": "burn-power-batch2-local",
+      "claims": 43,
+      "substrate_sha256": "028f2f1b6d525eb82e9cb0753e8d78cbf81ee94b1e9a8bd1c07ae0ea70f8a0ed"
+    },
+    {
+      "stem": "infineon-BSL207SP",
+      "batch": "burn-power-batch2-local",
+      "claims": 57,
+      "substrate_sha256": "00713d6c15397178e93ab9fcf96253d2abee239b0fa6c2b8232fd02379e4c963"
+    },
+    {
+      "stem": "infineon-BSP135",
+      "batch": "burn-power-batch2-local",
+      "claims": 68,
+      "substrate_sha256": "b9b80dd2abc4adb939290d2f8dfda0644e8a4919343c7b49aa5ad286bcb78bd9"
+    },
+    {
+      "stem": "infineon-BSP170I",
+      "batch": "burn-power-batch2-local",
+      "claims": 60,
+      "substrate_sha256": "9cc8b9f05cb96e6917be032a8b659afae99e12fad62dea903453341d9951bb97"
+    },
+    {
+      "stem": "infineon-BSP317P",
+      "batch": "burn-power-batch2-local",
+      "claims": 62,
+      "substrate_sha256": "a0cccc96858ddcbf447ac5b6b2395dcee05fbd715ca2e72e608238bd401747e1"
+    },
+    {
+      "stem": "infineon-BSP613P",
+      "batch": "burn-power-batch2-local",
+      "claims": 61,
+      "substrate_sha256": "a031709d7170b0cd76c979f13becb8ff954faf49277fa20463dc15305feb3f44"
+    },
+    {
+      "stem": "infineon-BSP89",
+      "batch": "burn-power-batch2-local",
+      "claims": 56,
+      "substrate_sha256": "3c4d881064e653a956e17d6ac92f4f050fda937061185bdf9147d1c7749c892b"
+    },
+    {
+      "stem": "infineon-BSR315P",
+      "batch": "burn-power-batch2-local",
+      "claims": 57,
+      "substrate_sha256": "d4134e42b3986e37ab43944e9e6805d58b0683900a9ec3b84856544464023781"
+    },
+    {
+      "stem": "infineon-BSS126",
+      "batch": "burn-power-batch2-local",
+      "claims": 65,
+      "substrate_sha256": "e07a904e2193a5975028b74f3316abcf28f4d1a99427a7cfb19f48b4edc075fc"
+    },
+    {
+      "stem": "infineon-BSS126I",
+      "batch": "burn-power-batch2-local",
+      "claims": 44,
+      "substrate_sha256": "ba0a06009e97211e3a5ccad044df8fed282ee8427c119e6598ac310b749ce070"
+    },
+    {
+      "stem": "infineon-BSS131",
+      "batch": "burn-power-batch2-local",
+      "claims": 55,
+      "substrate_sha256": "44cd8382cf6e6e5d035d1e8be5c5aad82db3c36723431ccc1475bb1fefe212f1"
+    },
+    {
+      "stem": "infineon-BSS138I",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "816a11d208bab23726531be95d4cf6074db1dc9e9d76213e436953222e239428"
+    },
+    {
+      "stem": "infineon-BSS138N",
+      "batch": "burn-power-batch2-local",
+      "claims": 56,
+      "substrate_sha256": "22ef56c898fd0e694a1abf22b7576205927cc22b8737f80b390766b0fcd647fb"
+    },
+    {
+      "stem": "infineon-BSS169",
+      "batch": "burn-power-batch2-local",
+      "claims": 60,
+      "substrate_sha256": "6d0bf1997f00fbc26033110431ac4794b078cc95a03838be0cbc351520fe2e9f"
+    },
+    {
+      "stem": "infineon-BSS169I",
+      "batch": "burn-power-batch2-local",
+      "claims": 44,
+      "substrate_sha256": "2b46a20c0e33fdac3b8946a060b4df144d86eec16252977bf10ea93feb7a56c0"
+    },
+    {
+      "stem": "infineon-BSS209PW",
+      "batch": "burn-power-batch2-local",
+      "claims": 62,
+      "substrate_sha256": "e33d3c7727f5c1c5e3af075966a88d5374f952a81c42eac5b14789fece3ce9a5"
+    },
+    {
+      "stem": "infineon-BSS215P",
+      "batch": "burn-power-batch2-local",
+      "claims": 49,
+      "substrate_sha256": "35ae8c4ddd18ff204c6e4e66cd59904b9c5ad3a928f1a33e14b1b9f44e64be46"
+    },
+    {
+      "stem": "infineon-BSS223PW",
+      "batch": "burn-power-batch2-local",
+      "claims": 59,
+      "substrate_sha256": "aef7e50f1154d9c17abd6f925ece23970b1384ad26145d5a7508ca44f657b126"
+    },
+    {
+      "stem": "infineon-BSS308PE",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "8b5f8762f26cdf703bd2ab75c5f48c2f1ffbd3d103d75d8aea1959795d4d58c9"
+    },
+    {
+      "stem": "infineon-BSS314PE",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "084718543e027c51e35319963d85a1c4b7bfd46bd76ee101e5028d643dc9ff0c"
+    },
+    {
+      "stem": "infineon-BSS84P",
+      "batch": "burn-power-batch2-local",
+      "claims": 59,
+      "substrate_sha256": "14082402731b955e880eb51fb0637b7459013659af12e8280722de1627551830"
+    },
+    {
+      "stem": "infineon-BSS87",
+      "batch": "burn-power-batch2-local",
+      "claims": 54,
+      "substrate_sha256": "81484c8264a21786e7a3fa9b773850ebda2d2eb4a14dd7d4fc4284e19c8317e7"
+    },
+    {
+      "stem": "infineon-BSV236SP",
+      "batch": "burn-power-batch2-local",
+      "claims": 56,
+      "substrate_sha256": "a5c12e7ef7d20a4c1c1e7cc619345d31a2ec71b1e4b2f5a3dadd1505f419ad2f"
+    },
+    {
+      "stem": "infineon-BSZ018N04LS6",
+      "batch": "burn-power-batch2-local",
+      "claims": 62,
+      "substrate_sha256": "4991761533cb97ee00203cfb534e1aeb78b7ae97914f79867e2ee82dd0b259ed"
+    },
+    {
+      "stem": "infineon-BSZ0501NSI",
+      "batch": "burn-power-batch2-local",
+      "claims": 62,
+      "substrate_sha256": "743b1386474b224c2ec23506d0e957de467d34676eb37abff527c765e5db4872"
+    },
+    {
+      "stem": "infineon-BSZ0502NSI",
+      "batch": "burn-power-batch2-local",
+      "claims": 63,
+      "substrate_sha256": "bfc5c824bf36dd008b391deb3efc3f0ef682d5583356e4a1c5009876156b7cf8"
+    },
+    {
+      "stem": "infineon-BSZ096N10LS5",
+      "batch": "burn-power-batch2-local",
+      "claims": 65,
+      "substrate_sha256": "974becfb59b80abfba19d21e6678e28f11233d523bb4a7e8ff0644702c7a5efe"
+    },
+    {
+      "stem": "infineon-BSZ160N10NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 57,
+      "substrate_sha256": "733e8673b7f8a07bd60d38772335432935a469db3d956e5595e3fbbb10fbd2da"
+    },
+    {
+      "stem": "infineon-BSZ22DN20NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 50,
+      "substrate_sha256": "e0698a2283bf644bdf7825aa9c28ae69ac7b405a017f8d8dad6cd6e3f824dfdc"
+    },
+    {
+      "stem": "infineon-BSZ340N08NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 54,
+      "substrate_sha256": "c99ff16f74c0c8e27f40a512cb374549c1f4180f11f85aec4affb192f9309a1e"
+    },
+    {
+      "stem": "infineon-BSZ520N15NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 31,
+      "substrate_sha256": "638bcc74102d75007eeb3d7e14c40a538276a56ba6d5d1c125a99d9f1c932d4a"
+    },
+    {
+      "stem": "infineon-BSZ900N20NS3 G",
+      "batch": "burn-power-batch2-local",
+      "claims": 52,
+      "substrate_sha256": "aeee7c25c23f7a57823e127b759441436bd1ee1eeedbd5eb23e5c249a41344a4"
+    },
+    {
+      "stem": "infineon-IAUA180N10S5N029",
+      "batch": "burn-power-batch2-local",
+      "claims": 52,
+      "substrate_sha256": "6677628ac4b881d4471a718e90c759120ea556805e42514cb9b5927913de48ba"
+    },
+    {
+      "stem": "infineon-IAUA220N08S5N021",
+      "batch": "burn-power-batch2-local",
+      "claims": 51,
+      "substrate_sha256": "0d49034fde112dfff8886896ba4d0aeb3f395a3cd07f316bcf3bcf876b0790d2"
+    },
+    {
+      "stem": "infineon-IAUAN04S7N008",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "67a95fadf808008826ef6f7cd75d02931249656c6fb32ffeb3836247f53e2232"
+    },
+    {
+      "stem": "infineon-IAUAN04S7N014",
+      "batch": "burn-power-batch2-local",
+      "claims": 53,
+      "substrate_sha256": "53a3b332d8077cc7923a88d9b2ae3c17ec4b1a05dc9eb35370c0c2c0e830e0ed"
+    },
+    {
+      "stem": "infineon-IAUC100N04S6L014",
+      "batch": "burn-power-batch2-local",
+      "claims": 47,
+      "substrate_sha256": "11dd5c46de04e9beeceb05f2a2eac95b06f9d7abcc7e8b53a7f8e85be8deea05"
+    },
+    {
+      "stem": "infineon-IAUC100N04S6L025",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "d9ca799ae85ee98df1c2d88083ba16891aa9416596732548f4a37052e15b83d5"
+    },
+    {
+      "stem": "infineon-IAUC100N04S6N028",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "1b8232842bfa6ae1ff29aeef4f4a0bf5e5bb79ac8392f9b3361e4d9d8c841ca2"
+    },
+    {
+      "stem": "infineon-IAUC100N08S5N031",
+      "batch": "burn-power-batch2-local",
+      "claims": 50,
+      "substrate_sha256": "b273be8baab0ce455b388b9ff79a6fbba630328efe4adb180dc2874a3e017b98"
+    },
+    {
+      "stem": "infineon-IAUC100N08S5N034",
+      "batch": "burn-power-batch2-local",
+      "claims": 51,
+      "substrate_sha256": "32f1374248e569a6b39d2427ceea4dcf6e9044321fc7821b32b9b980e6e0500a"
+    },
+    {
+      "stem": "infineon-IAUC100N08S5N043",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "d6e298ef4543b3ee4f87fc9b8d69d7fc766b471837afb9d3854a42a457d6702b"
+    },
+    {
+      "stem": "infineon-IAUC100N10S5N040",
+      "batch": "burn-power-batch2-local",
+      "claims": 49,
+      "substrate_sha256": "eb22b910171462e49a8eb3a81683935a4409b7ccb47bcc44c790d65595c382fd"
+    },
+    {
+      "stem": "infineon-IAUC120N04S6L008",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "d08c447b12ea96e42c73d72ea67c8ef405f3e6a5ab5d8123a7de3c316a8c645e"
+    },
+    {
+      "stem": "infineon-IAUC120N04S6N006",
+      "batch": "burn-power-batch2-local",
+      "claims": 49,
+      "substrate_sha256": "d924079aaff13dd69301d8de56f2c2db039fb827d0c668a27c608896d7ef3c23"
+    },
+    {
+      "stem": "infineon-IAUC120N06S5L022",
+      "batch": "burn-power-batch2-local",
+      "claims": 48,
+      "substrate_sha256": "494ba26ab7cc92a1f76ef1e5427a9a006df2395cc4953cc88f0b73eb369d4a28"
+    },
+    {
+      "stem": "infineon-IAUC26N10S5L245",
+      "batch": "burn-power-batch2-local",
+      "claims": 51,
+      "substrate_sha256": "56f33ab646ae23c65637b7a8ffd9a6d9350d45e9dc92b9201dd5756cfbb13dab"
+    },
+    {
+      "stem": "infineon-IAUC40N08S5L140",
+      "batch": "burn-power-batch2-local",
+      "claims": 49,
+      "substrate_sha256": "2ddd2115669e892bb7e4c89e3877b26e7bedf2626689a9bf029eb4eb8278a217"
+    },
+    {
+      "stem": "infineon-IAUC60N04S6L039",
+      "batch": "burn-power-batch2-local",
+      "claims": 47,
+      "substrate_sha256": "75137a5016acb920bc2cbe0ebf7ebbfecd1c1db1b404102910d7db476939d70c"
+    },
+    {
+      "stem": "infineon-IAUCN04S7L018D",
+      "batch": "burn-power-batch2-local",
+      "claims": 53,
+      "substrate_sha256": "547d88d348fb76d68bfd3a423cfc4553b1ff3933c64cc864145a9dbefae49a18"
+    },
+    {
+      "stem": "infineon-IAUCN04S7N006",
+      "batch": "burn-power-batch2-local",
+      "claims": 51,
+      "substrate_sha256": "3a43084af161cbaac38534ae166ac286c4614a98afe5521354cfff7a7f3a92b9"
+    },
+    {
+      "stem": "infineon-IAUCN04S7N015G",
+      "batch": "burn-power-batch2-local",
+      "claims": 52,
+      "substrate_sha256": "125ba7440e5f2a0f807d2af3e7a8f6dc503e98c9e899f155b112001fe4aabb8a"
+    },
+    {
+      "stem": "infineon-IAUCN04S7N020",
+      "batch": "burn-power-batch2-local",
+      "claims": 53,
+      "substrate_sha256": "a01f0e606ef3cc9256435af628b9cdb6805929154f2012813356ac806e841b85"
+    },
+    {
+      "stem": "infineon-IAUCN04S7N027G",
+      "batch": "burn-power-batch2-local",
+      "claims": 49,
+      "substrate_sha256": "93762e0fab21d3ce1103d5de5d9fa3460b4b233c32d516478ecdeca82b7119b7"
+    },
+    {
+      "stem": "infineon-IAUCN04S7N037G",
+      "batch": "burn-power-batch2-local",
+      "claims": 51,
+      "substrate_sha256": "7c18be32e21be707e24ea2152d020dd76853be9ad9b4b9ee3e4cae8266b5eda3"
+    },
+    {
+      "stem": "infineon-IAUCN08S5L160T",
+      "batch": "burn-power-batch2-local",
+      "claims": 56,
+      "substrate_sha256": "f18776cef9bcfe3be987973963b4c119b3789548c0b81aaa090476cd4dcb6769"
+    },
+    {
+      "stem": "infineon-IAUCN08S7L013",
+      "batch": "burn-power-batch2-local",
+      "claims": 53,
+      "substrate_sha256": "a0960ae950835e902934403f0d290ad29b0d11c7d5d14d53199cb5130e27f483"
+    }
+  ]
+}
