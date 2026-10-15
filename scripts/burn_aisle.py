@@ -24,8 +24,15 @@ from harness.pipeline.quote_verify import verify_claims
 
 RESULTS = Path("/Volumes/M5_4TB/extract-results")
 ROUTES = RESULTS / "routes"
-SUBSTRATE_DIRS = [RESULTS / "collected", RESULTS / "runs",
-                  Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/dispatch/collected")]  # ASUSTOR NVMe shared store
+# Local substrates FIRST (instant, no NAS dependency); NFS as fallback.
+# 2026-10-15: local substrate store eliminates the 5s-per-doc rglob on NFS.
+_LOCAL_SUBSTRATES = Path(__file__).resolve().parent.parent / "results" / "substrates"
+SUBSTRATE_DIRS = [
+    _LOCAL_SUBSTRATES,  # local disk (40k+ JSONs, indexed)
+    RESULTS / "collected",
+    RESULTS / "runs",
+    Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/dispatch/collected"),  # ASUSTOR NVMe shared store
+]
 # The NFS transport is a read-only mirror; writes land locally and
 # stage to the NAS later. BURN_OUT is fully overridable.
 BURN_OUT = _os.PathLike and _os.environ.get("BURN_OUT") or None
