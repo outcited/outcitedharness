@@ -30,6 +30,14 @@ def load_rows(out_root: Path):
                 continue
             d = json.loads(f.read_text())
             rows[d["stem"]] = d
+    if not rows:
+        # python soak layout: flat dir of {stem}.json (+ _report.json)
+        for f in out_root.glob("*.json"):
+            if f.name.startswith("_"):
+                continue
+            d = json.loads(f.read_text())
+            if isinstance(d, dict) and "stem" in d:
+                rows[d["stem"]] = d
     return rows
 
 

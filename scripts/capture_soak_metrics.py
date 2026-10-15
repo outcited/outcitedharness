@@ -79,7 +79,7 @@ def controller_metrics(state_dir: Path):
         )
         events = dict(
             con.execute(
-                "SELECT event, COUNT(*) FROM factory_events GROUP BY event"
+                "SELECT event_type, COUNT(*) FROM factory_events GROUP BY event_type"
             ).fetchall()
         )
         attempts = con.execute(

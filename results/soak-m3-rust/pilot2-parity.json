@@ -1,0 +1,137 @@
+{"rust_stems": 97, "python_stems": 1993, "common": 97}
+{
+ "skips_match": 46,
+ "skips_diff": 9,
+ "raw_identical_stems": 19,
+ "raw_differing_stems": 23,
+ "verdict_mismatches_on_identical_raw": 0,
+ "doc_sha_mismatches": 0,
+ "page_attribution": {
+  "surviving_claims_compared": 171,
+  "page_null_rust": 1,
+  "page_null_python": 1
+ },
+ "counter_mismatch_examples": [
+  {
+   "stem": "ATL431LI-Q1",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "ATL432LI-Q1",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ2026",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ24018",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ24074",
+   "kind": "raw_claims",
+   "rust": {
+    "tier": "local-v41",
+    "claims": 20,
+    "surviving": 14,
+    "p0": 5
+   },
+   "python": {
+    "tier": "local-v41",
+    "claims": 22,
+    "surviving": 15,
+    "p0": 6
+   }
+  },
+  {
+   "stem": "CSD96416",
+   "kind": "raw_claims",
+   "rust": {
+    "tier": "local-v41",
+    "claims": 28,
+    "surviving": 19,
+    "p0": 9
+   },
+   "python": {
+    "tier": "local-v41",
+    "claims": 19,
+    "surviving": 18,
+    "p0": 1
+   }
+  },
+  {
+   "stem": "CSD96497Q5MC",
+   "kind": "raw_claims",
+   "rust": {
+    "tier": "local-v41",
+    "claims": 21,
+    "surviving": 19,
+    "p0": 2
+   },
+   "python": {
+    "tier": "local-v41",
+    "claims": 20,
+    "surviving": 19,
+    "p0": 1
+   }
+  },
+  {
+   "stem": "TLC69650",
+   "kind": "raw_claims",
+   "rust": {
+    "tier": "local-v41",
+    "claims": 5,
+    "surviving": 5,
+    "p0": 0
+   },
+   "python": {
+    "tier": "local-v41",
+    "claims": 7,
+    "surviving": 7,
+    "p0": 0
+   }
+  },
+  {
+   "stem": "TLC69651",
+   "kind": "raw_claims",
+   "rust": {
+    "tier": "local-v41",
+    "claims": 11,
+    "surviving": 11,
+    "p0": 0
+   },
+   "python": {
+    "tier": "local-v41",
+    "claims": 8,
+    "surviving": 8,
+    "p0": 0
+   }
+  },
+  {
+   "stem": "TLC69651-Q1",
+   "kind": "raw_claims",
+   "rust": {
+    "tier": "local-v41",
+    "claims": 8,
+    "surviving": 8,
+    "p0": 0
+   },
+   "python": {
+    "tier": "local-v41",
+    "claims": 8,
+    "surviving": 8,
+    "p0": 0
+   }
+  }
+ ],
+ "verdict_mismatch_examples": []
+}
