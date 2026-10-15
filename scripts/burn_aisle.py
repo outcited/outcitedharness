@@ -18,7 +18,7 @@ import urllib.request
 from collections import Counter
 from pathlib import Path
 
-sys.path.insert(0, "/Users/samkim/Harnessv1")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # RUST-CUTOVER-02: repo-relative — a checkout carries its own harness
 from harness.pipeline import store
 from harness.pipeline.quote_verify import verify_claims
 from harness.pipeline import verify_provider  # RUST-CUTOVER-02 seam (default engine: python)
