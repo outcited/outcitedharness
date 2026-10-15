@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-SOURCE="${1:-/Volumes/T7/pdfs}"
+SOURCE="${1:-/Users/samsonkim/mnt/t7/spool/MFG_DOSIER_FACTORY/blobs}"
 DEST="/Users/samkim/Harnessv1/results/pdfs-incoming"
 VALIDATION_N=10
 LOCK="/tmp/pull_from_mini.lock"
@@ -32,7 +32,7 @@ rsync -a \
     --timeout=120 \
     --ignore-existing \
     --stats \
-    "mac-mini.local:${SOURCE}/" "$DEST/" >> "$LOG" 2>&1 || {
+    "samsonkim@100.80.101.116:${SOURCE}/" "$DEST/" >> "$LOG" 2>&1 || {
     echo "PULL FAILED — mac-mini unreachable or path wrong" >> "$LOG"
     exit 1
 }
