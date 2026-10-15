@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 STAGING = Path("/Users/samkim/mnt/yosemiteraid5-nfs2/m5-opencode/staging/datasheet_extractions")  # NVMe primary (Sam law 2026-10-14; charley backup-only)
 OUT = ROOT / "results" / "api-coverage"
 SNAP_DIR = OUT / "board"
-EXPORT_ROOT = Path("/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/api-store-export")
+EXPORT_ROOT = Path("/Users/samkim/mnt/yosemiteraid5-nfs2/m5-opencode/api-store-export")  # NVMe primary
 
 # What the front end can render, per part — the saleable facets.
 FACETS = [
