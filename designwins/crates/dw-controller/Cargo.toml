@@ -20,3 +20,7 @@ dw-recon = { path = "../dw-recon" }
 
 [lints]
 workspace = true
+
+[[bin]]
+name = "dw-shadow"
+path = "src/bin/dw-shadow.rs"
