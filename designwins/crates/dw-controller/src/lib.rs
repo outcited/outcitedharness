@@ -1523,8 +1523,21 @@ fn load_queue(path: &Path) -> Result<(Value, String), FactoryError> {
     })?;
     let value: Value =
         serde_json::from_slice(&payload).map_err(|e| FactoryError::State(e.to_string()))?;
-    if value.get("schema").and_then(Value::as_str)
-        != Some("harness.electronics-structural-local-work.v1")
+    if !value
+        .get("schema")
+        .and_then(Value::as_str)
+        .is_some_and(|schema| {
+            matches!(
+                schema,
+                "harness.electronics-structural-local-work.v1"
+                    // M5 soak (2026-10-14): doc-scoped work units for the
+                    // Rust factory soak — same queue contract (canonical
+                    // evidence over the core, non-empty work), different
+                    // unit of work. Additive: the structural schema and its
+                    // gold battery are unchanged.
+                    | "harness.electronics-soak-work.v1"
+            )
+        })
     {
         return Err(FactoryError::State(
             "unsupported structural work queue".into(),
@@ -1591,20 +1604,21 @@ fn verify_chunk_output(lease: &ChunkLease) -> Result<String, FactoryError> {
         ))
     })?)
     .map_err(|e| FactoryError::State(e.to_string()))?;
-    if manifest.get("schema").and_then(Value::as_str)
-        != Some("harness.electronics-structural-local-extraction.v1")
-    {
-        return Err(FactoryError::State(
-            "chunk output has an unsupported schema".into(),
-        ));
-    }
+    // Structural chunks pin their queue sha under
+    // `sources.structural_queue_sha256`; soak chunks (2026-10-14) use the
+    // same contract under `sources.queue_sha256`. Additive.
+    let queue_sha_key = match manifest.get("schema").and_then(Value::as_str) {
+        Some("harness.electronics-structural-local-extraction.v1") => "structural_queue_sha256",
+        Some("harness.electronics-soak-extraction.v1") => "queue_sha256",
+        _ => {
+            return Err(FactoryError::State(
+                "chunk output has an unsupported schema".into(),
+            ));
+        }
+    };
     let sources = manifest.get("sources").cloned().unwrap_or(Value::Null);
     let selection = manifest.get("selection").cloned().unwrap_or(Value::Null);
-    if sources
-        .get("structural_queue_sha256")
-        .and_then(Value::as_str)
-        != Some(lease.queue_sha256.as_str())
-    {
+    if sources.get(queue_sha_key).and_then(Value::as_str) != Some(lease.queue_sha256.as_str()) {
         return Err(FactoryError::State(
             "chunk output used a different queue".into(),
         ));
