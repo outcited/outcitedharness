@@ -1,0 +1,10 @@
+{"rust": 127, "python": 127, "common": 127}
+{
+ "identical_stems": 127,
+ "diverging_stems": 0,
+ "claims_python": 1359,
+ "claims_rust": 1359,
+ "surviving_python": 1272,
+ "surviving_rust": 1272,
+ "divergence_examples": {}
+}

@@ -70,10 +70,10 @@ fn flag_usize(args: &[String], name: &str, default: usize) -> usize {
         .unwrap_or(default)
 }
 
-fn canonical_core(value: &Value) -> String {
-    // mirrors harness.electronics.claims.canonical_json over the queue core
-    // (created_at / evidence_sha256 excluded): sorted keys, compact
-    // separators, unicode verbatim. serde_json's BTreeMap ordering matches.
+fn canonical_core(value: &Value) -> Vec<u8> {
+    // dw-extract's canonical writer — the SAME one load_queue hashes with.
+    // Value::to_string() would be preserve_order-sensitive under workspace
+    // feature unification (dw-learn enables it) and diverge the evidence.
     let mut core = serde_json::Map::new();
     if let Some(map) = value.as_object() {
         for (key, item) in map {
@@ -82,7 +82,8 @@ fn canonical_core(value: &Value) -> String {
             }
         }
     }
-    Value::Object(core).to_string()
+    dw_extract::canonical::canonical_json(&Value::Object(core))
+        .expect("queue core is canonically encodable")
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {
@@ -117,6 +118,10 @@ fn substrate_index(roots: &[PathBuf]) -> BTreeMap<String, PathBuf> {
     index
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "CLI arg glue; the pipeline body lives in named helpers"
+)]
 fn enqueue(args: &[String]) -> i32 {
     let state_dir = PathBuf::from(need(args, "--state"));
     let cohort_path = PathBuf::from(need(args, "--cohort"));
@@ -147,11 +152,11 @@ fn enqueue(args: &[String]) -> i32 {
         .collect();
 
     println!("substrate index: scanning {} roots", substrate_roots.len());
-    let index = if let Some(index_path) = flag(args, "--substrate-index") {
-        let raw = std::fs::read(&index_path).expect("read substrate index");
+    let index = if let Some(index_path) = flag(args, "--substrate-index").as_deref() {
+        let raw = std::fs::read(index_path).expect("read substrate index");
         let parsed: BTreeMap<String, Option<String>> =
             serde_json::from_slice(&raw).expect("parse substrate index");
-        println!("substrate index: loaded {}", index_path);
+        println!("substrate index: loaded {index_path}");
         parsed
             .into_iter()
             .filter_map(|(stem, path)| path.map(|p| (stem, PathBuf::from(p))))
@@ -204,7 +209,7 @@ fn enqueue(args: &[String]) -> i32 {
                 core.insert(k.clone(), v.clone());
             }
         }
-        sha256_hex(canonical_core(&Value::Object(core)).as_bytes())
+        sha256_hex(&canonical_core(&Value::Object(core)))
     };
     queue["evidence_sha256"] = Value::String(evidence.clone());
     std::fs::write(
@@ -255,11 +260,14 @@ fn join_pages(sub: &Value) -> Joined {
     let mut spans = Vec::new();
     let mut off = 0usize;
     for (p, t) in pages.iter().zip(texts.iter()) {
-        spans.push((
-            off,
-            off + t.chars().count(),
-            p["page"].as_str().unwrap_or("").to_string(),
-        ));
+        // Python: str(p.get("page","")) — substrates carry page as a JSON
+        // NUMBER (8 -> "8"); as_str alone yielded "" (found by replay)
+        let page = match &p["page"] {
+            Value::String(s) => s.clone(),
+            Value::Number(n) => n.to_string(),
+            _ => String::new(),
+        };
+        spans.push((off, off + t.chars().count(), page));
         off += t.chars().count() + 1;
     }
     Joined { text: full, spans }
@@ -333,6 +341,10 @@ fn shim_call(python: &str, shim: &str, mode: &str, payload: &Value) -> Option<Va
     serde_json::from_slice(&out.stdout).ok()
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "mirrors burn_aisle.burn_doc step-for-step; split would hide the parity shape"
+)]
 fn burn_doc_parity(item: &Value, python: &str, shim: &str) -> Value {
     let stem = item["stem"].as_str().unwrap_or_default().to_string();
     let Some(substrate_path) = item["substrate"].as_str() else {
@@ -354,6 +366,11 @@ fn burn_doc_parity(item: &Value, python: &str, shim: &str) -> Value {
         .map_or(base.to_string(), |(a, _)| a.to_string());
 
     let mut tier: Option<String> = None;
+    // claims_raw is the shim's own serialization of the model response
+    // (Python key order). The repair payload must carry it verbatim: a
+    // round trip through serde_json's sorted map would reorder keys and
+    // diverge the repair prompt (found by the LM5100B replay).
+    let mut claims_raw: Option<String> = None;
     let mut claims: Vec<Value> = match shim_call(
         python,
         shim,
@@ -363,6 +380,7 @@ fn burn_doc_parity(item: &Value, python: &str, shim: &str) -> Value {
         Some(mut out) => {
             let t = out["tier"].take();
             tier = t.as_str().map(str::to_string);
+            claims_raw = out["claims_raw"].take().as_str().map(str::to_string);
             out["claims"].as_array().cloned().unwrap_or_default()
         }
         None => Vec::new(),
@@ -385,10 +403,13 @@ fn burn_doc_parity(item: &Value, python: &str, shim: &str) -> Value {
             python,
             shim,
             "repair",
-            &json!({"bad": bad, "claims": claims, "text": text}),
+            &json!({"bad": bad, "claims_raw": claims_raw, "text": text}),
         ) {
             if let Some(fixed) = out["claims"].as_array() {
                 claims.clone_from(fixed);
+            }
+            if let Some(raw) = out["claims_raw"].as_str() {
+                claims_raw = Some(raw.to_string());
             }
         }
     }
@@ -462,6 +483,10 @@ fn verify_and_survive(
 
 // ── worker ──────────────────────────────────────────────────────────────
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "lease/process chunk loop; the per-doc cascade lives in burn_doc_parity"
+)]
 fn worker(args: &[String]) -> i32 {
     let state_dir = PathBuf::from(need(args, "--state"));
     let node = need(args, "--node");

@@ -2,12 +2,24 @@
 //! soak, 2026-10-14). The structural schemas and the 43-step gold battery
 //! are unchanged — these pin the ADDITION, including its fail-closed edges.
 
+// House pattern: test modules carry a documented allow (ASSURANCE.md).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::indexing_slicing,
+    clippy::panic,
+    clippy::needless_pass_by_value,
+    reason = "tests: fail loudly on fixture breakage"
+)]
+
 use std::path::Path;
 
 use dw_controller::FactoryState;
 use serde_json::{json, Value};
 
-fn canonical_core(value: &Value) -> String {
+fn canonical_core(value: &Value) -> Vec<u8> {
+    // the SAME canonical writer load_queue hashes with — NOT Value::to_string
+    // (preserve_order-sensitive under workspace feature unification)
     let mut core = serde_json::Map::new();
     if let Some(map) = value.as_object() {
         for (key, item) in map {
@@ -16,7 +28,7 @@ fn canonical_core(value: &Value) -> String {
             }
         }
     }
-    Value::Object(core).to_string()
+    dw_extract::canonical::canonical_json(&Value::Object(core)).unwrap()
 }
 
 fn write_soak_queue(dir: &Path, name: &str, work: Value, evidence_ok: bool) -> std::path::PathBuf {
@@ -26,7 +38,7 @@ fn write_soak_queue(dir: &Path, name: &str, work: Value, evidence_ok: bool) -> s
         "work": work,
         "created_at": "2026-10-15T00:00:00Z",
     });
-    let evidence = dw_extract::sha256::sha256_hex(canonical_core(&queue).as_bytes());
+    let evidence = dw_extract::sha256::sha256_hex(&canonical_core(&queue));
     let evidence = if evidence_ok {
         evidence
     } else {
@@ -112,7 +124,9 @@ fn unknown_queue_schema_is_still_refused() {
     let err = state
         .register_queue(&path, &out_root, 1, 3, 0, None)
         .unwrap_err();
-    assert!(err.to_string().contains("unsupported structural work queue"));
+    assert!(err
+        .to_string()
+        .contains("unsupported structural work queue"));
 }
 
 #[test]

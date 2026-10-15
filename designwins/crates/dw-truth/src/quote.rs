@@ -399,11 +399,11 @@ pub fn value_in_quote(value: Option<&serde_json::Value>, quote: &str) -> bool {
         return false;
     }
     if let Some(n) = value.as_f64() {
-        let candidates: Vec<f64> = q
-            .split(|c: char| !(c.is_ascii_digit() || c == '.' || c == '-' || c == '+'))
-            .filter(|s| !s.is_empty())
-            .filter_map(|s| s.parse::<f64>().ok())
-            .collect();
+        // extract_numbers mirrors the reference's re.findall(r"-?\d+(?:\.\d+)?"):
+        // "16-V VIN" must yield 16 (the old fragment split produced "16-",
+        // which failed to parse — found by the RUST-CUTOVER-01 frozen replay
+        // on CSD96416-class prose claims; negative control pinned in tests)
+        let candidates: Vec<f64> = extract_numbers(&q);
         let tol = (1e-6_f64).max(n.abs() * 1e-4);
         return candidates.iter().any(|c| (c - n).abs() < tol);
     }
@@ -875,6 +875,42 @@ pub fn verify_claims(claims: &BTreeMap<String, ClaimInput>, doc_text: &str) -> V
 )]
 mod tests {
     use super::*;
+
+    #[test]
+    fn value_in_quote_hyphenated_prose_matches_reference() {
+        // negative control for the RUST-CUTOVER-01 replay finding: the
+        // reference's re.findall extracts 16 from "16-V VIN" — the old
+        // fragment split produced "16-" and failed to parse, wrongly
+        // dropping prose-hyphenated claims (CSD96416 class)
+        let v = serde_json::json!(16);
+        assert!(value_in_quote(
+            Some(&v),
+            "16-V VIN, 25-V high-side and low-side FET"
+        ));
+        let v25 = serde_json::json!(25);
+        assert!(value_in_quote(
+            Some(&v25),
+            "16-V VIN, 25-V high-side and low-side FET"
+        ));
+        let v33 = serde_json::json!(3.3);
+        assert!(value_in_quote(
+            Some(&v33),
+            "3.3-V and 5-V PWM signal compatible"
+        ));
+        let v5 = serde_json::json!(5);
+        assert!(value_in_quote(
+            Some(&v5),
+            "3.3-V and 5-V PWM signal compatible"
+        ));
+        // sign binding stays reference-faithful: "1.5-3" -> [1.5, -3]
+        let v3 = serde_json::json!(-3.0);
+        assert!(value_in_quote(Some(&v3), "range 1.5-3 applies"));
+        let v15 = serde_json::json!(1.5);
+        assert!(value_in_quote(Some(&v15), "range 1.5-3 applies"));
+        // and a value genuinely absent still fails (the guard is not vacuous)
+        let v99 = serde_json::json!(99);
+        assert!(!value_in_quote(Some(&v99), "16-V VIN, 25-V FET"));
+    }
 
     fn claim(value: f64, quote: &str, table: &str) -> ClaimInput {
         ClaimInput {
