@@ -1,0 +1,106 @@
+{
+ "snapshot": {
+  "files": {
+   "parts_burn.jsonl": {
+    "sha256": "81afa88934cfa91fb6335652a2594da40c7248ab635b65a6488358bf6c0e50ff",
+    "bytes": 47182718
+   },
+   "parts_catalog.jsonl": {
+    "sha256": "ecab80712463d7a3c4d06da6f735d1ed73c030380cdc6d2e166caa8cfef40b8a",
+    "bytes": 30610366
+   },
+   "parts_cr_core.jsonl": {
+    "sha256": "ce11e3933a61f62a7d988dc49d1aa96fd8d7a8b79d9f52f0b7f94ef460071203",
+    "bytes": 39386615
+   },
+   "parts_family.jsonl": {
+    "sha256": "8463ce68397f1c5782853abc3b2a722e840420b7d573893b5ec1466a4af28b18",
+    "bytes": 9019332
+   }
+  },
+  "served_opns": 15872,
+  "served_with_pinout": 0
+ },
+ "gain": [
+  {
+   "part_number": "max20730",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 15
+  },
+  {
+   "part_number": "l6480",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 36
+  },
+  {
+   "part_number": "l6482",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 38
+  },
+  {
+   "part_number": "l5987",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 8
+  },
+  {
+   "part_number": "st1s14",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 9
+  },
+  {
+   "part_number": "tms320f2811",
+   "tier": "PARTIAL/VERIFIED",
+   "rows": 33
+  },
+  {
+   "part_number": "max20796",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 31
+  },
+  {
+   "part_number": "stspin32f0",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 49
+  },
+  {
+   "part_number": "infineon-xmc4400-ds-v01-03-en-2323407-2",
+   "tier": "PARTIAL/VERIFIED",
+   "rows": 65
+  },
+  {
+   "part_number": "adm2582e-2587e",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 19
+  },
+  {
+   "part_number": "max20743",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 15
+  },
+  {
+   "part_number": "l5980",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 8
+  },
+  {
+   "part_number": "l7986",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 8
+  },
+  {
+   "part_number": "adp2370-2371",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 9
+  },
+  {
+   "part_number": "l7985",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 16
+  },
+  {
+   "part_number": "l6474",
+   "tier": "UNCONFIRMED COMPLETENESS",
+   "rows": 26
+  }
+ ]
+}
