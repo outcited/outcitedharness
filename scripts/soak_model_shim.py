@@ -23,7 +23,8 @@ import json
 import os
 import sys
 
-BURN_AISLE = "/Users/samkim/Harnessv1/scripts/burn_aisle.py"
+BURN_AISLE = __import__("os").environ.get(
+    "SOAK_BURN_AISLE", "/Users/samkim/Harnessv1/scripts/burn_aisle.py")
 
 _spec = importlib.util.spec_from_file_location("burn_aisle", BURN_AISLE)
 burn = importlib.util.module_from_spec(_spec)

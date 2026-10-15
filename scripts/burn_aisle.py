@@ -21,11 +21,19 @@ from pathlib import Path
 sys.path.insert(0, "/Users/samkim/Harnessv1")
 from harness.pipeline import store
 from harness.pipeline.quote_verify import verify_claims
+from harness.pipeline import verify_provider  # RUST-CUTOVER-02 seam (default engine: python)
 
 RESULTS = Path("/Volumes/M5_4TB/extract-results")
 ROUTES = RESULTS / "routes"
-SUBSTRATE_DIRS = [RESULTS / "collected", RESULTS / "runs",
-                  Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/dispatch/collected")]  # ASUSTOR NVMe shared store
+# Local substrates FIRST (instant, no NAS dependency); NFS as fallback.
+# 2026-10-15: local substrate store eliminates the 5s-per-doc rglob on NFS.
+_LOCAL_SUBSTRATES = Path(__file__).resolve().parent.parent / "results" / "substrates"
+SUBSTRATE_DIRS = [
+    _LOCAL_SUBSTRATES,  # local disk (40k+ JSONs, indexed)
+    RESULTS / "collected",
+    RESULTS / "runs",
+    Path("/Users/samkim/mnt/yosemiteraid5-nfs/m5-opencode/dispatch/collected"),  # ASUSTOR NVMe shared store
+]
 # The NFS transport is a read-only mirror; writes land locally and
 # stage to the NAS later. BURN_OUT is fully overridable.
 BURN_OUT = _os.PathLike and _os.environ.get("BURN_OUT") or None
@@ -59,12 +67,16 @@ Return ONLY the corrected JSON array."""
 
 
 import os as _os
-PREFER_LOCAL = _os.environ.get("BURN_PREFER_LOCAL", "0") == "1"
+# 2026-10-14 (Sam): the DEFAULT was cloud-first at direct rates, which
+# silently violated the routing law below and burned ~$36/day of OpenRouter on
+# burn waves batch1-5. Defaults now enforce the law: local-first, text
+# fail-closed. Cloud text requires BOTH env flags set explicitly.
+PREFER_LOCAL = _os.environ.get("BURN_PREFER_LOCAL", "1") == "1"
 # The routing law (2026-10-12, Sam): text extraction runs locally. The
 # OpenRouter batch is approved for VISION only — text must never wander onto
 # it. BURN_TEXT_LOCAL_ONLY=1 truncates the chain at the local TP4: a total
 # local failure skips the doc (fail closed), it does not buy cloud text.
-TEXT_LOCAL_ONLY = _os.environ.get("BURN_TEXT_LOCAL_ONLY", "0") == "1"
+TEXT_LOCAL_ONLY = _os.environ.get("BURN_TEXT_LOCAL_ONLY", "1") == "1"
 
 LOCAL_CHAIN = [
     (V41, "deepseek-v4.1-flash"),
@@ -219,23 +231,10 @@ def burn_doc(stem, source_path, route, con, job_meta):
                 if isinstance(f, dict) and "i" in f:
                     claims[f["i"]] = {**claims[f["i"]], **{k: v for k, v in f.items() if k != "i"}}
 
-    verdicts = []
-    for i, c in enumerate(claims):
-        if not isinstance(c, dict) or c.get("value") is None:
-            continue
-        q = c.get("quote") or ""
-        if not q:
-            verdicts.append({"i": i, "verdict": "UNSUPPORTED", "reason": "unquoted", "severity": "P0"})
-            continue
-        from harness.pipeline.quote_verify import find_quote, value_in_quote, column_position_binds
-        ok = find_quote(q, text, field=_alias_field(c.get("symbol", ""))) and value_in_quote(c.get("value"), q)
-        if ok and (c.get("column_header") or c.get("row_header")):
-            ordinal = column_position_binds(c, q, text)
-            if ordinal is False:
-                ok = False
-        verdicts.append({"i": i, "verdict": "SUPPORTED" if ok else "UNSUPPORTED",
-                         "reason": None if ok else ("wrong_cell" if not ok and c.get("column_header") else "quote_not_in_doc"),
-                         "severity": "P2" if ok else "P0"})
+    # RUST-CUTOVER-02: verification seam — python engine reproduces the
+    # previous inline loop byte-identically; engine selectable via
+    # BURN_VERIFY_ENGINE (default python; rust = dw-truth dw-verify bin)
+    verdicts = verify_provider.verdicts(claims, text)
 
     p0_idx = {v["i"] for v in verdicts if v["severity"] == "P0"}
     surviving_claims = []
@@ -253,8 +252,9 @@ def burn_doc(stem, source_path, route, con, job_meta):
 
 
 def _quick_ok(c, text):
-    from harness.pipeline.quote_verify import find_quote
-    return bool(c.get("quote")) and find_quote(c["quote"], text, field=_alias_field(c.get("symbol", "")))
+    # RUST-CUTOVER-02: verification seam (BURN_VERIFY_ENGINE=python default;
+    # byte-identical to the previous inline kernel call)
+    return verify_provider.quick_ok(c, text)
 
 
 def _alias_field(symbol):
