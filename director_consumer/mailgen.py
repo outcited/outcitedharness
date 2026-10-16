@@ -9,8 +9,10 @@ drafts) and carry an explicit `proposed: true` header.
 """
 from __future__ import annotations
 
+import os
 import re
 import time
+import hashlib
 from pathlib import Path
 
 from .schema import Assessment, Proposal
@@ -127,6 +129,24 @@ exists so a human can approve, edit, or reject it.
 """
     return Proposal(ptype="escalation", trigger_key=a.trigger_key,
                     filename=name, body=body, authority="sam")
+
+
+def write_proposal_atomic(p: Proposal, workspace: Path) -> Path:
+    """Transactional-outbox file write: tmp + os.replace, never half-written.
+
+    Idempotent: strips any previously-applied hash suffix before re-adding,
+    so a heal re-write after a crash lands on the SAME final filename."""
+    sub = "escalations" if p.ptype == "escalation" else "outbox"
+    d = Path(workspace) / sub
+    d.mkdir(parents=True, exist_ok=True)
+    suffix = hashlib.sha256(p.trigger_key.encode()).hexdigest()[:8]
+    stem = p.filename[:-3] if p.filename.endswith(".md") else p.filename
+    stem = re.sub(r"\.[0-9a-f]{8}$", "", stem)  # idempotent re-heal
+    target = d / f"{stem}.{suffix}.md"
+    tmp = target.with_suffix(".md.tmp")
+    tmp.write_text(p.body)
+    os.replace(tmp, target)
+    return target
 
 
 def write_proposal(p: Proposal, workspace: Path) -> Path:

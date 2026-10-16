@@ -56,18 +56,78 @@ def _freshness_marker(feed: str, paths: list[Path], max_age_s: float,
     return None, newest
 
 
-class FleetChangesAdapter:
-    """Parses /Volumes/M5_4TB/fleet-state/CHANGES.md — appended sections.
+DELTA_RE = re.compile(
+    r"^(?P<box>[A-Za-z0-9_.-]+):\s+(?P<from>\[[^\]]*\]|None)\s*->\s*"
+    r"(?P<to>\[[^\]]*\]|None)\s*$")
+# probe states that mean "connectivity unknown", never a service verdict
+PROBE_STATES = {"SSH_FAIL", "UNREACHABLE", "TIMEOUT"}
 
-    Cursor: 'offset:byte' into the file. Sections are the events; the
-    section header timestamp (verbatim) is the original_ts.
+
+def parse_fleet_delta(line: str) -> Optional[dict]:
+    """'- asus4: ['a'] -> ['b']' -> structured {box, from, to, services,
+    change_kind}. Accepts raw bullet lines or bare deltas. from/to are
+    service-lists or probe-state strings."""
+    line = line.strip()
+    if line.startswith("-"):
+        line = line[1:].strip()
+    m = DELTA_RE.match(line)
+    if not m:
+        return None
+    def services(v: str) -> tuple[list[str], Optional[str]]:
+        if v == "None":
+            return [], None
+        inner = v.strip("[]")
+        items = [s.strip().strip("'\"") for s in inner.split(",") if s.strip()]
+        state = items[0] if len(items) == 1 and items[0] in PROBE_STATES else None
+        return items, state
+    f_items, f_state = services(m.group("from"))
+    t_items, t_state = services(m.group("to"))
+    all_items = (set(f_items) | set(t_items)) - PROBE_STATES
+    return {
+        "box": m.group("box"),
+        "from": f_items, "to": t_items,
+        "from_state": f_state, "to_state": t_state,
+        "services": sorted(all_items),
+        "change_kind": ("probe_state" if (f_state or t_state)
+                        else "container_delta"),
+    }
+
+
+def load_default_aliases() -> dict[str, str]:
+    """machine-aliases.yaml packaged next to this module (01A #6)."""
+    import yaml
+    p = Path(__file__).with_name("machine-aliases.yaml")
+    if p.exists():
+        try:
+            data = yaml.safe_load(p.read_text()) or {}
+            return dict(data.get("aliases", {}))
+        except Exception:  # noqa: BLE001 — registry is best-effort, identity
+            return {}      # falls through to raw box names
+    return {}
+
+
+class FleetChangesAdapter:
+    """Parses fleet-state CHANGES.md — appended sections.
+
+    01A #4/#5/#6 rewrite:
+      - cursor is the exact byte offset consumed; every byte of a section is
+        accounted for (no silent discards on multiline sections)
+      - every bullet line is its own event (fleet_state writes one delta per
+        box); prose-only sections produce one event
+      - delta lines are parsed into structured attrs {box, from, to,
+        services, change_kind} with canonical machine identity applied
     """
 
     feed = "fleet_changes"
 
-    def __init__(self, path: Path, max_age_s: float = 7 * 86400):
+    def __init__(self, path: Path, max_age_s: float = 7 * 86400,
+                 aliases: Optional[dict[str, str]] = None):
         self.path = Path(path)
         self.max_age_s = max_age_s
+        self.aliases = aliases if aliases is not None else load_default_aliases()
+
+    def _canon(self, box: str) -> str:
+        return self.aliases.get(box, self.aliases.get(box.lower(), box))
 
     def poll(self, cursor: str) -> tuple[list[Event], list[StateMarker], str]:
         marker, _ = _freshness_marker(self.feed, [self.path], self.max_age_s,
@@ -79,37 +139,58 @@ class FleetChangesAdapter:
             offset = int((cursor or "0").split(":", 1)[0])
         except ValueError:
             offset = 0
-        if offset > len(text):
-            offset = 0  # file truncated/replaced -> reread; dedup keeps us safe
+        if offset < 0 or offset > len(text):
+            offset = 0  # truncated/replaced file: reread; dedup keeps us safe
         new_text = text[offset:]
         events: list[Event] = []
-        pos = offset
-        for section in re.split(r"(?m)^(?=## )", new_text):
+        consumed = 0
+        for idx, section in enumerate(re.split(r"(?m)^(?=## )", new_text)):
             if not section.startswith("## "):
+                # 01A #4: bytes before the first header are a CONTINUATION of
+                # the section consumed at cursor time — new bullets appended
+                # without a new header are real changes, never discard them.
+                bullets = [l.lstrip("-").strip() for l in section.splitlines()
+                           if l.strip().startswith("- ")]
+                for line in bullets:
+                    loc = f"{self.path}#offset{offset + consumed}"
+                    ref = SourceRef(self.feed,
+                                    f"changes#continuation@{offset + consumed}",
+                                    None, utcnow(), locator=loc)
+                    attrs: dict[str, Any] = {"section_header":
+                                             "(continuation)"}
+                    parsed = parse_fleet_delta(line)
+                    if parsed:
+                        parsed["box"] = self._canon(parsed["box"])
+                        attrs.update(parsed)
+                    events.append(Event(
+                        self.feed,
+                        parsed["change_kind"] if parsed else "fleet_note",
+                        line, [ref], attrs=attrs))
+                consumed += len(section)
                 continue
             header = section.splitlines()[0][3:].strip()
-            body = "\n".join(section.splitlines()[1:]).strip()
-            if not body:
-                continue
+            body_lines = [l.strip() for l in section.splitlines()[1:]]
+            header_ts = header.split("—")[0].strip() or None
             h = hashlib.sha256(section.encode()).hexdigest()[:16]
-            ref = SourceRef(self.feed, f"changes#{header}#{h}",
-                            header.split("—")[0].strip() or None, utcnow(),
-                            locator=f"{self.path}#offset{pos}")
-            # one event per bullet line (machine deltas), prose kept whole
-            for line in body.splitlines():
-                line = line.strip().lstrip("-").strip()
-                if not line:
-                    continue
-                ev = Event(self.feed, "fleet_delta", line, [ref])
-                ev.attrs["section_header"] = header
+            bullets = [l.lstrip("-").strip() for l in body_lines
+                       if l.startswith("- ")]
+            lines_as_events = bullets or ([" ".join(
+                l for l in body_lines if l)[:200]] if any(body_lines) else [])
+            for line in lines_as_events:
+                loc = (f"{self.path}#offset{offset + consumed}")
+                ref = SourceRef(self.feed, f"changes#{header}#{h}",
+                                header_ts, utcnow(), locator=loc)
+                attrs: dict[str, Any] = {"section_header": header}
+                parsed = parse_fleet_delta(line)
+                if parsed:
+                    parsed["box"] = self._canon(parsed["box"])
+                    attrs.update(parsed)
+                ev = Event(self.feed,
+                           parsed["change_kind"] if parsed else "fleet_note",
+                           line, [ref], attrs=attrs)
                 events.append(ev)
-                break  # section-level event; bullets folded into summary
-            if not events or events[-1].refs[0] is not ref:
-                ev = Event(self.feed, "fleet_delta", body[:200], [ref])
-                ev.attrs["section_header"] = header
-                events.append(ev)
-            pos += len(section)
-        return events, [], f"{len(text)}:{hashlib.sha256(text.encode()).hexdigest()[:8]}"
+            consumed += len(section)
+        return events, [], f"{offset + consumed}"
 
 
 class SentinelAdapter:
@@ -172,13 +253,18 @@ class FactoryEventsAdapter:
         except sqlite3.Error as e:
             return [], [StateMarker("feed_error", self.feed, str(e), utcnow())], cursor
         try:
-            last = int(cursor or 0)
+            # 01A #3: the cursor may only advance through rows actually
+            # returned. With LIMIT 500 in effect, MAX(rowid) would silently
+            # skip every event beyond the page — cursor = last row returned.
+            try:
+                last = int(cursor or 0)
+            except ValueError:
+                last = 0
             rows = con.execute(
                 "SELECT rowid AS rid, event_id, event_type, subject_id, "
                 "payload_json, created_at FROM factory_events WHERE rowid > ? "
                 "ORDER BY rowid LIMIT 500", (last,)).fetchall()
-            newest_db = con.execute(
-                "SELECT MAX(rowid) FROM factory_events").fetchone()[0] or last
+            new_cursor = str(rows[-1]["rid"]) if rows else str(last)
         finally:
             con.close()
         marker, _ = _freshness_marker(self.feed, [self.db], self.max_age_s,
@@ -192,7 +278,7 @@ class FactoryEventsAdapter:
                        f"{r['event_type']} {r['subject_id']}", [ref],
                        attrs={"payload": r["payload_json"], "subject": r["subject_id"]})
             events.append(ev)
-        return events, markers, str(newest_db)
+        return events, markers, new_cursor
 
 
 class FacetLedgersAdapter:

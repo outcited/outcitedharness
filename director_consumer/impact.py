@@ -40,6 +40,19 @@ class Rule:
     action: str
     authority: str
     rationale: str
+    # 01A #5 structured matching (fleet deltas): service-token identity +
+    # actual change type, not substring luck.
+    change_kinds: list[str] = None                  # container_delta | probe_state
+    service_tokens: list[str] = None                # exact service ids
+    exclude_service_tokens: list[str] = None
+    service_direction: str = None                   # removed | added | present
+    # 01A incident collapse: one proposal per rule+box+window
+    dedupe_window_h: float = 0.0
+
+    def __post_init__(self) -> None:
+        self.change_kinds = self.change_kinds or []
+        self.service_tokens = self.service_tokens or []
+        self.exclude_service_tokens = self.exclude_service_tokens or []
 
 
 class ImpactMap:
@@ -68,7 +81,12 @@ class ImpactMap:
                 kinds=m.get("kinds", []),
                 severity=r["severity"], impacts=r["impacts"],
                 action=r["action"], authority=r["authority"],
-                rationale=r.get("rationale", "").strip()))
+                rationale=r.get("rationale", "").strip(),
+                change_kinds=m.get("change_kinds", []),
+                service_tokens=m.get("service_tokens", []),
+                exclude_service_tokens=m.get("exclude_service_tokens", []),
+                service_direction=m.get("service_direction"),
+                dedupe_window_h=float(r.get("dedupe_window_h", 0))))
         self.rule_index = {r.rid: r for r in self.rules}
 
     @classmethod
@@ -92,6 +110,32 @@ class ImpactMap:
                 continue
             if r.kinds and ev.kind not in r.kinds:
                 continue
+            attrs = ev.attrs or {}
+            # structured fleet-delta matching (01A #5)
+            if r.change_kinds and attrs.get("change_kind") not in r.change_kinds:
+                continue
+            if r.service_tokens or r.exclude_service_tokens or r.service_direction:
+                svcs = set(attrs.get("services", []))
+                # probe nodes (e.g. spark_embedder) ARE the service identity
+                if attrs.get("change_kind") == "probe_state" and attrs.get("box"):
+                    svcs.add(attrs["box"])
+                if r.exclude_service_tokens and (
+                        svcs & set(r.exclude_service_tokens)):
+                    continue
+                if r.service_tokens:
+                    present = set(r.service_tokens) & svcs
+                    if not present:
+                        continue
+                    if r.service_direction:
+                        token = sorted(present)[0]
+                        frm = set(attrs.get("from", []))
+                        to = set(attrs.get("to", []))
+                        if r.service_direction == "removed" and not (
+                                token in frm and token not in to):
+                            continue
+                        if r.service_direction == "added" and not (
+                                token not in frm and token in to):
+                            continue
             if r.any_substrings and not any(
                     s.lower() in ev.summary.lower() for s in r.any_substrings):
                 continue
@@ -103,6 +147,18 @@ class ImpactMap:
         closure = set(rule.impacts)
         for n in rule.impacts:
             closure |= self.downstream(n)
+        # incident collapse: bucket the trigger key so repeated deltas for the
+        # same rule+box inside the window produce ONE proposal
+        tk_parts: list = ["proposal", rule.rid, ev.fingerprint]
+        if rule.dedupe_window_h > 0:
+            bucket = int(ev.refs[0].observed_ts //
+                         (rule.dedupe_window_h * 3600)) if ev.refs else 0
+            tk_parts = ["proposal", rule.rid,
+                        ev.attrs.get("box") or ev.attrs.get("feed")
+                        or ev.kind,
+                        ",".join(sorted(ev.attrs.get("services", []))) or
+                        ev.kind,
+                        bucket]
         return Assessment(
             rule_id=rule.rid,
             severity=rule.severity,
@@ -113,7 +169,7 @@ class ImpactMap:
             evidence=list(ev.refs),
             event_kind=ev.kind,
             event_summary=ev.summary,
-            trigger_key=fp("proposal", rule.rid, ev.fingerprint))
+            trigger_key=fp(*tk_parts))
 
 
 def authority_note(action: str) -> str | None:

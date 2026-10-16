@@ -34,7 +34,9 @@ CREATE TABLE IF NOT EXISTS proposals (
     filename TEXT NOT NULL,
     authority TEXT NOT NULL,
     created_at REAL NOT NULL,
-    body TEXT NOT NULL
+    body TEXT NOT NULL,
+    written INTEGER NOT NULL DEFAULT 0,
+    written_at REAL
 );
 CREATE TABLE IF NOT EXISTS journal (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +47,17 @@ CREATE TABLE IF NOT EXISTS journal (
     entry_hash TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_journal_kind ON journal(kind);
+CREATE INDEX IF NOT EXISTS idx_proposals_unwritten ON proposals(written);
 """
+
+
+def _migrate(con: sqlite3.Connection) -> None:
+    cols = {r[1] for r in con.execute("PRAGMA table_info(proposals)")}
+    if "written" not in cols:
+        con.execute("ALTER TABLE proposals ADD COLUMN written INTEGER NOT NULL DEFAULT 0")
+    if "written_at" not in cols:
+        con.execute("ALTER TABLE proposals ADD COLUMN written_at REAL")
+    con.commit()
 
 
 class DirectorState:
@@ -58,9 +70,15 @@ class DirectorState:
         self.con = sqlite3.connect(self.db, timeout=30)
         self.con.executescript(SCHEMA)
         self.con.commit()
+        _migrate(self.con)
         self._head: Optional[str] = None
 
     # ---------- journal (hash-chained, append-only) ----------
+    #
+    # HEAD-CACHE LAW (01A #1): the in-memory head is only updated inside a
+    # transaction that COMMITS. A rollback invalidates the cache so the next
+    # append re-reads the true head from the database — a rolled-back batch
+    # can never leave the chain pointing at ghost entries.
 
     def _head_hash(self) -> str:
         if self._head is None:
@@ -82,19 +100,24 @@ class DirectorState:
         self._head = entry_hash
         return c.lastrowid
 
+    def _journal_standalone(self, kind: str, payload: dict) -> None:
+        try:
+            with self.con:
+                self._append(self.con, kind, payload)
+        except Exception:
+            self._head = None  # rolled back — cache must not keep ghost head
+            raise
+
     def journal_marker(self, m: StateMarker) -> None:
-        with self.con:
-            self._append(self.con, "marker", {
-                "kind": m.kind, "feed": m.feed, "detail": m.detail,
-                "observed_ts": m.observed_ts})
+        self._journal_standalone("marker", {
+            "kind": m.kind, "feed": m.feed, "detail": m.detail,
+            "observed_ts": m.observed_ts})
 
     def journal_run(self, summary: dict) -> None:
-        with self.con:
-            self._append(self.con, "run", summary)
+        self._journal_standalone("run", summary)
 
     def journal_llm(self, payload: dict) -> None:
-        with self.con:
-            self._append(self.con, "llm", payload)
+        self._journal_standalone("llm", payload)
 
     # ---------- ingestion batch (atomic) ----------
 
@@ -110,6 +133,7 @@ class DirectorState:
         new_proposals: list[Proposal] = []
         fps = list(fingerprints)
         cur = self.con
+        head_before = self._head  # snapshot for rollback restore
         cur.execute("BEGIN IMMEDIATE")
         try:
             for p in proposals:
@@ -120,7 +144,8 @@ class DirectorState:
                     continue
                 cur.execute(
                     "INSERT INTO proposals(trigger_key, ptype, filename, "
-                    "authority, created_at, body) VALUES (?,?,?,?,?,?)",
+                    "authority, created_at, body, written) "
+                    "VALUES (?,?,?,?,?,?,0)",
                     (p.trigger_key, p.ptype, p.filename, p.authority,
                      utcnow(), p.body))
                 new_proposals.append(p)
@@ -141,8 +166,43 @@ class DirectorState:
             cur.execute("COMMIT")
         except Exception:
             cur.execute("ROLLBACK")
+            # 01A #1: rolled-back journal entries must not poison the chain
+            self._head = None
             raise
         return new_proposals
+
+    # ---------- transactional outbox (01A #2) ----------
+    #
+    # Proposal rows commit with written=0. flush_pending_writes() writes the
+    # draft files atomically (tmp + os.replace) and marks written=1. A crash
+    # after commit but before the file write is healed on the next run — no
+    # draft can be permanently lost, and files are never half-written.
+
+    def flush_pending_writes(self, writer) -> int:
+        """writer(proposal_row_dict) -> final Path. Returns rows healed."""
+        rows = self.con.execute(
+            "SELECT trigger_key, ptype, filename, authority, created_at, body "
+            "FROM proposals WHERE written=0 ORDER BY created_at").fetchall()
+        healed = 0
+        for tk, ptype, filename, authority, created, body in rows:
+            try:
+                target = writer({"trigger_key": tk, "ptype": ptype,
+                                 "filename": filename, "authority": authority,
+                                 "body": body})
+                with self.con:
+                    self.con.execute(
+                        "UPDATE proposals SET written=1, written_at=?, "
+                        "filename=? WHERE trigger_key=? AND written=0",
+                        (utcnow(), str(target), tk))
+                healed += 1
+            except Exception:
+                # leave written=0; retried on the next flush (never lost)
+                continue
+        return healed
+
+    def unwritten_count(self) -> int:
+        return self.con.execute(
+            "SELECT COUNT(*) FROM proposals WHERE written=0").fetchone()[0]
 
     # ---------- queries ----------
 

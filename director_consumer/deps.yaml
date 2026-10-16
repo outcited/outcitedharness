@@ -1,7 +1,8 @@
 # Dependency / impact map — DIRECTOR-01
 # versioned; supersede by version bump + changelog entry, never edit silently
 schema: 1
-version: "2026-10-16.1"
+version: "2026-10-16.2"   # 01A: structured service matching, alias identity,
+                          # replica/primary split, watcher-health rule
 
 # Downstream dependency graph: node -> nodes it feeds. A change in X impacts
 # the transitive closure of X. Derived from HANDOFF-m5-20261012 extraction
@@ -42,18 +43,80 @@ edges:
 # Deterministic rules. match: {feed, any: [substrings]} on event summary.
 # severity / impacts / action / authority. Actions are PROPOSALS only.
 rules:
-  - id: canon-endpoint-change
+  - id: canon-primary-outage
     feed: fleet_changes
-    match: {any: ["canon", ":8900", "qwen3.8-27b"]}
+    match:
+      change_kinds: [container_delta]
+      service_tokens: [canon-qwen38-27b]
+      service_direction: removed
+    dedupe_window_h: 6
     severity: P0
     impacts: [canon, adjudication, promotion, release]
     action: propose_promotion_freeze
     authority: sam
     rationale: >
-      MODEL_SETTINGS.md canon law: verdict determinism (5/5) is the basis of
-      every adjudication. An endpoint change invalidates verdict parity until
-      re-proven (sentinel canon 5x5). Per HANDOFF-m5 "Sam's calls, only":
-      freeze changes are human-only. Recommendation, never execution.
+      Structured (01A #5): the canon PRIMARY container left the running set
+      (confirmed container delta, not a probe blind spot). MODEL_SETTINGS
+      canon law: verdict determinism is the adjudication basis. Freeze
+      changes are Sam-only (HANDOFF-m5). Recommendation, never execution.
+
+  - id: canon-primary-recovered
+    feed: fleet_changes
+    match:
+      change_kinds: [container_delta]
+      service_tokens: [canon-qwen38-27b]
+      service_direction: added
+    dedupe_window_h: 6
+    severity: P2
+    impacts: [canon, adjudication]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      Canon primary returned. Status note; sentinel canon 5x5 re-probe
+      confirms before any freeze lift is even discussed.
+
+  - id: canon-primary-unreachable
+    feed: fleet_changes
+    match:
+      change_kinds: [probe_state]
+      service_tokens: [canon-qwen38-27b]
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [canon, adjudication]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      01A #5: SSH_FAIL/UNREACHABLE means the PROBE lost the box — canon
+      state is UNKNOWN, not confirmed down. Investigation (agent), not a
+      P0 freeze on a blind probe (this exact false positive paged Sam three
+      times in the aadad37e backfill).
+
+  - id: canon-replica-change
+    feed: fleet_changes
+    match:
+      service_tokens: [canon-replica, dgx1_canon_replica]
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [canon]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      01A: replica redundancy change, NOT the verdict path. The primary on
+      its own box still adjudicates; redundancy loss is agent-level review
+      (dgx1 is the designated fragile overflow box by design).
+
+  - id: embedder-service-change
+    feed: fleet_changes
+    match:
+      service_tokens: [spark_embedder, bge-m3-embed, harness-gci]
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [fleet_infra, served_export]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Production embedder/GCI face search traffic; unreachable/degraded is
+      agent-level investigation with production impact noted.
 
   - id: adjudicator-meaning-drift
     feed: sentinel
@@ -65,6 +128,21 @@ rules:
     rationale: >
       sentinel.py: nightly frozen-gold drift >2% alarms; meaning health
       gate. Investigation belongs to the extraction lead agent.
+
+  - id: watcher-health-stale
+    feed: director
+    match: {kinds: [watcher_stale]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [verify, promotion]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      01A #8: a stale sentinel feed means the WATCHER is failing (both
+      launchd jobs exit 1: PermissionError on the sentinel dir owned by
+      _lpoperator:1026, and the hourly job opens the retired pipeline.db).
+      Nobody watches the watchers — this rule does. Diagnosis is recorded
+      in the proposal; the fix is production-side and human/agent-owned.
 
   - id: nas-backup-failure
     feed: sentinel
@@ -80,12 +158,18 @@ rules:
 
   - id: fleet-infra-change
     feed: fleet_changes
-    match: {any: []}
+    match:
+      any: []
+      exclude_service_tokens: [canon-qwen38-27b, canon-replica,
+                               dgx1_canon_replica, spark_embedder,
+                               bge-m3-embed, harness-gci]
     severity: P2
     impacts: [fleet_infra]
     action: propose_status_note
     authority: "agent:m5-opencode"
-    rationale: Default classification for infra deltas without a specific rule.
+    rationale: >
+      Default for infra deltas without a specific rule. Service-specific
+      rules above own their tokens (no double-classification).
 
   - id: facet-progress
     feed: facets
