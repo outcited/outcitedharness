@@ -74,11 +74,31 @@ No recovery procedure needed beyond restart: cursors/dedup/journal are
 transactional (crash mid-batch rolls back; outbox heals unwritten
 proposals on the next run). Proven by failure injection (01A/01B tests).
 
-## Rollback
+## DIRECTOR-05 additions
 
-Stop unit → restore previous workspace backup → reinstall previous `VERSION`
-directory. No schema migrations beyond additive column adds; old binaries
-read new columns only if present (`_migrate` is forward-additive).
+- **Project registry:** one workspace DB now hosts N projects
+  (`project_registry`, scoped keys). Project config lives in
+  `/etc/harness-director/projects/<id>/`; registration is data, engine
+  unchanged.
+- **Scope migration:** first boot on a pre-05 workspace runs the
+  transactional project-scope migration once (`schema_meta` guard);
+  `*_legacy` tables are kept as provenance. Backup BEFORE first boot of
+  a new version (standard procedure above).
+- **SQLite mirror consistency:** feed mirrors must use
+  `sqlite3 source '.backup mirror.db'` (or `VACUUM INTO`) for
+  `pipeline-live.db` / `factory.sqlite3` — never raw `cp` of a live WAL
+  database. File feeds (ledgers, logs, CHANGES.md) rsync as before.
+- **Reconciliation + context services:** same process, same 600s loop;
+  no new daemons. Health timer covers `cli verify` (journal chain) and
+  finding freshness.
+- **AuthorizationStore** lives in director.db; approvals are inserted by
+  human-signed records only. The service cannot issue its own.
+
+## Rollback (unchanged semantics)
+
+Stop unit → restore workspace backup → reinstall previous `VERSION`.
+Scope migration is forward-additive; previous binaries read old tables
+via the `*_legacy` names if needed. No destructive schema steps exist.
 
 ## DIRECTOR-04 additions
 

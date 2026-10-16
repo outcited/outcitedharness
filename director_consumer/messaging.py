@@ -22,10 +22,12 @@ from pathlib import Path
 from typing import Optional
 
 from .schema import fp, utcnow
+from .scope import ensure_scoped
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS messages (
-    message_id TEXT PRIMARY KEY,
+    message_id TEXT NOT NULL,
+    project TEXT NOT NULL DEFAULT 'default',
     correlation_id TEXT NOT NULL DEFAULT '',
     recipient TEXT NOT NULL,
     msg_type TEXT NOT NULL,
@@ -37,11 +39,13 @@ CREATE TABLE IF NOT EXISTS messages (
     sent_at REAL,
     acked_at REAL,
     expires_at REAL,
-    authorization_ref TEXT NOT NULL DEFAULT ''
+    authorization_ref TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (project, message_id)
 );
 CREATE TABLE IF NOT EXISTS message_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     message_id TEXT NOT NULL,
+    project TEXT NOT NULL DEFAULT 'default',
     ts REAL NOT NULL,
     event TEXT NOT NULL,
     detail TEXT NOT NULL DEFAULT ''
@@ -79,27 +83,33 @@ class DeliveryPolicy:
 
 
 class MailboxDelivery:
-    def __init__(self, con, policy: DeliveryPolicy, sender: str = "engineering-director"):
+    def __init__(self, con, policy: DeliveryPolicy,
+                 sender: str = "engineering-director",
+                 project: str = "default"):
         self.con = con
         self.policy = policy
         self.sender = sender
+        self.project = project
+        ensure_scoped(con)
         con.executescript(SCHEMA)
 
     def _event(self, mid: str, event: str, detail: str = "") -> None:
         self.con.execute(
-            "INSERT INTO message_events(message_id, ts, event, detail) "
-            "VALUES (?,?,?,?)", (mid, utcnow(), event, detail))
+            "INSERT INTO message_events(message_id, project, ts, event, "
+            "detail) VALUES (?,?,?,?,?)",
+            (mid, self.project, utcnow(), event, detail))
 
     def propose(self, recipient: str, msg_type: str, subject: str, body: str,
                 correlation_id: str = "", ttl_s: float = DEFAULT_TTL_S,
                 message_id: Optional[str] = None) -> str:
         mid = message_id or fp("msg", recipient, subject, body)[:16]
         self.con.execute(
-            "INSERT OR IGNORE INTO messages(message_id, correlation_id, "
-            "recipient, msg_type, subject, body, state, created_at, "
-            "expires_at) VALUES (?,?,?,?,?,?, 'proposed', ?, ?)",
-            (mid, correlation_id, recipient, msg_type, subject, body,
-             utcnow(), utcnow() + ttl_s))
+            "INSERT OR IGNORE INTO messages(message_id, project, "
+            "correlation_id, recipient, msg_type, subject, body, state, "
+            "created_at, expires_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (mid, self.project, correlation_id, recipient, msg_type,
+             subject, body, 'proposed', utcnow(), utcnow() + ttl_s))
         self._event(mid, "proposed")
         self.con.commit()
         return mid
@@ -108,8 +118,8 @@ class MailboxDelivery:
         """Attempt delivery. Gated: raises DeliveryDisabled when the
         authorization gate is closed. Idempotent by message_id."""
         row = self.con.execute(
-            "SELECT * FROM messages WHERE message_id=?",
-            (message_id,)).fetchone()
+            "SELECT * FROM messages WHERE message_id=? AND project=?",
+            (message_id, self.project)).fetchone()
         if row is None:
             raise KeyError(message_id)
         cols = [d[0] for d in self.con.execute(
@@ -130,8 +140,8 @@ class MailboxDelivery:
         # bounded retries
         if m["attempts"] >= MAX_ATTEMPTS:
             self.con.execute(
-                "UPDATE messages SET state='escalated' WHERE message_id=?",
-                (message_id,))
+                "UPDATE messages SET state='escalated' WHERE message_id=? "
+                "AND project=?", (message_id, self.project))
             self._event(message_id, "escalated",
                         f"attempts {m['attempts']} >= {MAX_ATTEMPTS}")
             self.con.commit()
@@ -145,7 +155,8 @@ class MailboxDelivery:
         tmp.replace(dest)             # atomic; duplicate sends same file
         self.con.execute(
             "UPDATE messages SET state='sent', attempts=attempts+1, "
-            "sent_at=? WHERE message_id=?", (utcnow(), message_id))
+            "sent_at=? WHERE message_id=? AND project=?",
+            (utcnow(), message_id, self.project))
         self._event(message_id, "sent", str(dest))
         self.con.commit()
         return "sent"
@@ -156,7 +167,8 @@ class MailboxDelivery:
         is a separate task-state concern (§3 laws)."""
         self.con.execute(
             "UPDATE messages SET state='acked', acked_at=? "
-            "WHERE message_id=?", (utcnow(), message_id))
+            "WHERE message_id=? AND project=?",
+            (utcnow(), message_id, self.project))
         self._event(message_id, "acked", f"from={from_agent} {ack_body[:80]}")
         self.con.commit()
         return "acked"
@@ -165,12 +177,13 @@ class MailboxDelivery:
         """Expiry -> escalation draft is produced by the caller from these."""
         rows = self.con.execute(
             "SELECT message_id FROM messages WHERE state IN "
-            "('proposed','sent') AND expires_at < ?", (utcnow(),)).fetchall()
+            "('proposed','sent') AND expires_at < ? AND project=?",
+            (utcnow(), self.project)).fetchall()
         out = []
         for (mid,) in rows:
             self.con.execute(
-                "UPDATE messages SET state='expired' WHERE message_id=?",
-                (mid,))
+                "UPDATE messages SET state='expired' WHERE message_id=? "
+                "AND project=?", (mid, self.project))
             self._event(mid, "expired")
             out.append(mid)
         self.con.commit()
@@ -187,14 +200,15 @@ class MailboxDelivery:
         for f in root.rglob("*.md"):
             mid = f.stem.split("_")[-1]
             row = self.con.execute(
-                "SELECT state FROM messages WHERE message_id=?",
-                (mid,)).fetchone()
+                "SELECT state FROM messages WHERE message_id=? "
+                "AND project=?", (mid, self.project)).fetchone()
             if row is None:
                 continue
             if row[0] == "proposed":
                 self.con.execute(
                     "UPDATE messages SET state='sent', sent_at=? "
-                    "WHERE message_id=?", (utcnow(), mid))
+                    "WHERE message_id=? AND project=?",
+                    (utcnow(), mid, self.project))
                 self._event(mid, "recovered", str(f))
                 recovered.append(mid)
             if "ack_of:" in f.read_text(errors="replace")[:2000]:
@@ -208,7 +222,8 @@ class MailboxDelivery:
     def snapshot(self) -> list[dict]:
         rows = self.con.execute(
             "SELECT message_id, recipient, state, attempts, created_at, "
-            "acked_at FROM messages ORDER BY created_at DESC LIMIT 50")
+            "acked_at FROM messages WHERE project=? "
+            "ORDER BY created_at DESC LIMIT 50", (self.project,))
         return [dict(zip(("message_id", "recipient", "state", "attempts",
                           "created_at", "acked_at"), r)) for r in rows]
 

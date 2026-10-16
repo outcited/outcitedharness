@@ -20,10 +20,11 @@ from dataclasses import dataclass
 from typing import Optional
 
 from .schema import Assessment, fp, utcnow
+from .scope import ensure_scoped
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS incidents (
-    incident_id TEXT PRIMARY KEY,
+    incident_id TEXT NOT NULL,
     project TEXT NOT NULL,
     correlation_id TEXT NOT NULL,
     identity_key TEXT NOT NULL,
@@ -39,16 +40,19 @@ CREATE TABLE IF NOT EXISTS incidents (
     proposed_action TEXT,
     resolution TEXT,
     reopen_count INTEGER NOT NULL DEFAULT 0,
-    lifecycle_state TEXT NOT NULL DEFAULT 'detected'
+    lifecycle_state TEXT NOT NULL DEFAULT 'detected',
+    PRIMARY KEY (project, incident_id)
 );
 CREATE TABLE IF NOT EXISTS incident_events (
     incident_id TEXT NOT NULL,
+    project TEXT NOT NULL DEFAULT 'default',
     trigger_key TEXT NOT NULL,
     ts REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS incident_recovery (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     incident_id TEXT NOT NULL,
+    project TEXT NOT NULL DEFAULT 'default',
     ts REAL NOT NULL,
     kind TEXT NOT NULL,        -- symptom-clear | root-cause-fixed |
                                -- fix-deployed | verified-fresh-run
@@ -116,6 +120,7 @@ class IncidentStore:
         self.con = con
         self.rules = correlations
         self.project = project
+        ensure_scoped(con)
         con.executescript(SCHEMA)
         cols = {r[1] for r in con.execute("PRAGMA table_info(incidents)")}
         if "lifecycle_state" not in cols:
@@ -132,8 +137,9 @@ class IncidentStore:
                         "fix-deployed", "verified-fresh-run"):
             raise RecoveryError(f"unknown evidence kind {kind!r}")
         self.con.execute(
-            "INSERT INTO incident_recovery(incident_id, ts, kind, detail) "
-            "VALUES (?,?,?,?)", (incident_id, utcnow(), kind, detail))
+            "INSERT INTO incident_recovery(incident_id, project, ts, kind, "
+            "detail) VALUES (?,?,?,?,?)",
+            (incident_id, self.project, utcnow(), kind, detail))
         self.con.commit()
 
     def lifecycle_transition(self, incident_id: str, to_state: str,
@@ -144,8 +150,8 @@ class IncidentStore:
         if not evidence:
             raise RecoveryError("evidence is mandatory for transitions")
         row = self.con.execute(
-            "SELECT lifecycle_state FROM incidents WHERE incident_id=?",
-            (incident_id,)).fetchone()
+            "SELECT lifecycle_state FROM incidents WHERE incident_id=? "
+            "AND project=?", (incident_id, self.project)).fetchone()
         if row is None:
             raise RecoveryError(f"unknown incident {incident_id}")
         cur = row[0]
@@ -154,8 +160,8 @@ class IncidentStore:
                                 f"lifecycle transition")
         if to_state == "recovery_verified":
             kinds = {r[0] for r in self.con.execute(
-                "SELECT kind FROM incident_recovery WHERE incident_id=?",
-                (incident_id,))}
+                "SELECT kind FROM incident_recovery WHERE incident_id=? "
+                "AND project=?", (incident_id, self.project))}
             if not (kinds & {"root-cause-fixed", "verified-fresh-run"}):
                 raise RecoveryError(
                     "recovery_verified requires root-cause-fixed or "
@@ -164,19 +170,21 @@ class IncidentStore:
         if to_state == "closed" and cur != "recovery_verified":
             raise RecoveryError("closed only from recovery_verified")
         self.con.execute(
-            "UPDATE incidents SET lifecycle_state=? WHERE incident_id=?",
-            (to_state, incident_id))
+            "UPDATE incidents SET lifecycle_state=? WHERE incident_id=? "
+            "AND project=?", (to_state, incident_id, self.project))
         self.con.execute(
-            "INSERT INTO incident_events(incident_id, trigger_key, ts) "
-            "VALUES (?,?,?)",
-            (incident_id, f"lifecycle:{cur}->{to_state}:{actor}", utcnow()))
+            "INSERT INTO incident_events(incident_id, project, trigger_key, "
+            "ts) VALUES (?,?,?,?)",
+            (incident_id, self.project,
+             f"lifecycle:{cur}->{to_state}:{actor}", utcnow()))
         self.con.commit()
         return to_state
 
     def lifecycle(self, incident_id: str) -> dict:
         row = self.con.execute(
             "SELECT lifecycle_state, reopen_count FROM incidents "
-            "WHERE incident_id=?", (incident_id,)).fetchone()
+            "WHERE incident_id=? AND project=?",
+            (incident_id, self.project)).fetchone()
         kinds = [dict(zip(("ts", "kind", "detail"), r)) for r in
                  self.con.execute("SELECT ts, kind, detail FROM "
                                   "incident_recovery WHERE incident_id=? "
@@ -204,7 +212,8 @@ class IncidentStore:
         incident_id = fp("incident", r.cid, ident, bucket)[:16]
         row = self.con.execute(
             "SELECT incident_id, state, severity, first_seen FROM incidents "
-            "WHERE incident_id=?", (incident_id,)).fetchone()
+            "WHERE incident_id=? AND project=?",
+            (incident_id, self.project)).fetchone()
         if row is None:
             self.con.execute(
                 "INSERT INTO incidents(incident_id, project, correlation_id, "
@@ -226,19 +235,21 @@ class IncidentStore:
                 (now, new_sev, 1 if reopened else 0, incident_id))
             rules = set(json.loads(
                 self.con.execute("SELECT related_rules FROM incidents "
-                                 "WHERE incident_id=?",
-                                 (incident_id,)).fetchone()[0]))
+                                 "WHERE incident_id=? AND project=?",
+                                 (incident_id, self.project)).fetchone()[0]))
             rules.add(a.rule_id)
             self.con.execute(
-                "UPDATE incidents SET related_rules=? WHERE incident_id=?",
-                (json.dumps(sorted(rules)), incident_id))
+                "UPDATE incidents SET related_rules=? WHERE incident_id=? "
+                "AND project=?",
+                (json.dumps(sorted(rules)), incident_id, self.project))
         self.con.execute(
-            "INSERT INTO incident_events(incident_id, trigger_key, ts) "
-            "VALUES (?,?,?)", (incident_id, a.trigger_key, now))
+            "INSERT INTO incident_events(incident_id, project, trigger_key, "
+            "ts) VALUES (?,?,?,?)",
+            (incident_id, self.project, a.trigger_key, now))
         # evidence accumulates (bounded)
         ev = json.loads(self.con.execute(
-            "SELECT evidence FROM incidents WHERE incident_id=?",
-            (incident_id,)).fetchone()[0])
+            "SELECT evidence FROM incidents WHERE incident_id=? "
+            "AND project=?", (incident_id, self.project)).fetchone()[0])
         entry = {"rule": a.rule_id, "summary": a.event_summary[:160],
                  "ts": now,
                  "refs": [{"feed": x.feed, "source_id": x.source_id}
@@ -246,12 +257,13 @@ class IncidentStore:
         if entry not in ev:
             ev.append(entry)
         self.con.execute(
-            "UPDATE incidents SET evidence=? WHERE incident_id=?",
-            (json.dumps(ev[-20:]), incident_id))
+            "UPDATE incidents SET evidence=? WHERE incident_id=? "
+            "AND project=?", (json.dumps(ev[-20:]), incident_id,
+             self.project))
         self.con.execute(
             "UPDATE incidents SET proposed_action=? WHERE incident_id=? "
-            "AND proposed_action IS NULL",
-            (a.action, incident_id))
+            "AND project=? AND proposed_action IS NULL",
+            (a.action, incident_id, self.project))
         self.con.commit()  # never leave an implicit txn for shared writers
         return incident_id
 
@@ -261,12 +273,13 @@ class IncidentStore:
         self.con.execute(
             "UPDATE incidents SET state='resolved', resolution=?, "
             "verified_cause=COALESCE(verified_cause, suspected_cause) "
-            "WHERE incident_id=?", (resolution, incident_id))
+            "WHERE incident_id=? AND project=?",
+            (resolution, incident_id, self.project))
 
     def open_incidents(self) -> list[dict]:
         rows = self.con.execute(
-            "SELECT * FROM incidents WHERE state='open' "
-            "ORDER BY severity, last_seen DESC").fetchall()
+            "SELECT * FROM incidents WHERE state='open' AND project=? "
+            "ORDER BY severity, last_seen DESC", (self.project,)).fetchall()
         cols = [d[0] for d in self.con.execute("SELECT * FROM incidents "
                                                "LIMIT 0").description]
         return [dict(zip(cols, r)) for r in rows]
