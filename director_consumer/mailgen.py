@@ -16,7 +16,7 @@ import hashlib
 from pathlib import Path
 
 from .schema import Assessment, Proposal
-from .impact import authority_note
+from .impact import authority_note as _default_authority_note
 
 FROM_IDENTITY = "engineering-director"
 
@@ -45,7 +45,7 @@ def evidence_lines(a: Assessment) -> str:
 
 
 ACTION_TO_MAIL = {
-    "propose_investigation": ("question", "investigate-meaning-drift"),
+    "propose_investigation": ("question", None),          # subject from event
     "propose_backup_response": ("status", "backup-restore-needed"),
     "propose_status_note": ("status", None),          # subject from event
     "propose_handoff_status": ("handoff", None),
@@ -96,11 +96,13 @@ explicitly approve delivery.)
                     filename=name, body=body, authority=a.authority)
 
 
-def build_escalation(a: Assessment) -> Proposal | None:
+def build_escalation(a: Assessment,
+                     auth_policy=None) -> Proposal | None:
     """Human-escalation draft for sam-authority actions. Draft only."""
     if a.authority != "sam":
         return None
-    note = authority_note(a.action) or "decision authority: human-only"
+    note = _default_authority_note(a.action, auth_policy) or \
+        "decision authority: human-only"
     name = f"{ts()}_{FROM_IDENTITY}_sam_escalation_{slug(a.event_summary)}.md"
     body = f"""---
 proposed: true
@@ -115,10 +117,26 @@ severity: {a.severity}
 
 ## Escalation draft — human decision required
 
-Event: {a.event_summary}
+**What happened:** {a.event_summary}
 
-Requested decision: {a.action}
-Why human: {note}
+**Why it matters:** rule {a.rule_id} classifies this {a.severity} with
+downstream impacts on {", ".join(a.impacts[:6])}.
+
+**What is blocked or at risk:** {", ".join(a.impacts)} (dependency closure
+from the project impact map; promotion/release gates depend on the
+affected nodes).
+
+**Investigation already performed:** deterministic classification by the
+impact engine from source evidence below; {("advisory model note attached (never verified fact)." if a.model_assessment else "no model inference was required.")}
+
+**Recommended action:** {a.action}
+
+**Alternatives:** no-action (monitor); delegate to
+{"agent:m5-opencode" if a.authority != "agent:m5-opencode" else "the lane owner"}
+for investigation-first handling.
+
+**Who has authority:** {note}
+
 Rule rationale: {a.rationale}
 
 Evidence:

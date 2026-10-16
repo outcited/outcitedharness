@@ -28,6 +28,14 @@ def main(argv=None) -> int:
     run.add_argument("--once", action="store_true")
     run.add_argument("--interval", type=float, default=600)
     run.add_argument("--no-llm", action="store_true")
+    run.add_argument("--project", help="project config dir (e.g. projects/designwins)")
+    run.add_argument("--fleet-yaml")
+    run.add_argument("--agent-network")
+    run.add_argument("--snap-dir")
+    run.add_argument("--factory-db")
+    run.add_argument("--pipeline-db")
+    run.add_argument("--facet-root")
+    run.add_argument("--intake-log")
 
     ver = sub.add_parser("verify")
     ver.add_argument("--workspace", required=True)
@@ -45,7 +53,25 @@ def main(argv=None) -> int:
     if not a.no_llm:
         from .llm import OpsBrainClient
         llm = OpsBrainClient(enabled=True)
-    c = DirectorConsumer(Path(a.workspace), Path(a.deps), feeds=feeds, llm=llm)
+    continuity = None
+    if any((a.factory_db, a.pipeline_db, a.facet_root, a.intake_log)):
+        from .continuity import FactoryContinuity
+        thresholds = {}
+        if a.project:
+            import yaml as _y
+            fy = Path(a.project) / "fleet.yaml"
+            if fy.exists():
+                thresholds = (_y.safe_load(fy.read_text()) or {}) \
+                    .get("factory_continuity", {})
+        continuity = FactoryContinuity(
+            factory_db=a.factory_db, pipeline_db=a.pipeline_db,
+            facet_root=a.facet_root, intake_log=a.intake_log,
+            thresholds=thresholds)
+    c = DirectorConsumer(
+        Path(a.workspace), Path(a.deps), feeds=feeds, llm=llm,
+        project_dir=Path(a.project) if a.project else None,
+        fleet_yaml=a.fleet_yaml, agent_network=a.agent_network,
+        snap_dir=a.snap_dir, continuity=continuity)
     while True:
         r = c.run_once()
         print(json.dumps(r.__dict__, default=str), flush=True)

@@ -15,9 +15,12 @@ from pathlib import Path
 from typing import Optional
 
 from .adapters import ADAPTERS
+from .continuity import FactoryContinuity
+from .fleet import FleetRegistry
 from .impact import ImpactMap
 from .llm import OpsBrainClient
 from .mailgen import build_escalation, build_message, write_proposal_atomic
+from .policy import load_project
 from .schema import Assessment, Event, Proposal, SourceRef, StateMarker, utcnow
 from .state import DirectorState
 
@@ -51,9 +54,15 @@ class DirectorConsumer:
                  feeds: Optional[dict[str, FeedConfig]] = None,
                  llm: Optional[OpsBrainClient] = None,
                  mode: str = "observe",
-                 backfill_max_age_h: float = DEFAULT_BACKFILL_MAX_AGE_H):
+                 backfill_max_age_h: float = DEFAULT_BACKFILL_MAX_AGE_H,
+                 project_dir: Optional[Path] = None,
+                 fleet_yaml: Optional[Path] = None,
+                 agent_network: Optional[Path] = None,
+                 snap_dir: Optional[Path] = None,
+                 continuity: Optional[FactoryContinuity] = None,
+                 tailscale: Optional[dict] = None):
         if mode != "observe":
-            raise ValueError("only observe mode is implemented (DIRECTOR-01)")
+            raise ValueError("only observe mode is implemented")
         self.mode = mode
         self.backfill_max_age_s = backfill_max_age_h * 3600.0
         self.workspace = Path(workspace)
@@ -61,6 +70,22 @@ class DirectorConsumer:
         self.map = ImpactMap.load(deps_map)
         self.feeds = feeds or {}
         self.llm = llm
+        # project policy (DIRECTOR-02 §2): authority + model governance
+        self.model_policy, self.auth_policy = load_project(project_dir)
+        self.model_policy.usage_sink = self.state.record_model_usage
+        if llm is not None:
+            if llm.policy is None and project_dir is not None:
+                llm.policy = self.model_policy
+            if llm.policy is not None:
+                llm.policy.usage_sink = self.state.record_model_usage
+            llm.project = getattr(llm, "project", "default") or "default"
+        self.project_name = Path(project_dir).name if project_dir else "default"
+        # fleet + factory continuity (§3, §4)
+        self.fleet_yaml = fleet_yaml
+        self.agent_network = agent_network
+        self.snap_dir = snap_dir
+        self.tailscale = tailscale
+        self.continuity = continuity
         self.adapters = {}
         for name, fc in self.feeds.items():
             if fc.enabled and name in ADAPTERS:
@@ -100,6 +125,99 @@ class DirectorConsumer:
         return {"source": result["source"], "text": result["text"],
                 "verified": False, "advisory_only": True}
 
+    def _classify(self, fresh: list[Event], report: RunReport):
+        assessments: list[Assessment] = []
+        proposals: list[Proposal] = []
+        for ev in fresh:
+            historical = self._is_historical(ev)
+            for rule in self.map.match(ev):
+                a = self.map.assess(ev, rule)
+                if historical:
+                    a.rationale = (f"[historical — source ts older than "
+                                   f"{self.backfill_max_age_s/3600:.0f}h; "
+                                   f"no proposal] " + a.rationale)
+                    assessments.append(a)
+                    report.historical_assessments += 1
+                    report.suppressed_backfill += 1
+                    continue
+                a.model_assessment = self._enrich(a)
+                assessments.append(a)
+                msg = build_message(a)
+                esc = build_escalation(a, self.auth_policy)
+                for p in (msg, esc):
+                    if p is not None:
+                        proposals.append(p)
+        report.assessments += len(assessments)
+        return assessments, proposals
+
+    def _commit(self, feed: str, cursor: str, fps: list[str],
+                assessments: list[Assessment], proposals: list[Proposal],
+                markers: list[StateMarker], report: RunReport) -> None:
+        new_props = self.state.ingest_batch(
+            feed, cursor, fps, assessments, proposals, markers)
+        report.proposals_new += len(new_props)
+
+    def _derived_feed(self, feed: str, events: list[Event],
+                      cursor: str, report: RunReport,
+                      markers: Optional[list[StateMarker]] = None) -> None:
+        markers = markers or []
+        report.events_seen += len(events)
+        report.markers += len(markers)
+        fps = [e.fingerprint for e in events]
+        already = self.state.seen(fps)
+        fresh = [e for e in events if e.fingerprint not in already]
+        report.events_new += len(fresh)
+        assessments, proposals = self._classify(fresh, report)
+        self._commit(feed, cursor, fps, assessments, proposals,
+                     markers, report)
+
+    def run_fleet(self, report: RunReport) -> None:
+        """§3: derived fleet/agent registry with diff events. Only runs when
+        fleet sources are configured — never probes the live tailnet by
+        accident (tests and minimal deployments stay deterministic)."""
+        if not (self.fleet_yaml or self.agent_network or self.snap_dir):
+            return
+        registry = FleetRegistry(
+            fleet_yaml=self.fleet_yaml, agent_network=self.agent_network,
+            snap_dir=self.snap_dir, tailscale=self.tailscale)
+        state_file = self.workspace / "fleet-state.json"
+        prev = {}
+        if state_file.exists():
+            try:
+                prev = json.loads(state_file.read_text())
+            except json.JSONDecodeError:
+                prev = {}
+        events = registry.diff_events(prev)
+        state_file.write_text(json.dumps(registry.snapshot_state(),
+                                         sort_keys=True))
+        evs = [Event("fleet_health", e["kind"], e["summary"],
+                     [SourceRef("fleet_health", f"{e['kind']}:{e.get('machine')}",
+                                None, utcnow(), locator="fleet-registry")],
+                     attrs=e.get("attrs", {})) for e in events]
+        cursor = json.dumps(sorted(registry.snapshot_state()), sort_keys=True)
+        self._derived_feed("fleet_health", evs, cursor, report)
+
+    def run_continuity(self, report: RunReport) -> None:
+        """§4: factory continuity — real evidence, UNKNOWN discipline."""
+        if self.continuity is None:
+            return
+        obs_file = self.workspace / "continuity-obs.json"
+        observations = []
+        if obs_file.exists():
+            try:
+                observations = json.loads(obs_file.read_text())
+                for o in observations:
+                    o["t"] = float(o["t"])
+            except (json.JSONDecodeError, ValueError, KeyError):
+                observations = []
+        m = self.continuity.assess(observations)
+        obs_file.write_text(json.dumps(observations[-200:], default=str))
+        meas_file = self.workspace / "continuity-latest.json"
+        meas_file.write_text(json.dumps(m.__dict__, default=str, indent=1))
+        self._derived_feed("factory", self.continuity.events(m),
+                           json.dumps(m.__dict__, default=str, sort_keys=True),
+                           report, markers=self.continuity.markers(m))
+
     def run_once(self) -> RunReport:
         report = RunReport()
         for feed, adapter in self.adapters.items():
@@ -132,34 +250,12 @@ class DirectorConsumer:
                         attrs={"feed": m.feed, "marker_kind": m.kind}))
             fresh = watcher_events + fresh
 
-            assessments: list[Assessment] = []
-            proposals: list[Proposal] = []
-            for ev in fresh:
-                historical = self._is_historical(ev)
-                for rule in self.map.match(ev):
-                    a = self.map.assess(ev, rule)
-                    if historical:
-                        # 01A #7: journal the assessment, suppress paging
-                        a.rationale = (f"[historical — source ts older than "
-                                       f"{self.backfill_max_age_s/3600:.0f}h; "
-                                       f"no proposal] " + a.rationale)
-                        assessments.append(a)
-                        report.historical_assessments += 1
-                        report.suppressed_backfill += 1
-                        continue
-                    a.model_assessment = self._enrich(a)
-                    assessments.append(a)
-                    msg = build_message(a)
-                    esc = build_escalation(a)
-                    for p in (msg, esc):
-                        if p is not None:
-                            proposals.append(p)
-            report.assessments += len(assessments)
+            assessments, proposals = self._classify(fresh, report)
+            self._commit(feed, new_cursor, fps, assessments, proposals,
+                         markers, report)
 
-            new_props = self.state.ingest_batch(
-                feed, new_cursor, fps, assessments, proposals, markers)
-            report.proposals_new += len(new_props)
-        # transactional outbox: heal any proposal committed but unwritten
+        self.run_fleet(report)
+        self.run_continuity(report)
         report.healed_writes = self.state.flush_pending_writes(
             lambda row: write_proposal_atomic(
                 Proposal(ptype=row["ptype"], trigger_key=row["trigger_key"],
@@ -170,6 +266,7 @@ class DirectorConsumer:
         self.state.journal_run({
             "mode": self.mode,
             "map_version": self.map.version,
+            "project": self.project_name,
             "events_seen": report.events_seen,
             "events_new": report.events_new,
             "assessments": report.assessments,
@@ -179,6 +276,12 @@ class DirectorConsumer:
             "healed_writes": report.healed_writes,
             "markers": report.markers,
             "elapsed_s": round(report.finished - report.started, 3)})
+        # operational briefing (§10.10) — derived, written every run
+        try:
+            from .briefing import write_briefing
+            write_briefing(self)
+        except Exception:  # noqa: BLE001 — briefing never breaks ingestion
+            pass
         return report
 
     def close(self) -> None:

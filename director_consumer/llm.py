@@ -47,15 +47,33 @@ DEFAULT_ENDPOINTS = [
 
 
 class OpsBrainClient:
-    """Primary -> overflow -> None. Never raises to the caller."""
+    """Primary -> overflow -> None. Never raises to the caller.
+
+    DIRECTOR-02 §6: when a ModelPolicy is supplied, enforcement is in the
+    router, not the prompt — endpoints must be allowlisted, metered
+    providers are hard-refused, rate limits apply, and every attempt
+    (allowed OR refused) is recorded to the usage ledger.
+    """
 
     def __init__(self, endpoints=None, timeout_s: float = 10.0,
                  bucket: TokenBucket | None = None,
-                 enabled: bool = True):
-        self.endpoints = endpoints if endpoints is not None else DEFAULT_ENDPOINTS
+                 enabled: bool = True,
+                 policy=None, purpose: str = "impact-enrichment",
+                 project: str = "default"):
         self.timeout_s = timeout_s
-        self.bucket = bucket or TokenBucket()
+        self.bucket = bucket if bucket is not None else TokenBucket()
         self.enabled = enabled
+        self.policy = policy
+        self.purpose = purpose
+        self.project = project
+        if policy is not None:
+            self.endpoints = [
+                Endpoint(name, spec.base_url, spec.model)
+                for name, spec in policy.endpoints.items()
+                if spec.role != "capacity-available-only" or endpoints]
+        else:
+            self.endpoints = endpoints if endpoints is not None \
+                else DEFAULT_ENDPOINTS
 
     def _call(self, ep: Endpoint, system: str, user: str) -> str | None:
         body = {
@@ -82,6 +100,17 @@ class OpsBrainClient:
             return {"unavailable": "token bucket empty"}
         reasons = []
         for ep in self.endpoints:
+            if self.policy is not None:
+                allowed, why = self.policy.check(ep.name, self.purpose)
+                if not allowed:
+                    reasons.append(f"{ep.name}: REFUSED ({why})")
+                    self.policy.record(ep.name, False, 0.0, self.purpose,
+                                       self.project, note=why)
+                    continue
+                if not self.policy.allow_rate():
+                    reasons.append(f"{ep.name}: policy rate limit")
+                    continue
+            t0 = time.monotonic()
             try:
                 text = self._call(
                     ep,
@@ -90,9 +119,18 @@ class OpsBrainClient:
                     f"Deterministic classification: {classification}\n"
                     f"Event: {event_summary}\n"
                     "One-paragraph impact note:")
+                latency = (time.monotonic() - t0) * 1000
+                if self.policy is not None:
+                    self.policy.record(ep.name, True, latency, self.purpose,
+                                       self.project)
                 if text:
                     return {"source": ep.name, "text": text, "verified": False}
                 reasons.append(f"{ep.name}: empty")
             except Exception as e:  # noqa: BLE001 — degrade, never raise
+                latency = (time.monotonic() - t0) * 1000
+                if self.policy is not None:
+                    self.policy.record(ep.name, False, latency, self.purpose,
+                                       self.project,
+                                       note=type(e).__name__)
                 reasons.append(f"{ep.name}: {type(e).__name__}")
         return {"unavailable": "; ".join(reasons)}

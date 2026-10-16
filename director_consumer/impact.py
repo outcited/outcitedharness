@@ -172,7 +172,14 @@ class ImpactMap:
             trigger_key=fp(*tk_parts))
 
 
-def authority_note(action: str) -> str | None:
+def authority_note(action: str, auth_policy=None) -> str | None:
     """Why this action is human-only, if it is. Fail closed: unknown
-    actions with no authority mapping escalate by default upstream."""
+    actions with no authority mapping escalate by default. With a project
+    AuthorityPolicy (DIRECTOR-02 §2) the mapping is project data; the
+    legacy constant remains as the engine default."""
+    if auth_policy is not None:
+        only, note = auth_policy.is_human_only(action)
+        if only:
+            return note
+        return None
     return SAM_ONLY_CATEGORIES.get(action)

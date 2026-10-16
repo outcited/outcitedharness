@@ -1,8 +1,9 @@
 # Dependency / impact map — DIRECTOR-01
 # versioned; supersede by version bump + changelog entry, never edit silently
 schema: 1
-version: "2026-10-16.2"   # 01A: structured service matching, alias identity,
+version: "2026-10-16.3"   # 01A: structured service matching, alias identity,
                           # replica/primary split, watcher-health rule
+                          # 02: fleet_health + factory continuity rules
 
 # Downstream dependency graph: node -> nodes it feeds. A change in X impacts
 # the transitive closure of X. Derived from HANDOFF-m5-20261012 extraction
@@ -243,3 +244,99 @@ rules:
     rationale: >
       Promotion packets await the human release owner (pin-batch pattern).
       Director proposes a reminder draft; release execution is never automatic.
+
+  # ---- fleet health (§3) — registry diffs ----
+  - id: fleet-machine-connectivity
+    feed: fleet_health
+    match: {kinds: [machine_offline]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [fleet_infra, facets]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      L3 connectivity lost (Tailscale evidence). §3 law: connectivity is
+      never service health — verify services separately before touching any
+      workload. Machine identity from the registry (aliases reconciled).
+
+  - id: fleet-machine-online
+    feed: fleet_health
+    match: {kinds: [machine_online]}
+    severity: P3
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: Recovery note; services stay UNKNOWN until endpoint telemetry.
+
+  - id: fleet-service-down
+    feed: fleet_health
+    match: {kinds: [service_down]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [fleet_infra]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Endpoint telemetry degraded while the machine may be perfectly
+      online — exactly the conflation §3 forbids. Service-level evidence,
+      service-level response.
+
+  - id: fleet-service-recovered
+    feed: fleet_health
+    match: {kinds: [service_recovered]}
+    severity: P3
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: Recovery note.
+
+  # ---- factory continuity (§4) ----
+  - id: factory-junk-flood
+    feed: factory
+    match: {kinds: [junk_flood]}
+    dedupe_window_h: 12
+    severity: P2
+    impacts: [intake, substrate, facets]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      AppleDouble '._' contamination dead-lettering the substrate queue
+      (evidence: pipeline jobs table). Factory-side fix in progress; the
+      director monitors the count and never deletes data.
+
+  - id: factory-lease-stall
+    feed: factory
+    match: {kinds: [lease_stall]}
+    dedupe_window_h: 6
+    severity: P2
+    impacts: [facets, substrate]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Claimed chunks past lease expiry = stuck or dead workers. Rust
+      dw-soak recover requeues safely; human action only if stalls recur.
+
+  - id: factory-starvation
+    feed: factory
+    match: {kinds: [starvation_risk, queue_empty]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [crawler, intake, substrate, facets]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      Factory continuity: ready-work coverage below the configured target
+      (docs and worker-hours reported separately; UNKNOWN values are
+      explicit). Root cause is upstream acquisition.
+
+  - id: factory-intake-anomaly
+    feed: factory
+    match: {kinds: [intake_anomaly]}
+    dedupe_window_h: 24
+    severity: P2
+    impacts: [crawler, intake]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Acquisition rate flat or negative over the observed window — crawler
+      lane, factory controller, or a manufacturer endpoint regression.

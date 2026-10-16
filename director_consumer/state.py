@@ -48,6 +48,18 @@ CREATE TABLE IF NOT EXISTS journal (
 );
 CREATE INDEX IF NOT EXISTS idx_journal_kind ON journal(kind);
 CREATE INDEX IF NOT EXISTS idx_proposals_unwritten ON proposals(written);
+CREATE TABLE IF NOT EXISTS model_usage (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts REAL NOT NULL,
+    endpoint TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    purpose TEXT,
+    project TEXT,
+    ok INTEGER NOT NULL,
+    latency_ms REAL,
+    note TEXT
+);
 """
 
 
@@ -203,6 +215,19 @@ class DirectorState:
     def unwritten_count(self) -> int:
         return self.con.execute(
             "SELECT COUNT(*) FROM proposals WHERE written=0").fetchone()[0]
+
+    def record_model_usage(self, row: dict) -> None:
+        """Model governance ledger (§6): every router call, allowed or
+        refused, is attributable."""
+        with self.con:
+            self.con.execute(
+                "INSERT INTO model_usage(ts, endpoint, provider, model, "
+                "purpose, project, ok, latency_ms, note) "
+                "VALUES (?,?,?,?,?,?,?,?,?)",
+                (utcnow(), row.get("endpoint", "?"), row.get("provider", "?"),
+                 row.get("model", ""), row.get("purpose", ""),
+                 row.get("project", ""), 1 if row.get("ok") else 0,
+                 row.get("latency_ms"), row.get("note", "")))
 
     # ---------- queries ----------
 
