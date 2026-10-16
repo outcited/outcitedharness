@@ -26,7 +26,14 @@ from typing import Optional
 SUPERSEDES_RE = re.compile(r"supersedes\s+((?:PRD-|D)\d*[-\w]*|[\w./-]+\.md)",
                            re.IGNORECASE)
 DECISION_RE = re.compile(r"^##\s+(D\d+)\b", re.MULTILINE)
-VERIFIED_HINTS = ("measured", "verified", "PASS", "evidence", "byte-identical")
+# §5: verification terminology in text NEVER establishes verification.
+# Only receipt-bearing records (sha/measured-state/verified_cause) do.
+RECEIPT_RE = re.compile(r"receipt:|sha256:|\bmeasured\b.*=|byte-identical|"
+                        r"verified_cause|last_verified")
+REF_TASK = re.compile(r"\b([A-Z][A-Z0-9]+(?:-[A-Z0-9]+)+-\d+)\b")
+REF_DEC = re.compile(r"\b(D\d+)\b")
+REF_PRD = re.compile(r"\b(PRD-[\w.-]+)")
+REF_SHA = re.compile(r"\b([0-9a-f]{7,10})\b")
 
 
 @dataclass
@@ -45,6 +52,8 @@ class DecisionPacket:
     policy_version: str
     items: list[ContextItem] = field(default_factory=list)
     uncertainties: list[str] = field(default_factory=list)
+    sections: dict = field(default_factory=dict)   # reproducible groupings
+    authority_missing: bool = False
 
 
 def _age_days(mtime: float) -> float:
@@ -98,12 +107,92 @@ class ContextCompiler:
         t = text.lower()
         return sum(t.count(term) for term in terms)
 
+    def _refs(self, query: str) -> dict:
+        return {
+            "tasks": REF_TASK.findall(query),
+            "decisions": REF_DEC.findall(query),
+            "prds": REF_PRD.findall(query),
+            "shas": [s for s in REF_SHA.findall(query)
+                     if len(s) >= 7],
+        }
+
     def compile(self, query: str, project_id: str = "default",
                 policy_version: str = "",
-                db=None) -> DecisionPacket:
+                db=None, registry=None) -> DecisionPacket:
         terms = self._terms(query)
         packet = DecisionPacket(query=query, project_id=project_id,
                                 policy_version=policy_version)
+        refs = self._refs(query)
+        packet.sections["exact_references"] = (
+            refs["tasks"] + refs["decisions"] + refs["prds"] +
+            [f"sha:{s}" for s in refs["shas"]])
+
+        # 0. EXACT REFERENCE lookups first (§5: critical retrieval must
+        # not depend on term matching alone)
+        if db is not None:
+            for tid in refs["tasks"]:
+                try:
+                    row = db.execute(
+                        "SELECT state, accountable_owner, "
+                        "last_verified_progress FROM tasks WHERE task_id=? "
+                        "AND project=?", (tid, project_id)).fetchone()
+                except Exception:  # noqa: BLE001
+                    row = None
+                if row:
+                    packet.items.append(ContextItem(
+                        "verified-fact" if row[2] else "assertion",
+                        f"task {tid}: state={row[0]} owner={row[1]} "
+                        f"progress={row[2] or 'none'}",
+                        source=f"director.db:tasks:{tid}"))
+                    packet.sections.setdefault("task_history", []).append(tid)
+                else:
+                    packet.uncertainties.append(
+                        f"task reference {tid} not found in project "
+                        f"{project_id} (missing source: task record)")
+            for iid in refs["tasks"] + refs["decisions"]:
+                try:
+                    row = db.execute(
+                        "SELECT suspected_cause, verified_cause, "
+                        "lifecycle_state FROM incidents WHERE incident_id=? "
+                        "AND project=?", (iid, project_id)).fetchone()
+                except Exception:  # noqa: BLE001
+                    row = None
+                if row:
+                    packet.items.append(ContextItem(
+                        "verified-fact" if row[1] else "hypothesis",
+                        f"incident {iid}: lifecycle={row[2]} "
+                        f"cause={row[1] or row[0]}",
+                        source=f"director.db:incidents:{iid}"))
+        if registry is not None:
+            try:
+                spec = registry.get(project_id)
+                if spec:
+                    packet.sections["objectives"] = [
+                        f"{o.get('id')}: {o.get('text', '')[:80]}"
+                        for o in spec.objectives]
+                    for o in spec.objectives:
+                        packet.items.append(ContextItem(
+                            "authority",
+                            f"approved objective {o.get('id')}: "
+                            f"{o.get('text', '')[:120]}",
+                            source=f"project_registry:{project_id}",
+                            authority="registered objective"))
+            except Exception:  # noqa: BLE001
+                packet.uncertainties.append("project registry unavailable")
+        for sha in refs["shas"]:
+            try:
+                out = subprocess.run(
+                    ["git", "-C", str(self.repo), "show", "-s",
+                     "--pretty=%h|%ct|%s", sha], capture_output=True,
+                    text=True, timeout=10).stdout.strip()
+                if out:
+                    packet.items.append(ContextItem(
+                        "assertion", f"commit {out[:140]}",
+                        source=f"git:{sha}"))
+                    packet.sections.setdefault("implementation_refs",
+                                               []).append(sha)
+            except Exception:  # noqa: BLE001
+                packet.uncertainties.append(f"commit {sha} not resolvable")
 
         # 1. DECISIONS — authority unless superseded
         dec = parse_decisions(self.decisions)
@@ -138,14 +227,14 @@ class ContextCompiler:
                         source=f"projects/{project_id}/{f.name}",
                         authority=f"config (policy {policy_version or '?'})"))
 
-        # 3. docs — verified when they carry measured evidence, else history
+        # 3. docs — assertions; receipt-bearing evidence artifacts are the
+        # only text that may classify as verified-fact (§5 hardening)
         docs_dir = self.repo / "director_consumer/docs"
         for f in sorted(docs_dir.glob("*.md")):
             text = _read(f)
             score = self._match(text[:8000], terms)
             if score:
-                cls = ("verified-fact"
-                       if any(h in text[:8000] for h in VERIFIED_HINTS)
+                cls = ("verified-fact" if RECEIPT_RE.search(text[:8000])
                        else "assertion")
                 packet.items.append(ContextItem(
                     cls, f"{f.name}: {score} term hits",
@@ -204,6 +293,16 @@ class ContextCompiler:
         if not packet.items:
             packet.uncertainties.append(
                 "no contextual evidence matched the query terms")
+        # decision-bound queries with no authority source are BLOCKED
+        decision_bound = any(w in query.lower() for w in
+                            ("decision", "change", "policy", "architecture",
+                             "should", "ratify", "prd"))
+        if decision_bound and not any(i.evidence_class == "authority"
+                                      for i in packet.items):
+            packet.authority_missing = True
+            packet.uncertainties.append(
+                "BLOCKED: no authoritative source found — conclusions "
+                "unsupported without policy/decision evidence")
         # cap + order: authority first, then verified, hypothesis last
         rank = {"authority": 0, "verified-fact": 1, "assertion": 2,
                 "unknown": 3, "hypothesis": 4, "superseded": 5}

@@ -165,7 +165,13 @@ def test_delivery_and_ack_are_distinct(tmp_path):
     snap = mb.snapshot()[0]
     assert snap["state"] == "sent" and snap["acked_at"] is None, \
         "delivery is never acknowledgment"
-    mb.record_ack(mid, ack_body="looking into it", from_agent="m5-opencode")
+    # unattributable ack text is evidence, NOT acceptance...
+    assert mb.record_ack(mid, ack_body="looking into it",
+                         from_agent="someone-else") == "ack-unverified"
+    # ...only a verified sender matching the recipient is acceptance
+    assert mb.record_ack(mid, ack_body="looking into it",
+                         from_agent="m5-opencode",
+                         verified_sender=True) == "acked"
     assert mb.snapshot()[0]["state"] == "acked"
 
 

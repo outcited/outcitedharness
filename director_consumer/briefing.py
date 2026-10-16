@@ -143,4 +143,23 @@ source references in director.db. Nothing has been dispatched or delivered.)
 """
     out = bdir / f"BRIEFING-{ts}.md"
     out.write_text(body)
+    # consolidated director briefing (all projects in this workspace)
+    try:
+        projs = con.execute("SELECT project_id, name, lifecycle FROM "
+                            "project_registry").fetchall()
+        finds = con.execute("SELECT project, rule, subject, severity FROM "
+                            "reconciler_findings WHERE state='open' "
+                            "ORDER BY severity").fetchall()
+        rows = ["## Projects"]
+        rows += [f"- {p[0]} ({p[2]}): {p[1]}" for p in projs] or ["- none"]
+        rows.append("## Open findings (all projects)")
+        rows += [f"- [{f[3]}] {f[0]}:{f[1]} — {f[2][:60]}" for f in finds] \
+            or ["- none"]
+        cons = bdir / f"BRIEFING-consolidated-{ts}.md"
+        cons.write_text(
+            f"# Director consolidated briefing — {ts}\n---\nproposed: true\n"
+            f"mode: observe\ndelivered: false\n\n" + "\n".join(rows) +
+            "\n\n(derived from director.db; nothing dispatched)\n")
+    except Exception:  # noqa: BLE001
+        pass
     return out

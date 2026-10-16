@@ -26,6 +26,11 @@ from .ownership import (OwnershipReconciler, scan_git_claims,
 from .manufacturers import ManufacturerTelemetry
 from .messaging import DeliveryPolicy, MailboxDelivery
 from .policy import load_project
+from .projects import ProjectRegistry, load_spec_from_config
+from .reconciler import DesiredState, ObservedState, Reconciler
+from .context import ContextCompiler
+from .resources import ResourceRegistry
+from .critical_path import from_designwins_continuity, assess as cp_assess
 from .schema import Assessment, Event, Proposal, SourceRef, StateMarker, utcnow
 from .sessions import SessionDiscovery
 from .state import DirectorState
@@ -51,6 +56,7 @@ class RunReport:
     suppressed_backfill: int = 0
     healed_writes: int = 0
     markers: int = 0
+    project_reconcile: list = field(default_factory=list)
     llm: Optional[dict] = None
     started: float = field(default_factory=utcnow)
     finished: float = 0.0
@@ -113,7 +119,10 @@ class DirectorConsumer:
         pol_path = Path(project_dir) / "policy.yaml" if project_dir else None
         self.mail = MailboxDelivery(
             self.state.con,
-            DeliveryPolicy.load(pol_path, self.workspace / "mailboxes"))
+            DeliveryPolicy.load(pol_path, self.workspace / "mailboxes"),
+            project=self.project_name)
+        self.project_registry = ProjectRegistry(self.state.con)
+        self.projects_root = Path(project_dir).parent if project_dir else None
         # ownership + sessions (§5/§6) — optional sources
         self.sessions_db = Path(sessions_db) if sessions_db else None
         self.mailbox_root = Path(mailbox_root) if mailbox_root else None
@@ -164,7 +173,8 @@ class DirectorConsumer:
         for ev in fresh:
             historical = self._is_historical(ev)
             for rule in self.map.match(ev):
-                a = self.map.assess(ev, rule)
+                a = self.map.assess(ev, rule,
+                                   project=self.project_name)
                 if historical:
                     a.rationale = (f"[historical — source ts older than "
                                    f"{self.backfill_max_age_s/3600:.0f}h; "
@@ -293,6 +303,79 @@ class DirectorConsumer:
                 (r.task_id + r.state for r in recs)), sort_keys=True)
         self._derived_feed("ownership", evs, cursor, report)
 
+    def _observed(self) -> ObservedState:
+        obs = ObservedState()
+        try:
+            obs.funnel = json.loads(
+                self.workspace.joinpath("continuity-latest.json")
+                .read_text())
+        except Exception:  # noqa: BLE001
+            obs.funnel = None
+        try:
+            obs.ownership = json.loads(
+                self.workspace.joinpath("ownership-latest.json")
+                .read_text())
+        except Exception:  # noqa: BLE001
+            obs.ownership = []
+        return obs
+
+    def run_projects(self, report: RunReport) -> list[dict]:
+        """§2/§6: per-registered-project reconciliation from REAL stores."""
+        results = []
+        specs = [sp for sp in self.project_registry.all()
+                 if sp.lifecycle == "active"]
+        observed = self._observed()
+        obs_has_funnel = bool(observed.funnel)
+        for spec in specs:
+            ts = TaskStore(self.state.con, project=spec.project_id)
+            rows = self.state.con.execute(
+                "SELECT task_id, state, updated_at, "
+                "last_verified_progress, host, correlation_id FROM tasks "
+                "WHERE project=?", (spec.project_id,)).fetchall()
+            tasks = [{"task_id": r[0], "state": r[1], "updated_at": r[2],
+                      "last_verified_progress": r[3], "host": r[4],
+                      "objective_ref": r[5]} for r in rows]
+            desired = DesiredState(
+                objectives=spec.objectives or [],
+                tasks=tasks,
+                # the continuity/funnel observation belongs to the
+                # workspace's primary project (its critical path config)
+                critical_targets=({"coverage": "continuity"}
+                                  if spec.project_id == self.project_name
+                                  and obs_has_funnel else {}))
+            rec = Reconciler(self.state.con, project=spec.project_id)
+            rep = rec.reconcile(desired, observed)
+            # compile context for consequential new findings
+            packets = 0
+            comp = ContextCompiler(
+                repo_root=Path.cwd(),
+                project_dir=(self.projects_root / spec.project_id)
+                if self.projects_root else None,
+                mailbox_root=self.mailbox_root)
+            for f in rep["new"]:
+                if f.severity in ("P0", "P1"):
+                    pkt = comp.compile(
+                        f"{f.rule} {f.subject} {' '.join(f.evidence)}",
+                        project_id=spec.project_id,
+                        policy_version=spec.policy_version,
+                        db=self.state.con,
+                        registry=self.project_registry)
+                    packets += 1
+                    self.state.journal_run({
+                        "kind": "decision-packet", "project": spec.project_id,
+                        "finding": f.finding_id, "rule": f.rule,
+                        "items": len(pkt.items),
+                        "authority_missing": pkt.authority_missing,
+                        "classes": sorted({i.evidence_class
+                                           for i in pkt.items})})
+            results.append({"project": spec.project_id,
+                            "new_findings": [f.rule for f in rep["new"]],
+                            "suppressed": len(rep["suppressed"]),
+                            "packets": packets})
+        self.state.journal_run({"kind": "project-reconcile",
+                                "results": results})
+        return results
+
     def run_once(self) -> RunReport:
         report = RunReport()
         for feed, adapter in self.adapters.items():
@@ -332,6 +415,7 @@ class DirectorConsumer:
         self.run_fleet(report)
         self.run_continuity(report)
         self.run_ownership(report)
+        report.project_reconcile = self.run_projects(report)
         report.healed_writes = self.state.flush_pending_writes(
             lambda row: write_proposal_atomic(
                 Proposal(ptype=row["ptype"], trigger_key=row["trigger_key"],

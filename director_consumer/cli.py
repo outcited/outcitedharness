@@ -47,7 +47,24 @@ def main(argv=None) -> int:
     ver = sub.add_parser("verify")
     ver.add_argument("--workspace", required=True)
 
+    reg = sub.add_parser("register-project")
+    reg.add_argument("--workspace", required=True)
+    reg.add_argument("--project-dir", required=True)
+
     a = ap.parse_args(argv)
+    if a.cmd == "register-project":
+        from .projects import ProjectRegistry, load_spec_from_config
+        from .state import DirectorState
+        st = DirectorState(Path(a.workspace))
+        spec = load_spec_from_config(Path(a.project_dir))
+        ProjectRegistry(st.con).register(spec)
+        ok, broken = st.verify_chain()
+        st.close()
+        print(json.dumps({"registered": spec.project_id,
+                          "policy_version": spec.policy_version,
+                          "config_digest": spec.config_digest,
+                          "chain_ok": ok}))
+        return 0
     if a.cmd == "verify":
         from .state import DirectorState
         st = DirectorState(Path(a.workspace))

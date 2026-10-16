@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from .schema import fp, utcnow
+from .scope import ensure_scoped
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS reconciler_findings (
@@ -39,6 +40,13 @@ CREATE TABLE IF NOT EXISTS reconciler_notes (
 """
 
 COOLDOWN_S = 6 * 3600.0
+
+# §6: the director must know when NOT to act. Every suppressed/repeated
+# finding records one of these reasons — never silence, never spam.
+NO_ACTION_REASONS = (
+    "existing-owner-repairing", "evidence-stale", "handoff-pending",
+    "work-productive", "outside-delegated-authority", "insufficient-capacity",
+    "duplicate-incident", "awaiting-verified-dependency", "no-safe-action")
 
 
 @dataclass
@@ -71,9 +79,11 @@ class Finding:
     verification_plan: str
     expected_outcome: str
 
+    project: str = ""
+
     @property
     def finding_id(self) -> str:
-        return fp("finding", self.rule, self.subject)[:16]
+        return fp("finding", self.project, self.rule, self.subject)[:16]
 
 
 class Reconciler:
@@ -82,6 +92,7 @@ class Reconciler:
         self.con = con
         self.project = project
         self.cooldown_s = cooldown_s
+        ensure_scoped(con)
         con.executescript(SCHEMA)
 
     # ---- deterministic discrepancy rules ----
@@ -143,8 +154,10 @@ class Reconciler:
                     "one accountable owner confirmed by authority",
                     "single owner settles"))
 
-        # upstream starvation (critical path)
-        if o.funnel:
+        # upstream starvation (critical path) — only for projects that
+        # DECLARE a critical path (shared observations never leak a
+        # project's critical-path state into another project)
+        if o.funnel and d.critical_targets:
             holdup = o.funnel.get("holdup")
             basis = o.funnel.get("starvation_basis")
             if holdup == "admission-gap" or basis in ("backlog-zero",
@@ -205,6 +218,8 @@ class Reconciler:
     def reconcile(self, desired: DesiredState,
                   observed: ObservedState) -> dict:
         findings = self._rules(desired, observed)
+        for f in findings:
+            f.project = self.project
         new, suppressed, open_ = [], [], []
         now = observed.now
         for f in findings:
@@ -234,6 +249,8 @@ class Reconciler:
                         "VALUES (?,?,?)",
                         (now, f.finding_id,
                          f"suppressed: cooldown until {cd} (hits={hits + 1}); "
+                         f"reason=no-safe-action-or-pending "
+                         f"(vocabulary: {','.join(NO_ACTION_REASONS)}); "
                          f"state unchanged — no new action"))
                     self.con.execute(
                         "UPDATE reconciler_findings SET hits=hits+1, "

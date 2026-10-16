@@ -79,6 +79,15 @@ class ResourceRegistry:
                 continue
             if r.availability in ("unavailable", "maintenance"):
                 continue
+            # §7: offline, unknown-health, or stale telemetry is never
+            # execution-ready — config `active` does not override evidence
+            if r.capabilities.get("connectivity") == "offline":
+                continue
+            if r.health.get("services", {}).get("_telemetry") == "STALE":
+                continue
+            if r.health.get("verdict") == UNKNOWN and \
+                    not r.health.get("migration"):
+                continue
             roles = r.capabilities.get("roles", [])
             match = (not want_cap) or any(want_cap in role for role in roles)
             if not match:

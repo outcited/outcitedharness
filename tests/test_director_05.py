@@ -225,7 +225,8 @@ def test_stalled_acknowledged_task(tmp_path):
 def test_conflicting_claims_and_starvation_and_unverified_repair(tmp_path):
     r = Reconciler(_con(tmp_path), project="alpha")
     rep = r.reconcile(
-        _desired(objectives=[], tasks=[{"task_id": "T-1", "state": "active",
+        _desired(objectives=[], critical_targets={"coverage": "declared"},
+                 tasks=[{"task_id": "T-1", "state": "active",
                          "updated_at": time.time(), "host": "m5"}]),
         _observed(
             ownership=[{"task_id": "T-1", "state": "conflicting",
@@ -263,47 +264,66 @@ def test_reconciler_survives_restart(tmp_path):
 
 # ------------------------------------------------ §6 authorization
 
-def _auth_store(tmp_path):
-    return AuthorizationStore(_con(tmp_path))
+def _auth_store(tmp_path, auth_id=None, record=None):
+    """File-backed approvals: the operator writes the approval file
+    (owner-only writable) and only then does the store accept the record."""
+    import os
+    apdir = tmp_path / "approvals"
+    apdir.mkdir(exist_ok=True)
+    st = AuthorizationStore(_con(tmp_path), approvals_dir=apdir)
+    if auth_id and record:
+        f = apdir / f"{auth_id}.json"
+        f.write_text(json.dumps({"auth_id": auth_id}))
+        os.chmod(f, 0o640)   # operator-owned, not group/world writable
+        st.issue(record)
+    return st
 
 
 def test_authorization_default_deny_and_scope_checks(tmp_path):
-    st = _auth_store(tmp_path)
-    st.issue(AuthRecord(auth_id="A1", project="alpha", action="deliver",
-                        recipient="agent-x", task_ref="T-1",
-                        expires_at=time.time() + 3600, issuer="sam"))
+    st = _auth_store(tmp_path, "A1", AuthRecord(
+        auth_id="A1", project="alpha", action="deliver",
+        recipient="agent-x", task_ref="T-1",
+        expires_at=time.time() + 3600, issuer="sam"))
     req = AuthRequest(project="alpha", action="deliver", recipient="agent-x",
                       task_ref="T-1")
     ok, why = st.check("A1", req)
     assert ok
-    # expired
+    # expired (approval file present but record expired)
+    import os as _os
+    f2 = st.approvals_dir / "A2.json"
+    f2.write_text("{}"); _os.chmod(f2, 0o640)
     st.issue(AuthRecord(auth_id="A2", project="alpha", action="deliver",
-                        recipient="agent-x", expires_at=time.time() - 10,
-                        issuer="sam"))
+                        recipient="agent-x", task_ref="T-1",
+                        expires_at=time.time() - 10, issuer="sam"))
     ok2, why2 = st.check("A2", req)
     assert not ok2 and "expired" in why2
     # project mismatch
-    ok3, why3 = st.check("A1", AuthRequest(project="beta", action="deliver"))
+    ok3, why3 = st.check("A1", AuthRequest(
+        project="beta", action="deliver", recipient="agent-x",
+        task_ref="T-1"))
     assert not ok3 and "project mismatch" in why3
-    # action mismatch
-    ok4, why4 = st.check("A1", AuthRequest(project="alpha", action="spawn"))
+    # action mismatch (fully scoped so the mismatch, not missing scope,
+    # is the refusal reason)
+    ok4, why4 = st.check("A1", AuthRequest(
+        project="alpha", action="spawn", objective_ref="OBJ-9"))
     assert not ok4 and "action mismatch" in why4
     # recipient mismatch
-    ok5, _ = st.check("A1", AuthRequest(project="alpha", action="deliver",
-                                        recipient="agent-y"))
-    assert not ok5
+    ok5, why5 = st.check("A1", AuthRequest(
+        project="alpha", action="deliver", recipient="agent-y",
+        task_ref="T-1"))
+    assert not ok5 and "recipient mismatch" in why5
     # unknown id
     ok6, why6 = st.check("nope", req)
     assert not ok6 and "default deny" in why6
 
 
 def test_replay_rejected_once_used(tmp_path):
-    st = _auth_store(tmp_path)
-    st.issue(AuthRecord(auth_id="A1", project="alpha", action="deliver",
-                        recipient="agent-x", expires_at=time.time() + 3600,
-                        issuer="sam"))
+    st = _auth_store(tmp_path, "A1", AuthRecord(
+        auth_id="A1", project="alpha", action="deliver",
+        recipient="agent-x", task_ref="T-1",
+        expires_at=time.time() + 3600, issuer="sam"))
     req = AuthRequest(project="alpha", action="deliver", recipient="agent-x",
-                      nonce="n-1")
+                      task_ref="T-1", nonce="n-1")
     ok1, _ = st.check("A1", req)
     ok2, why2 = st.check("A1", req)   # same nonce
     assert ok1 and not ok2 and "replay" in why2
@@ -311,6 +331,9 @@ def test_replay_rejected_once_used(tmp_path):
 
 def test_director_cannot_self_authorize(tmp_path):
     st = _auth_store(tmp_path)
+    import os as _os
+    f = st.approvals_dir / "SELF.json"
+    f.write_text("{}"); _os.chmod(f, 0o640)
     with pytest.raises(AuthorizationError):
         st.issue(AuthRecord(auth_id="SELF", project="alpha",
                             action="deliver", expires_at=time.time() + 10,
@@ -318,10 +341,10 @@ def test_director_cannot_self_authorize(tmp_path):
 
 
 def test_spend_scope_blocks_metered(tmp_path):
-    st = _auth_store(tmp_path)
-    st.issue(AuthRecord(auth_id="A1", project="alpha", action="reason",
-                        spend_scope="none", max_spend_usd=0,
-                        expires_at=time.time() + 3600, issuer="sam"))
+    st = _auth_store(tmp_path, "A1", AuthRecord(
+        auth_id="A1", project="alpha", action="reason",
+        spend_scope="none", max_spend_usd=0,
+        expires_at=time.time() + 3600, issuer="sam"))
     ok, why = st.check("A1", AuthRequest(project="alpha", action="reason",
                                          spend_usd=1.0))
     assert not ok and "exceeds" in why

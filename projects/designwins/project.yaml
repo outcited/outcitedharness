@@ -1,0 +1,15 @@
+project_id: designwins
+name: DesignWins
+description: >
+  Datasheet drill-down and elimination platform — the first proving
+  ground of the Engineering Director platform.
+objectives:
+  - {id: SUPPLY-CONTINUITY, text: keep prioritized PDF supply ahead of extraction}
+  - {id: EXTRACTION-COVERAGE, text: complete multi-facet extraction over the rescan backlog}
+success_criteria:
+  - ready-work coverage >= 24h at all times
+  - every claim resolves to quote+page+sha provenance
+repositories:
+  - github.com/outcited/outcitedharness
+policy_version: '2026-10-16.1'
+human_authority: sam

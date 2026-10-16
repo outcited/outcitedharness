@@ -142,18 +142,20 @@ class ImpactMap:
             hits.append(r)
         return hits
 
-    def assess(self, ev: Event, rule: Rule) -> Assessment:
+    def assess(self, ev: Event, rule: Rule,
+               project: str = "") -> Assessment:
         # impacts expand to full downstream closure; keep original list first
         closure = set(rule.impacts)
         for n in rule.impacts:
             closure |= self.downstream(n)
         # incident collapse: bucket the trigger key so repeated deltas for the
         # same rule+box inside the window produce ONE proposal
-        tk_parts: list = ["proposal", rule.rid, ev.fingerprint]
+        tk_parts: list = ["proposal", project, rule.rid,
+                          ev.fingerprint]
         if rule.dedupe_window_h > 0:
             bucket = int(ev.refs[0].observed_ts //
                          (rule.dedupe_window_h * 3600)) if ev.refs else 0
-            tk_parts = ["proposal", rule.rid,
+            tk_parts = ["proposal", project, rule.rid,
                         ev.attrs.get("box") or ev.attrs.get("feed")
                         or ev.kind,
                         ",".join(sorted(ev.attrs.get("services", []))) or

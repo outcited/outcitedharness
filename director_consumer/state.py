@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 from .schema import Assessment, Proposal, StateMarker, utcnow
+from .scope import ensure_scoped
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS cursors (
@@ -29,14 +30,16 @@ CREATE TABLE IF NOT EXISTS seen_events (
     first_seen REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS proposals (
-    trigger_key TEXT PRIMARY KEY,
+    trigger_key TEXT NOT NULL,
+    project TEXT NOT NULL DEFAULT 'default',
     ptype TEXT NOT NULL,
     filename TEXT NOT NULL,
     authority TEXT NOT NULL,
     created_at REAL NOT NULL,
     body TEXT NOT NULL,
     written INTEGER NOT NULL DEFAULT 0,
-    written_at REAL
+    written_at REAL,
+    PRIMARY KEY (project, trigger_key)
 );
 CREATE TABLE IF NOT EXISTS journal (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,6 +83,7 @@ class DirectorState:
         (self.workspace / "escalations").mkdir(exist_ok=True)
         self.db = self.workspace / "director.db"
         self.con = sqlite3.connect(self.db, timeout=30)
+        ensure_scoped(self.con)
         self.con.executescript(SCHEMA)
         self.con.commit()
         _migrate(self.con)
@@ -136,7 +140,8 @@ class DirectorState:
     def ingest_batch(self, feed: str, cursor: str, fingerprints: Iterable[str],
                      assessments: list[Assessment],
                      proposals: list[Proposal],
-                     markers: list[StateMarker]) -> list[Proposal]:
+                     markers: list[StateMarker],
+                     project: str = "default") -> list[Proposal]:
         """One transaction: seen + proposals + journal + cursor.
 
         Returns the proposals that were NEW in this batch (already-existing
@@ -151,16 +156,16 @@ class DirectorState:
         try:
             for p in proposals:
                 existing = cur.execute(
-                    "SELECT 1 FROM proposals WHERE trigger_key=?",
-                    (p.trigger_key,)).fetchone()
+                    "SELECT 1 FROM proposals WHERE trigger_key=? "
+                    "AND project=?", (p.trigger_key, project)).fetchone()
                 if existing:
                     continue
                 cur.execute(
-                    "INSERT INTO proposals(trigger_key, ptype, filename, "
-                    "authority, created_at, body, written) "
-                    "VALUES (?,?,?,?,?,?,0)",
-                    (p.trigger_key, p.ptype, p.filename, p.authority,
-                     utcnow(), p.body))
+                    "INSERT INTO proposals(trigger_key, project, ptype, "
+                    "filename, authority, created_at, body, written) "
+                    "VALUES (?,?,?,?,?,?,?,0)",
+                    (p.trigger_key, project, p.ptype, p.filename,
+                     p.authority, utcnow(), p.body))
                 new_proposals.append(p)
             for a in assessments:
                 self._append(cur, "assessment", a.to_json())
