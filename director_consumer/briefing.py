@@ -91,6 +91,22 @@ def write_briefing(consumer) -> Path:
                 f"verdict={h.get('verdict')} roles={','.join(h.get('roles', []))}"
                 + (" [MIGRATING]" if h.get("status") == "migrating" else ""))
 
+    # coordination state (04): tasks / messages / incident lifecycles
+    coord = []
+    try:
+        for st_, n in con.execute(
+                "SELECT state, COUNT(*) FROM tasks GROUP BY state"):
+            coord.append(f"- tasks [{st_}]: {n}")
+        for st_, n in con.execute(
+                "SELECT state, COUNT(*) FROM messages GROUP BY state"):
+            coord.append(f"- messages [{st_}]: {n}")
+        for cid, sev, lc in con.execute(
+                "SELECT correlation_id, severity, lifecycle_state "
+                "FROM incidents WHERE state='open' ORDER BY severity"):
+            coord.append(f"- incident {cid} ({sev}) lifecycle={lc}")
+    except sqlite3.Error:
+        coord.append("- coordination tables unavailable")
+
     ts = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     body = f"""# Engineering Director briefing — {ts}
 ---
@@ -112,6 +128,9 @@ map_version: {consumer.map.version}
 
 ## Source health
 {chr(10).join(health) or "- all feeds fresh"}
+
+## Coordination state
+{chr(10).join(coord) or "- nothing open"}
 
 ## Model usage
 {chr(10).join(usage)}

@@ -80,6 +80,21 @@ Stop unit → restore previous workspace backup → reinstall previous `VERSION`
 directory. No schema migrations beyond additive column adds; old binaries
 read new columns only if present (`_migrate` is forward-additive).
 
+## DIRECTOR-04 additions
+
+- New tables in director.db (tasks, task_events, task_contributors,
+  messages, message_events, incident_recovery, incidents.lifecycle_state)
+  — all additive; `_migrate`-style ALTER guards keep old workspaces
+  readable. Journal state migrates by workspace copy + `cli verify` as
+  before.
+- **Delivery gate:** `delivery: {enabled: false}` is the shipped default in
+  `/etc/harness-director/policy.yaml`. Production delivery is enabled only
+  by explicit human edit with an `authorization_ref`; the service cannot
+  grant it to itself. Test/experiment mailboxes are separate directories —
+  never the NAS inbox.
+- Coordination state (tasks/messages/incident lifecycles) appears in every
+  briefing; no new processes required.
+
 ## No-M5-dependency checklist
 
 - All feed paths live in config (mirrors), never code

@@ -38,12 +38,21 @@ CREATE TABLE IF NOT EXISTS incidents (
     evidence TEXT NOT NULL,
     proposed_action TEXT,
     resolution TEXT,
-    reopen_count INTEGER NOT NULL DEFAULT 0
+    reopen_count INTEGER NOT NULL DEFAULT 0,
+    lifecycle_state TEXT NOT NULL DEFAULT 'detected'
 );
 CREATE TABLE IF NOT EXISTS incident_events (
     incident_id TEXT NOT NULL,
     trigger_key TEXT NOT NULL,
     ts REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS incident_recovery (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    incident_id TEXT NOT NULL,
+    ts REAL NOT NULL,
+    kind TEXT NOT NULL,        -- symptom-clear | root-cause-fixed |
+                               -- fix-deployed | verified-fresh-run
+    detail TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_inc_events ON incident_events(incident_id);
 CREATE INDEX IF NOT EXISTS idx_inc_open ON incidents(state);
@@ -67,6 +76,28 @@ def _worst(a: str, b: str) -> str:
     return a if SEV_RANK.get(a, 9) <= SEV_RANK.get(b, 9) else b
 
 
+# ---- recovery lifecycle (§4): evidence-gated transitions ----
+RECOVERY_LEGAL = {
+    "detected": {"investigating", "escalated", "blocked"},
+    "investigating": {"mitigation_proposed", "repair_in_progress",
+                      "escalated", "blocked"},
+    "mitigation_proposed": {"repair_in_progress", "investigating",
+                            "escalated", "blocked"},
+    "repair_in_progress": {"recovery_observed", "investigating",
+                           "escalated", "blocked"},
+    "recovery_observed": {"recovery_verified", "repair_in_progress",
+                          "detected"},   # symptom back -> relapse
+    "recovery_verified": {"closed", "detected"},
+    "closed": {"detected"},              # recurrence
+    "blocked": {"investigating", "escalated"},
+    "escalated": {"investigating", "blocked"},
+}
+
+
+class RecoveryError(Exception):
+    pass
+
+
 def load_correlations(deps: dict) -> list[CorrelationRule]:
     out = []
     for r in deps.get("correlations", []):
@@ -86,7 +117,73 @@ class IncidentStore:
         self.rules = correlations
         self.project = project
         con.executescript(SCHEMA)
+        cols = {r[1] for r in con.execute("PRAGMA table_info(incidents)")}
+        if "lifecycle_state" not in cols:
+            con.execute("ALTER TABLE incidents ADD COLUMN lifecycle_state "
+                        "TEXT NOT NULL DEFAULT 'detected'")
+            con.commit()
         self.by_rule = {rid: r for r in correlations for rid in r.group_rules}
+
+    # ---- recovery lifecycle (§4) ----
+
+    def mark_recovery_evidence(self, incident_id: str, kind: str,
+                               detail: str) -> None:
+        if kind not in ("symptom-clear", "root-cause-fixed",
+                        "fix-deployed", "verified-fresh-run"):
+            raise RecoveryError(f"unknown evidence kind {kind!r}")
+        self.con.execute(
+            "INSERT INTO incident_recovery(incident_id, ts, kind, detail) "
+            "VALUES (?,?,?,?)", (incident_id, utcnow(), kind, detail))
+        self.con.commit()
+
+    def lifecycle_transition(self, incident_id: str, to_state: str,
+                             actor: str, evidence: str) -> str:
+        """Evidence-gated lifecycle move. recovery_verified REQUIRES
+        root-cause or fresh-run evidence — a vanished symptom is not
+        recovery, and an LLM opinion is never evidence."""
+        if not evidence:
+            raise RecoveryError("evidence is mandatory for transitions")
+        row = self.con.execute(
+            "SELECT lifecycle_state FROM incidents WHERE incident_id=?",
+            (incident_id,)).fetchone()
+        if row is None:
+            raise RecoveryError(f"unknown incident {incident_id}")
+        cur = row[0]
+        if to_state not in RECOVERY_LEGAL.get(cur, set()):
+            raise RecoveryError(f"{cur} -> {to_state} is not a legal "
+                                f"lifecycle transition")
+        if to_state == "recovery_verified":
+            kinds = {r[0] for r in self.con.execute(
+                "SELECT kind FROM incident_recovery WHERE incident_id=?",
+                (incident_id,))}
+            if not (kinds & {"root-cause-fixed", "verified-fresh-run"}):
+                raise RecoveryError(
+                    "recovery_verified requires root-cause-fixed or "
+                    "verified-fresh-run evidence — a cleared symptom is "
+                    "not a verified recovery")
+        if to_state == "closed" and cur != "recovery_verified":
+            raise RecoveryError("closed only from recovery_verified")
+        self.con.execute(
+            "UPDATE incidents SET lifecycle_state=? WHERE incident_id=?",
+            (to_state, incident_id))
+        self.con.execute(
+            "INSERT INTO incident_events(incident_id, trigger_key, ts) "
+            "VALUES (?,?,?)",
+            (incident_id, f"lifecycle:{cur}->{to_state}:{actor}", utcnow()))
+        self.con.commit()
+        return to_state
+
+    def lifecycle(self, incident_id: str) -> dict:
+        row = self.con.execute(
+            "SELECT lifecycle_state, reopen_count FROM incidents "
+            "WHERE incident_id=?", (incident_id,)).fetchone()
+        kinds = [dict(zip(("ts", "kind", "detail"), r)) for r in
+                 self.con.execute("SELECT ts, kind, detail FROM "
+                                  "incident_recovery WHERE incident_id=? "
+                                  "ORDER BY id", (incident_id,))]
+        return {"lifecycle_state": row[0] if row else None,
+                "reopen_count": row[1] if row else 0,
+                "recovery_evidence": kinds}
 
     def _identity(self, a: Assessment, r: CorrelationRule) -> str:
         # identity key: explicit attrs first (box/feed), then event kind

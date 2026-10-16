@@ -23,10 +23,13 @@ from .llm import OpsBrainClient
 from .mailgen import build_escalation, build_message, write_proposal_atomic
 from .ownership import (OwnershipReconciler, scan_git_claims,
                         scan_mailbox_hints, scan_session_claims)
+from .manufacturers import ManufacturerTelemetry
+from .messaging import DeliveryPolicy, MailboxDelivery
 from .policy import load_project
 from .schema import Assessment, Event, Proposal, SourceRef, StateMarker, utcnow
 from .sessions import SessionDiscovery
 from .state import DirectorState
+from .tasks import TaskStore
 
 ENRICH_SEVERITIES = {"P0", "P1"}
 DEFAULT_BACKFILL_MAX_AGE_H = 24.0
@@ -104,6 +107,13 @@ class DirectorConsumer:
             self.state.con, load_correlations(deps_raw),
             project=self.project_name)
         self.correlations = load_correlations(deps_raw)
+        # coordination layer (04): tasks + gated mail delivery (gate closed
+        # by default; production delivery requires explicit authorization)
+        self.tasks = TaskStore(self.state.con, project=self.project_name)
+        pol_path = Path(project_dir) / "policy.yaml" if project_dir else None
+        self.mail = MailboxDelivery(
+            self.state.con,
+            DeliveryPolicy.load(pol_path, self.workspace / "mailboxes"))
         # ownership + sessions (§5/§6) — optional sources
         self.sessions_db = Path(sessions_db) if sessions_db else None
         self.mailbox_root = Path(mailbox_root) if mailbox_root else None
