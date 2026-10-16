@@ -37,10 +37,22 @@ harness-director.service   (Type=simple, Restart=always, RestartSec=30)
     --pipeline-db /var/lib/harness-director/mirrors/pipeline-live.db \
     --facet-root /var/lib/harness-director/mirrors/facet-ledgers \
     --intake-log /var/lib/harness-director/mirrors/pdf-intake.log \
+    --l0-index /var/lib/harness-director/mirrors/l0-records.jsonl \
+    --backlog-paths /var/lib/harness-director/mirrors/vault-paths.json \
+    --class-costs /etc/harness-director/class-costs.json \
+    --sessions-db /var/lib/harness-director/mirrors/opencode.db \
+    --mailbox /var/lib/harness-director/mirrors/shared-docs-queue \
+    --repo /opt/harness-director \
+    --machine-id ryzen-1 \
     --interval 600
 harness-director-mirror.timer  (OnCalendar=*:0/5)
 harness-director-health.timer  (hourly: cli verify + briefing freshness)
 ```
+
+DIRECTOR-03 additions: `--l0-index/--backlog-paths/--class-costs`
+(class-aware continuity), `--sessions-db/--mailbox/--repo/--machine-id`
+(ownership + session discovery). OpenCode metadata and git history are
+mirror-only sources; the director never writes to them.
 
 ## Health checks
 

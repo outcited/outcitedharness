@@ -145,6 +145,7 @@ class DirectorState:
         new_proposals: list[Proposal] = []
         fps = list(fingerprints)
         cur = self.con
+        cur.commit()  # close any stray implicit txn (shared-connection writers)
         head_before = self._head  # snapshot for rollback restore
         cur.execute("BEGIN IMMEDIATE")
         try:

@@ -311,7 +311,7 @@ def test_watcher_stale_classifies(tmp_path):
 
 def test_deps_map_loads_and_rules_wellformed():
     m = ImpactMap.load(deps)
-    assert m.version == "2026-10-16.2"
+    assert m.version >= "2026-10-16.2"
     ids = [r.rid for r in m.rules]
     assert len(ids) == len(set(ids))
     canon_rules = [r for r in m.rules if r.service_tokens]

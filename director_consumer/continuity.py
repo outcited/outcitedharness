@@ -53,6 +53,12 @@ class ContinuityMeasurements:
     consumption_rate_docs_hr: Any = "unknown"
     ready_backlog_docs: Any = "unknown"
     starvation_hours: Any = "unknown"
+    starvation_basis: str = "unknown"   # measured | backlog-zero |
+                                        # unknown-telemetry | queues-unavailable
+    ready_by_class: dict = field(default_factory=dict)   # class -> docs
+    pages_by_class: dict = field(default_factory=dict)   # class -> pages
+    worker_hours_estimate: Any = "unknown"
+    worker_hours_note: str = ""
     coverage_target_h: float = 24.0
     notes: list[str] = field(default_factory=list)
     evidence: list[str] = field(default_factory=list)
@@ -63,11 +69,17 @@ class FactoryContinuity:
                  pipeline_db: Optional[Path] = None,
                  facet_root: Optional[Path] = None,
                  intake_log: Optional[Path] = None,
+                 l0_index: Optional[Path] = None,
+                 backlog_paths: Optional[Path] = None,
+                 class_costs: Optional[dict] = None,
                  thresholds: Optional[dict] = None):
         self.factory_db = Path(factory_db) if factory_db else None
         self.pipeline_db = Path(pipeline_db) if pipeline_db else None
         self.facet_root = Path(facet_root) if facet_root else None
         self.intake_log = Path(intake_log) if intake_log else None
+        self.l0_index = Path(l0_index) if l0_index else None
+        self.backlog_paths = Path(backlog_paths) if backlog_paths else None
+        self.class_costs = class_costs or {}
         th = thresholds or {}
         self.junk_flood_threshold = int(th.get("junk_flood_threshold", 1000))
         self.lease_stall_window_m = int(th.get("lease_stall_window_m", 60))
@@ -181,6 +193,73 @@ class FactoryContinuity:
 
     # ---- main ----
 
+    def _measure_classes(self, m: ContinuityMeasurements) -> None:
+        """§2: PDFs are not equal — class/page aware cost over the REAL
+        rescan backlog joined to L0 census records by source_path."""
+        if not self.l0_index or not self.l0_index.exists():
+            m.notes.append("worker-hours UNKNOWN: L0 index not available "
+                           "(missing measurement: doc_class/page_count join)")
+            return
+        backlog: list[str] = []
+        if self.backlog_paths and self.backlog_paths.exists():
+            try:
+                backlog = json.loads(self.backlog_paths.read_text())
+            except json.JSONDecodeError:
+                backlog = []
+        else:
+            m.notes.append("class backlog UNKNOWN: backlog path list missing")
+            return
+        want = set(backlog)
+        by_class: dict[str, int] = {}
+        pages_by_class: dict[str, int] = {}
+        index: dict[str, tuple[str, int]] = {}
+        try:
+            with open(self.l0_index, errors="replace") as fh:
+                for line in fh:
+                    try:
+                        r = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    sp = r.get("source_path")
+                    if sp in want:
+                        index[sp] = (r.get("doc_class", "unknown"),
+                                     int(r.get("page_count") or 0))
+        except OSError:
+            m.notes.append("worker-hours UNKNOWN: L0 index unreadable")
+            return
+        for sp, (cls, pages) in index.items():
+            by_class[cls] = by_class.get(cls, 0) + 1
+            pages_by_class[cls] = pages_by_class.get(cls, 0) + pages
+        m.ready_by_class = by_class
+        m.pages_by_class = pages_by_class
+        m.evidence.append(f"{self.l0_index} (joined {len(index)}/"
+                          f"{len(want)} backlog docs)")
+        # worker-hours: measured class costs only; unmapped classes are
+        # explicitly UNKNOWN, never guessed
+        total_h, unmapped = 0.0, 0
+        unmapped_classes = []
+        for cls, n in by_class.items():
+            cost = self.class_costs.get(cls)
+            if cost and "hours_per_doc" in cost:
+                total_h += n * float(cost["hours_per_doc"])
+            else:
+                unmapped += n
+                unmapped_classes.append(cls)
+        if unmapped and not self.class_costs:
+            m.worker_hours_estimate = "unknown"
+            m.worker_hours_note = (
+                "missing measurement: per-class extraction cost table "
+                "(class_costs config empty; benchmark needed)")
+        elif unmapped:
+            m.worker_hours_estimate = round(total_h, 2)
+            m.worker_hours_note = (
+                f"PARTIAL: {unmapped} docs of unmapped classes excluded "
+                f"({', '.join(sorted(unmapped_classes))}) — missing "
+                f"measurement: class cost for those classes")
+        else:
+            m.worker_hours_estimate = round(total_h, 2)
+            m.worker_hours_note = "class-cost table applied (see provenance)"
+
     def assess(self, observations: list) -> ContinuityMeasurements:
         m = ContinuityMeasurements()
         m.coverage_target_h = self.coverage_target_h
@@ -188,21 +267,32 @@ class FactoryContinuity:
         self._measure_pipeline(m)
         self._measure_ledgers(m, observations)
         self._measure_intake(m)
+        self._measure_classes(m)
         # ready backlog = known queue parts only
         parts = [x for x in (m.rust_queued, m.substrate_pending)
                  if isinstance(x, int)]
+        queues_missing = (m.rust_queued == "unknown"
+                          and m.substrate_pending == "unknown")
         if parts:
             m.ready_backlog_docs = sum(parts)
-        # starvation only when BOTH backlog and rate are known numbers
-        if isinstance(m.ready_backlog_docs, (int, float)) and \
-                isinstance(m.consumption_rate_docs_hr, (int, float)) and \
+        # starvation basis: distinguish real starvation from telemetry gaps
+        # and temporarily unavailable queues (§2 acceptance)
+        if queues_missing:
+            m.starvation_basis = "queues-unavailable"
+            m.notes.append("starvation UNKNOWN: queues temporarily "
+                           "unavailable (NOT evidence of starvation)")
+        elif m.ready_backlog_docs == 0:
+            m.starvation_hours = 0.0
+            m.starvation_basis = "backlog-zero"
+        elif isinstance(m.consumption_rate_docs_hr, (int, float)) and \
                 m.consumption_rate_docs_hr > 0:
             m.starvation_hours = round(
                 m.ready_backlog_docs / m.consumption_rate_docs_hr, 1)
-        elif m.ready_backlog_docs == 0:
-            m.starvation_hours = 0.0
+            m.starvation_basis = "measured"
         else:
-            m.notes.append("starvation UNKNOWN: consumption rate unknown")
+            m.starvation_basis = "unknown-telemetry"
+            m.notes.append("starvation UNKNOWN: consumption rate unknown "
+                           "(NOT evidence of starvation)")
         return m
 
     def events(self, m: ContinuityMeasurements) -> list[Event]:
@@ -225,12 +315,15 @@ class FactoryContinuity:
                f"{m.stalled_leases} claimed chunks with expired leases "
                f"(stall window {self.lease_stall_window_m}m)",
                {"severity_hint": "P2"})
-        if isinstance(m.starvation_hours, (int, float)):
+        if m.starvation_basis in ("measured", "backlog-zero") and \
+                isinstance(m.starvation_hours, (int, float)):
             if m.starvation_hours < self.starvation_alert_h:
                 ev("starvation_risk",
                    f"predicted extraction starvation in "
                    f"{m.starvation_hours}h (< {self.starvation_alert_h}h "
-                   f"target); backlog {m.ready_backlog_docs} docs",
+                   f"target); basis={m.starvation_basis}; "
+                   f"backlog {m.ready_backlog_docs} docs "
+                   f"(worker-hours: {m.worker_hours_estimate})",
                    {"severity_hint": "P1"})
         if m.ready_backlog_docs == 0:
             ev("queue_empty", "extraction queues empty — workers will idle",

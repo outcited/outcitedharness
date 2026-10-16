@@ -18,10 +18,14 @@ from .adapters import ADAPTERS
 from .continuity import FactoryContinuity
 from .fleet import FleetRegistry
 from .impact import ImpactMap
+from .incidents import IncidentStore, load_correlations
 from .llm import OpsBrainClient
 from .mailgen import build_escalation, build_message, write_proposal_atomic
+from .ownership import (OwnershipReconciler, scan_git_claims,
+                        scan_mailbox_hints, scan_session_claims)
 from .policy import load_project
 from .schema import Assessment, Event, Proposal, SourceRef, StateMarker, utcnow
+from .sessions import SessionDiscovery
 from .state import DirectorState
 
 ENRICH_SEVERITIES = {"P0", "P1"}
@@ -60,7 +64,11 @@ class DirectorConsumer:
                  agent_network: Optional[Path] = None,
                  snap_dir: Optional[Path] = None,
                  continuity: Optional[FactoryContinuity] = None,
-                 tailscale: Optional[dict] = None):
+                 tailscale: Optional[dict] = None,
+                 sessions_db: Optional[Path] = None,
+                 mailbox_root: Optional[Path] = None,
+                 repo_path: Optional[Path] = None,
+                 machine_id: str = "unknown"):
         if mode != "observe":
             raise ValueError("only observe mode is implemented")
         self.mode = mode
@@ -86,6 +94,21 @@ class DirectorConsumer:
         self.snap_dir = snap_dir
         self.tailscale = tailscale
         self.continuity = continuity
+        # incident correlation (§4) — deterministic grouping only
+        try:
+            import yaml as _y
+            deps_raw = _y.safe_load(Path(deps_map).read_text()) or {}
+        except Exception:  # noqa: BLE001
+            deps_raw = {}
+        self.incidents = IncidentStore(
+            self.state.con, load_correlations(deps_raw),
+            project=self.project_name)
+        self.correlations = load_correlations(deps_raw)
+        # ownership + sessions (§5/§6) — optional sources
+        self.sessions_db = Path(sessions_db) if sessions_db else None
+        self.mailbox_root = Path(mailbox_root) if mailbox_root else None
+        self.repo_path = Path(repo_path) if repo_path else Path.cwd()
+        self.machine_id = machine_id
         self.adapters = {}
         for name, fc in self.feeds.items():
             if fc.enabled and name in ADAPTERS:
@@ -142,6 +165,10 @@ class DirectorConsumer:
                     continue
                 a.model_assessment = self._enrich(a)
                 assessments.append(a)
+                try:
+                    self.incidents.observe(a)      # §4: incident grouping
+                except Exception:  # noqa: BLE001 — never break classification
+                    pass
                 msg = build_message(a)
                 esc = build_escalation(a, self.auth_policy)
                 for p in (msg, esc):
@@ -218,6 +245,44 @@ class DirectorConsumer:
                            json.dumps(m.__dict__, default=str, sort_keys=True),
                            report, markers=self.continuity.markers(m))
 
+    def run_ownership(self, report: RunReport) -> None:
+        """§5/§6: read-only session discovery + ownership reconciliation.
+        Only runs when ownership sources are explicitly configured — never
+        scans the live repo or OpenCode metadata by accident."""
+        if self.sessions_db is None and self.mailbox_root is None:
+            return
+        sd = SessionDiscovery(opencode_db=self.sessions_db,
+                              machine=self.machine_id)
+        sessions = sd.discover() if self.sessions_db is not None else []
+        claims = []
+        claims += scan_git_claims(self.repo_path)
+        if self.mailbox_root:
+            claims += scan_mailbox_hints(Path(self.mailbox_root))
+        claims += scan_session_claims([s.__dict__ for s in sessions])
+        recs = OwnershipReconciler().reconcile(claims, utcnow())
+        self.workspace.joinpath("ownership-latest.json").write_text(
+            json.dumps([r.__dict__ for r in recs], default=str, indent=1))
+        self.workspace.joinpath("sessions-latest.json").write_text(
+            json.dumps([s.__dict__ for s in sessions], default=str, indent=1))
+        evs = []
+        for e in sd.to_events(sessions):
+            evs.append(Event("sessions", e["kind"], e["summary"],
+                             [SourceRef("sessions", r, None, utcnow(),
+                                        locator="opencode.db")
+                              for r in e.get("refs", [])],
+                             attrs=e.get("attrs", {})))
+        from .ownership import OwnershipReconciler as _OR  # noqa: F401
+        for e in OwnershipReconciler().conflict_events(recs):
+            evs.append(Event("ownership", e["kind"], e["summary"],
+                             [SourceRef("ownership", r, None, utcnow(),
+                                        locator="reconciler")
+                              for r in e.get("refs", [])],
+                             attrs=e.get("attrs", {})))
+        cursor = json.dumps(
+            sorted((s.session_id for s in sessions)) + sorted(
+                (r.task_id + r.state for r in recs)), sort_keys=True)
+        self._derived_feed("ownership", evs, cursor, report)
+
     def run_once(self) -> RunReport:
         report = RunReport()
         for feed, adapter in self.adapters.items():
@@ -256,6 +321,7 @@ class DirectorConsumer:
 
         self.run_fleet(report)
         self.run_continuity(report)
+        self.run_ownership(report)
         report.healed_writes = self.state.flush_pending_writes(
             lambda row: write_proposal_atomic(
                 Proposal(ptype=row["ptype"], trigger_key=row["trigger_key"],

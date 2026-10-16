@@ -36,6 +36,13 @@ def main(argv=None) -> int:
     run.add_argument("--pipeline-db")
     run.add_argument("--facet-root")
     run.add_argument("--intake-log")
+    run.add_argument("--l0-index")
+    run.add_argument("--backlog-paths")
+    run.add_argument("--class-costs", help="json file: {class: {hours_per_doc}}")
+    run.add_argument("--sessions-db")
+    run.add_argument("--mailbox", help="shared-docs-queue root (ownership hints)")
+    run.add_argument("--machine-id", default="unknown")
+    run.add_argument("--repo", help="git repo for ownership claims")
 
     ver = sub.add_parser("verify")
     ver.add_argument("--workspace", required=True)
@@ -54,7 +61,8 @@ def main(argv=None) -> int:
         from .llm import OpsBrainClient
         llm = OpsBrainClient(enabled=True)
     continuity = None
-    if any((a.factory_db, a.pipeline_db, a.facet_root, a.intake_log)):
+    if any((a.factory_db, a.pipeline_db, a.facet_root, a.intake_log,
+            a.l0_index, a.backlog_paths)):
         from .continuity import FactoryContinuity
         thresholds = {}
         if a.project:
@@ -63,15 +71,22 @@ def main(argv=None) -> int:
             if fy.exists():
                 thresholds = (_y.safe_load(fy.read_text()) or {}) \
                     .get("factory_continuity", {})
+        class_costs = {}
+        if a.class_costs:
+            import json as _j
+            class_costs = _j.loads(Path(a.class_costs).read_text())
         continuity = FactoryContinuity(
             factory_db=a.factory_db, pipeline_db=a.pipeline_db,
             facet_root=a.facet_root, intake_log=a.intake_log,
-            thresholds=thresholds)
+            l0_index=a.l0_index, backlog_paths=a.backlog_paths,
+            class_costs=class_costs, thresholds=thresholds)
     c = DirectorConsumer(
         Path(a.workspace), Path(a.deps), feeds=feeds, llm=llm,
         project_dir=Path(a.project) if a.project else None,
         fleet_yaml=a.fleet_yaml, agent_network=a.agent_network,
-        snap_dir=a.snap_dir, continuity=continuity)
+        snap_dir=a.snap_dir, continuity=continuity,
+        sessions_db=a.sessions_db, mailbox_root=a.mailbox,
+        repo_path=a.repo, machine_id=a.machine_id)
     while True:
         r = c.run_once()
         print(json.dumps(r.__dict__, default=str), flush=True)

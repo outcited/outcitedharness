@@ -1,9 +1,10 @@
 # Dependency / impact map — DIRECTOR-01
 # versioned; supersede by version bump + changelog entry, never edit silently
 schema: 1
-version: "2026-10-16.3"   # 01A: structured service matching, alias identity,
+version: "2026-10-16.4"   # 01A: structured service matching, alias identity,
                           # replica/primary split, watcher-health rule
                           # 02: fleet_health + factory continuity rules
+                          # 03: ownership/sessions rules + incident correlations
 
 # Downstream dependency graph: node -> nodes it feeds. A change in X impacts
 # the transitive closure of X. Derived from HANDOFF-m5-20261012 extraction
@@ -340,3 +341,70 @@ rules:
     rationale: >
       Acquisition rate flat or negative over the observed window — crawler
       lane, factory controller, or a manufacturer endpoint regression.
+
+  # ---- ownership (§6) ----
+  - id: ownership-conflict
+    feed: ownership
+    match: {kinds: [ownership_conflict]}
+    dedupe_window_h: 24
+    severity: P1
+    impacts: [fleet_infra, facets]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Two or more agents hold claim evidence for the same task ID.
+      A mailbox message is never proof of ownership; the resolution is a
+      proposed message asking the claimants to settle ownership — never an
+      autonomous reassignment.
+
+  - id: ownership-stale
+    feed: ownership
+    match: {kinds: [ownership_stale]}
+    dedupe_window_h: 48
+    severity: P2
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      Claim evidence exists but has gone quiet beyond the stale window.
+      Status check proposed; not an abandonment verdict.
+
+  - id: session-disconnected
+    feed: sessions
+    match: {kinds: [session_disconnected]}
+    dedupe_window_h: 12
+    severity: P3
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      OpenCode session shows task IDs but no observable process. A
+      disconnected terminal is NOT proof of task completion (§5) — the
+      note asks; it never concludes.
+
+# ---- incident correlation (§4): deterministic symptom grouping ----
+correlations:
+  - id: factory-supply-exhaustion
+    group_rules: [factory-starvation]
+    group_key: feed
+    window_h: 24
+    suspected_cause: "extraction supply exhaustion (upstream acquisition)"
+    owner_hint: "agent:m5-opencode"
+  - id: intake-contamination
+    group_rules: [factory-junk-flood]
+    group_key: feed
+    window_h: 24
+    suspected_cause: "AppleDouble intake contamination (factory-side fix)"
+    owner_hint: "mac-mini factory"
+  - id: watcher-failure
+    group_rules: [watcher-health-stale, adjudicator-meaning-drift]
+    group_key: feed
+    window_h: 168
+    suspected_cause: "sentinel watcher failure (stale LKG is a symptom)"
+    owner_hint: "agent:m5-opencode"
+  - id: canon-availability
+    group_rules: [canon-primary-outage, canon-primary-unreachable]
+    group_key: feed
+    window_h: 6
+    suspected_cause: "adjudicator endpoint availability change"
+    owner_hint: "agent:m5-opencode"
