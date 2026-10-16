@@ -6,6 +6,7 @@ adapter understands; the state store persists them verbatim.
 """
 from __future__ import annotations
 
+import codecs
 import hashlib
 import json
 import os
@@ -109,13 +110,18 @@ def load_default_aliases() -> dict[str, str]:
 class FleetChangesAdapter:
     """Parses fleet-state CHANGES.md — appended sections.
 
-    01A #4/#5/#6 rewrite:
-      - cursor is the exact byte offset consumed; every byte of a section is
-        accounted for (no silent discards on multiline sections)
-      - every bullet line is its own event (fleet_state writes one delta per
-        box); prose-only sections produce one event
-      - delta lines are parsed into structured attrs {box, from, to,
-        services, change_kind} with canonical machine identity applied
+    01B Task 1: BYTE-EXACT cursor. The file is read as bytes; the cursor is
+    {"o": byte_offset, "h": sha256(consumed_prefix)}. Rules:
+
+    - offsets advance only through fully-decoded, newline-terminated bytes;
+      an incomplete trailing UTF-8 sequence or a partial final line is left
+      UNCONSUMED and re-read next poll (incomplete records are preserved,
+      never skipped, never decoded mid-character)
+    - truncation (offset > filesize) and replacement (prefix hash mismatch)
+      both reset to offset 0 and re-emit — replay idempotency is preserved
+      by the consumer's fingerprint dedup, so a re-read never duplicates
+    - every bullet of every complete section becomes an event; continuation
+      bullets (appended without a new header) become events too
     """
 
     feed = "fleet_changes"
@@ -129,35 +135,61 @@ class FleetChangesAdapter:
     def _canon(self, box: str) -> str:
         return self.aliases.get(box, self.aliases.get(box.lower(), box))
 
+    @staticmethod
+    def _decode_cursor(cursor: str) -> tuple[int, str]:
+        """Accepts the 01B json cursor and the legacy plain-offset form."""
+        if not cursor:
+            return 0, ""
+        try:
+            obj = json.loads(cursor)
+            if isinstance(obj, dict):
+                return int(obj.get("o", 0)), str(obj.get("h", ""))
+        except (json.JSONDecodeError, ValueError):
+            pass
+        try:
+            return int(str(cursor).split(":", 1)[0]), ""
+        except ValueError:
+            return 0, ""
+
     def poll(self, cursor: str) -> tuple[list[Event], list[StateMarker], str]:
         marker, _ = _freshness_marker(self.feed, [self.path], self.max_age_s,
                                       "fleet-state CHANGES.md")
         if marker:
             return [], [marker], cursor
-        text = self.path.read_text(errors="replace")
-        try:
-            offset = int((cursor or "0").split(":", 1)[0])
-        except ValueError:
-            offset = 0
-        if offset < 0 or offset > len(text):
-            offset = 0  # truncated/replaced file: reread; dedup keeps us safe
-        new_text = text[offset:]
+        data = self.path.read_bytes()
+        offset, prev_hash = self._decode_cursor(cursor)
+        # truncation or replacement -> full reread (dedup keeps idempotency)
+        if offset > len(data) or (offset > 0 and (
+                len(data) < offset or
+                hashlib.sha256(data[:offset]).hexdigest() != prev_hash)):
+            offset, prev_hash = 0, ""
+        chunk = data[offset:]
+        # hold back an incomplete trailing UTF-8 sequence
+        dec = codecs.getincrementaldecoder("utf-8")("replace")
+        dec.decode(chunk, final=False)
+        usable = chunk[: len(chunk) - len(dec.buffer)]
+        # hold back a partial (unterminated) final line
+        if usable and not usable.endswith(b"\n"):
+            nl = usable.rfind(b"\n")
+            usable = usable[: nl + 1] if nl != -1 else b""
+        if not usable:
+            return [], [], cursor  # nothing complete yet; keep position
+        text = usable.decode("utf-8", errors="replace")
+        new_offset = offset + len(usable)
+
         events: list[Event] = []
-        consumed = 0
-        for idx, section in enumerate(re.split(r"(?m)^(?=## )", new_text)):
+        consumed_chars = 0
+        for section in re.split(r"(?m)^(?=## )", text):
             if not section.startswith("## "):
-                # 01A #4: bytes before the first header are a CONTINUATION of
-                # the section consumed at cursor time — new bullets appended
-                # without a new header are real changes, never discard them.
+                # continuation bytes of the section consumed at cursor time
                 bullets = [l.lstrip("-").strip() for l in section.splitlines()
                            if l.strip().startswith("- ")]
                 for line in bullets:
-                    loc = f"{self.path}#offset{offset + consumed}"
-                    ref = SourceRef(self.feed,
-                                    f"changes#continuation@{offset + consumed}",
-                                    None, utcnow(), locator=loc)
-                    attrs: dict[str, Any] = {"section_header":
-                                             "(continuation)"}
+                    ref = SourceRef(
+                        self.feed,
+                        f"changes#continuation@{new_offset}",
+                        None, utcnow(), locator=f"{self.path}@{new_offset}")
+                    attrs: dict[str, Any] = {"section_header": "(continuation)"}
                     parsed = parse_fleet_delta(line)
                     if parsed:
                         parsed["box"] = self._canon(parsed["box"])
@@ -166,31 +198,35 @@ class FleetChangesAdapter:
                         self.feed,
                         parsed["change_kind"] if parsed else "fleet_note",
                         line, [ref], attrs=attrs))
-                consumed += len(section)
+                consumed_chars += len(section)
                 continue
             header = section.splitlines()[0][3:].strip()
             body_lines = [l.strip() for l in section.splitlines()[1:]]
             header_ts = header.split("—")[0].strip() or None
-            h = hashlib.sha256(section.encode()).hexdigest()[:16]
+            h = hashlib.sha256(section.encode("utf-8", "surrogatepass")).hexdigest()[:16]
             bullets = [l.lstrip("-").strip() for l in body_lines
                        if l.startswith("- ")]
             lines_as_events = bullets or ([" ".join(
                 l for l in body_lines if l)[:200]] if any(body_lines) else [])
             for line in lines_as_events:
-                loc = (f"{self.path}#offset{offset + consumed}")
                 ref = SourceRef(self.feed, f"changes#{header}#{h}",
-                                header_ts, utcnow(), locator=loc)
-                attrs: dict[str, Any] = {"section_header": header}
+                                header_ts, utcnow(),
+                                locator=f"{self.path}@{new_offset}")
+                attrs = {"section_header": header}
                 parsed = parse_fleet_delta(line)
                 if parsed:
                     parsed["box"] = self._canon(parsed["box"])
                     attrs.update(parsed)
-                ev = Event(self.feed,
-                           parsed["change_kind"] if parsed else "fleet_note",
-                           line, [ref], attrs=attrs)
-                events.append(ev)
-            consumed += len(section)
-        return events, [], f"{offset + consumed}"
+                events.append(Event(
+                    self.feed,
+                    parsed["change_kind"] if parsed else "fleet_note",
+                    line, [ref], attrs=attrs))
+            consumed_chars += len(section)
+        new_cursor = json.dumps({
+            "o": new_offset,
+            "h": hashlib.sha256(data[:new_offset]).hexdigest()
+            if new_offset else ""}, sort_keys=True)
+        return events, [], new_cursor
 
 
 class SentinelAdapter:

@@ -151,9 +151,10 @@ def test_fleet_multiline_and_exact_cursor(tmp_path):
     assert evs[2].attrs["box"] == "spark_embedder"
     assert evs[2].attrs["services"] == [], \
         "probe states are states, not services; identity lives in box"
-    # exact byte accounting: cursor == bytes consumed of the sections
-    body = chg.read_text()
-    assert int(cur) <= len(body)
+    # exact byte accounting (01B json cursor): o == bytes consumed
+    import json as _json
+    c = _json.loads(cur)
+    assert c["o"] == chg.stat().st_size, "cursor must consume exactly the file"
     # append a new section -> ONLY the new section's bullets
     with chg.open("a") as fh:
         fh.write("\n## 2026-10-16T08:00:00Z\n- m5: ['a'] -> ['b']\n")

@@ -155,7 +155,7 @@ def test_canon_change_promotion_freeze_recommendation_only(tmp_path):
                                 "- asus4: ['canon-qwen38-27b'] -> ['NO_CONTAINERS']\n")
     ws = tmp_path / "ws"
     run(ws, feeds)
-    a = [x for x in assessments(ws) if x["rule_id"] == "canon-endpoint-change"]
+    a = [x for x in assessments(ws) if x["rule_id"] == "canon-primary-outage"]
     assert a, "canon change must classify"
     assert a[0]["action"] == "propose_promotion_freeze"
     assert a[0]["authority"] == "sam"
