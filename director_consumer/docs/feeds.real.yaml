@@ -1,0 +1,16 @@
+fleet_changes:
+  args:
+    path: /Volumes/M5_4TB/fleet-state/CHANGES.md
+sentinel:
+  args:
+    alerts: /Volumes/M5_4TB/extract-results/sentinel/ALERTS.md
+    lkg: /Volumes/M5_4TB/extract-results/sentinel/last-known-good.json
+factory_events:
+  args:
+    db: /Users/samkim/Harnessv1-powerdata01/scratch/m5-soak/ra03-state/factory.sqlite3
+facets:
+  args:
+    root: /Users/samkim/Harnessv1/results/mbp-worker-20261014
+budget:
+  args:
+    db: /Users/samkim/Harnessv1/results/pipeline-live.db

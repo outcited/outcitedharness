@@ -1,0 +1,161 @@
+# Dependency / impact map — DIRECTOR-01
+# versioned; supersede by version bump + changelog entry, never edit silently
+schema: 1
+version: "2026-10-16.1"
+
+# Downstream dependency graph: node -> nodes it feeds. A change in X impacts
+# the transitive closure of X. Derived from HANDOFF-m5-20261012 extraction
+# ladder + ARCHITECTURE.md + 25K-WEEK-READINESS stage model.
+nodes:
+  crawler:        {description: "mac-mini / whitepine PDF acquisition"}
+  intake:         {description: "pdf-intake rsync spool (com.harness.pdf-intake)"}
+  substrate:      {description: "PDF->text substrate builders (81K layer)"}
+  l0:             {description: "L0 deterministic characterization (198,240 docs)"}
+  facets:         {description: "CPU facet rescans (thermal/mode/aec/errata/pillars/paxes/conn/ti)"}
+  verify:         {description: "quote_verify deterministic gate"}
+  canon:          {description: "asus4 FP8 adjudicator endpoint :8900"}
+  adjudication:   {description: "verdict issuance + adjudication_ledger"}
+  fold_board:     {description: "fold + extraction board snapshots"}
+  promotion:      {description: "promotion packet -> release owner (human)"}
+  release:        {description: "dw-release ReleaseId append-only publish"}
+  served_export:  {description: "api-store-export served store (NAS Public)"}
+  backups:        {description: "nightly results archive to NAS"}
+  budget:         {description: "cloud spend (budget_spend)"}
+  fleet_infra:    {description: "boxes, endpoints, containers (fleet_state)"}
+
+edges:
+  crawler: [intake]
+  intake: [substrate]
+  substrate: [l0]
+  l0: [facets]
+  facets: [verify]
+  verify: [canon, promotion]
+  canon: [adjudication]
+  adjudication: [fold_board]
+  fold_board: [promotion]
+  promotion: [release]
+  release: [served_export]
+  backups: []
+  budget: []
+  fleet_infra: [canon, substrate, facets, served_export, backups]
+
+# Deterministic rules. match: {feed, any: [substrings]} on event summary.
+# severity / impacts / action / authority. Actions are PROPOSALS only.
+rules:
+  - id: canon-endpoint-change
+    feed: fleet_changes
+    match: {any: ["canon", ":8900", "qwen3.8-27b"]}
+    severity: P0
+    impacts: [canon, adjudication, promotion, release]
+    action: propose_promotion_freeze
+    authority: sam
+    rationale: >
+      MODEL_SETTINGS.md canon law: verdict determinism (5/5) is the basis of
+      every adjudication. An endpoint change invalidates verdict parity until
+      re-proven (sentinel canon 5x5). Per HANDOFF-m5 "Sam's calls, only":
+      freeze changes are human-only. Recommendation, never execution.
+
+  - id: adjudicator-meaning-drift
+    feed: sentinel
+    match: {any: ["GOLD DRIFT", "canon", "probe fail"]}
+    severity: P1
+    impacts: [verify, adjudication, promotion]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      sentinel.py: nightly frozen-gold drift >2% alarms; meaning health
+      gate. Investigation belongs to the extraction lead agent.
+
+  - id: nas-backup-failure
+    feed: sentinel
+    match: {any: ["backup", "NAS", "DESTINATION UNREACHABLE"]}
+    severity: P1
+    impacts: [backups, served_export]
+    action: propose_backup_response
+    authority: "agent:m5-opencode"
+    rationale: >
+      Transport law (single-NIC NAS since 2026-10-13). Scope is backups +
+      export mirrors ONLY — extraction reads local vault and is unaffected.
+      Never propose production shutdown for a backup failure.
+
+  - id: fleet-infra-change
+    feed: fleet_changes
+    match: {any: []}
+    severity: P2
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: Default classification for infra deltas without a specific rule.
+
+  - id: facet-progress
+    feed: facets
+    match: {kinds: [facet_progress]}
+    severity: P3
+    impacts: [facets]
+    action: propose_handoff_status
+    authority: "agent:m5-opencode"
+    rationale: >
+      Routine progress. Produces a proposed status/handoff message for the
+      lane owner. Explicitly NOT a human escalation.
+
+  - id: facet-parked-growth
+    feed: facets
+    match: {kinds: [facet_parked_growth]}
+    severity: P2
+    impacts: [facets]
+    action: propose_park_review
+    authority: "agent:m5-opencode"
+    rationale: >
+      parked.txt growth = poison PDFs after 2 attempts. Agent-level review;
+      escalate only if growth is sustained across runs.
+
+  - id: facet-missing-growth
+    feed: facets
+    match: {kinds: [facet_missing_growth]}
+    severity: P3
+    impacts: [facets, substrate]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: Missing files retry by ledger law; watch, do not page.
+
+  - id: factory-lease-event
+    feed: factory_events
+    match: {kinds: [chunk_claimed, chunk_renewed, chunk_expired, chunk_recovered, chunk_completed]}
+    severity: P3
+    impacts: [facets]
+    action: none
+    authority: none
+    rationale: >
+      Normal Rust-controller lifecycle. Journaled for observability; no
+      message unless a dedicated rule fires (e.g. repeated expiry).
+
+  - id: factory-queue-registered
+    feed: factory_events
+    match: {kinds: [queue_registered]}
+    severity: P3
+    impacts: [facets]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: New production lane batch — status note to the lane owner.
+
+  - id: budget-spend-anomaly
+    feed: budget
+    match: {kinds: [budget_anomaly]}
+    severity: P2
+    impacts: [budget]
+    action: propose_spend_review
+    authority: sam
+    rationale: >
+      HANDOFF-m5 "Sam's calls, only": any cloud expense approval is
+      human-only. Escalation DRAFT, never an autonomous spend action.
+
+  - id: promotion-evidence-event
+    feed: facets
+    match: {any: ["PROMOTION", "promotion packet"]}
+    severity: P2
+    impacts: [promotion, release]
+    action: propose_release_nudge
+    authority: sam
+    rationale: >
+      Promotion packets await the human release owner (pin-batch pattern).
+      Director proposes a reminder draft; release execution is never automatic.
