@@ -211,18 +211,19 @@ CREATE TABLE jobs (state TEXT, corpus_key TEXT, source_path TEXT);""")
 
 
 def test_starvation_event_when_rate_known(tmp_path):
-    fc = FactoryContinuity(thresholds={"starvation_alert_h": 24})
+    fc = FactoryContinuity(thresholds={"starvation_alert_h": 24},
+                           population_aliases={
+                               "queue-items(chunks+jobs-unconverted)":
+                               "facet-pass-docs"})
     obs = [{"t": 1000000.0, "total": 100}, {"t": 1000000.0 + 3600, "total": 150}]
     _factory_db(tmp_path / "f.sqlite3", queued=100)
-    _pipeline_db(tmp_path / "p.sqlite3", dead_junk=0)
     fc.factory_db = tmp_path / "f.sqlite3"
-    fc.pipeline_db = tmp_path / "p.sqlite3"
     fc.facet_root = tmp_path / "facets"
     (tmp_path / "facets").mkdir()
     (tmp_path / "facets" / "done-x.txt").write_text("a\n" * 150)
     m = fc.assess(obs)
     assert m.consumption_rate_docs_hr == 50.0
-    assert m.ready_backlog_docs == 101
+    assert m.ready_backlog_docs == 100
     assert m.starvation_hours == pytest.approx(2.0, abs=0.2)
     kinds = [e.kind for e in fc.events(m)]
     assert "starvation_risk" in kinds, "coverage < target must be flagged"

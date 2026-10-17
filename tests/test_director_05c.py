@@ -149,7 +149,10 @@ def test_measured_coverage_is_not_below_target(tmp_path):
     con.commit()
     con.close()
     fc = FactoryContinuity(factory_db=tmp_path / "f.db",
-                           thresholds={"starvation_alert_h": 24})
+                           thresholds={"starvation_alert_h": 24},
+                           population_aliases={
+                               "queue-items(chunks+jobs-unconverted)":
+                               "facet-pass-docs"})
     obs = [{"t": 0.0, "total": 0}, {"t": 3600.0, "total": 10}]
     fx = tmp_path / "fx"
     fx.mkdir()
@@ -188,11 +191,14 @@ def _inc(tmp_path):
 
 def test_suspected_cause_never_promoted_by_resolve(tmp_path):
     st, iid = _inc(tmp_path)
-    st.resolve(iid, "looks fixed")   # convenience path: NO receipt
-    row = st.con.execute("SELECT verified_cause, suspected_cause FROM "
-                         "incidents WHERE incident_id=?", (iid,)).fetchone()
+    with pytest.raises(RecoveryError):
+        st.resolve(iid, "looks fixed")   # no receipt: refused outright
+    row = st.con.execute("SELECT verified_cause, suspected_cause, state "
+                         "FROM incidents WHERE incident_id=?",
+                         (iid,)).fetchone()
     assert row[0] is None, "resolve() must NEVER copy suspected into verified"
     assert row[1], "suspected cause is recorded as hypothesis"
+    assert row[2] == "open", "no evidence = still visible"
 
 
 def test_receipt_fields_required_for_verified_cause(tmp_path):
@@ -200,8 +206,8 @@ def test_receipt_fields_required_for_verified_cause(tmp_path):
     with pytest.raises(RecoveryError):
         st.resolve(iid, "fixed", receipt={"result": "ok"})   # incomplete
     st.resolve(iid, "service recovered; root cause unknown", receipt={
-        "source": "jobs table", "scope": "new deliveries window 24h",
-        "observed_at": "2026-10-17T00:00:00Z",
+        "source": "jobs table", "scope": f"incident:{iid} new deliveries 24h",
+        "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "method": "count of basenames prefix '._'", "result": "0 new junk"})
     row = st.con.execute("SELECT verified_cause FROM incidents "
                          "WHERE incident_id=?", (iid,)).fetchone()
@@ -211,9 +217,12 @@ def test_receipt_fields_required_for_verified_cause(tmp_path):
 def test_old_occurrence_evidence_cannot_close_recurrence(tmp_path):
     st, iid = _inc(tmp_path)
     st.mark_recovery_evidence(iid, "root-cause-fixed", "old fix",
-                              receipt={"source": "s", "scope": "o",
-                                       "observed_at": "t", "method": "m",
-                                       "result": "r"})
+                              receipt={"source": "s",
+                                       "scope": f"incident:{iid}",
+                                       "observed_at": time.strftime(
+                                           "%Y-%m-%dT%H:%M:%SZ",
+                                           time.gmtime()),
+                                       "method": "measurement", "result": "recovered-ok"})
     st.lifecycle_transition(iid, "investigating", "d", "e")
     st.lifecycle_transition(iid, "mitigation_proposed", "d", "e")
     st.lifecycle_transition(iid, "repair_in_progress", "d", "e")

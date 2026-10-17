@@ -16,6 +16,7 @@ Inbound acks are discovered as files with an `ack_of: <message_id>` header.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import time
 from dataclasses import dataclass
@@ -74,13 +75,32 @@ CREATE TABLE IF NOT EXISTS invalid_receipts (
 
 
 def _auth_request(project: str, m: dict, body_digest: str,
-                  message_id: str):
+                  message_id: str, sender: str, transport: str,
+                  assignment_epoch: int):
     from .authorization import AuthRequest
     return AuthRequest(project=project, action="deliver",
                        recipient=m["recipient"],
                        task_ref=m.get("correlation_id", ""),
                        nonce=f"deliver:{message_id}",
-                       payload_digest=body_digest)
+                       payload_digest=body_digest,
+                       action_id=message_id,
+                       msg_type=m.get("msg_type", ""),
+                       subject=m.get("subject", ""),
+                       transport=transport,
+                       assignment_epoch=assignment_epoch,
+                       sender=sender)
+
+
+class SessionTokenTransport:
+    """Trusted adapter: establishes ORIGIN from a session token embedded
+    in the artifact and registered with the transport at session start.
+    Caller-declared session text is never origin proof (05C §3)."""
+
+    def __init__(self, tokens: dict | None = None):
+        self.tokens = tokens or {}   # artifact path -> true origin session
+
+    def verify_origin(self, artifact_path):
+        return self.tokens.get(str(artifact_path))
 
 MAX_ATTEMPTS = 5
 DEFAULT_TTL_S = 7 * 86400
@@ -148,8 +168,14 @@ class MailboxDelivery:
 
     def propose(self, recipient: str, msg_type: str, subject: str, body: str,
                 correlation_id: str = "", ttl_s: float = DEFAULT_TTL_S,
-                message_id: Optional[str] = None) -> str:
-        mid = message_id or fp("msg", recipient, subject, body)[:16]
+                message_id: Optional[str] = None,
+                assignment_epoch: int = 0) -> str:
+        # 05C §2: identity covers the whole action — project/type/
+        # recipient/subject/body/task/epoch — so no field can piggyback
+        # an old id or an old grant
+        mid = message_id or fp("msg", self.project, recipient, msg_type,
+                               subject, body, correlation_id,
+                               assignment_epoch)[:16]
         self.con.execute(
             "INSERT OR IGNORE INTO messages(message_id, project, "
             "correlation_id, recipient, msg_type, subject, body, state, "
@@ -186,7 +212,8 @@ class MailboxDelivery:
             self.con.commit()
             raise DeliveryDisabled(f"authorization refused: {why}")
 
-    def deliver(self, message_id: str, auth_id: str = "") -> str:
+    def deliver(self, message_id: str, auth_id: str = "",
+                assignment_epoch: int = 0) -> str:
         """05C §4: ONE transaction owns validate + reserve + envelope +
         intent + audit; the external write happens after commit against
         the PERSISTED envelope (never regenerated). Crash semantics:
@@ -228,7 +255,9 @@ class MailboxDelivery:
                     raise DeliveryDisabled(
                         "no authorization service — fail closed")
                 ok, why = self.authorizations.reserve(self.con, auth_id,
-                    _auth_request(self.project, m, body_digest, message_id))
+                    _auth_request(self.project, m, body_digest, message_id,
+                                  self.sender, self.transport_name,
+                                  assignment_epoch))
                 if not ok:
                     self.con.execute("ROLLBACK")  # nothing consumed
                     self._event(message_id, "delivery_refused", why)
@@ -244,9 +273,11 @@ class MailboxDelivery:
                         "envelope_version": "1", "project": self.project,
                         "action_id": message_id, "sender": self.sender,
                         "recipient": m["recipient"],
+                        "task_ref": m.get("correlation_id", ""),
                         "msg_type": m["msg_type"], "subject": m["subject"],
                         "body_digest": body_digest,
                         "transport": self.transport_name,
+                        "assignment_epoch": assignment_epoch,
                         "auth_id": auth_id}), body_digest, auth_id,
                      utcnow()))
             # CAS transition: only one racer wins the intent
@@ -268,12 +299,14 @@ class MailboxDelivery:
         if self.mode != "test-delivery":
             raise DeliveryDisabled(
                 "external effects require test-delivery or approved mode")
-        # ---- external effect from the PERSISTED envelope ----
+        # ---- external effect driven by the PERSISTED approved envelope ----
         env = self._envelope(message_id)
+        if not env:
+            raise DeliveryDisabled("no persisted envelope — refuse to act")
         ts = time.strftime("%Y%m%dT%H%M%SZ",
                            time.gmtime(float(m["created_at"])))
-        fname = f"{ts}_{self.sender}_{m['recipient']}_" \
-                f"{m['msg_type']}_{message_id}.md"
+        fname = f"{ts}_{env['sender']}_{env['recipient']}_" \
+                f"{env['msg_type']}_{env['action_id']}.md"
         root = Path(self.policy.outbox_root)
         if self.policy.require_existing_root and not root.exists():
             # 05C: a missing destination (e.g. unmounted NAS) must never
@@ -283,20 +316,30 @@ class MailboxDelivery:
                         f"create an impostor inbox")
             self.con.commit()
             raise DeliveryDisabled(f"destination unavailable: {root}")
-        dest = root / m["recipient"] / fname
+        dest = root / env["recipient"] / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
         if dest.exists():
             prev = dest.read_text(errors="replace")
-            if fp("msg-body", prev) != body_digest and prev.strip() and \
-                    "body here" not in prev:
-                # same identity, different contents: integrity conflict
-                self._event(message_id, "integrity_conflict",
-                            f"existing artifact differs: {dest}")
+            # identical content: reconciled, nothing rewritten; ANY
+            # difference is an integrity conflict and is never overwritten
+            if fp("msg-body", prev) == env["body_digest"]:
+                self.con.execute(
+                    "UPDATE messages SET state='sent', sent_at=? "
+                    "WHERE message_id=? AND project=? AND state='delivering'",
+                    (utcnow(), message_id, self.project))
+                self._event(message_id, "reconciled-existing",
+                            f"artifact matches envelope digest: {dest}")
                 self.con.commit()
-                return "conflict"
+                return "sent"
+            self._event(message_id, "integrity_conflict",
+                        f"existing artifact differs: {dest}")
+            self.con.commit()
+            return "conflict"
         tmp = dest.with_suffix(".md.tmp")
         tmp.write_text(m["body"])
         tmp.replace(dest)
+        if os.environ.get("DIRECTOR_FAILPOINT") == "after-write-before-sent":
+            os._exit(9)   # real crash boundary for failure tests
         self.con.execute(
             "UPDATE messages SET state='sent', sent_at=? "
             "WHERE message_id=? AND project=? AND state='delivering'",
@@ -332,9 +375,15 @@ class MailboxDelivery:
         if not env:
             problems.append("missing ack envelope")
         else:
-            if env.get("ack_of") != message_id:
+            for fld in ("ack_of", "project", "task_ref", "epoch",
+                        "session_id", "message_digest"):
+                if env.get(fld) in (None, ""):
+                    problems.append(f"envelope missing {fld}")
+            if env.get("ack_of") not in (None, "") and \
+                    env.get("ack_of") != message_id:
                 problems.append("ack_of does not match this message")
-            if env.get("project") != self.project:
+            if env.get("project") not in (None, "") and \
+                    env.get("project") != self.project:
                 problems.append("envelope project mismatch")
             msg = self.con.execute(
                 "SELECT body FROM messages WHERE message_id=? AND "
@@ -343,24 +392,36 @@ class MailboxDelivery:
             if msg and env.get("message_digest") and \
                     env["message_digest"] != _fp("msg-body", msg[0]):
                 problems.append("message digest mismatch")
-            if session_bindings is not None:
-                want = session_bindings.get(
-                    (env.get("project"), env.get("task_ref"),
-                     env.get("epoch")))
-                if want is None:
-                    problems.append("no registered session binding for "
-                                    "project/task/epoch")
-                elif env.get("session_id") != want:
-                    problems.append("session origin does not match the "
-                                    "registered binding")
+        # session binding is REQUIRED — a missing map fails closed
+        if not session_bindings:
+            problems.append("missing session bindings (fail closed)")
+        else:
+            want = session_bindings.get(
+                (env.get("project"), env.get("task_ref"), env.get("epoch")))
+            if want is None:
+                problems.append("no registered session binding for "
+                                "project/task/epoch")
+        # origin must be ESTABLISHED by the trusted transport from the
+        # artifact — caller-declared session text is not origin proof
+        origin = None
         if transport is not None and artifact_path is not None:
             try:
-                verified_sender = bool(transport.verify(from_agent,
-                                                        artifact_path))
+                origin = transport.verify_origin(artifact_path)
             except Exception:  # noqa: BLE001
-                verified_sender = False
-            if not verified_sender:
-                problems.append("transport origin not attributable")
+                origin = None
+            if origin is None:
+                problems.append("transport cannot establish session origin")
+            elif session_bindings:
+                want = session_bindings.get(
+                    (env.get("project"), env.get("task_ref"), env.get("epoch")))
+                if want is not None and origin != want:
+                    problems.append(
+                        f"origin session {origin} is not the registered "
+                        f"binding {want}")
+                if env.get("session_id") and env.get("session_id") != origin:
+                    problems.append(
+                        "claimed session text disagrees with established "
+                        "origin")
         else:
             problems.append("no trusted transport evidence")
         accepted = (not problems and from_agent and
@@ -440,6 +501,30 @@ class MailboxDelivery:
                 recovered.append(mid)
         self.con.commit()
         return recovered
+
+    def reconcile_with_receiver(self, receiver) -> list[str]:
+        """05C §5/H: when an ack is lost but the RECEIVER accepted the
+        work, settle the message from the receiver's receipt — never
+        resend blindly, never leave it pending forever."""
+        settled = []
+        try:
+            accepted = set(receiver.receipts())
+        except Exception:  # noqa: BLE001
+            return settled
+        rows = self.con.execute(
+            "SELECT message_id, state FROM messages WHERE project=?",
+            (self.project,)).fetchall()
+        for mid, state in rows:
+            if mid in accepted and state in ("sent", "delivering"):
+                self.con.execute(
+                    "UPDATE messages SET state='acked', acked_at=? "
+                    "WHERE message_id=? AND project=?",
+                    (utcnow(), mid, self.project))
+                self._event(mid, "acked",
+                            "settled from receiver receipt (ack was lost)")
+                settled.append(mid)
+        self.con.commit()
+        return settled
 
     def snapshot(self) -> list[dict]:
         rows = self.con.execute(

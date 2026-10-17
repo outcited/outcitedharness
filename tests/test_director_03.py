@@ -84,7 +84,11 @@ def test_suspected_cause_never_verified(tmp_path):
 def test_reopen_on_recurrence(tmp_path):
     con, st = _store(tmp_path)
     iid = st.observe(_assess("factory-junk-flood", tk="r1"))
-    st.resolve(iid, "fixed upstream")
+    st.resolve(iid, "fixed upstream", receipt={
+        "source": "s", "scope": f"incident:{iid}",
+        "observed_at": __import__("time").strftime(
+            "%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
+        "method": "measurement", "result": "recovered-ok"})
     assert st.open_incidents() == []
     st.observe(_assess("factory-junk-flood", tk="r2", summary="again"))
     inc = st.open_incidents()
@@ -123,12 +127,13 @@ def _factdb(p, queued=50):
 
 
 def test_starvation_forecast_with_valid_measurements(tmp_path):
-    fc = FactoryContinuity(thresholds={"starvation_alert_h": 48})
+    fc = FactoryContinuity(thresholds={"starvation_alert_h": 48},
+        # operator-declared conversion: queue items ARE documents here
+        population_aliases={"queue-items(chunks+jobs-unconverted)": "facet-pass-docs"})
     _factdb(tmp_path / "f.sqlite3", queued=100)
     fc.factory_db = tmp_path / "f.sqlite3"
     fc.facet_root = tmp_path / "fx"
     (tmp_path / "fx").mkdir()
-    (tmp_path / "fx" / "done-a.txt").write_text("\n".join("x" * 1) or "a\n")
     (tmp_path / "fx" / "done-a.txt").write_text("a\n" * 200)
     obs = [{"t": 1000.0, "total": 100}, {"t": 4600.0, "total": 200}]
     m = fc.assess(obs)

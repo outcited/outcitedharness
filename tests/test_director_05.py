@@ -6,6 +6,7 @@ simulated agent/task, no factory/GPU specifics) running the SAME kernel.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import sys
 import time
@@ -105,11 +106,28 @@ def test_messages_and_incidents_scoped(tmp_path):
     pol = DeliveryPolicy(enabled=False)
     ma = MailboxDelivery(con, pol, project="alpha", mode="test-delivery")
     mb = MailboxDelivery(con, pol, project="beta", mode="test-delivery")
-    ida = ma.propose("agent-x", "question", "q", "same body")
-    idb = mb.propose("agent-x", "question", "q", "same body")
-    assert ida == idb  # identical content, identical local id
+    ida = ma.propose("agent-x", "question", "q", "same body",
+                     correlation_id="T-1")
+    idb = mb.propose("agent-x", "question", "q", "same body",
+                     correlation_id="T-1")
+    assert ida != idb, \
+        "identical content in different projects must be distinct actions"
     assert ma.snapshot()[0]["state"] == "proposed"
-    mb.record_ack(idb, from_agent="agent-x")
+    # an ack in beta never touches alpha, even when it is a valid ack
+    from director_consumer.messaging import SessionTokenTransport
+    art = tmp_path / "ackb.md"
+    art.write_text("ack")
+    os.chmod(art, 0o644)
+    env = {"ack_of": idb, "project": "beta", "task_ref": "T-1", "epoch": 1,
+           "session_id": "ses-1",
+           "message_digest": __import__("director_consumer.schema",
+                                        fromlist=["fp"]).fp("msg-body",
+                                                            "same body")}
+    mb.record_ack(idb, from_agent="agent-x",
+                  transport=SessionTokenTransport({str(art): "ses-1"}),
+                  artifact_path=art, envelope=env,
+                  session_bindings={("beta", "T-1", 1): "ses-1"})
+    assert mb.snapshot()[0]["state"] == "acked"
     assert ma.snapshot()[0]["state"] == "proposed", \
         "ack in beta must never mark alpha's message"
     deps = __import__("yaml").safe_load(DEPS.read_text())

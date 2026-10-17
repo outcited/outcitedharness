@@ -207,19 +207,23 @@ def test_delivery_and_ack_are_distinct(tmp_path):
            "epoch": 1, "session_id": "ses-1",
            "message_digest": _fp("msg-body", "body here")}
     bindings = {("default", "T-ACK", 1): "ses-1"}
+    from director_consumer.messaging import SessionTokenTransport
+    art = tmp_path / "ack.md"
+    art.write_text("ack")
+    os.chmod(art, 0o644)
     # unattributable ack text is evidence, NOT acceptance...
     assert mb.record_ack(mid, ack_body="looking into it",
                          from_agent="someone-else",
+                         transport=SessionTokenTransport({str(art): "ses-1"}),
+                         artifact_path=art,
                          envelope=env, session_bindings=bindings
                          ) == "ack-unverified"
-    # ...only an envelope-matching, transport-attributed origin is
+    # ...only an envelope-matching, transport-established origin is
     # acceptance (caller-declared flags prove nothing)
-    class _T:
-        def verify(self, agent, path):
-            return True
     assert mb.record_ack(mid, ack_body="looking into it",
                          from_agent="m5-opencode",
-                         transport=_T(), artifact_path=mid and __file__,
+                         transport=SessionTokenTransport({str(art): "ses-1"}),
+                         artifact_path=art,
                          envelope=env, session_bindings=bindings) == "acked"
     assert mb.snapshot()[0]["state"] == "acked"
 
@@ -369,7 +373,13 @@ def test_symptom_clear_is_not_verified_recovery(tmp_path):
                                 "symptom gone")
     # root-cause evidence arrives (contamination actually stopped)
     st.mark_recovery_evidence(iid, "root-cause-fixed",
-                              "new-delivery scan: 0 ._ files in 3 batches")
+                              "new-delivery scan: 0 ._ files in 3 batches",
+                              receipt={"source": "jobs",
+                                       "scope": f"incident:{iid}",
+                                       "observed_at": time.strftime(
+                                           "%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                       "method": "basename-prefix scan",
+                                       "result": "0 new junk"})
     assert st.lifecycle_transition(iid, "recovery_verified", "director",
                                    "root cause measured absent") == \
         "recovery_verified"
@@ -389,7 +399,13 @@ def test_sentinel_scenario_requires_fresh_run(tmp_path):
         st.lifecycle_transition(iid, "recovery_verified", "director",
                                 "looks up")
     st.mark_recovery_evidence(iid, "verified-fresh-run",
-                              "sentinel hourly exit 0, LKG refreshed")
+                              "sentinel hourly exit 0, LKG refreshed",
+                              receipt={"source": "sentinel",
+                                       "scope": f"incident:{iid}",
+                                       "observed_at": time.strftime(
+                                           "%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                       "method": "watcher exit status",
+                                       "result": "hourly exit 0"})
     st.lifecycle_transition(iid, "recovery_verified", "director",
                             "fresh successful watcher runs")
     assert st.lifecycle(iid)["lifecycle_state"] == "recovery_verified"
@@ -407,7 +423,12 @@ def test_recurrence_after_close_reopens(tmp_path):
     for to, ev in (("investigating", "e"), ("mitigation_proposed", "e"),
                    ("repair_in_progress", "e"), ("recovery_observed", "e")):
         st.lifecycle_transition(iid, to, "director", ev)
-    st.mark_recovery_evidence(iid, "root-cause-fixed", "e")
+    st.mark_recovery_evidence(iid, "root-cause-fixed", "e",
+                              receipt={"source": "s",
+                                       "scope": f"incident:{iid}",
+                                       "observed_at": time.strftime(
+                                           "%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                       "method": "measurement", "result": "recovered-ok"})
     st.lifecycle_transition(iid, "recovery_verified", "director", "e")
     st.lifecycle_transition(iid, "closed", "director", "e")
     st.lifecycle_transition(iid, "detected", "director",

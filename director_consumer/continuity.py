@@ -52,6 +52,7 @@ class ContinuityMeasurements:
     acquisition_rate_docs_day: Any = "unknown"
     consumption_rate_docs_hr: Any = "unknown"
     ready_backlog_docs: Any = "unknown"
+    lane_counts: dict = field(default_factory=dict)   # per-lane, NOT summed
     starvation_hours: Any = "unknown"
     starvation_basis: str = "unknown"   # measured | backlog-zero |
                                         # unknown-telemetry | queues-unavailable
@@ -73,6 +74,7 @@ class FactoryContinuity:
                  l0_index: Optional[Path] = None,
                  backlog_paths: Optional[Path] = None,
                  class_costs: Optional[dict] = None,
+                 population_aliases: Optional[dict] = None,
                  thresholds: Optional[dict] = None):
         self.factory_db = Path(factory_db) if factory_db else None
         self.pipeline_db = Path(pipeline_db) if pipeline_db else None
@@ -80,6 +82,9 @@ class FactoryContinuity:
         self.intake_log = Path(intake_log) if intake_log else None
         self.l0_index = Path(l0_index) if l0_index else None
         self.backlog_paths = Path(backlog_paths) if backlog_paths else None
+        # 05C §6: unit conversions are OPERATOR-DECLARED facts, never
+        # assumed — "queue items are documents" is a claim, not a law
+        self.population_aliases = dict(population_aliases or {})
         self.class_costs = class_costs or {}
         th = thresholds or {}
         self.junk_flood_threshold = int(th.get("junk_flood_threshold", 1000))
@@ -305,17 +310,38 @@ class FactoryContinuity:
                 "source": "backlog/consumption", "observed_at": now,
                 "lane": "planning", "unit": "hours",
                 "basis": m.starvation_basis,
+                "backlog_population": m.measurement_meta.get(
+                    "_backlog_population"),
+                "rate_population": m.measurement_meta.get(
+                    "_rate_population"),
+                "note": ("populations must match; no cross-lane "
+                         "conversion exists" if m.starvation_basis ==
+                         "population-mismatch" else ""),
                 "completeness": ("complete" if m.starvation_basis in
                                  ("measured", "backlog-zero")
                                  else "incomplete")},
         }
-        # ready backlog = known queue parts only
-        parts = [x for x in (m.rust_queued, m.substrate_pending)
-                 if isinstance(x, int)]
+        # 05C §6: chunks and jobs are DIFFERENT populations — never sum
+        # them into a document count. Per-lane counts only; a document
+        # total stays UNKNOWN unless one lane covers it.
+        m.lane_counts = {
+            "rust_chunks": m.rust_queued,
+            "substrate_jobs": m.substrate_pending}
         queues_missing = (m.rust_queued == "unknown"
                           and m.substrate_pending == "unknown")
-        if parts:
-            m.ready_backlog_docs = sum(parts)
+        single_lane = [v for v in (m.rust_queued, m.substrate_pending)
+                       if isinstance(v, int)]
+        m.ready_backlog_docs = single_lane[0] if len(single_lane) == 1 \
+            else "unknown"
+        if len(single_lane) > 1:
+            m.notes.append(
+                "ready backlog UNKNOWN: chunk and job populations are not "
+                "interchangeable (lane_counts carries each) — no cross-lane "
+                "conversion exists")
+        backlog_pop = ("queue-items(chunks+jobs-unconverted)"
+                       if single_lane else "unknown")
+        rate_pop = ("facet-pass-docs" if isinstance(
+            m.consumption_rate_docs_hr, (int, float)) else "unknown")
         # starvation basis: distinguish real starvation from telemetry gaps
         # and temporarily unavailable queues (§2 acceptance)
         if queues_missing:
@@ -336,15 +362,31 @@ class FactoryContinuity:
             else:
                 m.starvation_hours = 0.0
                 m.starvation_basis = "backlog-zero"
-        elif isinstance(m.consumption_rate_docs_hr, (int, float)) and \
-                m.consumption_rate_docs_hr > 0:
-            m.starvation_hours = round(
-                m.ready_backlog_docs / m.consumption_rate_docs_hr, 1)
-            m.starvation_basis = "measured"
         else:
-            m.starvation_basis = "unknown-telemetry"
-            m.notes.append("starvation UNKNOWN: consumption rate unknown "
-                           "(NOT evidence of starvation)")
+            # 05C §6: division requires LANE-COMPATIBLE populations.
+            # Queue items over facet-pass completions is not a rate.
+            rate = m.consumption_rate_docs_hr
+            if isinstance(rate, (int, float)) and rate > 0:
+                declared = (rate_pop == backlog_pop or
+                            self.population_aliases.get(backlog_pop) == rate_pop)
+                if declared:
+                    m.starvation_hours = round(
+                        m.ready_backlog_docs / rate, 1)
+                    m.starvation_basis = "measured"
+                else:
+                    m.starvation_basis = "population-mismatch"
+                    m.starvation_hours = "unknown"
+                    m.notes.append(
+                        f"starvation UNKNOWN: backlog population "
+                        f"({backlog_pop}) and consumption population "
+                        f"({rate_pop}) are not interchangeable — no "
+                        f"cross-lane conversion exists")
+            else:
+                m.starvation_basis = "unknown-telemetry"
+                m.notes.append("starvation UNKNOWN: consumption rate unknown "
+                               "(NOT evidence of starvation)")
+        m.measurement_meta["_backlog_population"] = backlog_pop
+        m.measurement_meta["_rate_population"] = rate_pop
         return m
 
     def events(self, m: ContinuityMeasurements) -> list[Event]:
@@ -377,7 +419,11 @@ class FactoryContinuity:
                    f"backlog {m.ready_backlog_docs} docs "
                    f"(worker-hours: {m.worker_hours_estimate})",
                    {"severity_hint": "P1"})
-        if m.ready_backlog_docs == 0:
+        if m.ready_backlog_docs == 0 and \
+                m.starvation_basis == "backlog-zero":
+            # only when the zero is proven in a compatible lane; with
+            # inventory elsewhere the prophecy "workers will idle" is
+            # unsupported
             ev("queue_empty", "extraction queues empty — workers will idle",
                {"severity_hint": "P1"})
         if isinstance(m.acquisition_rate_docs_day, (int, float)) and \

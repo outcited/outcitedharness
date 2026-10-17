@@ -91,6 +91,14 @@ class AuthRequest:
     nonce: str = ""
     provider: str = ""
     payload_digest: str = ""
+    # full immutable action identity (05C §2): every field is checked;
+    # nothing mutable may ride an old approval
+    action_id: str = ""
+    msg_type: str = ""
+    subject: str = ""
+    transport: str = ""
+    assignment_epoch: int = 0
+    sender: str = ""
 
 
 @dataclass
@@ -254,7 +262,12 @@ class AuthorizationStore:
                 "SELECT payload_digest FROM auth_nonces WHERE nonce=?",
                 (request.nonce,)).fetchone()
             if prev is not None:
-                return False, "replay rejected (nonce already used)"
+                if prev[0] == request.payload_digest:
+                    # SAME action being retried or raced: idempotent
+                    # resume, never a second action
+                    return True, "already-reserved (same action)"
+                return False, ("replay rejected (nonce already used for a "
+                               "different action)")
             cur.execute(
                 "INSERT INTO auth_nonces(nonce, project, auth_id, "
                 "payload_digest, used_at) VALUES (?,?,?,?,?)",
@@ -315,6 +328,23 @@ class AuthorizationStore:
                 request.payload_digest != data["payload_digest"]:
             return False, "payload digest mismatch (approval bound to a " \
                           "different message)"
+        # 05C §2: an approval binds the WHOLE action. Identical bodies
+        # with a different subject/type/destination/task/epoch/id can
+        # never ride the same grant.
+        for fld, label in (("msg_type", "message type"),
+                           ("subject", "subject"),
+                           ("transport", "transport/destination"),
+                           ("action_id", "action id"),
+                           ("sender", "sender")):
+            want = data.get(fld)
+            if want not in (None, ""):
+                got = getattr(request, fld, "")
+                if got != want:
+                    return False, f"{label} mismatch (approval bound to a " \
+                                  f"different action)"
+        if data.get("assignment_epoch") not in (None, "", 0):
+            if int(data["assignment_epoch"]) != request.assignment_epoch:
+                return False, "assignment epoch mismatch"
         if request.nonce and consume:
             prev = self.con.execute(
                 "SELECT payload_digest FROM auth_nonces WHERE nonce=?",

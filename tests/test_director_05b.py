@@ -20,8 +20,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from director_consumer.authorization import (AuthRecord, AuthRequest,
                                              AuthorizationError,
                                              AuthorizationStore)
-from director_consumer.messaging import (DeliveryDisabled, DeliveryPolicy,
-                                         MailboxDelivery)
+from director_consumer.messaging import (DeliveryDisabled,
+                                         DeliveryPolicy, MailboxDelivery,
+                                         SessionTokenTransport)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -252,14 +253,7 @@ def test_concurrent_delivery_single_message(tmp_path):
 
 # 7/8. ack origin (P0-4)
 
-class UidTransport:
-    def __init__(self, uids):
-        self.uids = uids
-    def verify(self, from_agent, artifact_path):
-        try:
-            return os.stat(artifact_path).st_uid == self.uids.get(from_agent)
-        except OSError:
-            return False
+
 
 
 def test_forged_ack_stays_unverified_and_real_ack_passes(tmp_path):
@@ -276,7 +270,7 @@ def test_forged_ack_stays_unverified_and_real_ack_passes(tmp_path):
     other = tmp_path / "wrong-session.md"
     other.write_text("ack_of: x\nFrom: agent-x\n")
     os.chmod(other, 0o644)
-    t_uid = UidTransport({"agent-x": os.getuid()})
+    t_uid = SessionTokenTransport({str(other): "ses-other"})
     st = mb.record_ack(mid, from_agent="agent-x", transport=t_uid,
                        artifact_path=other,
                        envelope={**good_env, "session_id": "ses-other"},
@@ -287,7 +281,8 @@ def test_forged_ack_stays_unverified_and_real_ack_passes(tmp_path):
     forged.write_text("ack_of: OTHER\nFrom: agent-x\n")
     os.chmod(forged, 0o644)
     st2 = mb.record_ack(mid, from_agent="agent-x",
-                        transport=UidTransport({"agent-x": os.getuid() + 7}),
+                        transport=SessionTokenTransport(
+                            {str(forged): "ses-evil"}),
                         artifact_path=forged,
                         envelope={**good_env, "ack_of": "OTHER"},
                         session_bindings=bindings)
@@ -297,13 +292,15 @@ def test_forged_ack_stays_unverified_and_real_ack_passes(tmp_path):
     real.write_text(f"ack_of: {mid}\nFrom: agent-x\n")
     os.chmod(real, 0o644)
     st3 = mb.record_ack(mid, from_agent="agent-x",
-                        transport=UidTransport({"agent-x": os.getuid()}),
+                        transport=SessionTokenTransport(
+                            {str(real): "ses-owner"}),
                         artifact_path=real, envelope=good_env,
                         session_bindings=bindings)
     assert st3 == "acked"
     # forged receipt AFTER a valid ack must not downgrade it
     st4 = mb.record_ack(mid, from_agent="agent-x",
-                        transport=UidTransport({"agent-x": os.getuid() + 9}),
+                        transport=SessionTokenTransport(
+                            {str(forged): "ses-evil"}),
                         artifact_path=forged,
                         envelope={**good_env, "message_digest": "bad"},
                         session_bindings=bindings)

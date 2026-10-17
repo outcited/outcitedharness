@@ -150,8 +150,10 @@ def make_factory_db_with_more(tmp_path):
 
 
 def test_canon_change_promotion_freeze_recommendation_only(tmp_path):
+    import time as _t
+    _hdr = _t.strftime("%Y-%m-%dT%H:%M:%SZ", _t.gmtime())
     feeds = build_feeds(tmp_path,
-                        changes="## 2026-10-16T02:00:00Z\n"
+                        changes=f"## {_hdr}\n"
                                 "- asus4: ['canon-qwen38-27b'] -> ['NO_CONTAINERS']\n")
     ws = tmp_path / "ws"
     run(ws, feeds)
@@ -177,8 +179,10 @@ def test_canon_change_promotion_freeze_recommendation_only(tmp_path):
 
 
 def test_nas_backup_failure_is_scoped(tmp_path):
+    import time as _t
+    hdr = _t.strftime("%Y-%m-%dT%H:%M:%SZ", _t.gmtime())
     feeds = build_feeds(tmp_path,
-                        alerts="## 2026-10-16T03:00:00Z — BACKUP destination unreachable\n"
+                        alerts=f"## {hdr} — BACKUP destination unreachable\n"
                                "nightly backup skipped: NAS down\n")
     ws = tmp_path / "ws"
     run(ws, feeds)

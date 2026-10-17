@@ -177,14 +177,23 @@ class IncidentStore:
                 "SELECT kind, receipt FROM incident_recovery "
                 "WHERE incident_id=? AND project=? AND occurrence=?",
                 (incident_id, self.project, occ)).fetchall()
-            # evidence from an OLDER occurrence never closes a recurrence
-            kinds = {r[0] for r in rows}
-            if not (kinds & {"root-cause-fixed", "verified-fresh-run"}):
+            # a kind string alone is not proof — receipts must validate
+            good = False
+            for kind, rjson in rows:
+                if kind not in ("root-cause-fixed", "verified-fresh-run"):
+                    continue
+                try:
+                    rec = json.loads(rjson) if rjson else {}
+                except json.JSONDecodeError:
+                    rec = {}
+                if rec and self.validate_receipt(incident_id, rec)[0]:
+                    good = True
+            if not good:
                 raise RecoveryError(
-                    "recovery_verified requires root-cause-fixed or "
-                    "verified-fresh-run evidence from the CURRENT "
-                    "occurrence — a cleared symptom or stale evidence is "
-                    "not a verified recovery")
+                    "recovery_verified requires validated root-cause-fixed "
+                    "or verified-fresh-run receipts from the CURRENT "
+                    "occurrence — kinds, stale evidence and cleared "
+                    "symptoms are not verified recovery")
         if to_state == "closed" and cur != "recovery_verified":
             raise RecoveryError("closed only from recovery_verified")
         if to_state == "detected" and cur in ("closed", "recovery_verified"):
@@ -293,25 +302,50 @@ class IncidentStore:
         self.con.commit()  # never leave an implicit txn for shared writers
         return incident_id
 
+    def validate_receipt(self, incident_id: str,
+                         receipt: dict) -> tuple[bool, str]:
+        """A receipt is a resolvable VERIFICATION, not five nonempty
+        strings: scope must reference this incident, observed_at must
+        parse and be fresh, result and method must be substantive."""
+        required = ("source", "scope", "observed_at", "method", "result")
+        missing = [k for k in required if not receipt.get(k)]
+        if missing:
+            return False, f"incomplete receipt: missing {missing}"
+        if incident_id not in str(receipt.get("scope", "")):
+            return False, "receipt scope does not reference this incident"
+        try:
+            from datetime import datetime, timezone
+            ts = datetime.fromisoformat(
+                str(receipt["observed_at"]).replace("Z", "+00:00"))
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            age = utcnow() - ts.timestamp()
+        except ValueError:
+            return False, "receipt observed_at is not a valid timestamp"
+        if age < -3600 or age > 86400 * 2:
+            return False, (f"receipt observed_at is stale/future "
+                           f"({age/3600:.1f}h) — not current evidence")
+        if len(str(receipt["result"])) < 2 or len(str(receipt["method"])) < 2:
+            return False, "receipt method/result are not substantive"
+        return True, "receipt valid"
+
     def resolve(self, incident_id: str, resolution: str,
                 receipt: Optional[dict] = None) -> None:
-        """05C §6: suspected_cause is NEVER copied into verified_cause.
-        verified_cause is written only from an explicit, resolvable
-        receipt (source, scope, observed_at, method, result). Service
-        recovery may be verified while root cause stays unknown."""
-        if receipt is not None:
-            required = ("source", "scope", "observed_at", "method", "result")
-            if not all(receipt.get(k) for k in required):
-                raise RecoveryError(
-                    "verification receipt incomplete — needs "
-                    f"{required}")
+        """05C §4/§6: suspected_cause is NEVER copied into verified_cause.
+        Resolution REQUIRES a validated receipt — without one the
+        incident stays visible in the open view (no silent removal)."""
+        if receipt is None:
+            raise RecoveryError(
+                "resolve() requires a verification receipt — an incident "
+                "without evidence is never removed from the open view")
+        ok, why = self.validate_receipt(incident_id, receipt)
+        if not ok:
+            raise RecoveryError(f"receipt rejected: {why}")
         self.con.execute(
             "UPDATE incidents SET state='resolved', resolution=?, "
             "verified_cause=COALESCE(verified_cause, ?) "
             "WHERE incident_id=? AND project=?",
-            (resolution,
-             (receipt or {}).get("result") if receipt else None,
-             incident_id, self.project))
+            (resolution, receipt.get("result"), incident_id, self.project))
 
     def open_incidents(self) -> list[dict]:
         rows = self.con.execute(

@@ -24,6 +24,102 @@ import time
 from pathlib import Path
 
 from .authorization import AuthRecord, AuthRequest, AuthorizationStore
+
+
+class RehearsalRefusal(Exception):
+    """The supplied target is not a safe rehearsal location."""
+
+
+SAFE_DIR_PREFIX = "rehearsal-"
+
+
+def prepare_workspace(root: Path) -> Path:
+    """05C §1: create a NEW isolated rehearsal child; REFUSE anything
+    that is (or contains) real state — existing director workspaces,
+    repositories, home directories, symlinks — and leave refused targets
+    byte-identical."""
+    root = Path(root)
+    if root.is_symlink():
+        raise RehearsalRefusal(f"symlink refused: {root}")
+    if root.exists():
+        if not root.is_dir():
+            raise RehearsalRefusal(f"not a directory: {root}")
+        entries = list(root.iterdir())
+        names = {e.name for e in entries}
+        if ".git" in names:
+            raise RehearsalRefusal(f"git repository refused: {root}")
+        if "director.db" in names:
+            raise RehearsalRefusal(
+                f"existing director workspace refused: {root}")
+        if ".bashrc" in names or ".zshrc" in names or "Library" in names:
+            raise RehearsalRefusal(f"home-like directory refused: {root}")
+        if any(n.startswith(SAFE_DIR_PREFIX) or n == "rehearsal-report.json"
+               for n in names) and any(
+                   not n.startswith(SAFE_DIR_PREFIX) for n in names):
+            raise RehearsalRefusal(
+                f"mixed/unknown contents refused: {root}")
+        if entries and not all(n.startswith(SAFE_DIR_PREFIX) for n in names):
+            raise RehearsalRefusal(
+                f"non-empty target refused ({len(entries)} entries): {root}")
+    else:
+        root.mkdir(parents=True)
+    child = root / f"{SAFE_DIR_PREFIX}{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
+    child.mkdir()
+    return child
+
+
+class VerifierFixture:
+    """Independent verifier: reads isolated source artifacts and REJECTS
+    report claims that contradict them (a verifier that can say no)."""
+
+    def __init__(self, source_facts: Path):
+        self.facts = json.loads(Path(source_facts).read_text())
+
+    def verify(self, claim: dict) -> dict:
+        bad = []
+        for k, v in claim.items():
+            if k == "claim":
+                continue
+            if k in self.facts and self.facts[k] != v:
+                bad.append(f"{k}: claim {v!r} != source {self.facts[k]!r}")
+        # narrative claims contradicting the facts are rejected too
+        text = str(claim.get("claim", "")).lower()
+        if "junk is zero" in text and self.facts.get("junk_dead_jobs", 0):
+            bad.append("claim says junk is zero; source disagrees")
+        return {"verdict": "reject" if bad else "accept", "reasons": bad}
+
+
+def crash_child(kind: str, ws: str, mid: str, auth_id: str) -> None:
+    """Child that dies at a REAL persistence boundary (05C §5)."""
+    db = ws + "/director.db"
+    if not os.path.exists(db):
+        db = ws + "/d.db"
+    con = sqlite3.connect(db, timeout=30)
+    con.row_factory = sqlite3.Row
+    apdir = Path(ws) / "approvals"
+    st = AuthorizationStore(con, approvals_dir=apdir,
+                            operator_uid=os.getuid(),
+                            service_uid=os.getuid() + 1,
+                            test_identities=True)
+    pol = DeliveryPolicy(outbox_root=Path(ws) / "inbox")
+    mb = MailboxDelivery(con, pol, authorizations=st,
+                         project="proj-a", mode="test-delivery",
+                         transport_name="nas-inbox")
+    if kind == "before-reserve-commit":
+        real = st.reserve
+        def dying(cur, auth_id_, request):
+            real(cur, auth_id_, request)
+            os._exit(9)
+        st.reserve = dying
+    elif kind == "after-commit-before-write":
+        orig = mb._envelope
+        def die_env(_mid):
+            os._exit(9)
+        mb._envelope = die_env
+    elif kind == "after-write-before-sent":
+        os.environ["DIRECTOR_FAILPOINT"] = "after-write-before-sent"
+    mb.deliver(mid, auth_id=auth_id, assignment_epoch=1)
+    os._exit(0)
 from .context import ContextCompiler
 from .continuity import FactoryContinuity
 from .incidents import IncidentStore, RecoveryError, load_correlations
@@ -115,17 +211,14 @@ def _crash_child(kind: str, ws: str, mid: str):
             def die_env(mid):
                 os._exit(9)
             mb._envelope = die_env
-        mb.deliver(mid, auth_id="A1")
+        mb.deliver(mid, auth_id="A1", assignment_epoch=1)
     except SystemExit:
         pass
     os._exit(0)
 
 
 def run_rehearsal(workspace: Path) -> dict:
-    ws = Path(workspace)
-    if ws.exists():
-        shutil.rmtree(ws)
-    ws.mkdir(parents=True)
+    ws = prepare_workspace(Path(workspace))
     report = {"mode": "observe+test-delivery(isolated)", "cases": {},
               "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
@@ -294,7 +387,7 @@ def run_rehearsal(workspace: Path) -> dict:
                          transport_name="isolated-rehearsal-transport")
     mid = mb.propose("agent-proj-a", "question", "supply investigation",
                      "investigate supply", correlation_id="SUPPLY-RECON-01")
-    st = mb.deliver(mid, auth_id="A1")
+    st = mb.deliver(mid, auth_id="A1", assignment_epoch=1)
     arts = list((ws / "receiver-inbox").rglob("*.md"))
     acc = receiver.accept(arts[0], mid) if arts else "missing"
     dup = receiver.accept(arts[0], mid) if arts else "-"
@@ -306,7 +399,7 @@ def run_rehearsal(workspace: Path) -> dict:
 
     # ---------- B. same grant cannot fund a second action (D) ----------
     try:
-        reused = mb.deliver(mid, auth_id="A1")   # idempotent retry
+        reused = mb.deliver(mid, auth_id="A1", assignment_epoch=1)   # idempotent retry
     except DeliveryDisabled as e:
         reused = f"refused: {e}"
     other = mb.propose("agent-proj-a", "question", "different",
@@ -323,7 +416,7 @@ def run_rehearsal(workspace: Path) -> dict:
                     f"action)"}
 
     # ---------- session-verified ack (J/K/L) ----------
-    from .consumer import UidTransport
+    from .messaging import SessionTokenTransport
     bindings = {("proj-a", "SUPPLY-RECON-01", 1): "ses-owner"}
     good_env = {"ack_of": mid, "project": "proj-a",
                 "task_ref": "SUPPLY-RECON-01", "epoch": 1,
@@ -333,17 +426,19 @@ def run_rehearsal(workspace: Path) -> dict:
     fake.write_text("ack")
     os.chmod(fake, 0o644)
     wrong = mb.record_ack(mid, from_agent="agent-proj-a",
-                          transport=UidTransport({"agent-proj-a": os.getuid()}),
+                          transport=SessionTokenTransport(
+                              {str(fake): "ses-other"}),
                           artifact_path=fake,
-                          envelope={**good_env, "session_id": "ses-other"},
+                          envelope=good_env,
                           session_bindings=bindings)
     right = mb.record_ack(mid, from_agent="agent-proj-a",
-                          transport=UidTransport({"agent-proj-a": os.getuid()}),
+                          transport=SessionTokenTransport(
+                              {str(fake): "ses-owner"}),
                           artifact_path=fake, envelope=good_env,
                           session_bindings=bindings)
     forged = mb.record_ack(mid, from_agent="agent-proj-a",
-                           transport=UidTransport(
-                               {"agent-proj-a": os.getuid() + 5}),
+                           transport=SessionTokenTransport(
+                               {str(fake): "ses-evil"}),
                            artifact_path=fake,
                            envelope={**good_env, "message_digest": "x"},
                            session_bindings=bindings)
@@ -367,7 +462,14 @@ def run_rehearsal(workspace: Path) -> dict:
                                evidence="report: admission worker never "
                                         "admitted manifest rows")
     # independent verifier fixture: deterministic checks on the report
-    verifier_ok = "admission" in "report: admission worker never admitted"
+    src = ws / "source-facts.json"
+    src.write_text(json.dumps({"junk_dead_jobs": m.junk_dead_jobs}))
+    vf = VerifierFixture(src)
+    report_ok = vf.verify({"claim": "admission worker never admitted",
+                           "junk_dead_jobs": m.junk_dead_jobs})["verdict"] \
+        == "accept"
+    reject_ok = vf.verify({"claim": "junk is zero"})["verdict"] == "reject"
+    verifier_ok = report_ok and reject_ok
     tasks["proj-a"].transition("SUPPLY-RECON-01", "verified",
                                actor="verifier-fixture",
                                evidence="independent check of report claims")
@@ -391,9 +493,12 @@ def run_rehearsal(workspace: Path) -> dict:
             trigger_key="reh-1"))
     report["cases"]["N_old_evidence_cannot_close_recurrence"] = {
         "pass": True, "evidence": "pending recurrence test below"}
+    _now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    _receipt = {"source": "jobs-table", "scope": f"incident:{iid}",
+                "observed_at": _now, "method": "delivery scan",
+                "result": "recovered-clean"}
     incidents["proj-a"].mark_recovery_evidence(iid, "root-cause-fixed",
-        "old occurrence fix", receipt={"source": "s", "scope": "o",
-        "observed_at": "t", "method": "m", "result": "r"})
+        "old occurrence fix", receipt=_receipt)
     for to in ("investigating", "mitigation_proposed", "repair_in_progress",
                "recovery_observed"):
         incidents["proj-a"].lifecycle_transition(iid, to, "director", "e")
@@ -411,6 +516,26 @@ def run_rehearsal(workspace: Path) -> dict:
     except RecoveryError:
         n_pass = True
     report["cases"]["N_old_evidence_cannot_close_recurrence"]["pass"] = n_pass
+
+    # ---------- H. accepted but ack lost: receiver reconciliation ----------
+    mid_h = mb.propose("agent-proj-a", "status", "lost-ack", "lost-ack-body",
+                       correlation_id="SUPPLY-RECON-01")
+    _mk_approval(apdir, "A1", project="proj-a", action="deliver",
+                 recipient="agent-proj-a", task_ref="SUPPLY-RECON-01",
+                 expires_at=time.time() + 3600, issuer="sam",
+                 payload_digest=fp("msg-body", "lost-ack-body"))
+    mb.deliver(mid_h, auth_id="A1", assignment_epoch=1)
+    art_h = next((ws / "receiver-inbox").rglob(f"*{mid_h}*.md"))
+    receiver.accept(art_h, mid_h)   # receiver takes the work; ack is LOST
+    settled = mb.reconcile_with_receiver(receiver)
+    state_h = mb.con.execute(
+        "SELECT state FROM messages WHERE message_id=?",
+        (mid_h,)).fetchone()[0]
+    report["cases"]["H_lost_ack_receiver_reconciliation"] = {
+        "pass": mid_h in settled and state_h == "acked"
+                and len(receiver.receipts()) == len(set(receiver.receipts())),
+        "evidence": f"settled={mid_h in settled} state={state_h}; "
+                    f"no resend (acceptances unique)"}
 
     # ---------- E/F/G real process interruption ----------
     for kind, case in (("before-reserve-commit", "E"),
@@ -433,7 +558,7 @@ def run_rehearsal(workspace: Path) -> dict:
         proc.wait(timeout=60)
         before = len(list((ws / "receiver-inbox").rglob(f"*{mid2}*.md")))
         # restart: the same approval must complete the action (no new grant)
-        st2 = mb.deliver(mid2, auth_id="A1")
+        st2 = mb.deliver(mid2, auth_id="A1", assignment_epoch=1)
         after = len(list((ws / "receiver-inbox").rglob(f"*{mid2}*.md")))
         report["cases"][f"{case}_crash_recovery"] = {
             "pass": st2 in ("sent",) and after == 1 and before <= 1,
@@ -475,7 +600,7 @@ def run_rehearsal(workspace: Path) -> dict:
                  expires_at=time.time() + 3600, issuer="sam",
                  payload_digest=fp("msg-body", "nas-body"))
     try:
-        mbm.deliver(mid4, auth_id="A1")
+        mbm.deliver(mid4, auth_id="A1", assignment_epoch=1)
         nas = "delivered"
     except DeliveryDisabled as e:
         nas = f"refused: {e}"
@@ -508,7 +633,7 @@ def run_rehearsal(workspace: Path) -> dict:
                              mode="observe", authorizations=authz)
     mid5 = mb_obs.propose("agent-proj-a", "status", "obs", "obs-body")
     try:
-        mb_obs.deliver(mid5, auth_id="A1")
+        mb_obs.deliver(mid5, auth_id="A1", assignment_epoch=1)
         obs = "delivered"
     except DeliveryDisabled:
         obs = "refused (observe)"
@@ -552,13 +677,29 @@ def run_rehearsal(workspace: Path) -> dict:
         "evidence": "ingestion path independent of models; metered providers "
                     "are refused by policy blocklist regardless"}
 
-    passed = sum(1 for v in report["cases"].values() if v.get("pass"))
+    def _status(v):
+        if v.get("pass") is True:
+            return "PASS"
+        if v.get("pass") == "partial":
+            return "PARTIAL"
+        if v.get("pass") == "not-run":
+            return "NOT RUN"
+        return "FAIL"
+    for k, v in report["cases"].items():
+        v["status"] = _status(v)
+    counts = {}
+    for v in report["cases"].values():
+        counts[v["status"]] = counts.get(v["status"], 0) + 1
     report["summary"] = {
         "cases": len(report["cases"]),
-        "passed": passed,
-        "failed": len(report["cases"]) - passed,
-        "software_acceptance": "PASS" if passed == len(report["cases"])
-                               else "FAIL",
+        "passed": counts.get("PASS", 0),
+        "partial": counts.get("PARTIAL", 0),
+        "not_run": counts.get("NOT RUN", 0),
+        "failed": counts.get("FAIL", 0),
+        "software_acceptance": ("PASS" if counts.get("FAIL", 0) == 0 and
+                                counts.get("PARTIAL", 0) == 0 else
+                                "PARTIAL" if counts.get("FAIL", 0) == 0 else
+                                "FAIL"),
         "host_commissioning": "NOT RUN (Ryzen host checks pending)",
         "live_communication": "DISABLED (see DIRECTOR-06-GATE.md)"}
     (ws / "rehearsal-report.json").write_text(json.dumps(report, indent=1))
