@@ -62,6 +62,7 @@ class ContinuityMeasurements:
     coverage_target_h: float = 24.0
     notes: list[str] = field(default_factory=list)
     evidence: list[str] = field(default_factory=list)
+    measurement_meta: dict = field(default_factory=dict)
 
 
 class FactoryContinuity:
@@ -120,9 +121,13 @@ class FactoryContinuity:
         try:
             m.substrate_pending = _scalar(
                 con, "SELECT COUNT(*) FROM jobs WHERE state='pending'")
+            # 05C §8-T: AppleDouble = literal basename prefix '._'.
+            # GLOB treats '_' literally (LIKE treats it as a wildcard and
+            # would count ordinary 'file._v2.pdf'-style names).
             junk = _scalar(con, (
                 "SELECT COUNT(*) FROM jobs WHERE state='dead' "
-                "AND (corpus_key LIKE '%._%' OR source_path LIKE '%._%')"))
+                "AND (source_path GLOB '*/._*' "
+                "OR corpus_key GLOB 'pdf:._*')"))
             m.junk_dead_jobs = junk if junk is not None else "unknown"
             m.evidence.append(f"{self.pipeline_db}:jobs")
         finally:
@@ -268,6 +273,42 @@ class FactoryContinuity:
         self._measure_ledgers(m, observations)
         self._measure_intake(m)
         self._measure_classes(m)
+        now = utcnow()
+        m.measurement_meta = {
+            "ready_backlog_docs": {
+                "source": "factory_chunks+jobs", "observed_at": now,
+                "lane": "execution-queues", "unit": "documents",
+                "population": "queued work items",
+                "completeness": ("complete" if isinstance(
+                    m.ready_backlog_docs, int) else "incomplete")},
+            "junk_dead_jobs": {
+                "source": "jobs(dead, basename-prefix ._)", "observed_at": now,
+                "lane": "substrate-queue", "unit": "jobs",
+                "population": "dead letters",
+                "completeness": "complete",
+                "note": "jobs are NOT documents; AppleDouble = literal "
+                        "basename prefix '._'"},
+            "consumption_rate_docs_hr": {
+                "source": "facet done-*.txt growth", "observed_at": now,
+                "lane": "facet-passes", "unit": "docs/hour",
+                "population": "documents touched by any facet pass",
+                "completeness": ("complete" if isinstance(
+                    m.consumption_rate_docs_hr, (int, float))
+                    else "incomplete")},
+            "worker_hours_estimate": {
+                "source": "L0 class join + class-costs.json",
+                "observed_at": now, "lane": "planning",
+                "unit": "worker-hours (not CPU-core-hours, not elapsed)",
+                "population": "class-mapped backlog docs only",
+                "completeness": "partial"},
+            "starvation_hours": {
+                "source": "backlog/consumption", "observed_at": now,
+                "lane": "planning", "unit": "hours",
+                "basis": m.starvation_basis,
+                "completeness": ("complete" if m.starvation_basis in
+                                 ("measured", "backlog-zero")
+                                 else "incomplete")},
+        }
         # ready backlog = known queue parts only
         parts = [x for x in (m.rust_queued, m.substrate_pending)
                  if isinstance(x, int)]
@@ -282,8 +323,19 @@ class FactoryContinuity:
             m.notes.append("starvation UNKNOWN: queues temporarily "
                            "unavailable (NOT evidence of starvation)")
         elif m.ready_backlog_docs == 0:
-            m.starvation_hours = 0.0
-            m.starvation_basis = "backlog-zero"
+            eligible = sum(m.ready_by_class.values()) if m.ready_by_class else 0
+            if eligible > 0:
+                # §8: an empty inspected queue with eligible inventory
+                # elsewhere is NOT proven starvation — it may be an
+                # admission gap OR a different execution lane
+                m.starvation_basis = "insufficient-evidence"
+                m.notes.append(
+                    f"insufficient evidence to distinguish admission "
+                    f"failure from a different execution lane "
+                    f"({eligible} eligible docs outside the inspected queue)")
+            else:
+                m.starvation_hours = 0.0
+                m.starvation_basis = "backlog-zero"
         elif isinstance(m.consumption_rate_docs_hr, (int, float)) and \
                 m.consumption_rate_docs_hr > 0:
             m.starvation_hours = round(

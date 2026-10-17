@@ -147,7 +147,7 @@ def test_failed_verification_returns_to_active(tmp_path):
 def test_delivery_gate_closed_by_default(tmp_path):
     con = _db(tmp_path)
     pol = DeliveryPolicy.load(None, tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol)
+    mb = MailboxDelivery(con, pol, mode="test-delivery")
     mid = mb.propose("m5-opencode", "question", "q", "body")
     with pytest.raises(DeliveryDisabled):
         mb.deliver(mid)
@@ -164,7 +164,8 @@ def _store_backed_delivery(tmp_path, con):
     apdir.mkdir(exist_ok=True)
     ast = AuthorizationStore(con, approvals_dir=apdir,
                              operator_uid=os.getuid(),
-                             service_uid=os.getuid() + 1)
+                             service_uid=os.getuid() + 1,
+                             test_identities=True)
     return ast
 
 
@@ -177,9 +178,11 @@ def test_delivery_and_ack_are_distinct(tmp_path):
     apdir.mkdir(exist_ok=True)
     ast = AuthorizationStore(con, approvals_dir=apdir,
                              operator_uid=os.getuid(),
-                             service_uid=os.getuid() + 1)
+                             service_uid=os.getuid() + 1,
+                             test_identities=True)
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol, authorizations=ast)
+    mb = MailboxDelivery(con, pol, authorizations=ast,
+                         mode="test-delivery")
     body = "body here"
     mid = mb.propose("m5-opencode", "question", "q", body,
                      correlation_id="T-ACK")
@@ -199,13 +202,25 @@ def test_delivery_and_ack_are_distinct(tmp_path):
     snap = mb.snapshot()[0]
     assert snap["state"] == "sent" and snap["acked_at"] is None, \
         "delivery is never acknowledgment"
+    from director_consumer.schema import fp as _fp
+    env = {"ack_of": mid, "project": "default", "task_ref": "T-ACK",
+           "epoch": 1, "session_id": "ses-1",
+           "message_digest": _fp("msg-body", "body here")}
+    bindings = {("default", "T-ACK", 1): "ses-1"}
     # unattributable ack text is evidence, NOT acceptance...
     assert mb.record_ack(mid, ack_body="looking into it",
-                         from_agent="someone-else") == "ack-unverified"
-    # ...only a verified sender matching the recipient is acceptance
+                         from_agent="someone-else",
+                         envelope=env, session_bindings=bindings
+                         ) == "ack-unverified"
+    # ...only an envelope-matching, transport-attributed origin is
+    # acceptance (caller-declared flags prove nothing)
+    class _T:
+        def verify(self, agent, path):
+            return True
     assert mb.record_ack(mid, ack_body="looking into it",
                          from_agent="m5-opencode",
-                         verified_sender=True) == "acked"
+                         transport=_T(), artifact_path=mid and __file__,
+                         envelope=env, session_bindings=bindings) == "acked"
     assert mb.snapshot()[0]["state"] == "acked"
 
 
@@ -218,9 +233,11 @@ def test_duplicate_delivery_idempotent(tmp_path):
     apdir.mkdir(exist_ok=True)
     ast = AuthorizationStore(con, approvals_dir=apdir,
                              operator_uid=os.getuid(),
-                             service_uid=os.getuid() + 1)
+                             service_uid=os.getuid() + 1,
+                             test_identities=True)
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol, authorizations=ast)
+    mb = MailboxDelivery(con, pol, authorizations=ast,
+                         mode="test-delivery")
     body = "body"
     mid = mb.propose("m5-opencode", "question", "q", body,
                      correlation_id="T-DUP")
@@ -253,9 +270,11 @@ def test_delivery_without_ack_expires_and_escalates(tmp_path):
     apdir.mkdir(exist_ok=True)
     ast = AuthorizationStore(con, approvals_dir=apdir,
                              operator_uid=os.getuid(),
-                             service_uid=os.getuid() + 1)
+                             service_uid=os.getuid() + 1,
+                             test_identities=True)
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol, authorizations=ast)
+    mb = MailboxDelivery(con, pol, authorizations=ast,
+                         mode="test-delivery")
     body = "body"
     mid = mb.propose("m5-opencode", "question", "q", body, ttl_s=-1,
                      correlation_id="T-EXP")
@@ -286,9 +305,11 @@ def test_crash_between_commit_and_delivery_recovers(tmp_path):
     apdir.mkdir(exist_ok=True)
     ast = AuthorizationStore(con, approvals_dir=apdir,
                              operator_uid=os.getuid(),
-                             service_uid=os.getuid() + 1)
+                             service_uid=os.getuid() + 1,
+                             test_identities=True)
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol, authorizations=ast)
+    mb = MailboxDelivery(con, pol, authorizations=ast,
+                         mode="test-delivery")
     body = "body"
     mid = mb.propose("m5-opencode", "status", "s", body,
                      correlation_id="T-REC")
@@ -490,14 +511,16 @@ def test_restart_and_replay_no_duplicate_messages(tmp_path):
     os.chmod(f, 0o640)
     ast = AuthorizationStore(con, approvals_dir=apdir,
                              operator_uid=os.getuid(),
-                             service_uid=os.getuid() + 1)
+                             service_uid=os.getuid() + 1,
+                             test_identities=True)
     ast.issue(AuthRecord(auth_id="A-RR", project="default",
                          action="deliver", recipient="m5-opencode",
                          task_ref="T-RR",
                          expires_at=time.time() + 3600, issuer="sam",
                          payload_digest=fp("msg-body", body)))
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol, authorizations=ast)
+    mb = MailboxDelivery(con, pol, authorizations=ast,
+                         mode="test-delivery")
     mid = mb.propose("m5-opencode", "question", "q", body,
                      correlation_id="T-RR")
     con.close()
@@ -505,8 +528,10 @@ def test_restart_and_replay_no_duplicate_messages(tmp_path):
     con2 = _db(tmp_path)
     ast2 = AuthorizationStore(con2, approvals_dir=apdir,
                               operator_uid=os.getuid(),
-                              service_uid=os.getuid() + 1)
-    mb2 = MailboxDelivery(con2, pol, authorizations=ast2)
+                              service_uid=os.getuid() + 1,
+                              test_identities=True)
+    mb2 = MailboxDelivery(con2, pol, authorizations=ast2,
+                          mode="test-delivery")
     mid2 = mb2.propose("m5-opencode", "question", "q", body,
                        correlation_id="T-RR")  # same id
     assert mid == mid2

@@ -65,6 +65,8 @@ class ProjectSpec:
     evidence: list = field(default_factory=list)
     human_authority: str = "sam"
     lifecycle: str = "active"
+    shared_sources: list = field(default_factory=list)   # 05C §7: private
+                                                         # by default
 
 
 class ProjectRegistry:
@@ -150,4 +152,5 @@ def load_spec_from_config(project_dir: Path) -> ProjectSpec:
         policy_version=cfg.get("policy_version", ""),
         config_digest=digest,
         evidence=[f"config:{f.name}" for f in digest_files],
-        human_authority=cfg.get("human_authority", "sam"))
+        human_authority=cfg.get("human_authority", "sam"),
+        shared_sources=cfg.get("shared_sources", []))

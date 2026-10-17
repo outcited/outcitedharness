@@ -103,8 +103,8 @@ def test_messages_and_incidents_scoped(tmp_path):
                                              MailboxDelivery)
     con = _con(tmp_path)
     pol = DeliveryPolicy(enabled=False)
-    ma = MailboxDelivery(con, pol, project="alpha")
-    mb = MailboxDelivery(con, pol, project="beta")
+    ma = MailboxDelivery(con, pol, project="alpha", mode="test-delivery")
+    mb = MailboxDelivery(con, pol, project="beta", mode="test-delivery")
     ida = ma.propose("agent-x", "question", "q", "same body")
     idb = mb.propose("agent-x", "question", "q", "same body")
     assert ida == idb  # identical content, identical local id
@@ -273,7 +273,7 @@ def _auth_store(tmp_path, auth_id=None, record=None):
     apdir.mkdir(exist_ok=True)
     st = AuthorizationStore(_con(tmp_path), approvals_dir=apdir,
                             operator_uid=os.getuid(),
-                            service_uid=os.getuid() + 1)
+                            service_uid=os.getuid() + 1, test_identities=True)
     if auth_id and record:
         f = apdir / f"{auth_id}.json"
         f.write_text(json.dumps({
@@ -501,10 +501,10 @@ def test_project_b_end_to_end(tmp_path):
     # and designwins work in the same db stays invisible to proj-b
     from director_consumer.messaging import DeliveryPolicy, MailboxDelivery
     mb = MailboxDelivery(con, DeliveryPolicy(enabled=False),
-                         project="designwins")
+                         project="designwins", mode="test-delivery")
     mb.propose("m5-opencode", "question", "q", "designwins private body")
     mb_b = MailboxDelivery(con, DeliveryPolicy(enabled=False),
-                           project="proj-b")
+                           project="proj-b", mode="test-delivery")
     assert mb_b.snapshot() == [], "project B never sees project A mail"
 
 

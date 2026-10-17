@@ -109,16 +109,52 @@ class AuthRecord:
     revoked: bool = False
 
 
+@dataclass
+class ActionEnvelope:
+    """Canonical versioned action envelope (05C §3). One approval binds
+    EVERY consequential field — body-only approval is not a thing."""
+    envelope_version: str = "1"
+    project: str = ""
+    objective_ref: str = ""
+    task_ref: str = ""
+    incident_ref: str = ""
+    assignment_epoch: int = 0
+    action_id: str = ""
+    sender: str = ""
+    recipient: str = ""
+    session_binding: str = ""
+    msg_type: str = ""
+    subject: str = ""
+    body_digest: str = ""
+    transport: str = ""
+    expires_at: float = 0.0
+    spend_scope: str = "none"
+    max_actions: int = 1
+    approval_id: str = ""
+    issuer: str = ""
+
+
 class AuthorizationStore:
     def __init__(self, con, approvals_dir: Optional[Path] = None,
                  operator_uid: Optional[int] = None,
-                 service_uid: Optional[int] = None):
+                 service_uid: Optional[int] = None,
+                 test_identities: bool = False):
         self.con = con
         self.approvals_dir = Path(approvals_dir) if approvals_dir else None
-        self.operator_uid = operator_uid if operator_uid is not None \
-            else os.getuid()
-        self.service_uid = service_uid if service_uid is not None \
-            else os.getuid()
+        # 05C §3: service identity comes from the ACTUAL process; the
+        # operator identity comes from protected deployment config.
+        # Caller-supplied uid values are honored ONLY when explicitly
+        # labeled as test doubles — never as production proof.
+        self.test_identities = test_identities
+        if test_identities:
+            self.service_uid = service_uid if service_uid is not None \
+                else os.getuid()
+            self.operator_uid = operator_uid if operator_uid is not None \
+                else os.getuid()
+        else:
+            self.service_uid = os.getuid()     # the real running process
+            self.operator_uid = operator_uid if operator_uid is not None \
+                else -1                        # unset operator: fail closed
         con.executescript(SCHEMA)
 
     # ---- protected artifact access ----
@@ -204,6 +240,28 @@ class AuthorizationStore:
         self.con.commit()
         return record.auth_id
 
+    def reserve(self, cur, auth_id: str, request: AuthRequest) -> tuple[bool, str]:
+        """D2 fix: grant reservation INSIDE the caller's transaction.
+        The nonce row and any state change commit (or roll back) together
+        with the delivery intent — a crash cannot consume a grant without
+        leaving a resumable action, and cannot leave intent without a
+        validated grant."""
+        ok, why = self.check(auth_id, request, consume=False)
+        if not ok:
+            return False, why
+        if request.nonce:
+            prev = cur.execute(
+                "SELECT payload_digest FROM auth_nonces WHERE nonce=?",
+                (request.nonce,)).fetchone()
+            if prev is not None:
+                return False, "replay rejected (nonce already used)"
+            cur.execute(
+                "INSERT INTO auth_nonces(nonce, project, auth_id, "
+                "payload_digest, used_at) VALUES (?,?,?,?,?)",
+                (request.nonce, request.project, auth_id,
+                 request.payload_digest, utcnow()))
+        return True, "reserved"
+
     def revoke(self, project: str, auth_id: str) -> None:
         self.con.execute(
             "UPDATE authorizations SET revoked=1 WHERE auth_id=? AND "
@@ -212,7 +270,8 @@ class AuthorizationStore:
 
     # ---- enforcement ----
 
-    def check(self, auth_id: str, request: AuthRequest) -> tuple[bool, str]:
+    def check(self, auth_id: str, request: AuthRequest,
+              consume: bool = True) -> tuple[bool, str]:
         row = self.con.execute(
             "SELECT * FROM authorizations WHERE auth_id=?",
             (auth_id,)).fetchone()
@@ -256,14 +315,11 @@ class AuthorizationStore:
                 request.payload_digest != data["payload_digest"]:
             return False, "payload digest mismatch (approval bound to a " \
                           "different message)"
-        if request.nonce:
+        if request.nonce and consume:
             prev = self.con.execute(
                 "SELECT payload_digest FROM auth_nonces WHERE nonce=?",
                 (request.nonce,)).fetchone()
             if prev is not None:
-                # one-time authorization: any re-check is a replay.
-                # Retrying an already-authorized action never re-enters
-                # check() (deliver() completes 'delivering' directly).
                 return False, "replay rejected (nonce already used)"
             try:
                 self.con.execute(

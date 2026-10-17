@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS incidents (
     resolution TEXT,
     reopen_count INTEGER NOT NULL DEFAULT 0,
     lifecycle_state TEXT NOT NULL DEFAULT 'detected',
+    occurrence INTEGER NOT NULL DEFAULT 1,
+    verified_cause_policy TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (project, incident_id)
 );
 CREATE TABLE IF NOT EXISTS incident_events (
@@ -53,10 +55,12 @@ CREATE TABLE IF NOT EXISTS incident_recovery (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     incident_id TEXT NOT NULL,
     project TEXT NOT NULL DEFAULT 'default',
+    occurrence INTEGER NOT NULL DEFAULT 1,
     ts REAL NOT NULL,
     kind TEXT NOT NULL,        -- symptom-clear | root-cause-fixed |
                                -- fix-deployed | verified-fresh-run
-    detail TEXT NOT NULL
+    detail TEXT NOT NULL,
+    receipt TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_inc_events ON incident_events(incident_id);
 CREATE INDEX IF NOT EXISTS idx_inc_open ON incidents(state);
@@ -132,14 +136,20 @@ class IncidentStore:
     # ---- recovery lifecycle (§4) ----
 
     def mark_recovery_evidence(self, incident_id: str, kind: str,
-                               detail: str) -> None:
+                               detail: str,
+                               receipt: Optional[dict] = None) -> None:
         if kind not in ("symptom-clear", "root-cause-fixed",
                         "fix-deployed", "verified-fresh-run"):
             raise RecoveryError(f"unknown evidence kind {kind!r}")
+        row = self.con.execute(
+            "SELECT occurrence FROM incidents WHERE incident_id=? "
+            "AND project=?", (incident_id, self.project)).fetchone()
+        occ = row[0] if row else 1
         self.con.execute(
-            "INSERT INTO incident_recovery(incident_id, project, ts, kind, "
-            "detail) VALUES (?,?,?,?,?)",
-            (incident_id, self.project, utcnow(), kind, detail))
+            "INSERT INTO incident_recovery(incident_id, project, "
+            "occurrence, ts, kind, detail, receipt) VALUES (?,?,?,?,?,?,?)",
+            (incident_id, self.project, occ, utcnow(), kind, detail,
+             json.dumps(receipt) if receipt else ""))
         self.con.commit()
 
     def lifecycle_transition(self, incident_id: str, to_state: str,
@@ -159,16 +169,30 @@ class IncidentStore:
             raise RecoveryError(f"{cur} -> {to_state} is not a legal "
                                 f"lifecycle transition")
         if to_state == "recovery_verified":
-            kinds = {r[0] for r in self.con.execute(
-                "SELECT kind FROM incident_recovery WHERE incident_id=? "
-                "AND project=?", (incident_id, self.project))}
+            occ_row = self.con.execute(
+                "SELECT occurrence FROM incidents WHERE incident_id=? "
+                "AND project=?", (incident_id, self.project)).fetchone()
+            occ = occ_row[0] if occ_row else 1
+            rows = self.con.execute(
+                "SELECT kind, receipt FROM incident_recovery "
+                "WHERE incident_id=? AND project=? AND occurrence=?",
+                (incident_id, self.project, occ)).fetchall()
+            # evidence from an OLDER occurrence never closes a recurrence
+            kinds = {r[0] for r in rows}
             if not (kinds & {"root-cause-fixed", "verified-fresh-run"}):
                 raise RecoveryError(
                     "recovery_verified requires root-cause-fixed or "
-                    "verified-fresh-run evidence — a cleared symptom is "
+                    "verified-fresh-run evidence from the CURRENT "
+                    "occurrence — a cleared symptom or stale evidence is "
                     "not a verified recovery")
         if to_state == "closed" and cur != "recovery_verified":
             raise RecoveryError("closed only from recovery_verified")
+        if to_state == "detected" and cur in ("closed", "recovery_verified"):
+            # recurrence: new occurrence freezes older evidence
+            self.con.execute(
+                "UPDATE incidents SET occurrence=occurrence+1 "
+                "WHERE incident_id=? AND project=?",
+                (incident_id, self.project))
         self.con.execute(
             "UPDATE incidents SET lifecycle_state=? WHERE incident_id=? "
             "AND project=?", (to_state, incident_id, self.project))
@@ -231,9 +255,10 @@ class IncidentStore:
             new_sev = _worst(row[2], a.severity)
             self.con.execute(
                 "UPDATE incidents SET last_seen=?, severity=?, "
-                "state='open', reopen_count=reopen_count+? "
-                "WHERE incident_id=?",
-                (now, new_sev, 1 if reopened else 0, incident_id))
+                "state='open', reopen_count=reopen_count+?, "
+                "occurrence=occurrence+? WHERE incident_id=?",
+                (now, new_sev, 1 if reopened else 0,
+                 1 if reopened else 0, incident_id))
             rules = set(json.loads(
                 self.con.execute("SELECT related_rules FROM incidents "
                                  "WHERE incident_id=? AND project=?",
@@ -268,14 +293,25 @@ class IncidentStore:
         self.con.commit()  # never leave an implicit txn for shared writers
         return incident_id
 
-    def resolve(self, incident_id: str, resolution: str) -> None:
-        """Verified recovery — in observe mode only from replayed
-        resolution evidence, never from a model opinion."""
+    def resolve(self, incident_id: str, resolution: str,
+                receipt: Optional[dict] = None) -> None:
+        """05C §6: suspected_cause is NEVER copied into verified_cause.
+        verified_cause is written only from an explicit, resolvable
+        receipt (source, scope, observed_at, method, result). Service
+        recovery may be verified while root cause stays unknown."""
+        if receipt is not None:
+            required = ("source", "scope", "observed_at", "method", "result")
+            if not all(receipt.get(k) for k in required):
+                raise RecoveryError(
+                    "verification receipt incomplete — needs "
+                    f"{required}")
         self.con.execute(
             "UPDATE incidents SET state='resolved', resolution=?, "
-            "verified_cause=COALESCE(verified_cause, suspected_cause) "
+            "verified_cause=COALESCE(verified_cause, ?) "
             "WHERE incident_id=? AND project=?",
-            (resolution, incident_id, self.project))
+            (resolution,
+             (receipt or {}).get("result") if receipt else None,
+             incident_id, self.project))
 
     def open_incidents(self) -> list[dict]:
         rows = self.con.execute(

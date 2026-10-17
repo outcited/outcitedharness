@@ -51,7 +51,19 @@ def main(argv=None) -> int:
     reg.add_argument("--workspace", required=True)
     reg.add_argument("--project-dir", required=True)
 
+    reh = sub.add_parser("rehearse")
+    reh.add_argument("--workspace", required=True)
+
     a = ap.parse_args(argv)
+    if a.cmd == "rehearse":
+        from .rehearse import run_rehearsal
+        rep = run_rehearsal(Path(a.workspace))
+        print(json.dumps(rep["summary"], indent=1))
+        failed = [k for k, v in rep["cases"].items() if not v.get("pass")]
+        if failed:
+            print("FAILED CASES:", failed, file=sys.stderr)
+            return 1
+        return 0
     if a.cmd == "register-project":
         from .projects import ProjectRegistry, load_spec_from_config
         from .state import DirectorState

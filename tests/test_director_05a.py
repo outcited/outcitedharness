@@ -207,7 +207,8 @@ def test_digest_bound_authorization_refuses_other_message(tmp_path):
     ast = AuthorizationStore(sqlite3.connect(tmp_path / "d.db"),
                              approvals_dir=apdir,
                              operator_uid=os.getuid(),
-                             service_uid=os.getuid() + 1)
+                             service_uid=os.getuid() + 1,
+                             test_identities=True)
     body = "the one approved message"
     f = apdir / "M1.json"
     f.write_text(json.dumps({
@@ -220,8 +221,10 @@ def test_digest_bound_authorization_refuses_other_message(tmp_path):
                          expires_at=time.time() + 3600, issuer="sam",
                          payload_digest=fp("msg-body", body)))
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(sqlite3.connect(tmp_path / "d2.db"), pol,
-                         project="alpha", authorizations=ast)
+    # single-transaction law: store and delivery share one connection
+    mb = MailboxDelivery(ast.con, pol,
+                         project="alpha", authorizations=ast,
+                         mode="test-delivery")
     good = mb.propose("agent-x", "question", "q", body,
                       correlation_id="T-1")
     assert mb.deliver(good, auth_id="M1") == "sent"
@@ -240,7 +243,8 @@ def test_approval_file_permissions_enforced(tmp_path):
     st = AuthorizationStore(sqlite3.connect(tmp_path / "d.db"),
                             approvals_dir=apdir,
                             operator_uid=os.getuid(),
-                            service_uid=os.getuid() + 1)
+                            service_uid=os.getuid() + 1,
+                            test_identities=True)
     f = apdir / "A1.json"
     f.write_text(json.dumps({
         "project": "alpha", "action": "reason", "recipient": "x",

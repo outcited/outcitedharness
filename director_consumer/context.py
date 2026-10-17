@@ -92,12 +92,17 @@ def parse_decisions(path: Path) -> dict[str, dict]:
 class ContextCompiler:
     def __init__(self, repo_root: Path, project_dir: Optional[Path] = None,
                  decisions_path: Optional[Path] = None,
-                 mailbox_root: Optional[Path] = None):
+                 mailbox_root: Optional[Path] = None,
+                 shared_sources: Optional[set] = None):
         self.repo = Path(repo_root)
         self.project_dir = Path(project_dir) if project_dir else None
         self.decisions = Path(decisions_path) if decisions_path else \
             self.repo / "docs/DECISIONS.md"
-        self.mailbox = Path(mailbox_root) if mailbox_root else None
+        # 05C §7: source visibility is PRIVATE by default. Sharing comes
+        # from per-project operator configuration, never engine policy.
+        self.shared = set(shared_sources or [])
+        self.mailbox = Path(mailbox_root) if mailbox_root and \
+            "agentmail" in self.shared else None
 
     def _terms(self, query: str) -> list[str]:
         return [t for t in re.split(r"[^a-z0-9_-]+", query.lower())
@@ -124,12 +129,11 @@ class ContextCompiler:
                                 policy_version=policy_version)
         refs = self._refs(query)
         packet.sections["visibility"] = {
-            "shared": ["git history", "agentmail (fleet protocol)",
-                       "kernel docs"],
+            "shared": sorted(self.shared),
             "project_private": ["project config", "tasks", "incidents",
-                                "messages", "approvals"],
-            "rule": "shared sources are organization-wide by design; "
-                    "project-private sources are filtered by project_id"}
+                                "messages", "approvals", "repo", "PRDs"],
+            "rule": "private by default; sharing requires per-project "
+                    "operator configuration"}
         packet.sections["exact_references"] = (
             refs["tasks"] + refs["decisions"] + refs["prds"] +
             [f"sha:{s}" for s in refs["shas"]])
@@ -260,8 +264,10 @@ class ContextCompiler:
                                    else f.name),
                         freshness_age_d=_age_days(f.stat().st_mtime)))
 
-        # 5. git history — assertions (commits are not verification)
-        try:
+        # 5. git history — assertions (commits are not verification);
+        # consulted only when the project config declares it shared
+        if "git" in self.shared:
+          try:
             log = subprocess.run(
                 ["git", "-C", str(self.repo), "log", "--all",
                  "--since=45 days ago", "--pretty=%h|%ct|%s"],
@@ -272,7 +278,7 @@ class ContextCompiler:
                     packet.items.append(ContextItem(
                         "assertion", f"commit {sha}: {subj[:120]}",
                         source=f"git:{sha}"))
-        except Exception:  # noqa: BLE001
+          except Exception:  # noqa: BLE001
             packet.uncertainties.append("git history unavailable")
 
         # 6. project-filtered operational state (never cross-project)

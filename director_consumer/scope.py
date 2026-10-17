@@ -148,11 +148,14 @@ def ensure_scoped(con: sqlite3.Connection) -> None:
                      "assignment_authority, epoch, created_at, updated_at, "
                      "last_verified_progress, correlation_id FROM tasks")
         if _needs_scope(con, "messages", ("message_id", "project")):
+            mcols = _cols(con, "messages")
+            mproj = "COALESCE(project,'default')" if "project" in mcols \
+                else "'default'"
             _rebuild(con, "messages", _MESSAGES_DDL,
                      "(message_id, project, correlation_id, recipient, "
                      "msg_type, subject, body, state, attempts, created_at, "
                      "sent_at, acked_at, expires_at, authorization_ref) "
-                     "SELECT message_id, 'default', correlation_id, "
+                     f"SELECT message_id, {mproj}, correlation_id, "
                      "recipient, msg_type, subject, body, state, attempts, "
                      "created_at, sent_at, acked_at, expires_at, "
                      "authorization_ref FROM messages")
@@ -171,10 +174,13 @@ def ensure_scoped(con: sqlite3.Connection) -> None:
                      "evidence, proposed_action, resolution, reopen_count, "
                      f"{lc} FROM incidents")
         if _needs_scope(con, "proposals", ("project", "trigger_key")):
+            pcols = _cols(con, "proposals")
+            pproj = "COALESCE(project,'default')" if "project" in pcols \
+                else "'default'"
             _rebuild(con, "proposals", _PROPOSALS_DDL,
                      "(trigger_key, project, ptype, filename, authority, "
                      "created_at, body, written, written_at) SELECT "
-                     "trigger_key, 'default', ptype, filename, authority, "
+                     f"trigger_key, {pproj}, ptype, filename, authority, "
                      "created_at, body, COALESCE(written,0), written_at "
                      "FROM proposals")
         if _exists(con, "reconciler_findings") and \
@@ -185,6 +191,7 @@ def ensure_scoped(con: sqlite3.Connection) -> None:
                      "SELECT finding_id, COALESCE(project,'default'), rule, "
                      "subject, severity, state, hits, first_seen, last_seen, "
                      "cooldown_until, payload FROM reconciler_findings")
+        # (findings already used COALESCE — kept for clarity)
         if _exists(con, "authorizations") and \
                 "project" not in _cols(con, "authorizations"):
             dig = ("payload_digest" if "payload_digest" in
@@ -199,6 +206,7 @@ def ensure_scoped(con: sqlite3.Connection) -> None:
                      "task_ref, action, recipient, spend_scope, "
                      "max_spend_usd, expires_at, issuer, issued_at, "
                      f"{dig}, {rev} FROM authorizations")
+        # auths: same COALESCE discipline as above
         # child history tables gain project (append-only, ALTER only)
         for child in ("task_events", "task_contributors", "message_events",
                       "incident_events", "incident_recovery",

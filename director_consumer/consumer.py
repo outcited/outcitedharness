@@ -52,7 +52,8 @@ from .reconciler import DesiredState, ObservedState, Reconciler
 from .context import ContextCompiler
 from .resources import ResourceRegistry
 from .critical_path import from_designwins_continuity, assess as cp_assess
-from .schema import Assessment, Event, Proposal, SourceRef, StateMarker, utcnow
+from .schema import (Assessment, Event, Proposal, SourceRef,
+                     StateMarker, fp, utcnow)
 from .sessions import SessionDiscovery
 from .state import DirectorState
 from .tasks import TaskStore
@@ -406,10 +407,11 @@ class DirectorConsumer:
             # compile context for consequential new findings
             packets = 0
             comp = ContextCompiler(
-                repo_root=Path.cwd(),
+                repo_root=self.repo_path,
                 project_dir=(self.projects_root / spec.project_id)
                 if self.projects_root else None,
-                mailbox_root=self.mailbox_root)
+                mailbox_root=self.mailbox_root,
+                shared_sources=set(getattr(spec, "shared_sources", [])))
             for f in rep["new"]:
                 if f.severity in ("P0", "P1"):
                     pkt = comp.compile(
@@ -419,13 +421,45 @@ class DirectorConsumer:
                         db=self.state.con,
                         registry=self.project_registry)
                     packets += 1
+                    # 05C §7: persist the ACTUAL decision packet as an
+                    # immutable, digest-stamped artifact — not a count
+                    payload = {
+                        "compiler_version": "context-05c.1",
+                        "project_id": spec.project_id,
+                        "policy_version": spec.policy_version,
+                        "finding_id": f.finding_id, "rule": f.rule,
+                        "query": f"{f.rule} {f.subject}",
+                        "items": [i.__dict__ for i in pkt.items],
+                        "sections": pkt.sections,
+                        "uncertainties": pkt.uncertainties,
+                        "authority_missing": pkt.authority_missing,
+                        "source_versions": {
+                            "registry_digest": spec.config_digest},
+                    }
+                    blob = json.dumps(payload, sort_keys=True)
+                    digest = fp("decision-packet", blob)
+                    pdir = self.workspace / "decisions"
+                    pdir.mkdir(exist_ok=True)
+                    (pdir / f"{f.finding_id}-{digest[:12]}.json").write_text(
+                        blob)
+                    model_note = None
+                    if self.llm is not None and not pkt.authority_missing:
+                        # the ACTUAL packet goes to the model (advisory)
+                        model_note = self.llm.assess(
+                            "PACKET: " + json.dumps(payload)[:6000],
+                            f"rule={f.rule} severity={f.severity}")
                     self.state.journal_run({
-                        "kind": "decision-packet", "project": spec.project_id,
+                        "kind": "decision-record", "project": spec.project_id,
                         "finding": f.finding_id, "rule": f.rule,
+                        "packet_digest": digest,
+                        "artifact": f"decisions/{f.finding_id}-"
+                                    f"{digest[:12]}.json",
                         "items": len(pkt.items),
                         "authority_missing": pkt.authority_missing,
-                        "classes": sorted({i.evidence_class
-                                           for i in pkt.items})})
+                        "model": (model_note or {}).get("source"),
+                        "proposed_action": f.proposed_action,
+                        "verification_plan": f.verification_plan,
+                        "advisory_only": True})
             results.append({"project": spec.project_id,
                             "new_findings": [f.rule for f in rep["new"]],
                             "suppressed": len(rep["suppressed"]),

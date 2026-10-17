@@ -44,7 +44,7 @@ def _store(con, tmp, uid_shift=1):
     apdir.mkdir(exist_ok=True)
     return AuthorizationStore(con, approvals_dir=apdir,
                               operator_uid=os.getuid(),
-                              service_uid=os.getuid() + uid_shift), apdir
+                              service_uid=os.getuid() + uid_shift, test_identities=True), apdir
 
 
 # 1. legacy delivery-bypass attempts fail (P0-1)
@@ -52,7 +52,7 @@ def _store(con, tmp, uid_shift=1):
 def test_legacy_bypass_refused_without_store(tmp_path):
     pol = DeliveryPolicy(enabled=True, authorization_ref="just-a-string",
                          outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(_db(tmp_path), pol)
+    mb = MailboxDelivery(_db(tmp_path), pol, mode="test-delivery")
     mid = mb.propose("agent-x", "question", "q", "body",
                      correlation_id="T-1")
     with pytest.raises(DeliveryDisabled) as e:
@@ -66,7 +66,7 @@ def test_legacy_bypass_refused_even_with_flag(tmp_path):
     deliver without the AuthorizationStore (P0-1)."""
     pol = DeliveryPolicy(enabled=True, authorization_ref="SAM-SAID-SO",
                          outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(_db(tmp_path), pol)
+    mb = MailboxDelivery(_db(tmp_path), pol, mode="test-delivery")
     mid = mb.propose("agent-x", "status", "s", "body")
     assert mb.deliver.__doc__  # sanity
     with pytest.raises(DeliveryDisabled):
@@ -82,7 +82,7 @@ def test_director_identity_cannot_authorize(tmp_path):
     apdir.mkdir()
     st = AuthorizationStore(con, approvals_dir=apdir,
                             operator_uid=os.getuid(),
-                            service_uid=os.getuid())
+                            service_uid=os.getuid(), test_identities=True)
     _approval(apdir, "A1", project="p", action="reason", recipient="x",
               expires_at=time.time() + 3600, issuer="sam",
               payload_digest="d")
@@ -157,26 +157,39 @@ def _deliver_setup(tmp_path, body="body"):
                         recipient="agent-x", task_ref="T-1",
                         expires_at=time.time() + 3600, issuer="sam"))
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol, authorizations=st)
+    mb = MailboxDelivery(con, pol, authorizations=st, mode="test-delivery")
     mid = mb.propose("agent-x", "question", "q", body, correlation_id="T-1")
     return mb, mid
 
 
 def test_crash_boundary_after_nonce_before_intent(tmp_path):
-    # nonce consumed (authorization recorded) but intent never written:
-    # a NEW attempt re-enters check() -> nonce replay -> must NOT double
-    # deliver; the recoverable path is reconcile from intent-less state
+    """05C invariant: grant consumption and delivery intent commit
+    TOGETHER. A crash between them must leave NOTHING consumed so the
+    same approval can authorize the retry (no human re-approval)."""
     mb, mid = _deliver_setup(tmp_path)
-    from director_consumer.schema import fp
-    mb.authorizations.check("A1", AuthRequest(
-        project="default", action="deliver", recipient="agent-x",
-        task_ref="T-1", nonce=f"deliver:{mid}",
-        payload_digest=fp("msg-body", "body")))
-    # crashed here: no intent, no file
-    with pytest.raises(DeliveryDisabled):
-        mb.deliver(mid, auth_id="A1")   # nonce already burned -> refused
-    # audit shows the refusal; nothing was written
-    assert not list((tmp_path / "boxes").rglob("*.md"))
+    # failpoint INSIDE the reservation, before the transaction commits
+    real_reserve = mb.authorizations.reserve
+    calls = {"n": 0}
+    def exploding_reserve(cur, auth_id, request):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            ok, why = real_reserve(cur, auth_id, request)
+            assert ok
+            raise RuntimeError("simulated crash before COMMIT")
+        return real_reserve(cur, auth_id, request)
+    mb.authorizations.reserve = exploding_reserve
+    with pytest.raises(RuntimeError):
+        mb.deliver(mid, auth_id="A1")
+    # rollback must leave no nonce row and no intent
+    row = mb.con.execute("SELECT COUNT(*) FROM auth_nonces").fetchone()[0]
+    assert row == 0, "crash before commit must not consume the grant"
+    st = mb.con.execute("SELECT state FROM messages WHERE message_id=?",
+                        (mid,)).fetchone()[0]
+    assert st == "proposed", "no intent may survive an uncommitted txn"
+    # SAME approval retries successfully — no human involvement
+    mb.authorizations.reserve = real_reserve
+    assert mb.deliver(mid, auth_id="A1") == "sent"
+    assert len(list((tmp_path / "boxes").rglob("*.md"))) == 1
 
 
 def test_crash_boundary_after_intent_before_write(tmp_path):
@@ -222,7 +235,8 @@ def test_concurrent_delivery_single_message(tmp_path):
             con.row_factory = sqlite3.Row
             st, apdir = _store(con, tmp_path)
             pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-            local = MailboxDelivery(con, pol, authorizations=st)
+            local = MailboxDelivery(con, pol, authorizations=st,
+                                       mode="test-delivery")
             with lock:
                 results.append(local.deliver(mid, auth_id="A1"))
         except Exception as e:  # noqa: BLE001
@@ -249,24 +263,55 @@ class UidTransport:
 
 
 def test_forged_ack_stays_unverified_and_real_ack_passes(tmp_path):
+    from director_consumer.schema import fp as _fp
     mb, mid = _deliver_setup(tmp_path)
     mb.deliver(mid, auth_id="A1")
-    # forged: From: header claims agent-x but transport uid differs
+    body = "body"
+    digest = _fp("msg-body", body)
+    bindings = {("default", "T-1", 1): "ses-owner"}
+    good_env = {"ack_of": mid, "project": "default", "task_ref": "T-1",
+                "epoch": 1, "session_id": "ses-owner",
+                "message_digest": digest}
+    # wrong same-UID session: uid matches, session does not
+    other = tmp_path / "wrong-session.md"
+    other.write_text("ack_of: x\nFrom: agent-x\n")
+    os.chmod(other, 0o644)
+    t_uid = UidTransport({"agent-x": os.getuid()})
+    st = mb.record_ack(mid, from_agent="agent-x", transport=t_uid,
+                       artifact_path=other,
+                       envelope={**good_env, "session_id": "ses-other"},
+                       session_bindings=bindings)
+    assert st == "ack-unverified",         "a same-UID session that does not own the task cannot accept it"
+    # forged uid + envelope naming a different message
     forged = tmp_path / "forged.md"
-    forged.write_text("ack_of: x\nFrom: agent-x\n")
+    forged.write_text("ack_of: OTHER\nFrom: agent-x\n")
     os.chmod(forged, 0o644)
-    transport = UidTransport({"agent-x": os.getuid() + 7})
-    state = mb.record_ack(mid, from_agent="agent-x",
-                          transport=transport, artifact_path=forged)
-    assert state == "ack-unverified", "forged origin is never acceptance"
-    # verified: artifact owned by the agent's registered uid
+    st2 = mb.record_ack(mid, from_agent="agent-x",
+                        transport=UidTransport({"agent-x": os.getuid() + 7}),
+                        artifact_path=forged,
+                        envelope={**good_env, "ack_of": "OTHER"},
+                        session_bindings=bindings)
+    assert st2 == "ack-unverified"
+    # correct owner session with matching envelope + transport: accepted
     real = tmp_path / "real.md"
-    real.write_text("ack_of: x\nFrom: agent-x\n")
+    real.write_text(f"ack_of: {mid}\nFrom: agent-x\n")
     os.chmod(real, 0o644)
-    transport_ok = UidTransport({"agent-x": os.getuid()})
-    state2 = mb.record_ack(mid, from_agent="agent-x",
-                           transport=transport_ok, artifact_path=real)
-    assert state2 == "acked"
+    st3 = mb.record_ack(mid, from_agent="agent-x",
+                        transport=UidTransport({"agent-x": os.getuid()}),
+                        artifact_path=real, envelope=good_env,
+                        session_bindings=bindings)
+    assert st3 == "acked"
+    # forged receipt AFTER a valid ack must not downgrade it
+    st4 = mb.record_ack(mid, from_agent="agent-x",
+                        transport=UidTransport({"agent-x": os.getuid() + 9}),
+                        artifact_path=forged,
+                        envelope={**good_env, "message_digest": "bad"},
+                        session_bindings=bindings)
+    assert st4 == "ack-unverified"
+    assert mb.snapshot()[0]["state"] == "acked", "valid ack is never downgraded"
+    # quarantined receipts are stored separately
+    q = mb.con.execute("SELECT COUNT(*) FROM invalid_receipts").fetchone()[0]
+    assert q == 3
 
 
 # 9. migrated rows keep project identity
@@ -338,6 +383,7 @@ def test_restart_no_duplicate_actions(tmp_path):
     con2 = _db(tmp_path)   # reopen same db
     st2, _ = _store(con2, tmp_path)
     pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
-    mb2 = MailboxDelivery(con2, pol, authorizations=st2)
+    mb2 = MailboxDelivery(con2, pol, authorizations=st2,
+                          mode="test-delivery")
     assert mb2.deliver(mid, auth_id="A1") == "sent", "terminal state held"
     assert len(list((tmp_path / "boxes").rglob("*.md"))) == 1
