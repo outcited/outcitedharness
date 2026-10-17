@@ -1,25 +1,33 @@
-"""Scoped authorization (§4) — verified approvals at the action boundary.
+"""Scoped authorization (§4/§5B) — operator-file trust boundary.
 
-Hardening over 05:
-  - approvals are FILE-BACKED: an operator-owned, non-world-writable
-    approval file is the trusted proof (unix permissions = the established
-    mechanism for a single-owner self-hosted box; no invented crypto)
-  - a declared issuer string is never proof; missing approval file or
-    wrong ownership/mode => REFUSED (and revocation = removing the file
-    or flipping `revoked`)
-  - one-message authorizations bind to the message's immutable digest
-  - missing required scope fields fail closed per action class
-  - nonce consumption is crash-safe and one-shot (see messaging.deliver)
-  - the director can never issue or enlarge its own authority
+TRUST MODEL (P0-2): the approval artifact is an operator-owned file whose
+CONTENT defines the complete approved scope. The service identity (the
+director's uid) must NOT be able to write it:
 
-Grant/revoke lifecycle (operator): write `approvals/<auth_id>.json`
-(chmod 0640, owned by the operator) to grant; delete the file to revoke.
-Ownership/mode are verified on every check.
+  - auth_id is a strict token (no path traversal) and the file is opened
+    O_NOFOLLOW inside the approvals directory (no symlink escapes)
+  - file uid must equal the configured OPERATOR uid and must differ from
+    the SERVICE uid; same identities = no trust boundary = refuse
+  - approvals dir and file must not be group/world writable
+  - an empty {} file is NOT approval — the file must carry the full scope
+    (project, action, recipient, task_ref, objective_ref, expires_at,
+    spend_scope, max_spend_usd, issuer, payload_digest) and the file's
+    values are what gets enforced (DB row is a validated cache)
+  - revocation = deleting the file (or the revoked flag); re-checks
+    re-read the file every time
+
+NO INVENTED CRYPTOGRAPHY: unix ownership/permissions are the established
+mechanism for a single-owner self-hosted host; the human operator keeps
+the approvals directory write-protected from the service account.
+
+NONCE LAW (P0-3): a nonce may be REUSED only to retry the identical
+action (same payload digest); any other reuse is a replay and refused.
 """
 from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 import stat
 from dataclasses import dataclass
@@ -49,9 +57,23 @@ CREATE TABLE IF NOT EXISTS auth_nonces (
     nonce TEXT PRIMARY KEY,
     project TEXT NOT NULL DEFAULT 'default',
     auth_id TEXT NOT NULL,
+    payload_digest TEXT NOT NULL DEFAULT '',
     used_at REAL NOT NULL
 );
 """
+
+SAFE_ID = re.compile(r"^[A-Za-z0-9_.\-]{1,64}$")
+REQUIRED_SCOPE = {
+    "deliver": ("project", "recipient", "task_ref"),
+    "reason": ("project",),
+    "dispatch": ("project", "task_ref"),
+    "spawn": ("project", "objective_ref"),
+}
+# the approval FILE must carry these fields — a partial/empty file is not
+# authenticated human approval. Scope fields are action-scoped (a
+# reason-only approval does not carry a recipient).
+FILE_BASE_FIELDS = ("project", "action", "expires_at", "issuer",
+                    "payload_digest")
 
 
 class AuthorizationError(Exception):
@@ -87,61 +109,97 @@ class AuthRecord:
     revoked: bool = False
 
 
-# per-action minimum scope: missing fields fail closed
-REQUIRED_SCOPE = {
-    "deliver": ("project", "recipient", "task_ref"),
-    "reason": ("project",),
-    "dispatch": ("project", "task_ref"),
-    "spawn": ("project", "objective_ref"),
-}
-
-
 class AuthorizationStore:
     def __init__(self, con, approvals_dir: Optional[Path] = None,
-                 operator_uid: Optional[int] = None):
+                 operator_uid: Optional[int] = None,
+                 service_uid: Optional[int] = None):
         self.con = con
         self.approvals_dir = Path(approvals_dir) if approvals_dir else None
         self.operator_uid = operator_uid if operator_uid is not None \
             else os.getuid()
+        self.service_uid = service_uid if service_uid is not None \
+            else os.getuid()
         con.executescript(SCHEMA)
 
-    # ---- operator proof ----
+    # ---- protected artifact access ----
 
-    def _approval_ok(self, auth_id: str) -> tuple[bool, str]:
-        """File-backed proof: operator-owned, not group/world writable."""
+    def _read_artifact(self, auth_id: str) -> tuple[Optional[dict], str]:
+        if not SAFE_ID.match(auth_id or ""):
+            return None, "invalid auth id (path traversal refused)"
         if self.approvals_dir is None:
-            return False, ("no approvals directory configured — "
-                           "file-backed proof unavailable (fail closed)")
-        f = self.approvals_dir / f"{auth_id}.json"
+            return None, "no approvals directory configured (fail closed)"
+        if self.operator_uid == self.service_uid:
+            return None, ("operator uid equals service uid — no trust "
+                          "boundary (refuse)")
+        base = os.path.realpath(self.approvals_dir)
+        target = os.path.join(base, f"{auth_id}.json")
+        if os.path.dirname(os.path.realpath(target)) != base:
+            return None, "approval path escapes approvals directory"
         try:
-            st = os.stat(f)
+            fd = os.open(target, os.O_RDONLY | os.O_NOFOLLOW)
         except OSError:
-            return False, f"approval file missing: {f.name} (revoked?)"
-        if st.st_uid != self.operator_uid:
-            return False, (f"approval file owner uid {st.st_uid} != "
-                           f"operator uid {self.operator_uid}")
-        if st.st_mode & 0o022:
-            return False, "approval file is group/world writable"
-        return True, "operator approval file verified"
+            return None, f"approval file missing or symlink: {auth_id}"
+        try:
+            st = os.fstat(fd)
+            if not stat.S_ISREG(st.st_mode):
+                return None, "approval artifact is not a regular file"
+            if st.st_uid != self.operator_uid:
+                return None, (f"approval owner uid {st.st_uid} != operator "
+                              f"{self.operator_uid}")
+            if st.st_mode & 0o022:
+                return None, "approval file is group/world writable"
+            dmode = os.stat(base).st_mode
+            if dmode & 0o022:
+                return None, "approvals directory is group/world writable"
+            raw = os.read(fd, 1 << 20)
+        finally:
+            os.close(fd)
+        try:
+            data = json.loads(raw.decode())
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return None, "approval artifact is not valid JSON"
+        if not isinstance(data, dict):
+            return None, "approval artifact must be a JSON object"
+        required = FILE_BASE_FIELDS + REQUIRED_SCOPE.get(
+            data.get("action", ""), ())
+        missing = [f for f in required if not data.get(f)]
+        if missing:
+            return None, (f"approval artifact incomplete — missing "
+                          f"{missing} (an empty or partial file is NOT "
+                          f"human approval)")
+        return data, "operator approval artifact verified"
 
     # ---- issue / revoke ----
 
     def issue(self, record: AuthRecord) -> str:
         if record.issuer.startswith(("engineering-director", "director:")):
             raise AuthorizationError(
-                "the director cannot authorize itself (§4/§10)")
-        ok, why = self._approval_ok(record.auth_id)
-        if not ok:
+                "the director cannot authorize itself (P0-2)")
+        data, why = self._read_artifact(record.auth_id)
+        if data is None:
             raise AuthorizationError(f"issuance refused: {why}")
+        # the FILE is authority: enforce its values, not caller claims.
+        # Expiry is enforced at CHECK time — an old artifact simply cannot
+        # authorize anything anymore.
+        for f in ("project", "action", "recipient"):
+            if data.get(f) != getattr(record, f):
+                raise AuthorizationError(
+                    f"record disagrees with approval artifact on {f!r}")
         self.con.execute(
             "INSERT OR REPLACE INTO authorizations(auth_id, project, "
             "objective_ref, task_ref, action, recipient, spend_scope, "
             "max_spend_usd, expires_at, issuer, issued_at, payload_digest, "
             "revoked) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            (record.auth_id, record.project, record.objective_ref,
-             record.task_ref, record.action, record.recipient,
-             record.spend_scope, record.max_spend_usd, record.expires_at,
-             record.issuer, utcnow(), record.payload_digest,
+            (record.auth_id, data.get("project", record.project),
+             data.get("objective_ref", record.objective_ref),
+             data.get("task_ref", record.task_ref),
+             data.get("action", record.action),
+             data.get("recipient", record.recipient),
+             data.get("spend_scope", record.spend_scope),
+             float(data.get("max_spend_usd", record.max_spend_usd)),
+             float(data.get("expires_at", record.expires_at)),
+             data.get("issuer", record.issuer), utcnow(),
+             data.get("payload_digest", record.payload_digest),
              1 if record.revoked else 0))
         self.con.commit()
         return record.auth_id
@@ -165,21 +223,22 @@ class AuthorizationStore:
         r = dict(zip(cols, row))
         if r["revoked"]:
             return False, "authorization revoked"
-        ok, why = self._approval_ok(auth_id)
-        if not ok:
+        data, why = self._read_artifact(auth_id)   # re-read EVERY check
+        if data is None:
             return False, f"approval proof failed: {why}"
         now = utcnow()
-        if r["expires_at"] < now:
+        if float(data.get("expires_at", 0)) < now or r["expires_at"] < now:
             return False, "authorization expired"
-        if r["project"] != request.project:
+        if data.get("project") != request.project or \
+                r["project"] != request.project:
             return False, "project mismatch"
-        if r["action"] != request.action:
+        if data.get("action") != request.action or r["action"] != request.action:
             return False, "action mismatch"
-        if r["recipient"] and r["recipient"] != request.recipient:
+        if data.get("recipient") != request.recipient:
             return False, "recipient mismatch"
-        # fail-closed required scope for the action class
-        for fld in REQUIRED_SCOPE.get(r["action"], ()):
-            if not getattr(request, fld, "") or not r.get(fld, ""):
+        for fld in REQUIRED_SCOPE.get(request.action, ()):
+            if not getattr(request, fld, "") or not (
+                    r.get(fld) or data.get(fld)):
                 return False, f"missing required scope field {fld!r}"
         if r["task_ref"] and request.task_ref and \
                 r["task_ref"] != request.task_ref:
@@ -193,16 +252,26 @@ class AuthorizationStore:
         if request.provider and r["spend_scope"] == "none" and \
                 request.provider.lower() in {"openrouter", "metered"}:
             return False, "METERED REFUSED: spend_scope=none"
-        if r["payload_digest"] and request.payload_digest != r["payload_digest"]:
-            return False, "payload digest mismatch (approval is bound to " \
-                          "a different message)"
+        if data.get("payload_digest") and \
+                request.payload_digest != data["payload_digest"]:
+            return False, "payload digest mismatch (approval bound to a " \
+                          "different message)"
         if request.nonce:
+            prev = self.con.execute(
+                "SELECT payload_digest FROM auth_nonces WHERE nonce=?",
+                (request.nonce,)).fetchone()
+            if prev is not None:
+                # one-time authorization: any re-check is a replay.
+                # Retrying an already-authorized action never re-enters
+                # check() (deliver() completes 'delivering' directly).
+                return False, "replay rejected (nonce already used)"
             try:
                 self.con.execute(
                     "INSERT INTO auth_nonces(nonce, project, auth_id, "
-                    "used_at) VALUES (?,?,?,?)",
-                    (request.nonce, request.project, auth_id, now))
+                    "payload_digest, used_at) VALUES (?,?,?,?,?)",
+                    (request.nonce, request.project, auth_id,
+                     request.payload_digest, now))
                 self.con.commit()
             except sqlite3.IntegrityError:
                 return False, "replay rejected (nonce already used)"
-        return True, f"authorized by operator-approved record ({r['issuer']})"
+        return True, f"authorized by operator artifact ({data.get('issuer')})"

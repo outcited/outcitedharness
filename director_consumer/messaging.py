@@ -87,12 +87,14 @@ class MailboxDelivery:
     def __init__(self, con, policy: DeliveryPolicy,
                  sender: str = "engineering-director",
                  project: str = "default",
-                 authorizations: AuthorizationStore | None = None):
+                 authorizations: AuthorizationStore | None = None,
+                 transport=None):
         self.con = con
         self.policy = policy
         self.sender = sender
         self.project = project
         self.authorizations = authorizations
+        self.transport = transport
         ensure_scoped(con)
         con.executescript(SCHEMA)
 
@@ -125,11 +127,11 @@ class MailboxDelivery:
         operator-file-backed approvals pass. Crash-safe: nonce = the
         message id itself (one action id, never two consumptions)."""
         if self.authorizations is None:
-            if not (self.policy.enabled and self.policy.authorization_ref):
-                raise DeliveryDisabled(
-                    "production delivery disabled — explicit authorization "
-                    "required (hard boundary)")
-            return
+            self._event(message_id, "delivery_refused",
+                        "no authorization service attached (fail closed)")
+            self.con.commit()
+            raise DeliveryDisabled(
+                "no authorization service — delivery refused (fail closed)")
         row = self.con.execute(
             "SELECT correlation_id FROM messages WHERE message_id=? "
             "AND project=?", (message_id, self.project)).fetchone()
@@ -166,15 +168,30 @@ class MailboxDelivery:
             return "escalated"
         if self.policy.outbox_root is None and self.authorizations is None:
             raise DeliveryDisabled("no outbox root configured")
-        self._authorize(message_id, auth_id, m["body"], m["recipient"])
-        # durable action intent (crash-safe): 'delivering' is resumable
-        self.con.execute(
-            "UPDATE messages SET state='delivering', attempts=attempts+1 "
-            "WHERE message_id=? AND project=?",
-            (message_id, self.project))
-        self._event(message_id, "intent", f"auth={auth_id or 'legacy'}")
-        self.con.commit()
-        fname = f"{self._ts()}_{self.sender}_{m['recipient']}_" \
+        if m["state"] != "delivering":
+            # a NEW action must be authorized; a retry of an already-
+            # authorized action ('delivering') completes the write only
+            self._authorize(message_id, auth_id, m["body"], m["recipient"])
+        # durable action intent (crash-safe): 'delivering' is resumable.
+        # The write + intent are serialized so concurrent delivers of the
+        # same message converge on ONE physical artifact.
+        self.con.execute("BEGIN IMMEDIATE")
+        try:
+            self.con.execute(
+                "UPDATE messages SET state='delivering', attempts=attempts+1 "
+                "WHERE message_id=? AND project=?",
+                (message_id, self.project))
+            self._event(message_id, "intent", f"auth={auth_id or 'none'}")
+            self.con.execute("COMMIT")
+        except Exception:
+            self.con.execute("ROLLBACK")
+            raise
+        # P0-3: stable persisted filename — derived from created_at and
+        # message_id, INDEPENDENT of retry time; identical retries land on
+        # the same file (atomic replace), never a second physical message
+        ts = time.strftime("%Y%m%dT%H%M%SZ",
+                           time.gmtime(float(m["created_at"])))
+        fname = f"{ts}_{self.sender}_{m['recipient']}_" \
                 f"{m['msg_type']}_{message_id}.md"
         dest = Path(self.policy.outbox_root) / m["recipient"] / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -190,14 +207,22 @@ class MailboxDelivery:
         return "sent"
 
     def record_ack(self, message_id: str, ack_body: str = "",
-                   from_agent: str = "", verified_sender: bool = False) -> str:
-        """Acknowledgment receipt. Only a VERIFIED sender matching the
-        intended recipient counts as acceptance; anything else is
-        evidence to investigate (ack-unverified), never acceptance."""
+                   from_agent: str = "", verified_sender: bool = False,
+                   transport=None, artifact_path: Optional[Path] = None) -> str:
+        """P0-4: a From: header is NOT sender proof. Acceptance requires
+        attributable evidence from a trusted agent transport (e.g. the ack
+        artifact's OS uid matching the agent's registered uid). Without
+        it: ack-unverified — evidence to investigate, never acceptance."""
         row = self.con.execute(
             "SELECT recipient FROM messages WHERE message_id=? AND "
             "project=?", (message_id, self.project)).fetchone()
         intended = row[0] if row else ""
+        if transport is not None and artifact_path is not None:
+            try:
+                verified_sender = bool(transport.verify(from_agent,
+                                                        artifact_path))
+            except Exception:  # noqa: BLE001
+                verified_sender = False
         accepted = (verified_sender and from_agent and
                     (from_agent == intended or
                      from_agent == f"agent:{intended}"))
@@ -252,21 +277,16 @@ class MailboxDelivery:
                 recovered.append(mid)
             head = f.read_text(errors="replace")[:2000]
             if "ack_of:" in head and row[0] not in ("acked",):
-                # attribute only when the file names its sender and it
-                # matches the intended recipient
+                # P0-4: the From: header alone proves nothing — origin
+                # must come from the transport's attributable evidence
                 sender = ""
                 for line in head.splitlines():
                     if line.lower().startswith("from:"):
                         sender = line.split(":", 1)[1].strip()
-                recip_row = self.con.execute(
-                    "SELECT recipient FROM messages WHERE message_id=? "
-                    "AND project=?", (mid, self.project)).fetchone()
-                intended = recip_row[0] if recip_row else ""
                 self.record_ack(mid, ack_body="recovered from mailbox",
                                 from_agent=sender,
-                                verified_sender=bool(sender and
-                                    (sender == intended or
-                                     sender == f"agent:{intended}")))
+                                transport=self.transport,
+                                artifact_path=f)
                 recovered.append(mid)
         self.con.commit()
         return recovered

@@ -265,16 +265,26 @@ def test_reconciler_survives_restart(tmp_path):
 # ------------------------------------------------ §6 authorization
 
 def _auth_store(tmp_path, auth_id=None, record=None):
-    """File-backed approvals: the operator writes the approval file
-    (owner-only writable) and only then does the store accept the record."""
+    """File-backed approvals: the operator writes the COMPLETE approval
+    artifact (full scope + digest) and only then can the store accept it.
+    operator uid != service uid: the trust boundary required by P0-2."""
     import os
     apdir = tmp_path / "approvals"
     apdir.mkdir(exist_ok=True)
-    st = AuthorizationStore(_con(tmp_path), approvals_dir=apdir)
+    st = AuthorizationStore(_con(tmp_path), approvals_dir=apdir,
+                            operator_uid=os.getuid(),
+                            service_uid=os.getuid() + 1)
     if auth_id and record:
         f = apdir / f"{auth_id}.json"
-        f.write_text(json.dumps({"auth_id": auth_id}))
-        os.chmod(f, 0o640)   # operator-owned, not group/world writable
+        f.write_text(json.dumps({
+            "project": record.project, "action": record.action,
+            "recipient": record.recipient, "task_ref": record.task_ref,
+            "objective_ref": record.objective_ref,
+            "expires_at": record.expires_at, "issuer": record.issuer,
+            "payload_digest": record.payload_digest or "digest",
+            "spend_scope": record.spend_scope,
+            "max_spend_usd": record.max_spend_usd}))
+        os.chmod(f, 0o640)
         st.issue(record)
     return st
 
@@ -285,22 +295,26 @@ def test_authorization_default_deny_and_scope_checks(tmp_path):
         recipient="agent-x", task_ref="T-1",
         expires_at=time.time() + 3600, issuer="sam"))
     req = AuthRequest(project="alpha", action="deliver", recipient="agent-x",
-                      task_ref="T-1")
+                      task_ref="T-1", payload_digest="digest")
     ok, why = st.check("A1", req)
     assert ok
     # expired (approval file present but record expired)
     import os as _os
     f2 = st.approvals_dir / "A2.json"
-    f2.write_text("{}"); _os.chmod(f2, 0o640)
+    f2.write_text(json.dumps({
+        "project": "alpha", "action": "deliver", "recipient": "agent-x",
+        "task_ref": "T-1", "expires_at": time.time() - 10,
+        "issuer": "sam", "payload_digest": "d"}))
+    _os.chmod(f2, 0o640)
     st.issue(AuthRecord(auth_id="A2", project="alpha", action="deliver",
                         recipient="agent-x", task_ref="T-1",
                         expires_at=time.time() - 10, issuer="sam"))
-    ok2, why2 = st.check("A2", req)
+    ok2, why2 = st.check("A2", req)   # same req shape; A2 is expired
     assert not ok2 and "expired" in why2
     # project mismatch
     ok3, why3 = st.check("A1", AuthRequest(
         project="beta", action="deliver", recipient="agent-x",
-        task_ref="T-1"))
+        task_ref="T-1", payload_digest="digest"))
     assert not ok3 and "project mismatch" in why3
     # action mismatch (fully scoped so the mismatch, not missing scope,
     # is the refusal reason)
@@ -310,7 +324,7 @@ def test_authorization_default_deny_and_scope_checks(tmp_path):
     # recipient mismatch
     ok5, why5 = st.check("A1", AuthRequest(
         project="alpha", action="deliver", recipient="agent-y",
-        task_ref="T-1"))
+        task_ref="T-1", payload_digest="digest"))
     assert not ok5 and "recipient mismatch" in why5
     # unknown id
     ok6, why6 = st.check("nope", req)
@@ -323,7 +337,7 @@ def test_replay_rejected_once_used(tmp_path):
         recipient="agent-x", task_ref="T-1",
         expires_at=time.time() + 3600, issuer="sam"))
     req = AuthRequest(project="alpha", action="deliver", recipient="agent-x",
-                      task_ref="T-1", nonce="n-1")
+                      task_ref="T-1", nonce="n-1", payload_digest="digest")
     ok1, _ = st.check("A1", req)
     ok2, why2 = st.check("A1", req)   # same nonce
     assert ok1 and not ok2 and "replay" in why2
@@ -333,7 +347,11 @@ def test_director_cannot_self_authorize(tmp_path):
     st = _auth_store(tmp_path)
     import os as _os
     f = st.approvals_dir / "SELF.json"
-    f.write_text("{}"); _os.chmod(f, 0o640)
+    f.write_text(json.dumps({
+        "project": "alpha", "action": "reason", "recipient": "x",
+        "expires_at": time.time() + 3600, "issuer": "engineering-director",
+        "payload_digest": "d"}))
+    _os.chmod(f, 0o640)
     with pytest.raises(AuthorizationError):
         st.issue(AuthRecord(auth_id="SELF", project="alpha",
                             action="deliver", expires_at=time.time() + 10,

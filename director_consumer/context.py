@@ -28,8 +28,8 @@ SUPERSEDES_RE = re.compile(r"supersedes\s+((?:PRD-|D)\d*[-\w]*|[\w./-]+\.md)",
 DECISION_RE = re.compile(r"^##\s+(D\d+)\b", re.MULTILINE)
 # §5: verification terminology in text NEVER establishes verification.
 # Only receipt-bearing records (sha/measured-state/verified_cause) do.
-RECEIPT_RE = re.compile(r"receipt:|sha256:|\bmeasured\b.*=|byte-identical|"
-                        r"verified_cause|last_verified")
+# P0-5: text terminology is NEVER verification. Only structured evidence
+# (store rows carrying verified fields) classifies as verified-fact.
 REF_TASK = re.compile(r"\b([A-Z][A-Z0-9]+(?:-[A-Z0-9]+)+-\d+)\b")
 REF_DEC = re.compile(r"\b(D\d+)\b")
 REF_PRD = re.compile(r"\b(PRD-[\w.-]+)")
@@ -123,6 +123,13 @@ class ContextCompiler:
         packet = DecisionPacket(query=query, project_id=project_id,
                                 policy_version=policy_version)
         refs = self._refs(query)
+        packet.sections["visibility"] = {
+            "shared": ["git history", "agentmail (fleet protocol)",
+                       "kernel docs"],
+            "project_private": ["project config", "tasks", "incidents",
+                                "messages", "approvals"],
+            "rule": "shared sources are organization-wide by design; "
+                    "project-private sources are filtered by project_id"}
         packet.sections["exact_references"] = (
             refs["tasks"] + refs["decisions"] + refs["prds"] +
             [f"sha:{s}" for s in refs["shas"]])
@@ -234,10 +241,10 @@ class ContextCompiler:
             text = _read(f)
             score = self._match(text[:8000], terms)
             if score:
-                cls = ("verified-fact" if RECEIPT_RE.search(text[:8000])
-                       else "assertion")
+                # docs are agent-authored material: always assertion.
+                # verified-fact comes only from measured store rows below.
                 packet.items.append(ContextItem(
-                    cls, f"{f.name}: {score} term hits",
+                    "assertion", f"{f.name}: {score} term hits",
                     source=f"director_consumer/docs/{f.name}",
                     freshness_age_d=_age_days(f.stat().st_mtime)))
 

@@ -209,7 +209,8 @@ class IncidentStore:
         now = utcnow()
         bucket = int(now // (r.window_h * 3600))
         ident = self._identity(a, r)
-        incident_id = fp("incident", r.cid, ident, bucket)[:16]
+        incident_id = fp("incident", self.project, r.cid, ident,
+                 bucket)[:16]
         row = self.con.execute(
             "SELECT incident_id, state, severity, first_seen FROM incidents "
             "WHERE incident_id=? AND project=?",

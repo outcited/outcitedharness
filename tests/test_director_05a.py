@@ -205,10 +205,15 @@ def test_digest_bound_authorization_refuses_other_message(tmp_path):
     apdir = tmp_path / "approvals"
     apdir.mkdir()
     ast = AuthorizationStore(sqlite3.connect(tmp_path / "d.db"),
-                             approvals_dir=apdir)
+                             approvals_dir=apdir,
+                             operator_uid=os.getuid(),
+                             service_uid=os.getuid() + 1)
     body = "the one approved message"
     f = apdir / "M1.json"
-    f.write_text("{}")
+    f.write_text(json.dumps({
+        "project": "alpha", "action": "deliver", "recipient": "agent-x",
+        "task_ref": "T-1", "expires_at": time.time() + 3600,
+        "issuer": "sam", "payload_digest": fp("msg-body", body)}))
     os.chmod(f, 0o640)
     ast.issue(AuthRecord(auth_id="M1", project="alpha", action="deliver",
                          recipient="agent-x", task_ref="T-1",
@@ -233,17 +238,27 @@ def test_approval_file_permissions_enforced(tmp_path):
     apdir = tmp_path / "approvals"
     apdir.mkdir()
     st = AuthorizationStore(sqlite3.connect(tmp_path / "d.db"),
-                            approvals_dir=apdir)
+                            approvals_dir=apdir,
+                            operator_uid=os.getuid(),
+                            service_uid=os.getuid() + 1)
     f = apdir / "A1.json"
-    f.write_text("{}")
+    f.write_text(json.dumps({
+        "project": "alpha", "action": "reason", "recipient": "x",
+        "expires_at": time.time() + 3600, "issuer": "sam",
+        "payload_digest": "d"}))
     os.chmod(f, 0o666)     # world writable — not trustworthy proof
     with pytest.raises(AuthorizationError):
         st.issue(AuthRecord(auth_id="A1", project="alpha", action="reason",
+                            recipient="x",
                             expires_at=time.time() + 3600, issuer="sam"))
     f2 = apdir / "A2.json"
-    f2.write_text("{}")
+    f2.write_text(json.dumps({
+        "project": "alpha", "action": "reason", "recipient": "x",
+        "expires_at": time.time() + 3600, "issuer": "sam",
+        "payload_digest": "d"}))
     os.chmod(f2, 0o640)
     st.issue(AuthRecord(auth_id="A2", project="alpha", action="reason",
+                        recipient="x",
                         expires_at=time.time() + 3600, issuer="sam"))
     st.revoke("alpha", "A2")
     ok, why = st.check("A2", __import__(

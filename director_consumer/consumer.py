@@ -23,7 +23,28 @@ from .llm import OpsBrainClient
 from .mailgen import build_escalation, build_message, write_proposal_atomic
 from .ownership import (OwnershipReconciler, scan_git_claims,
                         scan_mailbox_hints, scan_session_claims)
+from .authorization import AuthorizationStore
 from .manufacturers import ManufacturerTelemetry
+
+
+class UidTransport:
+    """Trusted agent transport: an ack artifact's OS uid must match the
+    agent's registered uid (established unix mechanism, no invented
+    crypto). Header text alone never vouches for origin (P0-4)."""
+
+    def __init__(self, agent_uids: Optional[dict[str, int]] = None):
+        self.agent_uids = agent_uids or {}
+
+    def verify(self, from_agent: str, artifact_path) -> bool:
+        try:
+            import os
+            st = os.stat(artifact_path)
+        except OSError:
+            return False
+        want = self.agent_uids.get(from_agent)
+        if want is None:
+            return False
+        return st.st_uid == want
 from .messaging import DeliveryPolicy, MailboxDelivery
 from .policy import load_project
 from .projects import ProjectRegistry, load_spec_from_config
@@ -117,10 +138,24 @@ class DirectorConsumer:
         # by default; production delivery requires explicit authorization)
         self.tasks = TaskStore(self.state.con, project=self.project_name)
         pol_path = Path(project_dir) / "policy.yaml" if project_dir else None
+        # P0-1: the running director uses the SAME authorization service
+        # the security suite tests. Missing infra = fail closed on any
+        # delivery attempt (observe mode proposes only, as before).
+        delivery_cfg = {}
+        if pol_path and Path(pol_path).exists():
+            import yaml as _y
+            delivery_cfg = (_y.safe_load(Path(pol_path).read_text()) or {}) \
+                .get("delivery", {})
+        approvals = delivery_cfg.get("approvals_dir") or str(
+            self.workspace / "approvals")
+        self.authz = AuthorizationStore(self.state.con, approvals_dir=approvals)
+        self.transport = UidTransport(delivery_cfg.get("agent_uids", {}))
         self.mail = MailboxDelivery(
             self.state.con,
             DeliveryPolicy.load(pol_path, self.workspace / "mailboxes"),
-            project=self.project_name)
+            project=self.project_name,
+            authorizations=self.authz,
+            transport=self.transport)
         self.project_registry = ProjectRegistry(self.state.con)
         self.projects_root = Path(project_dir).parent if project_dir else None
         # ownership + sessions (§5/§6) — optional sources
@@ -141,10 +176,17 @@ class DirectorConsumer:
             return False
         try:
             from datetime import datetime, timezone
-            ts = datetime.fromisoformat(
-                ev.refs[0].original_ts.replace("Z", "+00:00"))
+            raw = ev.refs[0].original_ts
+            ts = datetime.fromisoformat(raw.replace("Z", "+00:00"))
             if ts.tzinfo is None:
                 ts = ts.replace(tzinfo=timezone.utc)
+            if len(raw.strip()) == 10:
+                # date-only source stamps compare at DAY granularity — a
+                # stamp of "today" is never historical
+                today = datetime.now(timezone.utc).date()
+                age_days = (today - ts.date()).days
+                return age_days > max(1, int(self.backfill_max_age_s //
+                                             86400))
             return (utcnow() - ts.timestamp()) > self.backfill_max_age_s
         except ValueError:
             return False
@@ -327,6 +369,22 @@ class DirectorConsumer:
         observed = self._observed()
         obs_has_funnel = bool(observed.funnel)
         for spec in specs:
+            # P0-5: project-private observation is POPULATED per project —
+            # incidents, messages, ownership; fleet/funnel stay shared
+            observed_p = ObservedState(
+                sessions=observed.sessions,
+                ownership=observed.ownership,
+                funnel=observed.funnel if spec.project_id ==
+                        self.project_name else None,
+                incidents=[dict(zip(("incident_id", "correlation_id",
+                                     "severity", "state", "lifecycle_state"),
+                                    r)) for r in self.state.con.execute(
+                    "SELECT incident_id, correlation_id, severity, state, "
+                    "lifecycle_state FROM incidents WHERE project=?",
+                    (spec.project_id,))],
+                messages=self.mail.snapshot()
+                        if spec.project_id == self.project_name else [],
+                fleet=observed.fleet)
             ts = TaskStore(self.state.con, project=spec.project_id)
             rows = self.state.con.execute(
                 "SELECT task_id, state, updated_at, "
@@ -344,7 +402,7 @@ class DirectorConsumer:
                                   if spec.project_id == self.project_name
                                   and obs_has_funnel else {}))
             rec = Reconciler(self.state.con, project=spec.project_id)
-            rep = rec.reconcile(desired, observed)
+            rep = rec.reconcile(desired, observed_p)
             # compile context for consequential new findings
             packets = 0
             comp = ContextCompiler(

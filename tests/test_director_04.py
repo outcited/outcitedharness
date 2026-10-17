@@ -155,13 +155,47 @@ def test_delivery_gate_closed_by_default(tmp_path):
     assert mb.snapshot()[0]["state"] == "proposed"
 
 
+def _store_backed_delivery(tmp_path, con):
+    """Real authorization service: operator approval artifact + store."""
+    import os
+    from director_consumer.authorization import AuthRecord, AuthorizationStore
+    from director_consumer.schema import fp
+    apdir = tmp_path / "approvals"
+    apdir.mkdir(exist_ok=True)
+    ast = AuthorizationStore(con, approvals_dir=apdir,
+                             operator_uid=os.getuid(),
+                             service_uid=os.getuid() + 1)
+    return ast
+
+
 def test_delivery_and_ack_are_distinct(tmp_path):
     con = _db(tmp_path)
-    pol = DeliveryPolicy(enabled=True, authorization_ref="SAM-TEST-1",
-                         outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol)
-    mid = mb.propose("m5-opencode", "question", "q", "body here")
-    assert mb.deliver(mid) == "sent"
+    import os
+    from director_consumer.authorization import AuthRecord, AuthorizationStore
+    from director_consumer.schema import fp
+    apdir = tmp_path / "approvals"
+    apdir.mkdir(exist_ok=True)
+    ast = AuthorizationStore(con, approvals_dir=apdir,
+                             operator_uid=os.getuid(),
+                             service_uid=os.getuid() + 1)
+    pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
+    mb = MailboxDelivery(con, pol, authorizations=ast)
+    body = "body here"
+    mid = mb.propose("m5-opencode", "question", "q", body,
+                     correlation_id="T-ACK")
+    f = apdir / "A-ACK.json"
+    f.write_text(json.dumps({
+        "project": "default", "action": "deliver",
+        "recipient": "m5-opencode", "task_ref": "T-ACK",
+        "expires_at": time.time() + 3600, "issuer": "sam",
+        "payload_digest": fp("msg-body", body)}))
+    os.chmod(f, 0o640)
+    ast.issue(AuthRecord(auth_id="A-ACK", project="default",
+                         action="deliver", recipient="m5-opencode",
+                         task_ref="T-ACK",
+                         expires_at=time.time() + 3600, issuer="sam",
+                         payload_digest=fp("msg-body", body)))
+    assert mb.deliver(mid, auth_id="A-ACK") == "sent"
     snap = mb.snapshot()[0]
     assert snap["state"] == "sent" and snap["acked_at"] is None, \
         "delivery is never acknowledgment"
@@ -177,12 +211,33 @@ def test_delivery_and_ack_are_distinct(tmp_path):
 
 def test_duplicate_delivery_idempotent(tmp_path):
     con = _db(tmp_path)
-    pol = DeliveryPolicy(enabled=True, authorization_ref="SAM-TEST-1",
-                         outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol)
-    mid = mb.propose("m5-opencode", "question", "q", "body")
-    mb.deliver(mid)
-    mb.deliver(mid)   # duplicate send
+    import os
+    from director_consumer.authorization import AuthRecord, AuthorizationStore
+    from director_consumer.schema import fp
+    apdir = tmp_path / "approvals"
+    apdir.mkdir(exist_ok=True)
+    ast = AuthorizationStore(con, approvals_dir=apdir,
+                             operator_uid=os.getuid(),
+                             service_uid=os.getuid() + 1)
+    pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
+    mb = MailboxDelivery(con, pol, authorizations=ast)
+    body = "body"
+    mid = mb.propose("m5-opencode", "question", "q", body,
+                     correlation_id="T-DUP")
+    f = apdir / "A-DUP.json"
+    f.write_text(json.dumps({
+        "project": "default", "action": "deliver",
+        "recipient": "m5-opencode", "task_ref": "T-DUP",
+        "expires_at": time.time() + 3600, "issuer": "sam",
+        "payload_digest": fp("msg-body", body)}))
+    os.chmod(f, 0o640)
+    ast.issue(AuthRecord(auth_id="A-DUP", project="default",
+                         action="deliver", recipient="m5-opencode",
+                         task_ref="T-DUP",
+                         expires_at=time.time() + 3600, issuer="sam",
+                         payload_digest=fp("msg-body", body)))
+    mb.deliver(mid, auth_id="A-DUP")
+    mb.deliver(mid, auth_id="A-DUP")   # duplicate send (authorized retry)
     files = list((tmp_path / "boxes").rglob("*.md"))
     assert len(files) == 1, "duplicate delivery rewrites the same artifact"
     assert con.execute("SELECT attempts FROM messages "
@@ -191,11 +246,32 @@ def test_duplicate_delivery_idempotent(tmp_path):
 
 def test_delivery_without_ack_expires_and_escalates(tmp_path):
     con = _db(tmp_path)
-    pol = DeliveryPolicy(enabled=True, authorization_ref="SAM-TEST-1",
-                         outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol)
-    mid = mb.propose("m5-opencode", "question", "q", "body", ttl_s=-1)
-    mb.deliver(mid)
+    import os
+    from director_consumer.authorization import AuthRecord, AuthorizationStore
+    from director_consumer.schema import fp
+    apdir = tmp_path / "approvals"
+    apdir.mkdir(exist_ok=True)
+    ast = AuthorizationStore(con, approvals_dir=apdir,
+                             operator_uid=os.getuid(),
+                             service_uid=os.getuid() + 1)
+    pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
+    mb = MailboxDelivery(con, pol, authorizations=ast)
+    body = "body"
+    mid = mb.propose("m5-opencode", "question", "q", body, ttl_s=-1,
+                     correlation_id="T-EXP")
+    f = apdir / "A-EXP.json"
+    f.write_text(json.dumps({
+        "project": "default", "action": "deliver",
+        "recipient": "m5-opencode", "task_ref": "T-EXP",
+        "expires_at": time.time() + 3600, "issuer": "sam",
+        "payload_digest": fp("msg-body", body)}))
+    os.chmod(f, 0o640)
+    ast.issue(AuthRecord(auth_id="A-EXP", project="default",
+                         action="deliver", recipient="m5-opencode",
+                         task_ref="T-EXP",
+                         expires_at=time.time() + 3600, issuer="sam",
+                         payload_digest=fp("msg-body", body)))
+    mb.deliver(mid, auth_id="A-EXP")
     expired = mb.expire_due()
     assert mid in expired
     assert mb.snapshot()[0]["state"] == "expired"
@@ -203,11 +279,32 @@ def test_delivery_without_ack_expires_and_escalates(tmp_path):
 
 def test_crash_between_commit_and_delivery_recovers(tmp_path):
     con = _db(tmp_path)
-    pol = DeliveryPolicy(enabled=True, authorization_ref="SAM-TEST-1",
-                         outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol)
-    mid = mb.propose("m5-opencode", "status", "s", "body")
-    mb.deliver(mid)
+    import os
+    from director_consumer.authorization import AuthRecord, AuthorizationStore
+    from director_consumer.schema import fp
+    apdir = tmp_path / "approvals"
+    apdir.mkdir(exist_ok=True)
+    ast = AuthorizationStore(con, approvals_dir=apdir,
+                             operator_uid=os.getuid(),
+                             service_uid=os.getuid() + 1)
+    pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
+    mb = MailboxDelivery(con, pol, authorizations=ast)
+    body = "body"
+    mid = mb.propose("m5-opencode", "status", "s", body,
+                     correlation_id="T-REC")
+    f = apdir / "A-REC.json"
+    f.write_text(json.dumps({
+        "project": "default", "action": "deliver",
+        "recipient": "m5-opencode", "task_ref": "T-REC",
+        "expires_at": time.time() + 3600, "issuer": "sam",
+        "payload_digest": fp("msg-body", body)}))
+    os.chmod(f, 0o640)
+    ast.issue(AuthRecord(auth_id="A-REC", project="default",
+                         action="deliver", recipient="m5-opencode",
+                         task_ref="T-REC",
+                         expires_at=time.time() + 3600, issuer="sam",
+                         payload_digest=fp("msg-body", body)))
+    mb.deliver(mid, auth_id="A-REC")
     # simulate crash BEFORE the state write: state back to proposed
     con.execute("UPDATE messages SET state='proposed' WHERE message_id=?",
                 (mid,))
@@ -377,18 +474,43 @@ def test_two_projects_isolated_tasks_and_authority(tmp_path):
 
 
 def test_restart_and_replay_no_duplicate_messages(tmp_path):
+    import os
+    from director_consumer.authorization import AuthRecord, AuthorizationStore
+    from director_consumer.schema import fp
     con = _db(tmp_path)
-    pol = DeliveryPolicy(enabled=True, authorization_ref="SAM-TEST-1",
-                         outbox_root=tmp_path / "boxes")
-    mb = MailboxDelivery(con, pol)
-    mid = mb.propose("m5-opencode", "question", "q", "body")
+    apdir = tmp_path / "approvals"
+    apdir.mkdir(exist_ok=True)
+    body = "body"
+    f = apdir / "A-RR.json"
+    f.write_text(json.dumps({
+        "project": "default", "action": "deliver",
+        "recipient": "m5-opencode", "task_ref": "T-RR",
+        "expires_at": time.time() + 3600, "issuer": "sam",
+        "payload_digest": fp("msg-body", body)}))
+    os.chmod(f, 0o640)
+    ast = AuthorizationStore(con, approvals_dir=apdir,
+                             operator_uid=os.getuid(),
+                             service_uid=os.getuid() + 1)
+    ast.issue(AuthRecord(auth_id="A-RR", project="default",
+                         action="deliver", recipient="m5-opencode",
+                         task_ref="T-RR",
+                         expires_at=time.time() + 3600, issuer="sam",
+                         payload_digest=fp("msg-body", body)))
+    pol = DeliveryPolicy(outbox_root=tmp_path / "boxes")
+    mb = MailboxDelivery(con, pol, authorizations=ast)
+    mid = mb.propose("m5-opencode", "question", "q", body,
+                     correlation_id="T-RR")
     con.close()
     # "restart": new connection, same db
     con2 = _db(tmp_path)
-    mb2 = MailboxDelivery(con2, pol)
-    mid2 = mb2.propose("m5-opencode", "question", "q", "body")  # same id
+    ast2 = AuthorizationStore(con2, approvals_dir=apdir,
+                              operator_uid=os.getuid(),
+                              service_uid=os.getuid() + 1)
+    mb2 = MailboxDelivery(con2, pol, authorizations=ast2)
+    mid2 = mb2.propose("m5-opencode", "question", "q", body,
+                       correlation_id="T-RR")  # same id
     assert mid == mid2
-    mb2.deliver(mid2)
+    mb2.deliver(mid2, auth_id="A-RR")
     assert len(list((tmp_path / "boxes").rglob("*.md"))) == 1
     assert con2.execute("SELECT COUNT(*) FROM messages").fetchone()[0] == 1
 

@@ -43,7 +43,18 @@ def _rebuild(con, table: str, new_ddl: str, select_sql: str,
              legacy_keep: bool = True) -> None:
     tmp = f"{table}_scoped"
     con.execute(new_ddl)
+    before = con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
     con.execute(f"INSERT INTO {tmp} {select_sql}")
+    after = con.execute(f"SELECT COUNT(*) FROM {tmp}").fetchone()[0]
+    con.execute("CREATE TABLE IF NOT EXISTS migration_log ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL NOT NULL, "
+                "tbl TEXT NOT NULL, rows_before INTEGER NOT NULL, "
+                "rows_after INTEGER NOT NULL, note TEXT NOT NULL)")
+    con.execute("INSERT INTO migration_log(ts, tbl, rows_before, "
+                "rows_after, note) VALUES (?,?,?,?,?)",
+                (__import__('time').time(), table, before, after,
+                 "project-scope rebuild; original preserved as "
+                 f"{table}_legacy" if legacy_keep else "rebuild"))
     if legacy_keep:
         con.execute(f"ALTER TABLE {table} RENAME TO {table}_legacy")
     else:
