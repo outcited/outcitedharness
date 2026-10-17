@@ -123,13 +123,16 @@ def test_messages_and_incidents_scoped(tmp_path):
            "message_digest": __import__("director_consumer.schema",
                                         fromlist=["fp"]).fp("msg-body",
                                                             "same body")}
-    mb.record_ack(idb, from_agent="agent-x",
-                  transport=SessionTokenTransport({str(art): "ses-1"}),
-                  artifact_path=art, envelope=env,
-                  session_bindings={("beta", "T-1", 1): "ses-1"})
-    assert mb.snapshot()[0]["state"] == "acked"
+    # ack for an UNSENT message is never acceptance (fail closed) —
+    # and alpha must stay untouched either way
+    res = mb.record_ack(idb, from_agent="agent-x",
+                        transport=SessionTokenTransport({str(art): "ses-1"}),
+                        artifact_path=art, envelope=env,
+                        session_bindings={("beta", "T-1", 1): "ses-1"})
+    assert res == "ack-unverified", "unsent work cannot be accepted"
     assert ma.snapshot()[0]["state"] == "proposed", \
         "ack in beta must never mark alpha's message"
+    assert mb.snapshot()[0]["state"] in ("proposed", "ack-unverified")
     deps = __import__("yaml").safe_load(DEPS.read_text())
     ia = IncidentStore(con, load_correlations(deps), project="alpha")
     ib = IncidentStore(con, load_correlations(deps), project="beta")

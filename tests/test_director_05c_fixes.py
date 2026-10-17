@@ -258,16 +258,18 @@ def test_receipt_validation_rejects_rubbish(tmp_path):
     st, iid = _incident(tmp_path)
     # five nonempty fields is NOT sufficient: scope must match, age must be
     # valid, result must be meaningful
-    bad_scope = {"source": "s", "scope": "some other incident",
+    real_src = tmp_path / "facts.jsonl"
+    real_src.write_text("{}\n")
+    bad_scope = {"source": str(real_src), "scope": "some other incident",
                  "observed_at": "2026-10-17T00:00:00Z", "method": "m",
                  "result": "r"}
     with pytest.raises(RecoveryError):
         st.resolve(iid, "fixed", receipt=bad_scope)
-    bad_time = {"source": "s", "scope": f"incident:{iid}",
+    bad_time = {"source": str(real_src), "scope": f"incident:{iid}",
                 "observed_at": "not-a-time", "method": "m", "result": "r"}
     with pytest.raises(RecoveryError):
         st.resolve(iid, "fixed", receipt=bad_time)
-    stale = {"source": "s", "scope": f"incident:{iid}",
+    stale = {"source": str(real_src), "scope": f"incident:{iid}",
              "observed_at": "2020-01-01T00:00:00Z", "method": "m",
              "result": "r"}
     with pytest.raises(RecoveryError):
@@ -276,9 +278,11 @@ def test_receipt_validation_rejects_rubbish(tmp_path):
           "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
           "method": "count", "result": "0 new junk"}
     st.resolve(iid, "service recovered", receipt=ok)
-    row = st.con.execute("SELECT verified_cause, state FROM incidents "
-                         "WHERE incident_id=?", (iid,)).fetchone()
-    assert row[0] == "0 new junk" and row[1] == "resolved"
+    row = st.con.execute("SELECT verified_outcome, verified_cause, state "
+                         "FROM incidents WHERE incident_id=?",
+                         (iid,)).fetchone()
+    assert row[0] == "0 new junk" and row[2] == "resolved"
+    assert row[1] is None, "resolve() records outcome, never a cause"
 
 
 def test_verifier_rejects_false_report_claims(tmp_path):
@@ -365,11 +369,16 @@ def test_lost_ack_receiver_reconciliation(tmp_path):
     mb.deliver(mid, auth_id="A1", assignment_epoch=1)
     art = next((tmp_path / "inbox").rglob(f"*{mid}*.md"))
     recv = Receiver(tmp_path / "receiver")
-    assert recv.accept(art, mid) == "accepted"
+    from director_consumer.acceptance import scoped_receipt
+    from director_consumer.schema import fp as _fp
+    recv.accept(art, scoped_receipt(
+        mid, "proj-a", "T-1", 1, "ses-1",
+        _fp("msg-body", "investigate supply")))
     # ack lost: sender still 'sent'
     assert mb.con.execute("SELECT state FROM messages WHERE message_id=?",
                           (mid,)).fetchone()[0] == "sent"
-    settled = mb.reconcile_with_receiver(recv)
+    settled = mb.reconcile_with_receiver(
+        recv, session_bindings={("proj-a", "T-1", 1): "ses-1"})
     assert mid in settled, "receiver receipt settles the lost ack"
     assert mb.con.execute("SELECT state FROM messages WHERE message_id=?",
                           (mid,)).fetchone()[0] == "acked"

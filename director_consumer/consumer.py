@@ -23,6 +23,7 @@ from .llm import OpsBrainClient
 from .mailgen import build_escalation, build_message, write_proposal_atomic
 from .ownership import (OwnershipReconciler, scan_git_claims,
                         scan_mailbox_hints, scan_session_claims)
+import os
 from .authorization import AuthorizationStore
 from .manufacturers import ManufacturerTelemetry
 
@@ -149,8 +150,21 @@ class DirectorConsumer:
                 .get("delivery", {})
         approvals = delivery_cfg.get("approvals_dir") or str(
             self.workspace / "approvals")
-        self.authz = AuthorizationStore(self.state.con, approvals_dir=approvals)
-        self.transport = UidTransport(delivery_cfg.get("agent_uids", {}))
+        # closure §6: operator identity comes from PROTECTED deployment
+        # config; service identity is the real process. Missing operator
+        # config fails closed (no approval can ever validate).
+        op_uid = delivery_cfg.get("operator_uid")
+        self.authz = AuthorizationStore(
+            self.state.con, approvals_dir=approvals,
+            operator_uid=int(op_uid) if op_uid is not None else -1,
+            service_uid=os.getuid())
+        tkind = delivery_cfg.get("transport", "opencode-session")
+        if tkind == "uid-host":
+            self.transport = UidTransport(delivery_cfg.get("agent_uids", {}))
+        else:
+            from .messaging import OpenCodeSessionTransport
+            self.transport = OpenCodeSessionTransport(
+                bindings_file=delivery_cfg.get("session_bindings"))
         self.mail = MailboxDelivery(
             self.state.con,
             DeliveryPolicy.load(pol_path, self.workspace / "mailboxes"),

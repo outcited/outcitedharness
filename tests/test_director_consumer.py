@@ -232,11 +232,13 @@ def test_sam_reserved_generates_escalation_draft_only(tmp_path):
 
 
 def test_llm_total_loss_ingestion_continues(tmp_path):
+    import time as _t
+    _hdr = _t.strftime("%Y-%m-%dT%H:%M:%SZ", _t.gmtime())
     feeds = build_feeds(tmp_path,
-                        changes="## 2026-10-16T04:00:00Z\n- asus2: ['a'] -> ['b']\n",
-                        alerts="## 2026-10-16T04:00:00Z — GOLD DRIFT f1 0.16 -> 0.30\n",
+                        changes=f"## {_hdr}\n- asus2: ['a'] -> ['b']\n",
+                        alerts=f"## {_hdr} — GOLD DRIFT f1 0.16 -> 0.30\n",
                         factory_events=[("e9", "queue_registered", "q-1", "{}",
-                                         "2026-10-16T04:00:00")])
+                                         _hdr)])
     from director_consumer.llm import Endpoint, OpsBrainClient
     dead = OpsBrainClient(endpoints=[
         Endpoint("dead1", "http://127.0.0.1:1", "m"),

@@ -15,6 +15,7 @@ Tables (director.db):
 from __future__ import annotations
 
 import json
+import os
 import time
 from dataclasses import dataclass
 from typing import Optional
@@ -34,6 +35,7 @@ CREATE TABLE IF NOT EXISTS incidents (
     severity TEXT NOT NULL,
     suspected_cause TEXT NOT NULL,
     verified_cause TEXT,
+    verified_outcome TEXT,
     owner TEXT,
     related_rules TEXT NOT NULL,
     evidence TEXT NOT NULL,
@@ -130,7 +132,13 @@ class IncidentStore:
         if "lifecycle_state" not in cols:
             con.execute("ALTER TABLE incidents ADD COLUMN lifecycle_state "
                         "TEXT NOT NULL DEFAULT 'detected'")
-            con.commit()
+        if "verified_outcome" not in cols:
+            con.execute("ALTER TABLE incidents ADD COLUMN verified_outcome "
+                        "TEXT")
+        if "occurrence" not in cols:
+            con.execute("ALTER TABLE incidents ADD COLUMN occurrence "
+                        "INTEGER NOT NULL DEFAULT 1")
+        con.commit()
         self.by_rule = {rid: r for r in correlations for rid in r.group_rules}
 
     # ---- recovery lifecycle (§4) ----
@@ -327,13 +335,29 @@ class IncidentStore:
                            f"({age/3600:.1f}h) — not current evidence")
         if len(str(receipt["result"])) < 2 or len(str(receipt["method"])) < 2:
             return False, "receipt method/result are not substantive"
+        # closure §4: format != outcome. A well-formed FAILURE result
+        # never verifies recovery.
+        res = str(receipt["result"]).lower()
+        if any(bad in res for bad in ("failed", "still broken", "unhealthy",
+                                      "not recovered", "regressed")):
+            return False, (f"receipt result is a FAILURE "
+                           f"({receipt['result']!r}) — outcomes must "
+                           f"succeed to verify")
+        # a path-like source must RESOLVE — an unresolvable source is not
+        # proof of anything
+        src = str(receipt.get("source", ""))
+        looks_path = src.startswith(("/", "./", "../")) or any(
+            src.endswith(ext) for ext in (".json", ".jsonl", ".db", ".md",
+                                          ".txt", ".log"))
+        if looks_path and not os.path.exists(src):
+            return False, f"receipt source does not resolve: {src}"
         return True, "receipt valid"
 
     def resolve(self, incident_id: str, resolution: str,
                 receipt: Optional[dict] = None) -> None:
-        """05C §4/§6: suspected_cause is NEVER copied into verified_cause.
-        Resolution REQUIRES a validated receipt — without one the
-        incident stays visible in the open view (no silent removal)."""
+        """closure §4: resolve records a verified OUTCOME only. A generic
+        observation result is NEVER stored as a verified causal
+        explanation; suspected_cause is never promoted."""
         if receipt is None:
             raise RecoveryError(
                 "resolve() requires a verification receipt — an incident "
@@ -343,9 +367,28 @@ class IncidentStore:
             raise RecoveryError(f"receipt rejected: {why}")
         self.con.execute(
             "UPDATE incidents SET state='resolved', resolution=?, "
-            "verified_cause=COALESCE(verified_cause, ?) "
-            "WHERE incident_id=? AND project=?",
+            "verified_outcome=? WHERE incident_id=? AND project=?",
             (resolution, receipt.get("result"), incident_id, self.project))
+
+    def establish_cause(self, incident_id: str, receipt: dict) -> None:
+        """closure §4: a CAUSAL claim needs its own explicit receipt
+        (kind: root-cause / causal: true + a causal method). Recovery may
+        be verified while the root cause stays unknown — and a generic
+        observation can never become a cause."""
+        if not (receipt.get("causal") or receipt.get("kind") == "root-cause"):
+            raise RecoveryError(
+                "causal conclusion requires an explicit causal receipt "
+                "(kind=root-cause) — observations are not causes")
+        ok, why = self.validate_receipt(incident_id, receipt)
+        if not ok:
+            raise RecoveryError(f"receipt rejected: {why}")
+        if len(str(receipt.get("result", ""))) < 8:
+            raise RecoveryError("causal result is not substantive")
+        self.con.execute(
+            "UPDATE incidents SET verified_cause=? WHERE incident_id=? "
+            "AND project=?",
+            (receipt.get("result"), incident_id, self.project))
+        self.con.commit()
 
     def open_incidents(self) -> list[dict]:
         rows = self.con.execute(

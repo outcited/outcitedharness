@@ -205,13 +205,17 @@ def test_receipt_fields_required_for_verified_cause(tmp_path):
     st, iid = _inc(tmp_path)
     with pytest.raises(RecoveryError):
         st.resolve(iid, "fixed", receipt={"result": "ok"})   # incomplete
+    real = tmp_path / "facts.jsonl"
+    real.write_text("{}\n")
     st.resolve(iid, "service recovered; root cause unknown", receipt={
-        "source": "jobs table", "scope": f"incident:{iid} new deliveries 24h",
+        "source": str(real), "scope": f"incident:{iid} new deliveries 24h",
         "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "method": "count of basenames prefix '._'", "result": "0 new junk"})
-    row = st.con.execute("SELECT verified_cause FROM incidents "
-                         "WHERE incident_id=?", (iid,)).fetchone()
+    row = st.con.execute("SELECT verified_outcome, verified_cause "
+                         "FROM incidents WHERE incident_id=?",
+                         (iid,)).fetchone()
     assert row[0] == "0 new junk"
+    assert row[1] is None, "outcome is never a cause"
 
 
 def test_old_occurrence_evidence_cannot_close_recurrence(tmp_path):

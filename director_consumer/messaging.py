@@ -25,6 +25,7 @@ from typing import Optional
 
 from .schema import fp, utcnow
 from .scope import ensure_scoped
+from .acceptance import scoped_receipt, validate_acceptance
 from .authorization import AuthRequest, AuthorizationStore
 
 SCHEMA = """
@@ -89,6 +90,36 @@ def _auth_request(project: str, m: dict, body_digest: str,
                        transport=transport,
                        assignment_epoch=assignment_epoch,
                        sender=sender)
+
+
+class OpenCodeSessionTransport:
+    """PRODUCTION adapter for OpenCode session origin.
+
+    Assurance level (honest): origin is resolved from an OPERATOR-PROTECTED
+    sessions binding (artifact -> session token registered at session
+    start) plus existence of the session in the local OpenCode metadata
+    store. The installed opencode.db schema carries NO signed session
+    tokens (inspected 2026-10), so cryptographic origin binding is a
+    SOFTWARE GAP — this adapter is the strongest available until OpenCode
+    exposes authenticated session receipts. It is NOT the test double
+    (SessionTokenTransport) and must not be confused with it.
+    """
+
+    def __init__(self, bindings_file=None, opencode_db=None):
+        self.bindings_file = bindings_file
+        self.opencode_db = opencode_db
+
+    def verify_origin(self, artifact_path):
+        if not self.bindings_file:
+            return None
+        try:
+            data = json.loads(Path(self.bindings_file).read_text())
+        except (OSError, json.JSONDecodeError):
+            return None
+        session = data.get(str(artifact_path))
+        if not session:
+            return None
+        return session   # existence in bindings is the interim proof
 
 
 class SessionTokenTransport:
@@ -265,6 +296,9 @@ class MailboxDelivery:
                     raise DeliveryDisabled(f"authorization refused: {why}")
                 # validated + reserved + envelope + intent commit together
                 # immutable action envelope persisted with the intent
+                dest_root = str(Path(self.policy.outbox_root)
+                                / m["recipient"]) if self.policy.outbox_root \
+                    else ""
                 self.con.execute(
                     "INSERT OR REPLACE INTO action_envelopes("
                     "action_id, project, envelope_json, body_digest, "
@@ -276,9 +310,12 @@ class MailboxDelivery:
                         "task_ref": m.get("correlation_id", ""),
                         "msg_type": m["msg_type"], "subject": m["subject"],
                         "body_digest": body_digest,
+                        "body": m["body"],
+                        "destination": dest_root,
                         "transport": self.transport_name,
                         "assignment_epoch": assignment_epoch,
-                        "auth_id": auth_id}), body_digest, auth_id,
+                        "max_actions": 1,
+                        "approval_id": auth_id}), body_digest, auth_id,
                      utcnow()))
             # CAS transition: only one racer wins the intent
             cur = self.con.execute(
@@ -303,11 +340,25 @@ class MailboxDelivery:
         env = self._envelope(message_id)
         if not env:
             raise DeliveryDisabled("no persisted envelope — refuse to act")
+        # closure §5: revocation/expiry/artifact re-checked immediately
+        # before any external effect
+        if self.authorizations is not None and env.get("approval_id"):
+            elig, why = self.authorizations.still_eligible(env["approval_id"])
+            if not elig:
+                self.con.execute(
+                    "UPDATE messages SET state='revoked-before-send' "
+                    "WHERE message_id=? AND project=?",
+                    (message_id, self.project))
+                self._event(message_id, "revoked-before-send", why)
+                self.con.commit()
+                raise DeliveryDisabled(f"stopped before effect: {why}")
         ts = time.strftime("%Y%m%dT%H%M%SZ",
                            time.gmtime(float(m["created_at"])))
         fname = f"{ts}_{env['sender']}_{env['recipient']}_" \
                 f"{env['msg_type']}_{env['action_id']}.md"
-        root = Path(self.policy.outbox_root)
+        dest_dir = Path(env.get("destination") or
+                        (Path(self.policy.outbox_root) / env["recipient"]))
+        root = dest_dir.parent
         if self.policy.require_existing_root and not root.exists():
             # 05C: a missing destination (e.g. unmounted NAS) must never
             # become a local impostor inbox
@@ -316,8 +367,9 @@ class MailboxDelivery:
                         f"create an impostor inbox")
             self.con.commit()
             raise DeliveryDisabled(f"destination unavailable: {root}")
-        dest = root / env["recipient"] / fname
+        dest = dest_dir / fname
         dest.parent.mkdir(parents=True, exist_ok=True)
+        approved_body = env.get("body", m["body"])
         if dest.exists():
             prev = dest.read_text(errors="replace")
             # identical content: reconciled, nothing rewritten; ANY
@@ -336,7 +388,7 @@ class MailboxDelivery:
             self.con.commit()
             return "conflict"
         tmp = dest.with_suffix(".md.tmp")
-        tmp.write_text(m["body"])
+        tmp.write_text(approved_body)   # persisted action, not the row
         tmp.replace(dest)
         if os.environ.get("DIRECTOR_FAILPOINT") == "after-write-before-sent":
             os._exit(9)   # real crash boundary for failure tests
@@ -371,62 +423,31 @@ class MailboxDelivery:
             "project=?", (message_id, self.project)).fetchone()
         intended = row[0] if row else ""
         env = envelope or {}
-        problems = []
-        if not env:
-            problems.append("missing ack envelope")
+        row_full = self.con.execute(
+            "SELECT * FROM messages WHERE message_id=? AND project=?",
+            (message_id, self.project)).fetchone()
+        if row_full is None:
+            persisted = {}
         else:
-            for fld in ("ack_of", "project", "task_ref", "epoch",
-                        "session_id", "message_digest"):
-                if env.get(fld) in (None, ""):
-                    problems.append(f"envelope missing {fld}")
-            if env.get("ack_of") not in (None, "") and \
-                    env.get("ack_of") != message_id:
-                problems.append("ack_of does not match this message")
-            if env.get("project") not in (None, "") and \
-                    env.get("project") != self.project:
-                problems.append("envelope project mismatch")
-            msg = self.con.execute(
-                "SELECT body FROM messages WHERE message_id=? AND "
-                "project=?", (message_id, self.project)).fetchone()
-            from .schema import fp as _fp
-            if msg and env.get("message_digest") and \
-                    env["message_digest"] != _fp("msg-body", msg[0]):
-                problems.append("message digest mismatch")
-        # session binding is REQUIRED — a missing map fails closed
-        if not session_bindings:
-            problems.append("missing session bindings (fail closed)")
-        else:
-            want = session_bindings.get(
-                (env.get("project"), env.get("task_ref"), env.get("epoch")))
-            if want is None:
-                problems.append("no registered session binding for "
-                                "project/task/epoch")
-        # origin must be ESTABLISHED by the trusted transport from the
-        # artifact — caller-declared session text is not origin proof
+            cols = [d[0] for d in self.con.execute(
+                "SELECT * FROM messages LIMIT 0").description]
+            persisted = dict(zip(cols, row_full))
+        persisted["message_id"] = message_id
+        persisted["project"] = self.project
+        persisted.setdefault("task_ref", persisted.get("correlation_id", ""))
+        # origin is ESTABLISHED by the trusted transport/adapter only
         origin = None
         if transport is not None and artifact_path is not None:
             try:
                 origin = transport.verify_origin(artifact_path)
             except Exception:  # noqa: BLE001
                 origin = None
-            if origin is None:
-                problems.append("transport cannot establish session origin")
-            elif session_bindings:
-                want = session_bindings.get(
-                    (env.get("project"), env.get("task_ref"), env.get("epoch")))
-                if want is not None and origin != want:
-                    problems.append(
-                        f"origin session {origin} is not the registered "
-                        f"binding {want}")
-                if env.get("session_id") and env.get("session_id") != origin:
-                    problems.append(
-                        "claimed session text disagrees with established "
-                        "origin")
-        else:
-            problems.append("no trusted transport evidence")
-        accepted = (not problems and from_agent and
-                    (from_agent == intended or
-                     from_agent == f"agent:{intended}"))
+        ok_acc, problems = validate_acceptance(
+            persisted, env, origin, session_bindings,
+            persisted.get("state", ""))
+        if from_agent not in (intended, f"agent:{intended}"):
+            problems.append("sender does not match the intended recipient")
+        accepted = ok_acc and not problems
         if not accepted:
             self.con.execute(
                 "INSERT INTO invalid_receipts(message_id, project, reason, "
@@ -488,41 +509,71 @@ class MailboxDelivery:
                 recovered.append(mid)
             head = f.read_text(errors="replace")[:2000]
             if "ack_of:" in head and row[0] not in ("acked",):
-                # P0-4: the From: header alone proves nothing — origin
-                # must come from the transport's attributable evidence
+                # closure §3: mailbox recovery uses the SAME validator;
+                # the file must carry a scoped envelope or it settles
+                # nothing
                 sender = ""
+                env = {}
                 for line in head.splitlines():
                     if line.lower().startswith("from:"):
                         sender = line.split(":", 1)[1].strip()
+                    if line.lower().startswith("envelope:"):
+                        try:
+                            env = json.loads(line.split(":", 1)[1].strip())
+                        except json.JSONDecodeError:
+                            env = {}
                 self.record_ack(mid, ack_body="recovered from mailbox",
                                 from_agent=sender,
                                 transport=self.transport,
-                                artifact_path=f)
+                                artifact_path=f, envelope=env,
+                                session_bindings=None)
                 recovered.append(mid)
         self.con.commit()
         return recovered
 
-    def reconcile_with_receiver(self, receiver) -> list[str]:
-        """05C §5/H: when an ack is lost but the RECEIVER accepted the
-        work, settle the message from the receiver's receipt — never
-        resend blindly, never leave it pending forever."""
+    def reconcile_with_receiver(self, receiver,
+                                session_bindings: Optional[dict] = None
+                                ) -> list[str]:
+        """05C closure §3: the receiver must return SCOPED acceptance
+        receipts validated by the same contract as record_ack. A bare
+        message id is not proof of task acceptance and settles nothing."""
         settled = []
         try:
-            accepted = set(receiver.receipts())
+            receipts = list(receiver.receipts())
         except Exception:  # noqa: BLE001
             return settled
-        rows = self.con.execute(
-            "SELECT message_id, state FROM messages WHERE project=?",
-            (self.project,)).fetchall()
-        for mid, state in rows:
-            if mid in accepted and state in ("sent", "delivering"):
-                self.con.execute(
-                    "UPDATE messages SET state='acked', acked_at=? "
-                    "WHERE message_id=? AND project=?",
-                    (utcnow(), mid, self.project))
-                self._event(mid, "acked",
-                            "settled from receiver receipt (ack was lost)")
-                settled.append(mid)
+        for rec in receipts:
+            if not isinstance(rec, dict):
+                self._event("?", "receipt_rejected",
+                            f"bare id {rec!r} is not an acceptance receipt")
+                continue
+            mid = rec.get("ack_of", "")
+            row = self.con.execute(
+                "SELECT * FROM messages WHERE message_id=? AND project=?",
+                (mid, rec.get("project", self.project))).fetchone()
+            if row is None:
+                continue
+            cols = [d[0] for d in self.con.execute(
+                "SELECT * FROM messages LIMIT 0").description]
+            persisted = dict(zip(cols, row))
+            persisted["message_id"] = mid
+            persisted["task_ref"] = persisted.get("correlation_id", "")
+            # the receiver ledger IS the trusted side once it carries a
+            # scoped receipt; origin comes from the receipt's session,
+            # which must match the registered binding
+            ok, problems = validate_acceptance(
+                persisted, rec, rec.get("session_id"), session_bindings,
+                persisted.get("state", "sent"))
+            if not ok:
+                self._event(mid, "receipt_rejected", "; ".join(problems))
+                continue
+            self.con.execute(
+                "UPDATE messages SET state='acked', acked_at=? "
+                "WHERE message_id=? AND project=? AND state!='acked'",
+                (utcnow(), mid, persisted.get("project", self.project)))
+            self._event(mid, "acked",
+                        "settled from scoped receiver receipt")
+            settled.append(mid)
         self.con.commit()
         return settled
 

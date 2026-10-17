@@ -89,7 +89,7 @@ class VerifierFixture:
         return {"verdict": "reject" if bad else "accept", "reasons": bad}
 
 
-def crash_child(kind: str, ws: str, mid: str, auth_id: str) -> None:
+def crash_child(kind: str, ws: str, mid: str, auth_id: str = "A1") -> None:
     """Child that dies at a REAL persistence boundary (05C §5)."""
     db = ws + "/director.db"
     if not os.path.exists(db):
@@ -133,8 +133,9 @@ from .tasks import TaskStore
 DEPS = Path(__file__).parent / "deps.yaml"
 
 
-def _racer(q, ws, mid):
-    """Module-level so multiprocessing spawn can pickle it (case I)."""
+def _racer(result_path, ws, mid, auth_id="A1"):
+    """Module-level racer (spawn-safe). Every caller files its outcome —
+    no shared queue to lose results in."""
     try:
         con = sqlite3.connect(ws + "/director.db", timeout=30)
         con.row_factory = sqlite3.Row
@@ -144,10 +145,13 @@ def _racer(q, ws, mid):
             test_identities=True)
         mbb = MailboxDelivery(con, DeliveryPolicy(
             outbox_root=Path(ws) / "receiver-inbox"),
-            authorizations=st_, project="proj-a", mode="test-delivery")
-        q.put(mbb.deliver(mid, auth_id="A1"))
+            authorizations=st_, project="proj-a", mode="test-delivery",
+            transport_name="isolated-rehearsal-transport")
+        out = mbb.deliver(mid, auth_id=auth_id, assignment_epoch=1)
     except Exception as e:  # noqa: BLE001
-        q.put(type(e).__name__)
+        out = type(e).__name__
+    with open(result_path, "w") as fh:
+        fh.write(out)
 
 
 class Receiver:
@@ -159,24 +163,40 @@ class Receiver:
         self.root.mkdir(parents=True, exist_ok=True)
         self.ledger = self.root / "accepted.jsonl"
 
-    def accept(self, artifact: Path, action_id: str) -> str:
+    def accept(self, artifact, action_id) -> str:
+        """Accept work. `action_id` may be a bare id (legacy) or a SCOPED
+        acceptance receipt dict (05C closure §3) — scoped receipts are
+        what reconciliation can settle from."""
+        if isinstance(action_id, dict):
+            key = action_id.get("ack_of") or action_id.get("action_id")
+            receipt = dict(action_id)
+        else:
+            key = action_id
+            receipt = {"action_id": action_id}
         seen = self._seen()
-        if action_id in seen:
+        if key in seen:
             return "duplicate-suppressed"
+        receipt["artifact"] = str(artifact)
+        receipt["ts"] = time.time()
         with open(self.ledger, "a") as fh:
-            fh.write(json.dumps({"action_id": action_id,
-                                 "artifact": str(artifact),
-                                 "ts": time.time()}) + "\n")
+            fh.write(json.dumps(receipt) + "\n")
         return "accepted"
 
     def _seen(self) -> set:
         if not self.ledger.exists():
             return set()
-        return {json.loads(l)["action_id"]
-                for l in open(self.ledger) if l.strip()}
+        out = set()
+        for l in open(self.ledger):
+            if not l.strip():
+                continue
+            r = json.loads(l)
+            out.add(r.get("ack_of") or r.get("action_id"))
+        return out
 
     def receipts(self) -> list:
-        return list(self._seen())
+        if not self.ledger.exists():
+            return []
+        return [json.loads(l) for l in open(self.ledger) if l.strip()]
 
 
 def _mk_approval(apdir: Path, auth_id: str, **fields):
@@ -387,7 +407,19 @@ def run_rehearsal(workspace: Path) -> dict:
                          transport_name="isolated-rehearsal-transport")
     mid = mb.propose("agent-proj-a", "question", "supply investigation",
                      "investigate supply", correlation_id="SUPPLY-RECON-01")
-    st = mb.deliver(mid, auth_id="A1", assignment_epoch=1)
+    _mk_approval(apdir, "A-MAIN", project="proj-a", action="deliver",
+                 recipient="agent-proj-a", task_ref="SUPPLY-RECON-01",
+                 objective_ref="OBJ-SUPPLY-1",
+                 expires_at=time.time() + 3600, issuer="sam",
+                 payload_digest=fp("msg-body", "investigate supply"),
+                 max_actions=1)
+    authz.issue(AuthRecord(auth_id="A-MAIN", project="proj-a",
+                           action="deliver", recipient="agent-proj-a",
+                           task_ref="SUPPLY-RECON-01",
+                           objective_ref="OBJ-SUPPLY-1",
+                           expires_at=time.time() + 3600, issuer="sam",
+                           payload_digest=fp("msg-body", "investigate supply")))
+    st = mb.deliver(mid, auth_id="A-MAIN", assignment_epoch=1)
     arts = list((ws / "receiver-inbox").rglob("*.md"))
     acc = receiver.accept(arts[0], mid) if arts else "missing"
     dup = receiver.accept(arts[0], mid) if arts else "-"
@@ -520,20 +552,35 @@ def run_rehearsal(workspace: Path) -> dict:
     # ---------- H. accepted but ack lost: receiver reconciliation ----------
     mid_h = mb.propose("agent-proj-a", "status", "lost-ack", "lost-ack-body",
                        correlation_id="SUPPLY-RECON-01")
-    _mk_approval(apdir, "A1", project="proj-a", action="deliver",
+    _mk_approval(apdir, "A-LOSTACK", project="proj-a", action="deliver",
                  recipient="agent-proj-a", task_ref="SUPPLY-RECON-01",
                  expires_at=time.time() + 3600, issuer="sam",
-                 payload_digest=fp("msg-body", "lost-ack-body"))
-    mb.deliver(mid_h, auth_id="A1", assignment_epoch=1)
+                 payload_digest=fp("msg-body", "lost-ack-body"),
+                 max_actions=1)
+    authz.issue(AuthRecord(auth_id="A-LOSTACK", project="proj-a",
+                           action="deliver", recipient="agent-proj-a",
+                           task_ref="SUPPLY-RECON-01",
+                           expires_at=time.time() + 3600, issuer="sam",
+                           payload_digest=fp("msg-body", "lost-ack-body")))
+    mb.deliver(mid_h, auth_id="A-LOSTACK", assignment_epoch=1)
     art_h = next((ws / "receiver-inbox").rglob(f"*{mid_h}*.md"))
-    receiver.accept(art_h, mid_h)   # receiver takes the work; ack is LOST
-    settled = mb.reconcile_with_receiver(receiver)
+    # receiver takes the work and records a SCOPED receipt; the ack on the
+    # wire is lost
+    from .acceptance import scoped_receipt
+    receiver.accept(art_h, scoped_receipt(
+        mid_h, "proj-a", "SUPPLY-RECON-01", 1, "ses-owner",
+        fp("msg-body", "lost-ack-body")))
+    settled = mb.reconcile_with_receiver(
+        receiver,
+        session_bindings={("proj-a", "SUPPLY-RECON-01", 1): "ses-owner"})
     state_h = mb.con.execute(
         "SELECT state FROM messages WHERE message_id=?",
         (mid_h,)).fetchone()[0]
+    rkeys = [r.get("ack_of") or r.get("action_id")
+             for r in receiver.receipts()]
     report["cases"]["H_lost_ack_receiver_reconciliation"] = {
         "pass": mid_h in settled and state_h == "acked"
-                and len(receiver.receipts()) == len(set(receiver.receipts())),
+                and len(rkeys) == len(set(rkeys)),
         "evidence": f"settled={mid_h in settled} state={state_h}; "
                     f"no resend (acceptances unique)"}
 
@@ -543,22 +590,31 @@ def run_rehearsal(workspace: Path) -> dict:
                        ("after-write-before-sent", "G")):
         mid2 = mb.propose("agent-proj-a", "status", f"crash-{case}",
                           f"body-{case}", correlation_id="SUPPLY-RECON-01")
-        # each crash case is its own approved action (fresh digest)
-        _mk_approval(apdir, "A1", project="proj-a", action="deliver",
+        # each crash case is its own approved action (fresh grant)
+        _mk_approval(apdir, f"A-CRASH-{case}", project="proj-a",
+                     action="deliver",
                      recipient="agent-proj-a",
                      task_ref="SUPPLY-RECON-01",
                      expires_at=time.time() + 3600, issuer="sam",
-                     payload_digest=fp("msg-body", f"body-{case}"))
+                     payload_digest=fp("msg-body", f"body-{case}"),
+                     max_actions=1)
+        authz.issue(AuthRecord(auth_id=f"A-CRASH-{case}", project="proj-a",
+                               action="deliver", recipient="agent-proj-a",
+                               task_ref="SUPPLY-RECON-01",
+                               expires_at=time.time() + 3600, issuer="sam",
+                               payload_digest=fp("msg-body", f"body-{case}")))
         proc = subprocess.Popen(
             [sys.executable, "-c",
              "import sys; sys.path.insert(0, %r); "
              "from director_consumer.rehearse import _crash_child; "
-             "_crash_child(%r, %r, %r)" % (
-                 str(Path(__file__).parent.parent), kind, str(ws), mid2)])
+             "_crash_child(%r, %r, %r, %r)" % (
+                 str(Path(__file__).parent.parent), kind, str(ws), mid2,
+                 f"A-CRASH-{case}")])
         proc.wait(timeout=60)
         before = len(list((ws / "receiver-inbox").rglob(f"*{mid2}*.md")))
         # restart: the same approval must complete the action (no new grant)
-        st2 = mb.deliver(mid2, auth_id="A1", assignment_epoch=1)
+        st2 = mb.deliver(mid2, auth_id=f"A-CRASH-{case}",
+                         assignment_epoch=1)
         after = len(list((ws / "receiver-inbox").rglob(f"*{mid2}*.md")))
         report["cases"][f"{case}_crash_recovery"] = {
             "pass": st2 in ("sent",) and after == 1 and before <= 1,
@@ -570,18 +626,31 @@ def run_rehearsal(workspace: Path) -> dict:
     mid3 = mb.propose("agent-proj-a", "status", "race", "race-body",
                       correlation_id="SUPPLY-RECON-01")
 
-    _mk_approval(apdir, "A1", project="proj-a", action="deliver",
+    _mk_approval(apdir, "A-RACE", project="proj-a", action="deliver",
                  recipient="agent-proj-a", task_ref="SUPPLY-RECON-01",
                  expires_at=time.time() + 3600, issuer="sam",
-                 payload_digest=fp("msg-body", "race-body"))
-    q = mp.Queue()
-    procs = [mp.Process(target=_racer, args=(q, str(ws), mid3))
-             for _ in range(6)]
+                 payload_digest=fp("msg-body", "race-body"),
+                 max_actions=1)
+    authz.issue(AuthRecord(auth_id="A-RACE", project="proj-a",
+                           action="deliver", recipient="agent-proj-a",
+                           task_ref="SUPPLY-RECON-01",
+                           expires_at=time.time() + 3600, issuer="sam",
+                           payload_digest=fp("msg-body", "race-body")))
+    rdir = ws / "race-results"
+    rdir.mkdir(exist_ok=True)
+    procs = [mp.Process(target=_racer,
+                        args=(str(rdir / f"r{i}.out"), str(ws), mid3,
+                              "A-RACE"))
+             for i in range(6)]
     for pr in procs:
         pr.start()
     for pr in procs:
-        pr.join(timeout=60)
-    outcomes = [q.get(timeout=10) for _ in range(6)]
+        pr.join(timeout=90)
+    outcomes = []
+    for i in range(6):
+        f = rdir / f"r{i}.out"
+        outcomes.append(f.read_text().strip() if f.exists() else
+                        f"NO-RESULT(exit={procs[i].exitcode})")
     files3 = list((ws / "receiver-inbox").rglob(f"*{mid3}*.md"))
     report["cases"]["I_concurrent_no_lock"] = {
         "pass": len(files3) == 1 and outcomes.count("sent") >= 1 and
@@ -595,12 +664,17 @@ def run_rehearsal(workspace: Path) -> dict:
                           project="proj-a", mode="test-delivery")
     mid4 = mbm.propose("agent-proj-a", "status", "nas", "nas-body",
                        correlation_id="SUPPLY-RECON-01")
-    _mk_approval(apdir, "A1", project="proj-a", action="deliver",
+    _mk_approval(apdir, "A-NAS", project="proj-a", action="deliver",
                  recipient="agent-proj-a", task_ref="SUPPLY-RECON-01",
                  expires_at=time.time() + 3600, issuer="sam",
-                 payload_digest=fp("msg-body", "nas-body"))
+                 payload_digest=fp("msg-body", "nas-body"), max_actions=1)
+    authz.issue(AuthRecord(auth_id="A-NAS", project="proj-a",
+                           action="deliver", recipient="agent-proj-a",
+                           task_ref="SUPPLY-RECON-01",
+                           expires_at=time.time() + 3600, issuer="sam",
+                           payload_digest=fp("msg-body", "nas-body")))
     try:
-        mbm.deliver(mid4, auth_id="A1", assignment_epoch=1)
+        mbm.deliver(mid4, auth_id="A-NAS", assignment_epoch=1)
         nas = "delivered"
     except DeliveryDisabled as e:
         nas = f"refused: {e}"
@@ -641,8 +715,8 @@ def run_rehearsal(workspace: Path) -> dict:
         "pass": obs.startswith("refused"),
         "evidence": obs}
     # C: revoked/expired/malformed
-    authz.revoke("proj-a", "A1")
-    ok_c, why_c = authz.check("A1", AuthRequest(
+    authz.revoke("proj-a", "A-MAIN")
+    ok_c, why_c = authz.check("A-MAIN", AuthRequest(
         project="proj-a", action="deliver", recipient="agent-proj-a",
         task_ref="SUPPLY-RECON-01", payload_digest=fp("msg-body", "x")))
     report["cases"]["C_revocation_enforced"] = {

@@ -53,6 +53,12 @@ CREATE TABLE IF NOT EXISTS authorizations (
     revoked INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (project, auth_id)
 );
+CREATE TABLE IF NOT EXISTS grant_bindings (
+    auth_id TEXT PRIMARY KEY,
+    project TEXT NOT NULL,
+    action_id TEXT NOT NULL,
+    bound_at REAL NOT NULL
+);
 CREATE TABLE IF NOT EXISTS auth_nonces (
     nonce TEXT PRIMARY KEY,
     project TEXT NOT NULL DEFAULT 'default',
@@ -257,6 +263,28 @@ class AuthorizationStore:
         ok, why = self.check(auth_id, request, consume=False)
         if not ok:
             return False, why
+        # 05C closure §5: a single-action grant is ATOMICALLY bound to
+        # the one immutable action that consumes it — an omitted artifact
+        # action_id never becomes a reusable grant
+        data, _why = self._read_artifact(auth_id)
+        data = data or {}
+        max_actions = 1
+        try:
+            max_actions = int(data.get("max_actions", 1) or 1)
+        except (TypeError, ValueError):
+            max_actions = 1
+        if max_actions <= 1:
+            bind = cur.execute(
+                "SELECT action_id FROM grant_bindings WHERE auth_id=?",
+                (auth_id,)).fetchone()
+            if bind is not None and bind[0] != request.action_id:
+                return False, ("single-action grant already bound to action "
+                               f"{bind[0]!r}")
+            if bind is None:
+                cur.execute(
+                    "INSERT INTO grant_bindings(auth_id, project, action_id, "
+                    "bound_at) VALUES (?,?,?,?)",
+                    (auth_id, request.project, request.action_id, utcnow()))
         if request.nonce:
             prev = cur.execute(
                 "SELECT payload_digest FROM auth_nonces WHERE nonce=?",
@@ -274,6 +302,26 @@ class AuthorizationStore:
                 (request.nonce, request.project, auth_id,
                  request.payload_digest, utcnow()))
         return True, "reserved"
+
+    def still_eligible(self, auth_id: str) -> tuple[bool, str]:
+        """Pre-external-effect gate: revocation, expiry and artifact
+        integrity are re-checked immediately before any effect."""
+        row = self.con.execute(
+            "SELECT * FROM authorizations WHERE auth_id=?",
+            (auth_id,)).fetchone()
+        if row is None:
+            return False, "authorization vanished"
+        cols = [d[0] for d in self.con.execute(
+            "SELECT * FROM authorizations LIMIT 0").description]
+        r = dict(zip(cols, row))
+        if r["revoked"]:
+            return False, "authorization revoked before effect"
+        if r["expires_at"] < utcnow():
+            return False, "authorization expired before effect"
+        data, why = self._read_artifact(auth_id)
+        if data is None:
+            return False, f"approval artifact no longer valid: {why}"
+        return True, "eligible"
 
     def revoke(self, project: str, auth_id: str) -> None:
         self.con.execute(
