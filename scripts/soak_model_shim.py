@@ -113,10 +113,12 @@ def call(endpoint, model, messages, timeout=240):
 
 
 def propose(payload):
+    # Exact port of burn.propose's chain selection (LOCAL_CHAIN if
+    # PREFER_LOCAL else CLOUD_CHAIN), executed through this module's call()
+    # so record/replay/fill see every request. No monkeypatching (patching
+    # burn.call would recurse through shim.call's live path).
     part, text = payload["part"], payload["text"]
-    tier = None
-    claims = None
-    chain = [(burn.STUDENT, "power-tables-student-v1")] + list(burn.LOCAL_CHAIN)
+    chain = list(burn.LOCAL_CHAIN) if burn.PREFER_LOCAL else list(burn.CLOUD_CHAIN)
     for endpoint, model in chain:
         try:
             claims = call(
@@ -133,17 +135,17 @@ def propose(payload):
         except Exception:
             claims = None
         if isinstance(claims, list):
-            tier = "local-v41" if endpoint == burn.V41 else (
-                "student" if endpoint == burn.STUDENT else "cloud-v41"
+            tier = (
+                "local-v41" if endpoint == burn.V41
+                else "cloud-v41" if endpoint == burn.OPENROUTER
+                else "student"
             )
-            break
-    return {
-        "claims": claims,
-        "claims_raw": json.dumps(claims, ensure_ascii=False)
-        if isinstance(claims, list)
-        else None,
-        "tier": tier,
-    }
+            return {
+                "claims": claims,
+                "claims_raw": json.dumps(claims, ensure_ascii=False),
+                "tier": tier,
+            }
+    return {"claims": None, "claims_raw": None, "tier": None}
 
 
 def repair(payload):

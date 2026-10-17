@@ -117,8 +117,20 @@ def call(endpoint, model, messages, timeout=240):
         ok, spend = _store.budget_check(_con, "burn-cloud")
         if not ok:
             raise RuntimeError("BURN_DAILY_CAP_REACHED")
-    body = {"model": model, "temperature": 0, "max_tokens": 16000,
-            "reasoning": {"effort": "low"}, "messages": messages}
+        # RUST-ACTIVATION-03 cloud catch-up: HARD dollar cap, Sam-approved
+        # $30 (2026-10-17). The 16k/effort-low combo drained the account
+        # twice; this guard sums the cost-meter ledger before every call.
+        cap_usd = float(_os.environ.get("CLOUD_DOLLAR_CAP", "30"))
+        rows = _con.execute(
+            "SELECT COALESCE(SUM(CAST(reason_code AS REAL)), 0)"
+            " FROM adjudication_ledger"
+            " WHERE judge='cost-meter' AND verdict='COST'"
+        ).fetchone()
+        spent = float(rows[0] or 0)
+        if spent >= cap_usd:
+            raise RuntimeError(f"CLOUD_DOLLAR_CAP_REACHED spent={spent:.2f} cap={cap_usd}")
+    body = {"model": model, "temperature": 0, "max_tokens": 6000,
+            "reasoning": {"enabled": False}, "messages": messages}
     if "openrouter" not in endpoint:
         body.pop("reasoning", None)
         body["max_tokens"] = 6000
