@@ -1,0 +1,24 @@
+# Confirmed agent registry — DIRECTOR-WORKLOOP-01
+# Source of truth: onboarding roster (issue #3 status reports) + declared
+# agent network. An agent appears here ONLY after a status report in the
+# roster with a named session/machine. Branch prefixes are NOT ownership.
+schema: 1
+version: "2026-10-18.1"
+agents:
+  m5:
+    agent_id: m5-extraction-provenance
+    source: "onboarding #3 status report (this M5 session, ack via GitHub issue #5 comment 6254139699)"
+    ack_channel: "nas-agentmail + github-comment"
+    machine: m5
+    uid_hint: 501
+  director:
+    agent_id: seven-director
+    source: "runs on seven (100.89.168.75); TaskStore authority"
+    ack_channel: "taskstore-journal"
+    machine: seven
+    uid_hint: 1000
+  mac-mini:
+    agent_id: pdf-factory
+    source: "issue #4 read-only receipt 2026-10-18"
+    ack_channel: "nas-agentmail"
+    machine: mac-mini
