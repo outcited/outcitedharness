@@ -85,7 +85,7 @@ def build_map(pages: list[str]) -> dict:
 
 def call(text, part):
     body = {
-        "model": MODEL, "temperature": 0, "max_tokens": 6000,
+        "model": MODEL, "temperature": 0, "max_tokens": 12000,  # map+claims arrays were truncating at 6000
         "chat_template_kwargs": {"enable_thinking": False},
         "messages": [
             {"role": "system", "content": STUDENT_PROMPT},
@@ -103,21 +103,25 @@ def call(text, part):
         return None, time.time() - t0, f"{type(exc).__name__}: {exc}"[:120]
     dt = time.time() - t0
     c = d["choices"][0]["message"].get("content") or ""
-    m = re.search(r"\[.*\]", c, re.DOTALL)
+    m = re.search(r"\[.*", c, re.DOTALL)
     if not m:
         return None, dt, "no_json_array"
+    frag = m.group(0)
     try:
-        claims = json.loads(m.group(0))
+        claims = json.loads(frag)
         return (claims if isinstance(claims, list) else None), dt, None
     except json.JSONDecodeError:
-        frag = m.group(0)
-        cut = frag.rfind("}")
-        if cut > 0:
-            try:
-                return json.loads(frag[:cut + 1] + "]"), dt, None
-            except Exception:
-                pass
-        return None, dt, "bad_json"
+        pass
+    # salvage: truncated array — take complete objects up to the last brace
+    # (burn.call's recovery pattern); mark as truncated_salvage
+    cut = frag.rfind("}")
+    if cut > 0:
+        try:
+            claims = json.loads(frag[:cut + 1] + "]")
+            return claims, dt, "truncated_salvage"
+        except Exception:
+            pass
+    return None, dt, "bad_json"
 
 
 def alias_field(symbol):
@@ -186,6 +190,7 @@ def main() -> int:
         mmap = build_map(pages)
         enriched = text + MAP_PREAMBLE + json.dumps(mmap, ensure_ascii=False)
         claims, dt, err = call(enriched, part)
+        parse_note = err if claims is not None else None
         if claims is None:
             results.append({"stem": stem, "status": "model_empty_or_error",
                             "error": err, "latency_s": round(dt, 1),
@@ -205,6 +210,7 @@ def main() -> int:
             "original_failure": rec.get("original_failure"),
             "baseline_claims": rec.get("python_baseline_claims"),
             "map_pages": len(mmap["table_signal_pages"]),
+            "parse_note": parse_note,
         })
         print(f"{stem:34s} proposed={len(claims):3d} survived={s:3d} p0={p0:3d} {dt:.0f}s",
               flush=True)
