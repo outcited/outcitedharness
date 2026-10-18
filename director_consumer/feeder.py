@@ -286,12 +286,12 @@ class HappyFeederAdapter:
                 out.append(
                     f"lane {ln.lane_id}: INPUT-BLOCKED — missing input, not "
                     f"compute starvation")
-            if _int0(ln.worker_count) == 0 and _int0(ln.ready) > 0:
+            if _int0(ln.worker_count) == 0 and _int0(ln.ready) > 0                     and isinstance(ln.ready, int):
                 out.append(
                     f"lane {ln.lane_id}: {ln.ready} ready but 0 workers — "
                     f"feeder may have stopped launching (check auto-restart)")
-            if _int0(ln.failed) and _int0(ln.completed) is not None:
-                if _int0(ln.failed) > _int0(ln.completed or 0):
+            if isinstance(ln.failed, int) and ln.failed > 0:
+                if ln.failed > _int0(ln.completed):
                     out.append(
                         f"lane {ln.lane_id}: failures exceed completions — "
                         f"growing failure pattern")
@@ -306,8 +306,9 @@ class HappyFeederAdapter:
         return out
 
 
-def _int0(v: Any) -> Any:
-    return v if isinstance(v, int) else 0 if v is None else v
+def _int0(v: Any, default: int = 0) -> int:
+    """Numeric view for comparisons. UNKNOWN/None/non-numeric -> default."""
+    return v if isinstance(v, int) and not isinstance(v, bool) else default
 
 
 def assert_only_reported(lanes_reported: dict) -> list[dict]:
