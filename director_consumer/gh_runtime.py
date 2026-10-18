@@ -121,7 +121,6 @@ class GithubIssueRuntime:
                         "transport_ack": self._mail_ack(rec.task_id, source_key)
                             if correct_source else {"state": "not-observed",
                                                     "message_ids": []},
-                        "ack_from_github_only": False,
                     })
             except Exception as exc:  # noqa: BLE001 — preserve other feeds
                 repo_result.update(source_state="ERROR", issues_observed=None)
