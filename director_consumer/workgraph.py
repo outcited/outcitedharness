@@ -72,6 +72,28 @@ def _sh(cmd, timeout=30):
         return ""
 
 
+# branch prefix -> owning agent, from the declared agent network (fleet.yaml
+# agents:). Ownership declared in config beats commit-author guessing.
+BRANCH_OWNERS = {
+    "agent/power-data-01": "power-data-01 (m5 sibling worktree)",
+    "director/": "m5-opencode director session",
+    "integration/": "v2c agent (m5)",
+    "curve/": "curve agent",
+    "discovery/": "discovery agent",
+    "facet/": "facet agent",
+    "queue/": "queue-fix agent",
+    "search/": "search agent",
+    "audit/": "audit agent",
+}
+
+
+def _owner_for(branch: str, author: str) -> tuple[str, str]:
+    for prefix, agent in BRANCH_OWNERS.items():
+        if branch.startswith(prefix):
+            return agent, f"declared owner of branch {branch!r}"
+    return author or UNKNOWN, "last commit author (no declared owner)"
+
+
 def git_threads(roots_glob: str = "/Users/samkim/Harnessv1*") -> list[WorkThread]:
     """One WorkThread per worktree with a real branch. Owner = most recent
     commit author (an assertion of activity, not of completion)."""
@@ -95,11 +117,12 @@ def git_threads(roots_glob: str = "/Users/samkim/Harnessv1*") -> list[WorkThread
         state = ("active" if recent else
                  "stale" if age_days is not None and age_days > 3 else
                  "unknown")
+        owner, owner_ev = _owner_for(branch, author)
         out.append(WorkThread(
             thread_id=d.name, kind=PROOF_KIND_FOR(branch, subject),
             title=f"{branch}: {subject[:80]}",
-            owner=author or UNKNOWN,
-            owner_evidence=f"last commit author @{date}",
+            owner=owner,
+            owner_evidence=f"{owner_ev} @ {date}",
             state=state, last_activity=date,
             blockers=(["uncommitted changes in worktree"] if dirty else []),
             source=f"worktree:{d}"))
@@ -128,11 +151,18 @@ def telemetry_threads(feeder_log: str = "",
     """Lanes from the live feeder log + telemetry records. Blocking reasons
     come only from measured SKIP lines / crash states."""
     threads: list[WorkThread] = []
+    seen: set[str] = set()
+
+    def _add(t: WorkThread):
+        if t.thread_id not in seen:
+            seen.add(t.thread_id)
+            threads.append(t)
+
     if feeder_log and Path(feeder_log).exists():
         text = Path(feeder_log).read_text(errors="replace")
         for m in re.finditer(r"\[feeder\] SKIP (\w+): (.+)", text):
             lane, reason = m.group(1), m.group(2)
-            threads.append(WorkThread(
+            _add(WorkThread(
                 thread_id=f"lane:{lane}", kind="extraction-lane",
                 title=f"extraction lane {lane}", owner="happy-owner",
                 owner_evidence="work-feeder on happy",
@@ -141,8 +171,8 @@ def telemetry_threads(feeder_log: str = "",
                 source="feeder-log"))
         for m in re.finditer(r"\[feeder\] launched (\w+) \[(\d+)\]", text):
             lane = m.group(1)
-            if not any(t.thread_id == f"lane:{lane}" for t in threads):
-                threads.append(WorkThread(
+            if f"lane:{lane}" not in seen:
+                _add(WorkThread(
                     thread_id=f"lane:{lane}", kind="extraction-lane",
                     title=f"extraction lane {lane}", owner="happy-owner",
                     owner_evidence="work-feeder on happy",
@@ -156,7 +186,7 @@ def telemetry_threads(feeder_log: str = "",
                 continue
             for s in d.get("services", []):
                 if isinstance(s, dict) and (s.get("restarts") or 0) > 5:
-                    threads.append(WorkThread(
+                    _add(WorkThread(
                         thread_id=f"unit:{s.get('name')}",
                         kind="feeder-health",
                         title=f"crash-looping unit {s.get('name')}",
