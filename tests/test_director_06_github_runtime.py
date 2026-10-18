@@ -145,3 +145,44 @@ def test_github_only_ack_is_reported_as_unverified(tmp_path):
     assert row["transport_ack"]["state"] == "not-observed"
     # A GitHub-only transition remains visibly distinct from trusted mail.
     assert row["transport_ack"]["message_ids"] == []
+
+
+def test_mail_ack_requires_current_assignment_epoch_and_envelope(tmp_path):
+    from director_consumer.messaging import MailboxDelivery, DeliveryPolicy
+
+    db = sqlite3.connect(tmp_path / "db.sqlite")
+    t = TaskStore(db, project="designwins")
+    ingest(REPO, t, issues=[_issue()])
+    # A real, separate authority sets an owner and bumps the epoch.
+    t.transition("DW-TRUTH-FUNNEL-01", "offered",
+                 actor="operator", evidence="scoped external assignment",
+                 owner="agent:m5", expect_epoch=0)
+    assert t.get("DW-TRUTH-FUNNEL-01").epoch == 1
+
+    # Simulate an already-validated persisted mailbox record without calling
+    # the delivery path or sending any mail. This tests the OBSERVER only.
+    MailboxDelivery(db, DeliveryPolicy(outbox_root=tmp_path / "box"),
+                    project="designwins")
+    db.execute(
+        "INSERT INTO messages(message_id, project, correlation_id, "
+        "recipient, msg_type, subject, body, state, created_at, "
+        "expires_at, acked_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        ("m1", "designwins", "DW-TRUTH-FUNNEL-01", "agent:m5",
+         "question", "check", "read-only", "acked", 1.0, 9999999999.0, 2.0))
+    envelope = {"project": "designwins", "task_ref": "DW-TRUTH-FUNNEL-01",
+                "action_id": "m1", "assignment_epoch": 0}
+    db.execute(
+        "INSERT INTO action_envelopes(action_id, project, envelope_json, "
+        "body_digest, auth_id, created_at) VALUES (?,?,?,?,?,?)",
+        ("m1", "designwins", json.dumps(envelope), "test", "test", 1.0))
+    db.commit()
+    run = GithubIssueRuntime(db, tmp_path, "designwins", (REPO,),
+                             fetcher=lambda repo: [_issue()])
+    assert run.run_once()["tasks"][0]["transport_ack"]["state"] == "not-observed"
+    envelope["assignment_epoch"] = 1
+    db.execute("UPDATE action_envelopes SET envelope_json=? "
+               "WHERE action_id='m1' AND project='designwins'",
+               (json.dumps(envelope),))
+    db.commit()
+    assert run.run_once()["tasks"][0]["transport_ack"]["state"] == (
+        "recorded-mailbox-ack")
