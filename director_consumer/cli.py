@@ -43,6 +43,11 @@ def main(argv=None) -> int:
     run.add_argument("--mailbox", help="shared-docs-queue root (ownership hints)")
     run.add_argument("--machine-id", default="unknown")
     run.add_argument("--repo", help="git repo for ownership claims")
+    run.add_argument("--github-repo", action="append", default=[],
+                     help="explicitly opt into polling one allowlisted repo's "
+                          "open issues once per Director tick (repeatable)")
+    run.add_argument("--github-project-id",
+                     help="already-registered project id to scope GitHub tasks")
 
     ver = sub.add_parser("verify")
     ver.add_argument("--workspace", required=True)
@@ -84,6 +89,11 @@ def main(argv=None) -> int:
         print(json.dumps({"chain_ok": ok, "broken_at": broken}))
         return 0 if ok else 1
 
+    if a.github_repo and not a.github_project_id:
+        ap.error("--github-project-id is required when using --github-repo")
+    if a.github_project_id and not a.github_repo:
+        ap.error("--github-repo is required when using --github-project-id")
+
     feeds = load_feeds(Path(a.feeds)) if a.feeds else {}
     llm = None
     if not a.no_llm:
@@ -115,7 +125,9 @@ def main(argv=None) -> int:
         fleet_yaml=a.fleet_yaml, agent_network=a.agent_network,
         snap_dir=a.snap_dir, continuity=continuity,
         sessions_db=a.sessions_db, mailbox_root=a.mailbox,
-        repo_path=a.repo, machine_id=a.machine_id)
+        repo_path=a.repo, machine_id=a.machine_id,
+        github_repos=tuple(a.github_repo),
+        github_project_id=a.github_project_id or "")
     while True:
         r = c.run_once()
         print(json.dumps(r.__dict__, default=str), flush=True)
