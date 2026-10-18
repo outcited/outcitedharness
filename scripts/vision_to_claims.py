@@ -26,6 +26,32 @@ import re
 import sys
 from pathlib import Path
 
+# Coordinate transform: image-local pixels -> PDF page coordinates
+# vision-v2 region_bbox is PDF points (from pymupdf)
+# row.bbox is image-local pixels at 200 DPI
+# PDF_coord = region_origin + pixel * (72 / DPI)
+DPI = 200
+PDF_PER_PIXEL = 72.0 / DPI  # 0.36
+
+
+def transform_bbox_to_pdf(region_bbox: list, pixel_bbox: list) -> tuple:
+    """Transform image-local pixel bbox to PDF-page coordinates.
+
+    region_bbox: [x0, y0, x1, y1] in PDF points (from pymupdf)
+    pixel_bbox:  [x0, y0, x1, y1] in image-local pixels (from model)
+    Returns: (pdf_x0, pdf_y0, pdf_x1, pdf_y1) in PDF points
+    """
+    if not region_bbox or not pixel_bbox:
+        return None
+    rx0, ry0 = region_bbox[0], region_bbox[1]
+    px0, py0, px1, py1 = pixel_bbox[0], pixel_bbox[1], pixel_bbox[2], pixel_bbox[3]
+    return (
+        rx0 + px0 * PDF_PER_PIXEL,
+        ry0 + py0 * PDF_PER_PIXEL,
+        rx0 + px1 * PDF_PER_PIXEL,
+        ry0 + py1 * PDF_PER_PIXEL,
+    )
+
 # ── value/unit parsing ──────────────────────────────────────────────────
 _UNIT_RE = re.compile(
     r"^([<>±~]?\s*-?\d+\.?\d*(?:[eE][+-]?\d+)?)\s*(.*)$"
@@ -254,9 +280,16 @@ def table_to_claims(
                 "doc_sha256": doc_sha256,
                 "region_bbox": region.get("region_bbox"),
                 "cell_bbox": cell_bbox,
+                # Coordinate transform: pixel bbox -> PDF-page bbox
+                "pdf_bbox": transform_bbox_to_pdf(
+                    region.get("region_bbox"), cell_bbox
+                ),
                 "extractor": extractor,
                 "extractor_version": extractor_version,
                 "verification": _match_verification(
+                    verification or [], table_idx, r_idx, col_name
+                ),
+                "verification_status": _verification_status(
                     verification or [], table_idx, r_idx, col_name
                 ),
                 "table_class": tclass,
@@ -266,6 +299,14 @@ def table_to_claims(
                 "region_idx": region_idx,
                 "table_idx": table_idx,
                 "row_idx": r_idx,
+                "col_name": col_name,
+                # Document-level identity — NOT an OPN
+                "doc_identity": {
+                    "sha256": doc_sha256,
+                    "filename": filename,
+                    "opn_established": False,
+                    "family_applicability": "unknown",
+                },
             }
             claims.append(claim)
 
@@ -296,6 +337,23 @@ def _match_verification(
                 v.get("col") == col_name):
             matched.append(v)
     return matched
+
+
+def _verification_status(
+    verdicts: list, table_idx: int, row_idx: int, col_name: str
+) -> str:
+    """Return verification status: PASS, FAIL, or UNKNOWN.
+
+    Empty verdict list is UNKNOWN, not PASS. This is the rule from
+    the assignment: "An empty verdict list is UNKNOWN, not successful
+    verification."
+    """
+    matched = _match_verification(verdicts, table_idx, row_idx, col_name)
+    if not matched:
+        return "UNKNOWN"
+    if all(v.get("match") for v in matched):
+        return "PASS"
+    return "FAIL"
 
 
 def process_doc(input_path: Path, verbose: bool = False) -> dict:

@@ -233,23 +233,25 @@ def _burn_rows(burn_dir: Path) -> list:
         except Exception:
             continue
         stem = rec.get("stem") or f.stem
-        if "-" in stem:
+        # Never use a document SHA as an orderable part number.
+        # Preserve document-level evidence until family/device/OPN
+        # applicability is established.
+        is_sha = len(stem) == 64 and all(c in "0123456789abcdef" for c in stem)
+        if is_sha:
+            vendor, part = "unknown", None
+        elif "-" in stem:
             vendor, part = stem.split("-", 1)
         else:
             vendor, part = "unknown", stem
         claims = []
         for c in rec.get("claim_data") or []:
-            claims.append({
+            claim = {
                 "field": str(c.get("symbol") or "unknown")[:64],
                 "value": "" if c.get("value") is None else str(c.get("value")),
                 "quote": c.get("quote"),
                 "source": {
                     "column_header": c.get("column_header"),
                     "crop": None,
-                    # Provenance fix (2026-10-12): the chain rides on the claim
-                    # when the burn stamped it (page via substrate spans, sha
-                    # from the substrate record). Old rows without it keep
-                    # saying None — absence is named, never invented.
                     "page": c.get("page"),
                     "row_header": c.get("row_header"),
                     "sha": c.get("doc_sha256"),
@@ -257,8 +259,39 @@ def _burn_rows(burn_dir: Path) -> list:
                     "source_pdf": f"{stem}.pdf",
                     "provenance_tier": None,
                 },
-            })
-        out.append((stem, {"part_number": part, "vendor": vendor, "claims": claims}))
+            }
+            # Preserve meaning: unit, qualifier, conditions, evidence status,
+            # and source locators survive the consumer contract.
+            if c.get("unit") is not None:
+                claim["unit"] = c["unit"]
+            if c.get("qualifier") is not None:
+                claim["qualifier"] = c["qualifier"]
+            if c.get("condition") is not None:
+                claim["condition"] = c["condition"]
+            if c.get("pdf_bbox") is not None:
+                claim["source"]["pdf_bbox"] = c["pdf_bbox"]
+            if c.get("verification_status") is not None:
+                claim["evidence_status"] = c["verification_status"]
+            else:
+                claim["evidence_status"] = "UNKNOWN"
+            if c.get("doc_identity") is not None:
+                claim["doc_identity"] = c["doc_identity"]
+            if c.get("table_class") is not None:
+                claim["table_class"] = c["table_class"]
+            if c.get("absolute_max") is not None:
+                claim["absolute_max"] = c["absolute_max"]
+            if c.get("recommended_operation") is not None:
+                claim["recommended_operation"] = c["recommended_operation"]
+            claims.append(claim)
+        row = {"part_number": part, "vendor": vendor, "claims": claims}
+        if is_sha:
+            row["doc_identity"] = {
+                "sha256": stem,
+                "opn_established": False,
+                "family_applicability": "unknown",
+                "note": "document-level evidence; OPN not established",
+            }
+        out.append((stem, row))
     return out
 
 
