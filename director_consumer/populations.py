@@ -140,6 +140,14 @@ def assess_factory(lanes: list[LaneState],
     by_type: dict[str, list] = {}
 
     for ln in lanes:
+        if ln.lane_id.startswith("__"):
+            # summary rows (e.g. __population_totals__) are derived views of
+            # the lanes below them. Summing them double-counts the factory.
+            a.notes.append(
+                f"summary row {ln.lane_id!r} excluded from totals (it "
+                f"describes the lanes, it is not an additional lane)")
+            a.per_lane[ln.lane_id] = {"kind": "summary", "ready": ln.ready}
+            continue
         a.per_lane[ln.lane_id] = {
             "source_population": ln.source_population,
             "work_unit_type": ln.work_unit_type,
