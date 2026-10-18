@@ -105,31 +105,44 @@ def services_and_lanes() -> tuple[list, list, dict, list]:
             continue
         m = re.search(r"extract_([a-z0-9_]+)\.py", p[2])
         svc = "extract-" + (m.group(1) if m else "unattributed")
-        w = re.search(r"--workers\s+(\d+)", p[2])
-        procs.append({"name": svc, "status": "active",
-                      "workers": int(w.group(1)) if w else 1,
-                      "restarts": 0})
+        # NOTE: multiprocessing children inherit the parent's argv, so
+        # `--workers 32` appears on every child. Summing it would report
+        # thousands of workers. The worker count is the PROCESS count.
+        procs.append({"name": svc, "status": "active", "restarts": 0})
 
-    # aggregate per service name
+    # worker count = live processes for that service (not summed --workers)
     agg: dict[str, dict] = {}
     for s in procs:
         a = agg.setdefault(s["name"], {"name": s["name"], "status": "active",
                                        "workers": 0, "restarts": 0})
-        a["workers"] += s["workers"]
+        a["workers"] += 1
     # restarts: read systemd if reachable, else report null (never guessed)
     for name in list(agg):
-        try:
-            r = subprocess.run(
-                ["systemctl", "show", name + ".service",
-                 "--property=NRestarts,ActiveState"],
-                capture_output=True, text=True, timeout=8).stdout
-            d = dict(l.split("=", 1) for l in r.splitlines() if "=" in l)
-            agg[name]["restarts"] = int(d.get("NRestarts", 0) or 0)
-            st = d.get("ActiveState", "active")
-            agg[name]["status"] = ("active" if st == "active"
-                                   else "failed" if st == "failed" else "inactive")
-        except Exception:                                # noqa: BLE001
-            agg[name]["restarts"] = None
+        # We SAW live processes for this service, so it is active regardless of
+        # whether systemd knows the unit name (many extractors run as
+        # template instances like extract-mode-currents@0 or as bare
+        # processes). Try the unit, then its hyphenated template form.
+        agg[name]["status"] = "active"
+        agg[name]["restarts"] = None
+        for unit in (name + ".service",
+                     name.replace("_", "-") + ".service",
+                     name.replace("_", "-") + "@0.service"):
+            try:
+                r = subprocess.run(
+                    ["systemctl", "show", unit,
+                     "--property=NRestarts,ActiveState"],
+                    capture_output=True, text=True, timeout=8).stdout
+                d = dict(l.split("=", 1) for l in r.splitlines() if "=" in l)
+                if not d.get("ActiveState"):
+                    continue
+                agg[name]["restarts"] = int(d.get("NRestarts", 0) or 0)
+                st = d["ActiveState"]
+                agg[name]["status"] = ("active" if st in ("active", "activating")
+                                       else "failed" if st == "failed"
+                                       else "active")
+                break
+            except Exception:                            # noqa: BLE001
+                continue
 
     # lanes from queue manifests + output files
     lanes = []
