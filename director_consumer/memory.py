@@ -249,12 +249,16 @@ class ProjectMemory:
         except sqlite3.OperationalError:
             rows = []
         groups = self._groups(q)
+        # Long natural-language queries contain many low-value words.
+        # Requiring HALF the groups discards the right document; requiring 1
+        # lets a stray token leak. Two agreeing content groups is the
+        # measured balance (controls stay at 0 leakage, paraphrases retrieve).
         if not groups:
             need = 1
         elif len(groups) <= 2:
             need = len(groups)
         else:
-            need = max(2, (len(groups) + 1) // 2)
+            need = 2
         for r in rows:
             rec = _row(r)
             got = self._score_groups(f"{rec.title} {rec.body}", groups)

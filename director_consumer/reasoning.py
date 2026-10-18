@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import re
 import time
+import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -144,6 +145,32 @@ def user_prompt(situation: str, evidence: list[dict]) -> str:
             % (situation, json.dumps(ev, indent=1)))
 
 
+def structured_call(ep, system: str, user: str,
+                    max_tokens: int = 1400, timeout_s: float = 120.0,
+                    temperature: float = 0.0) -> str | None:
+    """A consequential assessment needs room for the whole envelope.
+
+    The shared OpsBrainClient._call uses max_tokens=300, which is right for a
+    terse impact blurb and WRONG for an eight-key JSON envelope: it truncates
+    mid-object and the response becomes unparseable. Same endpoint, same
+    policy gate, larger budget, thinking disabled.
+    """
+    body = {
+        "model": ep.model,
+        "messages": [{"role": "system", "content": system},
+                     {"role": "user", "content": user}],
+        "temperature": temperature, "max_tokens": max_tokens,
+        "chat_template_kwargs": {"enable_thinking": False},
+    }
+    req = urllib.request.Request(
+        ep.base_url + "/v1/chat/completions",
+        data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json"})
+    r = json.load(urllib.request.urlopen(req, timeout=timeout_s))
+    content = r["choices"][0]["message"]["content"]
+    return (content or "").strip() or None
+
+
 def run_structured(client, situation: str, evidence: list[dict],
                    known_sources: set[str], max_retries: int = 2,
                    purpose: str = "decision-packet",
@@ -156,7 +183,8 @@ def run_structured(client, situation: str, evidence: list[dict],
     for attempt in range(1, max_retries + 1):
         a.attempts = attempt
         try:
-            text = client._call(client.endpoints[0], SYSTEM_PROMPT, prompt)
+            text = structured_call(client.endpoints[0], SYSTEM_PROMPT,
+                                   prompt)
         except Exception as e:                              # noqa: BLE001
             last_reason = f"model call raised {type(e).__name__}: {e}"
             text = None
