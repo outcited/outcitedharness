@@ -55,8 +55,13 @@ class ContinuityMeasurements:
     lane_counts: dict = field(default_factory=dict)   # per-lane, NOT summed
     starvation_hours: Any = "unknown"
     starvation_basis: str = "unknown"   # measured | backlog-zero |
+                                        # eligible-unmeasured |
                                         # unknown-telemetry | queues-unavailable
     ready_by_class: dict = field(default_factory=dict)   # class -> docs
+    # C4: an UNMEASURED eligible inventory is not a measured zero. Only a
+    # completed L0/backlog join may justify "backlog-zero".
+    eligible_measured: bool = False
+    rust_status_column: str = ""        # C3: which column was actually used
     pages_by_class: dict = field(default_factory=dict)   # class -> pages
     worker_hours_estimate: Any = "unknown"
     worker_hours_note: str = ""
@@ -94,6 +99,15 @@ class FactoryContinuity:
 
     # ---- measurement helpers (each names its missing measurement) ----
 
+    # C3: the production controller (designwins/crates/dw-controller) uses
+    # factory_chunks.STATUS with vocabulary queued|leased|completed|failed and
+    # gates readiness on available_at. Older test fixtures use a STATE column
+    # with 'claimed' for in-progress. Neither column name is assumed to exist:
+    # both are discovered from the schema, and an unmapped status is reported
+    # as UNKNOWN rather than guessed.
+    RUST_STATUS_COLS = ("status", "state")
+    RUST_IN_PROGRESS = ("leased", "claimed")
+
     def _measure_rust(self, m: ContinuityMeasurements) -> None:
         if not (self.factory_db and self.factory_db.exists()):
             m.notes.append("rust queue UNKNOWN: factory.sqlite3 not found "
@@ -101,19 +115,50 @@ class FactoryContinuity:
             return
         con = _ro(self.factory_db)
         try:
+            cols = {r[1] for r in con.execute(
+                "PRAGMA table_info(factory_chunks)")}
+            if not cols:
+                m.notes.append("rust queue UNKNOWN: no factory_chunks table "
+                               f"in {self.factory_db}")
+                return
+            scol = next((c for c in self.RUST_STATUS_COLS if c in cols), None)
+            if scol is None:
+                m.notes.append(
+                    "rust queue UNKNOWN: factory_chunks has no status column "
+                    f"(found {sorted(cols)}) — no column name assumed")
+                return
+            ready = f"{scol}='queued'"
+            gating = ""
+            if "available_at" in cols:
+                # julianday parses the ISO-8601 stamps the controller writes
+                ready += (" AND (available_at IS NULL OR "
+                          "julianday(available_at) <= julianday('now'))")
+                gating = " AND available_at<=now"
+            inprog = "(" + ",".join(
+                "'%s'" % v for v in self.RUST_IN_PROGRESS) + ")"
             m.rust_queued = _scalar(
-                con, "SELECT COUNT(*) FROM factory_chunks WHERE state='queued'")
+                con, f"SELECT COUNT(*) FROM factory_chunks WHERE {ready}")
             m.rust_claimed = _scalar(
-                con, "SELECT COUNT(*) FROM factory_chunks WHERE state='claimed'")
-            stalled = _scalar(con, (
-                "SELECT COUNT(*) FROM factory_chunks WHERE state='claimed' "
-                "AND lease_expires_at < datetime('now')"))
-            if stalled is None:
-                # schema variant: report unknown, name it
-                m.notes.append("stalled leases UNKNOWN: lease_expires_at "
-                               "column not queryable")
+                con, f"SELECT COUNT(*) FROM factory_chunks "
+                     f"WHERE {scol} IN {inprog}")
+            if "lease_expires_at" in cols:
+                stalled = _scalar(con, (
+                    f"SELECT COUNT(*) FROM factory_chunks "
+                    f"WHERE {scol} IN {inprog} "
+                    "AND julianday(lease_expires_at) < julianday('now')"))
+                if stalled is None:
+                    m.notes.append("stalled leases UNKNOWN: lease_expires_at "
+                                   "not queryable")
+                else:
+                    m.stalled_leases = stalled
             else:
-                m.stalled_leases = stalled
+                m.notes.append("stalled leases UNKNOWN: factory_chunks has "
+                               "no lease_expires_at column")
+            m.rust_status_column = scol
+            m.notes.append(
+                f"rust queue measured via factory_chunks.{scol} "
+                f"(ready=queued{gating}, in-progress="
+                f"{'/'.join(self.RUST_IN_PROGRESS)})")
             m.evidence.append(f"{self.factory_db}:factory_chunks")
         finally:
             con.close()
@@ -219,6 +264,9 @@ class FactoryContinuity:
         else:
             m.notes.append("class backlog UNKNOWN: backlog path list missing")
             return
+        # C4: from here the eligible inventory IS measured — a completed join
+        # that finds zero eligible docs is a proven zero, not an absent feed.
+        m.eligible_measured = True
         want = set(backlog)
         by_class: dict[str, int] = {}
         pages_by_class: dict[str, int] = {}
@@ -278,49 +326,7 @@ class FactoryContinuity:
         self._measure_ledgers(m, observations)
         self._measure_intake(m)
         self._measure_classes(m)
-        now = utcnow()
-        m.measurement_meta = {
-            "ready_backlog_docs": {
-                "source": "factory_chunks+jobs", "observed_at": now,
-                "lane": "execution-queues", "unit": "documents",
-                "population": "queued work items",
-                "completeness": ("complete" if isinstance(
-                    m.ready_backlog_docs, int) else "incomplete")},
-            "junk_dead_jobs": {
-                "source": "jobs(dead, basename-prefix ._)", "observed_at": now,
-                "lane": "substrate-queue", "unit": "jobs",
-                "population": "dead letters",
-                "completeness": "complete",
-                "note": "jobs are NOT documents; AppleDouble = literal "
-                        "basename prefix '._'"},
-            "consumption_rate_docs_hr": {
-                "source": "facet done-*.txt growth", "observed_at": now,
-                "lane": "facet-passes", "unit": "docs/hour",
-                "population": "documents touched by any facet pass",
-                "completeness": ("complete" if isinstance(
-                    m.consumption_rate_docs_hr, (int, float))
-                    else "incomplete")},
-            "worker_hours_estimate": {
-                "source": "L0 class join + class-costs.json",
-                "observed_at": now, "lane": "planning",
-                "unit": "worker-hours (not CPU-core-hours, not elapsed)",
-                "population": "class-mapped backlog docs only",
-                "completeness": "partial"},
-            "starvation_hours": {
-                "source": "backlog/consumption", "observed_at": now,
-                "lane": "planning", "unit": "hours",
-                "basis": m.starvation_basis,
-                "backlog_population": m.measurement_meta.get(
-                    "_backlog_population"),
-                "rate_population": m.measurement_meta.get(
-                    "_rate_population"),
-                "note": ("populations must match; no cross-lane "
-                         "conversion exists" if m.starvation_basis ==
-                         "population-mismatch" else ""),
-                "completeness": ("complete" if m.starvation_basis in
-                                 ("measured", "backlog-zero")
-                                 else "incomplete")},
-        }
+        now = utcnow()   # C8: meta is built AFTER the basis is computed
         # 05C §6: chunks and jobs are DIFFERENT populations — never sum
         # them into a document count. Per-lane counts only; a document
         # total stays UNKNOWN unless one lane covers it.
@@ -350,7 +356,16 @@ class FactoryContinuity:
                            "unavailable (NOT evidence of starvation)")
         elif m.ready_backlog_docs == 0:
             eligible = sum(m.ready_by_class.values()) if m.ready_by_class else 0
-            if eligible > 0:
+            if not m.eligible_measured:
+                # C4: the eligible inventory was never measured (absent L0
+                # index or backlog list). An unmeasured population is NOT a
+                # measured zero — never claim "workers will idle" from it.
+                m.starvation_basis = "eligible-unmeasured"
+                m.notes.append(
+                    "starvation UNKNOWN: eligible inventory not measured "
+                    "(missing L0 index and/or backlog path list) — an empty "
+                    "queue is NOT proof of proven backlog-zero")
+            elif eligible > 0:
                 # §8: an empty inspected queue with eligible inventory
                 # elsewhere is NOT proven starvation — it may be an
                 # admission gap OR a different execution lane
@@ -360,6 +375,8 @@ class FactoryContinuity:
                     f"failure from a different execution lane "
                     f"({eligible} eligible docs outside the inspected queue)")
             else:
+                # proven: the queue is empty AND a completed join found zero
+                # eligible docs elsewhere
                 m.starvation_hours = 0.0
                 m.starvation_basis = "backlog-zero"
         else:
@@ -385,8 +402,55 @@ class FactoryContinuity:
                 m.starvation_basis = "unknown-telemetry"
                 m.notes.append("starvation UNKNOWN: consumption rate unknown "
                                "(NOT evidence of starvation)")
-        m.measurement_meta["_backlog_population"] = backlog_pop
-        m.measurement_meta["_rate_population"] = rate_pop
+        m.measurement_meta = {
+            "ready_backlog_docs": {
+                "source": "factory_chunks+jobs", "observed_at": now,
+                "measured_at": utcnow(), "lane": "execution-queues",
+                "unit": "documents", "population": "queued work items",
+                "completeness": ("complete" if isinstance(
+                    m.ready_backlog_docs, int) else "incomplete")},
+            "junk_dead_jobs": {
+                "source": "jobs(dead, basename-prefix ._)", "observed_at": now,
+                "measured_at": utcnow(), "lane": "substrate-queue",
+                "unit": "jobs", "population": "dead letters",
+                "completeness": "complete",
+                "note": "jobs are NOT documents; AppleDouble = literal "
+                        "basename prefix '._'"},
+            "consumption_rate_docs_hr": {
+                "source": "facet done-*.txt growth", "observed_at": now,
+                "measured_at": utcnow(), "lane": "facet-passes",
+                "unit": "docs/hour",
+                "population": "documents touched by any facet pass",
+                "completeness": ("complete" if isinstance(
+                    m.consumption_rate_docs_hr, (int, float))
+                    else "incomplete")},
+            "worker_hours_estimate": {
+                "source": "L0 class join + class-costs.json",
+                "observed_at": now, "measured_at": utcnow(),
+                "lane": "planning",
+                "unit": "worker-hours (not CPU-core-hours, not elapsed)",
+                "population": "class-mapped backlog docs only",
+                "eligible_measured": m.eligible_measured,
+                # "partial" = unmapped doc classes are excluded from the
+                # estimate (separate axis from whether the join was measured)
+                "completeness": "partial"},
+            "starvation_hours": {
+                "source": "backlog/consumption", "observed_at": now,
+                "measured_at": utcnow(), "lane": "planning", "unit": "hours",
+                "basis": m.starvation_basis,
+                "backlog_population": backlog_pop,
+                "rate_population": rate_pop,
+                "eligible_measured": m.eligible_measured,
+                "note": ("populations must match; no cross-lane "
+                         "conversion exists" if m.starvation_basis ==
+                         "population-mismatch" else ""),
+                "completeness": ("complete" if m.starvation_basis in
+                                 ("measured", "backlog-zero")
+                                 else "incomplete")},
+            "_backlog_population": backlog_pop,
+            "_rate_population": rate_pop,
+            "_eligible_measured": m.eligible_measured,
+        }
         return m
 
     def events(self, m: ContinuityMeasurements) -> list[Event]:

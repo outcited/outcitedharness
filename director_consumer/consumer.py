@@ -257,8 +257,12 @@ class DirectorConsumer:
     def _commit(self, feed: str, cursor: str, fps: list[str],
                 assessments: list[Assessment], proposals: list[Proposal],
                 markers: list[StateMarker], report: RunReport) -> None:
+        # C7: the project identity must ride with every persisted event.
+        # Without it ingest_batch falls back to its "default" and proposal
+        # rows are not attributable to the configured project.
         new_props = self.state.ingest_batch(
-            feed, cursor, fps, assessments, proposals, markers)
+            feed, cursor, fps, assessments, proposals, markers,
+            project=self.project_name)
         report.proposals_new += len(new_props)
 
     def _derived_feed(self, feed: str, events: list[Event],
