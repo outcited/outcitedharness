@@ -78,16 +78,22 @@ def transform_bbox_to_pdf(region_bbox: list, pixel_bbox: list, dpi: int = 200) -
 def verify_with_source_geometry(pdf_path: str, page_1based: int, region_bbox: list,
                                  table_columns: list, row_cells: dict,
                                  target_col: str, expected_value: str,
-                                 dpi: int = 200) -> dict:
-    """Location-bound, token-aware verification.
+                                 dpi: int = 200, row_idx: int = 0,
+                                 table_idx: int = 0, region_idx: int = 0) -> dict:
+    """LOCATION-FIRST verification. Not answer-first.
 
-    Uses pymupdf word geometry to locate the exact cell, then OCRs
-    ONLY that cell. Matches complete source tokens (not substrings).
-    Returns REVIEW when cell cannot be unambiguously located.
+    1. Locate the source table row using PDF geometry (word positions).
+    2. Establish the source column using printed header geometry.
+    3. Find the cell at row×column intersection.
+    4. Read/OCR that cell.
+    5. Compare observed value against extracted claim.
+
+    Does NOT use expected_value to select the source cell.
+    Where table geometry is unavailable, returns REVIEW.
     """
     if not pdf_path:
         return {"verdict": "REVIEW", "reason": "no_source_pdf",
-                "method": "source_geometry", "engine_version": "2.0"}
+                "method": "location_first", "engine_version": "3.0"}
 
     try:
         import pymupdf
@@ -99,45 +105,114 @@ def verify_with_source_geometry(pdf_path: str, page_1based: int, region_bbox: li
         if page_1based > len(doc):
             doc.close()
             return {"verdict": "REVIEW", "reason": "page_out_of_range",
-                    "method": "source_geometry", "engine_version": "2.0"}
+                    "method": "location_first", "engine_version": "3.0"}
 
         page = doc[page_1based - 1]
         words = page.get_text("words")  # (x0, y0, x1, y1, word, block, line, idx)
 
-        exp_str = str(expected_value).strip()
-        if not exp_str:
+        # STEP 1: Locate the source row using row position.
+        # We know the row_idx. Find the Nth row in the table region.
+        region_words = [w for w in words
+                       if _in_region(w[0], w[1], region_bbox)]
+        if not region_words:
             doc.close()
-            return {"verdict": "REVIEW", "reason": "empty_expected",
-                    "method": "source_geometry", "engine_version": "2.0"}
+            return {"verdict": "REVIEW", "reason": "no_words_in_region",
+                    "method": "location_first", "engine_version": "3.0"}
 
-        # TOKEN-AWARE: find exact word token matching expected value
+        # Group words into rows by y-position
+        rows_by_y = {}
+        for w in region_words:
+            y_key = round(w[1] / 5) * 5  # cluster by 5pt bands
+            rows_by_y.setdefault(y_key, []).append(w)
+
+        # Sort rows by y-position (top to bottom)
+        sorted_y = sorted(rows_by_y.keys())
+        # row_idx 0 = first data row (after header)
+        # We'll adjust after finding header_y_idx
+        # For now, use row_idx directly (will adjust below)
+
+        # STEP 2: Establish column geometry from headers.
+        # Find the actual column header row — skip title rows.
+        # The header row is the one whose words match known column names.
+        if len(sorted_y) < 2:
+            doc.close()
+            return {"verdict": "REVIEW", "reason": "no_header_row",
+                    "method": "location_first", "engine_version": "3.0"}
+
+        # Look for header row by checking if words match table_columns
+        header_words = None
+        header_y_idx = 0
+        for yi, y_key in enumerate(sorted_y[:3]):  # check first 3 rows
+            row_words = rows_by_y[y_key]
+            row_texts = [w[4].strip() for w in row_words]
+            # If any word matches a known column name, this is the header row
+            matches = sum(1 for t in row_texts if t in (table_columns or []))
+            if matches >= max(1, len(table_columns or []) // 3):
+                header_words = row_words
+                header_y_idx = yi
+                break
+
+        if not header_words:
+            # Fallback: use second row (skip title)
+            if len(sorted_y) >= 2:
+                header_words = rows_by_y[sorted_y[1]]
+                header_y_idx = 1
+            else:
+                doc.close()
+                return {"verdict": "REVIEW", "reason": "no_header_row",
+                        "method": "location_first", "engine_version": "3.0"}
+        # Map column headers to x-ranges
+        col_x_ranges = {}
+        for hw in header_words:
+            htext = hw[4].strip()
+            if htext:
+                col_x_ranges[htext] = (hw[0], hw[2])  # (x_start, x_end)
+
+        # Find target column x-range
+        target_col_x = None
+        for header, (x0, x1) in col_x_ranges.items():
+            if header.lower() == target_col.lower() or header == target_col:
+                target_col_x = (x0, x1)
+                break
+
+        if not target_col_x:
+            # Column not found by header — cannot locate cell
+            doc.close()
+            return {"verdict": "REVIEW", "reason": "column_header_not_found",
+                    "target_col": target_col,
+                    "available_headers": list(col_x_ranges.keys())[:10],
+                    "method": "location_first", "engine_version": "3.0"}
+
+        # Adjust row_idx for header offset (row 0 = first data row)
+        data_row_y_idx = header_y_idx + 1 + row_idx
+        if data_row_y_idx >= len(sorted_y):
+            doc.close()
+            return {"verdict": "REVIEW", "reason": "row_idx_out_of_range",
+                    "found_rows": len(sorted_y), "requested": row_idx,
+                    "header_y": header_y_idx,
+                    "method": "location_first", "engine_version": "3.0"}
+
+        target_row_words = rows_by_y[sorted_y[data_row_y_idx]]
+
+        # STEP 3: Find word at row×column intersection
+        col_x0, col_x1 = target_col_x
         target_word = None
-        for w in words:
-            wx0, wy0, wx1, wy1, wtext = w[0], w[1], w[2], w[3], w[4]
-            wtext_stripped = wtext.strip()
-            # Exact token match (not substring)
-            if wtext_stripped == exp_str:
-                if _in_region(wx0, wy0, region_bbox):
-                    target_word = {"bbox": (wx0, wy0, wx1, wy1), "text": wtext_stripped}
-                    break
-
-        # Try numeric core as exact token
-        if not target_word:
-            numeric_core = _extract_numeric_core(exp_str)
-            if numeric_core:
-                for w in words:
-                    wtext_stripped = w[4].strip()
-                    if wtext_stripped == numeric_core and _in_region(w[0], w[1], region_bbox):
-                        target_word = {"bbox": (w[0], w[1], w[2], w[3]), "text": wtext_stripped}
-                        break
+        for w in target_row_words:
+            wx0, wx1 = w[0], w[2]
+            # Word must be within column x-range (with tolerance)
+            TOL = 5.0
+            if (wx0 >= col_x0 - TOL and wx1 <= col_x1 + TOL) or                (wx0 >= col_x0 - TOL and wx0 <= col_x1 + TOL):
+                target_word = {"bbox": (w[0], w[1], w[2], w[3]), "text": w[4].strip()}
+                break
 
         if not target_word:
             doc.close()
-            return {"verdict": "REVIEW", "reason": "token_not_in_source_geometry",
-                    "expected": exp_str, "method": "source_geometry",
-                    "engine_version": "2.0"}
+            return {"verdict": "REVIEW", "reason": "no_word_in_cell",
+                    "col_x_range": target_col_x,
+                    "row_words": [w[4].strip() for w in target_row_words[:10]],
+                    "method": "location_first", "engine_version": "3.0"}
 
-        # Cell bbox: word bbox with minimal padding (respects glyph bounds)
+        # STEP 4: OCR the located cell
         PAD = 1.0
         word_bbox = target_word["bbox"]
         cell_bbox = (
@@ -147,17 +222,17 @@ def verify_with_source_geometry(pdf_path: str, page_1based: int, region_bbox: li
             word_bbox[3] + PAD,
         )
 
-        # Validate cell bbox against page bounds
+        # Validate bounds
         page_rect = page.rect
-        if (cell_bbox[0] < 0 or cell_bbox[1] < 0 or
+        if (cell_bbox[0] < -PAD or cell_bbox[1] < -PAD or
                 cell_bbox[2] > page_rect.width + PAD or
                 cell_bbox[3] > page_rect.height + PAD):
             doc.close()
             return {"verdict": "REVIEW", "reason": "cell_bbox_out_of_bounds",
-                    "cell_bbox": cell_bbox, "page_size": (page_rect.width, page_rect.height),
-                    "method": "source_geometry", "engine_version": "2.0"}
+                    "cell_bbox": cell_bbox,
+                    "method": "location_first", "engine_version": "3.0"}
 
-        # OCR the cell crop
+        # OCR
         clip = pymupdf.Rect(*cell_bbox)
         pix = page.get_pixmap(dpi=300, clip=clip)
         tmpf = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
@@ -177,50 +252,55 @@ def verify_with_source_geometry(pdf_path: str, page_1based: int, region_bbox: li
 
         doc.close()
 
-        if not ocr_text:
-            return {"verdict": "REVIEW", "reason": "empty_cell_ocr",
+        # STEP 5: Compare observed vs claimed
+        observed_token = target_word["text"]
+        expected_str = str(expected_value).strip()
+
+        if not observed_token:
+            return {"verdict": "REVIEW", "reason": "empty_observed_cell",
                     "cell_bbox": cell_bbox, "word_bbox": word_bbox,
-                    "method": "source_geometry", "engine_version": "2.0"}
+                    "method": "location_first", "engine_version": "3.0"}
 
-        # TOKEN-AWARE MATCHING (complete tokens, not substrings)
-        ocr_tokens = ocr_text.split()
-
-        # Exact token match
-        if exp_str in ocr_tokens:
-            return {"verdict": "SUPPORTED", "reason": "cell_exact_token",
+        # Exact match
+        if observed_token == expected_str:
+            return {"verdict": "SUPPORTED", "reason": "location_exact_match",
+                    "observed": observed_token, "expected": expected_str,
                     "ocr_text": ocr_text, "cell_bbox": cell_bbox,
-                    "word_bbox": word_bbox, "source_token": target_word["text"],
-                    "method": "source_geometry", "engine_version": "2.0"}
+                    "word_bbox": word_bbox,
+                    "column_header": target_col, "row_idx": row_idx,
+                    "method": "location_first", "engine_version": "3.0"}
 
-        # Case-insensitive token match
-        exp_upper = exp_str.upper()
-        for tok in ocr_tokens:
-            if tok.upper() == exp_upper:
-                return {"verdict": "SUPPORTED", "reason": "cell_case_insensitive_token",
-                        "ocr_text": ocr_text, "cell_bbox": cell_bbox,
-                        "word_bbox": word_bbox, "source_token": target_word["text"],
-                        "method": "source_geometry", "engine_version": "2.0"}
+        # Case-insensitive
+        if observed_token.upper() == expected_str.upper():
+            return {"verdict": "SUPPORTED", "reason": "location_case_insensitive",
+                    "observed": observed_token, "expected": expected_str,
+                    "ocr_text": ocr_text, "cell_bbox": cell_bbox,
+                    "word_bbox": word_bbox,
+                    "column_header": target_col, "row_idx": row_idx,
+                    "method": "location_first", "engine_version": "3.0"}
 
-        # Numeric token match (complete numeric token)
-        numeric_core = _extract_numeric_core(exp_str)
-        if numeric_core:
-            for tok in ocr_tokens:
-                tok_numeric = _extract_numeric_core(tok)
-                if tok_numeric == numeric_core:
-                    return {"verdict": "SUPPORTED", "reason": "cell_numeric_token",
-                            "ocr_text": ocr_text, "cell_bbox": cell_bbox,
-                            "word_bbox": word_bbox, "source_token": target_word["text"],
-                            "method": "source_geometry", "engine_version": "2.0"}
+        # Numeric core match
+        obs_num = _extract_numeric_core(observed_token)
+        exp_num = _extract_numeric_core(expected_str)
+        if obs_num and exp_num and obs_num == exp_num:
+            return {"verdict": "SUPPORTED", "reason": "location_numeric_match",
+                    "observed": observed_token, "expected": expected_str,
+                    "ocr_text": ocr_text, "cell_bbox": cell_bbox,
+                    "word_bbox": word_bbox,
+                    "column_header": target_col, "row_idx": row_idx,
+                    "method": "location_first", "engine_version": "3.0"}
 
-        # No match in cell OCR
-        return {"verdict": "REVIEW", "reason": "cell_token_no_match",
+        # Different value at the located cell
+        return {"verdict": "REVIEW", "reason": "location_mismatch",
+                "observed": observed_token, "expected": expected_str,
                 "ocr_text": ocr_text, "cell_bbox": cell_bbox,
-                "expected": exp_str, "method": "source_geometry",
-                "engine_version": "2.0"}
+                "word_bbox": word_bbox,
+                "column_header": target_col, "row_idx": row_idx,
+                "method": "location_first", "engine_version": "3.0"}
 
     except Exception as e:
         return {"verdict": "REVIEW", "reason": f"verify_error:{str(e)[:60]}",
-                "method": "source_geometry", "engine_version": "2.0"}
+                "method": "location_first", "engine_version": "3.0"}
 
 
 def _in_region(x: float, y: float, region_bbox: list) -> bool:
@@ -333,9 +413,12 @@ def detect_abs_max(table_title: str) -> bool:
 
 
 def classify_table(columns: list[str], table_title: str) -> str:
-    """Classify table type for routing. Returns 'param'|'pin'|'dim'|'unknown'."""
+    """Classify table type. Symbol alone is NOT parameter.
+
+    Returns 'param'|'pin'|'dim'|'unknown'.
+    """
     cols_joined = " ".join(c or "" for c in columns)
-    title = table_title or ""
+    title = (table_title or "").lower()
 
     # Pin table: has pin number + pin name/description columns
     if _PIN_COL_RE.search(cols_joined):
@@ -347,9 +430,25 @@ def classify_table(columns: list[str], table_title: str) -> str:
             _MM_COL_RE.search(cols_joined)):
         return "dim"
 
-    # Parameter table: has parameter/symbol column and value-like columns
-    if _PARAM_COL_RE.search(cols_joined) or _PARAM_COL_RE.search(title):
+    # Parameter table: needs Min/Typ/Max columns AND parameter identifier
+    # Symbol alone is NOT enough — it appears in pin tables too
+    has_role_columns = any(detect_role(c) for c in columns)
+    has_param_id = any(
+        _PARAM_COL_RE.search(c or "") and detect_role(c) is None
+        for c in columns
+    )
+    # Also check title for parameter context
+    has_param_context = any(kw in title for kw in [
+        'characteristic', 'rating', 'specification', 'electrical',
+        'thermal', 'parametric', 'performance'
+    ])
+
+    if (has_role_columns and has_param_id) or (has_role_columns and has_param_context):
         return "param"
+
+    # Dimension table: DIM column without inch/mm (simple dims)
+    if _DIM_COL_RE.search(cols_joined) and not has_role_columns:
+        return "dim"
 
     return "unknown"
 
@@ -387,7 +486,7 @@ def table_to_claims(
     verification: list | None = None,
     pdf_path: str | None = None,
     dpi: int = 200,
-) -> tuple[list[dict], list[dict]]:
+    sha_validated: bool = False,) -> tuple[list[dict], list[dict]]:
     """Convert one table to claim_data rows.
 
     Returns (claims, held) — claims are eligible for downstream admission,
@@ -471,30 +570,21 @@ def table_to_claims(
                 # Otherwise use the column name
                 field = col_header if col_header else "unknown"
 
-            # Real crop verification
-            pdf_bbox = transform_bbox_to_pdf(
-                region.get("region_bbox"), cell_bbox
-            )
-            crop_result = verify_with_source_geometry(
-                pdf_path, int(str(region.get("page", "1")) or "1"),
-                region.get("region_bbox"), columns, cells,
-                col_name, raw_str
-            )
-
-            # Build the claim with engineering record
+            # Coordinate transform
             coords = transform_bbox_to_pdf(region.get("region_bbox"), cell_bbox, dpi)
 
-            # Real crop verification
+            # LOCATION-FIRST verification (single call, no duplicate OCR)
             crop_result = verify_with_source_geometry(
                 pdf_path, int(str(region.get("page", "1")) or "1"),
                 region.get("region_bbox"), columns, cells,
-                col_name, raw_str, dpi=dpi
+                col_name, raw_str,
+                dpi=dpi, row_idx=r_idx, table_idx=table_idx, region_idx=region_idx
             )
 
             # Row identity: globally unique
             row_identity = f"{doc_sha256}|{region.get('page', '')}|{region_idx}|{table_idx}|{r_idx}"
 
-            # Engineering record for parameter tables
+            # Engineering record
             eng_record = None
             if tclass == "param":
                 eng_record = _build_param_record(cells, columns, table_title, r_idx)
@@ -502,6 +592,11 @@ def table_to_claims(
                 eng_record = _build_pin_record(cells, columns, r_idx)
             elif tclass == "dim":
                 eng_record = _build_dim_record(cells, columns, r_idx)
+
+            # SHA HARD GATE: if SHA not validated, claim cannot be SUPPORTED
+            if not sha_validated and crop_result["verdict"] == "SUPPORTED":
+                crop_result["verdict"] = "REVIEW"
+                crop_result["reason"] = "sha_not_validated"
 
             claim = {
                 "symbol": field[:64],
@@ -543,7 +638,7 @@ def table_to_claims(
                     "opn_established": False,
                     "family_applicability": "unknown",
                 },
-                "source_sha_validated": False,  # set by process_doc
+                "source_sha_validated": sha_validated,
             }
 
             claims.append(claim)
@@ -620,8 +715,13 @@ def validate_sha(pdf_path: str, expected_sha: str) -> bool:
 
 
 def _build_param_record(cells: dict, columns: list, table_title: str, row_idx: int) -> dict:
-    """Build parameter engineering record: identifier + min/typ/max + units + conditions."""
-    # Find parameter identifier (first non-Min/Typ/Max column)
+    """Build parameter engineering record.
+
+    Selects the parameter identifier correctly (not first arbitrary column).
+    For example: VGS(th) is the parameter, not 'Symbol'.
+    """
+    # Parameter identifier: the cell value in the column that names the parameter
+    # (e.g., 'Symbol', 'Parameter', 'Characteristic') — but the VALUE is what matters
     param_id = None
     for col in columns:
         if col and detect_role(col) is None and col.lower() not in ('unit', 'symbol'):
@@ -630,7 +730,16 @@ def _build_param_record(cells: dict, columns: list, table_title: str, row_idx: i
                 param_id = str(val)
                 break
 
-    # Collect measurements
+    # If no non-symbol column, use Symbol column value
+    if not param_id:
+        for col in columns:
+            if col and col.lower() == 'symbol':
+                val = cells.get(col)
+                if val:
+                    param_id = str(val)
+                    break
+
+    # Collect measurements from Min/Typ/Max columns
     measurements = {}
     for col in columns:
         role = detect_role(col)
@@ -638,7 +747,7 @@ def _build_param_record(cells: dict, columns: list, table_title: str, row_idx: i
         if role and val:
             measurements[role] = {"value": str(val), "column": col}
 
-    # Units from any column
+    # Units from Unit column
     unit = cells.get("Unit") or cells.get("unit") or None
 
     return {
@@ -648,6 +757,126 @@ def _build_param_record(cells: dict, columns: list, table_title: str, row_idx: i
         "unit": str(unit) if unit else None,
         "condition_source": table_title,
         "absolute_max": bool(_ABS_MAX_RE.search(table_title or "")),
+        "row_idx": row_idx,
+    }
+
+
+def _build_pin_record(cells: dict, columns: list, row_idx: int) -> dict:
+    """Build pin engineering record: identity + signal + type + description."""
+    pin_id = cells.get("Pin") or cells.get("pin") or None
+    signal = cells.get("Name") or cells.get("Signal") or None
+    electrical = cells.get("Type") or None
+    description = cells.get("Description(1)") or cells.get("Description") or None
+
+    return {
+        "type": "pin",
+        "pin_identity": str(pin_id) if pin_id else None,
+        "signal_name": str(signal) if signal else None,
+        "electrical_type": str(electrical) if electrical else None,
+        "description": str(description) if description else None,
+    }
+
+
+def _build_dim_record(cells: dict, columns: list, row_idx: int) -> dict:
+    """Build dimension record. DIM identifier is NOT a limit."""
+    dim_id = None
+    for col in columns:
+        if col and col.lower().strip() in ('dim', 'symbol', 'dimension'):
+            val = cells.get(col)
+            if val:
+                dim_id = str(val)
+                break
+
+    # Limits: all columns EXCEPT the identifier column
+    limits = {}
+    for col in columns:
+        if col and col.lower().strip() in ('dim', 'symbol', 'dimension'):
+            continue  # skip identifier
+        val = cells.get(col)
+        if val:
+            is_inch = 'inch' in (col or '').lower()
+            is_mm = 'mm' in (col or '').lower() or 'millimeter' in (col or '').lower()
+            unit_system = "inches" if is_inch else ("millimeters" if is_mm else None)
+            role = detect_role(col)
+            limits[col] = {"value": str(val), "unit_system": unit_system, "role": role}
+
+    return {
+        "type": "dimension",
+        "dimension_id": dim_id,
+        "limits": limits,
+        "row_idx": row_idx,
+    }
+
+
+def resolve_pdf(sha256: str, filename: str) -> str | None:
+    """Resolve PDF path from content-addressed blob store."""
+    if not sha256 or len(sha256) != 64:
+        return None
+    hits = list(BLOB_ROOT.glob(f"*/blobs/{sha256[:2]}/{sha256[2:4]}/{sha256}.pdf"))
+    if hits:
+        return str(hits[0])
+    return None
+
+
+def validate_sha(pdf_path: str, expected_sha: str) -> bool:
+    """Validate document SHA against actual source bytes."""
+    if not pdf_path or not expected_sha:
+        return False
+    import hashlib
+    try:
+        with open(pdf_path, "rb") as f:
+            actual = hashlib.sha256(f.read()).hexdigest()
+        return actual == expected_sha
+    except Exception:
+        return False
+
+
+
+
+def _build_param_record(cells: dict, columns: list, table_title: str, row_idx: int) -> dict:
+    """Build parameter engineering record.
+
+    Selects the parameter identifier correctly (not first arbitrary column).
+    For example: VGS(th) is the parameter, not 'Symbol'.
+    """
+    # Parameter identifier: the cell value in the column that names the parameter
+    # (e.g., 'Symbol', 'Parameter', 'Characteristic') — but the VALUE is what matters
+    param_id = None
+    for col in columns:
+        if col and detect_role(col) is None and col.lower() not in ('unit', 'symbol'):
+            val = cells.get(col)
+            if val:
+                param_id = str(val)
+                break
+
+    # If no non-symbol column, use Symbol column value
+    if not param_id:
+        for col in columns:
+            if col and col.lower() == 'symbol':
+                val = cells.get(col)
+                if val:
+                    param_id = str(val)
+                    break
+
+    # Collect measurements from Min/Typ/Max columns
+    measurements = {}
+    for col in columns:
+        role = detect_role(col)
+        val = cells.get(col)
+        if role and val:
+            measurements[role] = {"value": str(val), "column": col}
+
+    # Units from Unit column
+    unit = cells.get("Unit") or cells.get("unit") or None
+
+    return {
+        "type": "parameter",
+        "parameter_id": param_id,
+        "measurements": measurements,
+        "unit": str(unit) if unit else None,
+        "condition_source": table_title,
+        "absolute_max": bool(_ABS_MAX_RE.search(table_title or "")),
+        "row_idx": row_idx,
     }
 
 
@@ -741,10 +970,8 @@ def process_doc(input_path: Path, verbose: bool = False) -> dict:
                     r_idx, t_idx,
                     pdf_path=pdf_path,
                     dpi=dpi,
+                    sha_validated=sha_validated,
                 )
-                # Mark SHA validation status
-                for c in claims:
-                    c["source_sha_validated"] = sha_validated
                 all_claims.extend(claims)
                 all_held.extend(held)
                 stats["cells"] += len(claims) + len(held)
@@ -790,9 +1017,12 @@ def main() -> int:
 
     totals = {"docs": 0, "tables": 0, "rows": 0, "input_cells": 0,
               "candidates": 0, "held": 0,
+              "text_matched": 0,
+              "location_established": 0,
+              "row_col_association": 0,
+              "sha_validated": 0,
               "supported": 0, "review": 0, "unsupported": 0,
-              "ocr_matched": 0, "location_verified": 0,
-              "consumable": 0, "errors": 0, "sha_validated": 0}
+              "consumable": 0, "errors": 0}
 
     for f in files:
         try:
@@ -805,14 +1035,22 @@ def main() -> int:
         all_claims = result["claims"]
         held = result["held"]
         errors = result.get("errors", [])
+        sha_val = result.get("sha_validated", False)
 
         supported = [c for c in all_claims if c.get("verification_status") == "SUPPORTED"]
         review = [c for c in all_claims if c.get("verification_status") == "REVIEW"]
         unsupported = [c for c in all_claims if c.get("verification_status") == "UNSUPPORTED"]
 
-        # Separate OCR-matched from location-verified
-        ocr_matched = [c for c in supported if c.get("verification", {}).get("reason", "").startswith("cell_")]
-        location_verified = supported  # all SUPPORTED are location-verified in v2
+        # Distinct metrics
+        text_matched = [c for c in all_claims
+                       if c.get("verification", {}).get("reason", "").startswith(("location_exact", "location_case", "location_numeric"))]
+        location_established = [c for c in supported if c.get("verification", {}).get("cell_bbox")]
+        row_col_assoc = [c for c in supported
+                        if c.get("verification", {}).get("column_header") and
+                           c.get("verification", {}).get("row_idx") is not None]
+
+        # Consumable: SHA validated AND SUPPORTED
+        consumable = supported if sha_val else []
 
         out_rec = {
             "stem": f.stem,
@@ -820,23 +1058,20 @@ def main() -> int:
             "counts": {
                 "candidates": len(all_claims),
                 "held": len(held),
+                "text_matched": len(text_matched),
+                "location_established": len(location_established),
+                "row_col_association": len(row_col_assoc),
+                "sha_validated": sha_val,
                 "supported": len(supported),
                 "review": len(review),
                 "unsupported": len(unsupported),
-                "ocr_matched": len(ocr_matched),
-                "location_verified": len(location_verified),
-                "consumable": len(supported),
+                "consumable": len(consumable),
                 "errors": len(errors),
             },
             "claim_data": all_claims,
             "held_evidence": held,
             "errors": errors,
-            "sha_validated": result.get("sha_validated", False),
-            "adapter": {
-                "version": "0.3.0",
-                "source": str(f),
-                "doc_sha256": all_claims[0]["doc_sha256"] if all_claims else None,
-            },
+            "sha_validated": sha_val,
         }
         out_path = output_dir / f"{f.stem}.json"
         out_path.write_text(json.dumps(out_rec, ensure_ascii=False))
@@ -847,41 +1082,39 @@ def main() -> int:
         totals["input_cells"] += result["stats"]["cells"]
         totals["candidates"] += len(all_claims)
         totals["held"] += len(held)
+        totals["text_matched"] += len(text_matched)
+        totals["location_established"] += len(location_established)
+        totals["row_col_association"] += len(row_col_assoc)
+        if sha_val:
+            totals["sha_validated"] += 1
         totals["supported"] += len(supported)
         totals["review"] += len(review)
         totals["unsupported"] += len(unsupported)
-        totals["ocr_matched"] += len(ocr_matched)
-        totals["location_verified"] += len(location_verified)
-        totals["consumable"] += len(supported)
+        totals["consumable"] += len(consumable)
         totals["errors"] += len(errors)
-        if result.get("sha_validated"):
-            totals["sha_validated"] += 1
-
-        if args.verbose:
-            print(f"  {f.stem[:40]}: {len(all_claims)} cand, "
-                  f"{len(supported)} sup, {len(review)} rev, {len(held)} held")
 
     print(f"\n=== SUMMARY ===")
-    print(f"documents:          {totals['docs']}")
-    print(f"tables:             {totals['tables']}")
-    print(f"rows:               {totals['rows']}")
-    print(f"input cells:        {totals['input_cells']}")
-    print(f"candidates:         {totals['candidates']}")
-    print(f"held:               {totals['held']}")
-    print(f"conservation:       {totals['candidates'] + totals['held']} == {totals['input_cells']} -> {totals['candidates'] + totals['held'] == totals['input_cells']}")
-    print(f"")
-    print(f"SUPPORTED:          {totals['supported']}")
-    print(f"REVIEW:             {totals['review']}")
-    print(f"UNSUPPORTED:        {totals['unsupported']}")
-    print(f"consumable:         {totals['consumable']}  (SUPPORTED only)")
-    print(f"")
-    print(f"ocr_matched:        {totals['ocr_matched']}")
-    print(f"location_verified:  {totals['location_verified']}")
-    print(f"sha_validated:      {totals['sha_validated']}/{totals['docs']}")
-    print(f"errors:             {totals['errors']}")
+    print(f"documents:              {totals['docs']}")
+    print(f"tables:                 {totals['tables']}")
+    print(f"rows:                   {totals['rows']}")
+    print(f"input cells:            {totals['input_cells']}")
+    print(f"candidates:             {totals['candidates']}")
+    print(f"held:                   {totals['held']}")
+    print(f"conservation:           {totals['candidates'] + totals['held']} == {totals['input_cells']} -> {totals['candidates'] + totals['held'] == totals['input_cells']}")
+    print()
+    print(f"text_matched:           {totals['text_matched']}")
+    print(f"location_established:   {totals['location_established']}")
+    print(f"row_col_association:    {totals['row_col_association']}")
+    print(f"sha_validated:          {totals['sha_validated']}/{totals['docs']}")
+    print()
+    print(f"SUPPORTED:              {totals['supported']}")
+    print(f"REVIEW:                 {totals['review']}")
+    print(f"UNSUPPORTED:            {totals['unsupported']}")
+    print(f"consumable:             {totals['consumable']}  (SHA validated AND SUPPORTED)")
+    print(f"errors:                 {totals['errors']}")
 
-    return 0
 
 
 if __name__ == "__main__":
     sys.exit(main())
+
