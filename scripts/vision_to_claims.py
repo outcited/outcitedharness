@@ -52,6 +52,132 @@ def transform_bbox_to_pdf(region_bbox: list, pixel_bbox: list) -> tuple:
         ry0 + py1 * PDF_PER_PIXEL,
     )
 
+
+def crop_verify_cell(pdf_path: str, page_1based: int, pdf_bbox: tuple,
+                     expected_value: str) -> dict:
+    """Real crop verification: OCR the PDF region and match against claim.
+
+    Returns {verdict: SUPPORTED|UNSUPPORTED|REVIEW, ocr_text: str, ...}
+    - SUPPORTED: expected value found in OCR
+    - UNSUPPORTED: OCR found a DIFFERENT value (not just misread)
+    - REVIEW: OCR mismatch or ambiguous (misread, missing, etc.)
+    """
+    if not pdf_path or not pdf_bbox:
+        return {"verdict": "REVIEW", "reason": "no_source_or_bbox", "ocr_text": ""}
+
+    try:
+        import pymupdf
+        import tempfile
+        import subprocess
+
+        doc = pymupdf.open(pdf_path)
+        if page_1based > len(doc):
+            doc.close()
+            return {"verdict": "REVIEW", "reason": "page_out_of_range", "ocr_text": ""}
+
+        page = doc[page_1based - 1]
+        clip = pymupdf.Rect(*pdf_bbox)
+        pix = page.get_pixmap(dpi=300, clip=clip)
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            pix.save(f.name)
+            result = subprocess.run(
+                ["tesseract", f.name, "stdout", "--psm", "6"],
+                capture_output=True, text=True, timeout=60
+            )
+            ocr_text = result.stdout.strip()
+        doc.close()
+
+        if not ocr_text:
+            return {"verdict": "REVIEW", "reason": "empty_ocr", "ocr_text": ""}
+
+        # Match expected value against OCR
+        exp = str(expected_value).strip()
+        if not exp:
+            return {"verdict": "REVIEW", "reason": "empty_expected", "ocr_text": ocr_text}
+
+        # Exact match
+        if exp in ocr_text:
+            return {"verdict": "SUPPORTED", "reason": "exact_match",
+                    "ocr_text": ocr_text, "matched": exp}
+
+        # Case-insensitive
+        if exp.upper() in ocr_text.upper():
+            return {"verdict": "SUPPORTED", "reason": "case_insensitive_match",
+                    "ocr_text": ocr_text, "matched": exp}
+
+        # Numeric core match: extract numeric part and check in OCR
+        # Handles cases like "45° (typ.)" where OCR garbles the suffix
+        numeric_core = _extract_numeric_core(exp)
+        if numeric_core and numeric_core in ocr_text:
+            return {"verdict": "SUPPORTED", "reason": "numeric_core_match",
+                    "ocr_text": ocr_text, "matched": numeric_core}
+
+        # Normalized match (strip whitespace, handle common OCR substitutions)
+        exp_norm = exp.strip().upper()
+        ocr_norm = ocr_text.upper()
+        if _fuzzy_match(exp_norm, ocr_norm):
+            return {"verdict": "REVIEW", "reason": "fuzzy_match_possible_ocr_misread",
+                    "ocr_text": ocr_text, "expected": exp}
+
+        # No match — default to REVIEW (conservative)
+        # UNSUPPORTED only when OCR clearly shows a different valid value
+        ocr_words = [w for w in ocr_text.split() if any(c.isalnum() for c in w)]
+        if len(ocr_words) == 0:
+            return {"verdict": "REVIEW", "reason": "no_alphanumeric_in_ocr",
+                    "ocr_text": ocr_text}
+
+        # Check if ANY expected-like value appears in OCR
+        for word in ocr_words:
+            if _fuzzy_match(exp.upper(), word.upper()):
+                return {"verdict": "REVIEW", "reason": "possible_match_different_position",
+                        "ocr_text": ocr_text, "expected": exp}
+
+        # Look for a clean numeric value that's different from expected
+        exp_numeric = _extract_numeric_core(exp)
+        for word in ocr_words:
+            word_numeric = _extract_numeric_core(word)
+            if word_numeric and exp_numeric and word_numeric != exp_numeric:
+                # Found a different numeric value — could be UNSUPPORTED
+                # But only if the OCR word looks clean (not garbled)
+                if len(word) >= 2 and word.replace('.','').replace('-','').isdigit():
+                    return {"verdict": "UNSUPPORTED", "reason": "different_numeric_value",
+                            "ocr_text": ocr_text, "expected": exp,
+                            "found": word}
+
+        # Default: REVIEW (OCR may be garbled or value in different column)
+        return {"verdict": "REVIEW", "reason": "no_confident_match",
+                "ocr_text": ocr_text, "expected": exp}
+
+    except Exception as e:
+        return {"verdict": "REVIEW", "reason": f"verify_error:{str(e)[:60]}",
+                "ocr_text": ""}
+
+
+def _fuzzy_match(expected: str, ocr: str) -> bool:
+    """Check if expected could be an OCR misread of text in ocr."""
+    exp_len = len(expected)
+    if exp_len < 2:
+        return False
+    for word in ocr.split():
+        if abs(len(word) - exp_len) <= 1:
+            common = sum(1 for a, b in zip(expected, word) if a == b)
+            if common >= exp_len - 1:
+                return True
+    return False
+
+
+def _extract_numeric_core(text: str) -> str | None:
+    """Extract the numeric core from a value string.
+
+    '45° (typ.)' → '45'
+    '2.65' → '2.65'
+    '60V' → '60'
+    'GND' → None (not numeric)
+    """
+    m = re.match(r'^([<>±~]?\s*-?\d+\.?\d*)', text.strip())
+    return m.group(1).strip() if m else None
+
 # ── value/unit parsing ──────────────────────────────────────────────────
 _UNIT_RE = re.compile(
     r"^([<>±~]?\s*-?\d+\.?\d*(?:[eE][+-]?\d+)?)\s*(.*)$"
@@ -182,6 +308,7 @@ def table_to_claims(
     region_idx: int,
     table_idx: int,
     verification: list | None = None,
+    pdf_path: str | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Convert one table to claim_data rows.
 
@@ -266,6 +393,15 @@ def table_to_claims(
                 # Otherwise use the column name
                 field = col_header if col_header else "unknown"
 
+            # Real crop verification
+            pdf_bbox = transform_bbox_to_pdf(
+                region.get("region_bbox"), cell_bbox
+            )
+            crop_result = crop_verify_cell(
+                pdf_path, int(str(region.get("page", "1")) or "1"),
+                pdf_bbox, raw_str
+            )
+
             # Build the claim
             claim = {
                 "symbol": field[:64],
@@ -280,18 +416,11 @@ def table_to_claims(
                 "doc_sha256": doc_sha256,
                 "region_bbox": region.get("region_bbox"),
                 "cell_bbox": cell_bbox,
-                # Coordinate transform: pixel bbox -> PDF-page bbox
-                "pdf_bbox": transform_bbox_to_pdf(
-                    region.get("region_bbox"), cell_bbox
-                ),
+                "pdf_bbox": pdf_bbox,
                 "extractor": extractor,
                 "extractor_version": extractor_version,
-                "verification": _match_verification(
-                    verification or [], table_idx, r_idx, col_name
-                ),
-                "verification_status": _verification_status(
-                    verification or [], table_idx, r_idx, col_name
-                ),
+                "verification": [crop_result],
+                "verification_status": crop_result["verdict"],
                 "table_class": tclass,
                 "absolute_max": abs_max,
                 "recommended_operation": is_op,
@@ -300,7 +429,11 @@ def table_to_claims(
                 "table_idx": table_idx,
                 "row_idx": r_idx,
                 "col_name": col_name,
-                # Document-level identity — NOT an OPN
+                # Row relationship: all claims from the same row share this ID
+                # so downstream consumers know Pin=1, Name=GND, Type=Power
+                # are one coherent pin description, not independent facts
+                "row_id": f"{region_idx}_{table_idx}_{r_idx}",
+                "row_cells": {k: str(v) for k, v in cells.items() if v},
                 "doc_identity": {
                     "sha256": doc_sha256,
                     "filename": filename,
@@ -356,6 +489,17 @@ def _verification_status(
     return "FAIL"
 
 
+def resolve_pdf(sha256: str, filename: str) -> str | None:
+    """Resolve PDF path from content-addressed blob store."""
+    if not sha256 or len(sha256) != 64:
+        return None
+    blob_root = Path("/Volumes/M5_4TB/exports/corpus-deliveries")
+    hits = list(blob_root.glob(f"*/blobs/{sha256[:2]}/{sha256[2:4]}/{sha256}.pdf"))
+    if hits:
+        return str(hits[0])
+    return None
+
+
 def process_doc(input_path: Path, verbose: bool = False) -> dict:
     """Process one vision-v2 artifact. Returns {stem, claims, held, stats}."""
     rec = json.loads(input_path.read_text())
@@ -363,6 +507,9 @@ def process_doc(input_path: Path, verbose: bool = False) -> dict:
     filename = rec.get("filename", input_path.stem)
     extractor = rec.get("extractor", "vision_worker")
     extractor_version = rec.get("extractor_version", "unknown")
+
+    # Resolve PDF for crop verification
+    pdf_path = resolve_pdf(doc_sha, filename)
 
     all_claims = []
     all_held = []
@@ -388,6 +535,7 @@ def process_doc(input_path: Path, verbose: bool = False) -> dict:
                 table, region, doc_sha, filename,
                 extractor, extractor_version,
                 r_idx, t_idx, crop_verdicts,
+                pdf_path=pdf_path,
             )
             all_claims.extend(claims)
             all_held.extend(held)

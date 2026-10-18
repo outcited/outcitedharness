@@ -282,6 +282,11 @@ def _burn_rows(burn_dir: Path) -> list:
                 claim["absolute_max"] = c["absolute_max"]
             if c.get("recommended_operation") is not None:
                 claim["recommended_operation"] = c["recommended_operation"]
+            # Row relationship: preserve so Pin=1, Name=GND stay linked
+            if c.get("row_id") is not None:
+                claim["row_id"] = c["row_id"]
+            if c.get("row_cells") is not None:
+                claim["row_cells"] = c["row_cells"]
             claims.append(claim)
         row = {"part_number": part, "vendor": vendor, "claims": claims}
         if is_sha:
