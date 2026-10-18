@@ -80,6 +80,7 @@ class RunReport:
     healed_writes: int = 0
     markers: int = 0
     project_reconcile: list = field(default_factory=list)
+    github_workloop: Optional[dict] = None
     llm: Optional[dict] = None
     started: float = field(default_factory=utcnow)
     finished: float = 0.0
@@ -100,7 +101,9 @@ class DirectorConsumer:
                  sessions_db: Optional[Path] = None,
                  mailbox_root: Optional[Path] = None,
                  repo_path: Optional[Path] = None,
-                 machine_id: str = "unknown"):
+                 machine_id: str = "unknown",
+                 github_repos: tuple[str, ...] = (),
+                 github_project_id: str = ""):
         if mode != "observe":
             raise ValueError("only observe mode is implemented")
         self.mode = mode
@@ -173,6 +176,16 @@ class DirectorConsumer:
             transport=self.transport)
         self.project_registry = ProjectRegistry(self.state.con)
         self.projects_root = Path(project_dir).parent if project_dir else None
+        # Explicit opt-in to poll GitHub on EACH existing Director tick.
+        # This only registers local task definitions; it never sends mail,
+        # infers accountable ownership, or acknowledges an assignment.
+        self.github_runtime = None
+        if github_repos:
+            from .gh_runtime import GithubIssueRuntime
+            self.github_runtime = GithubIssueRuntime(
+                self.state.con, self.workspace, github_project_id,
+                github_repos,
+                registered=lambda pid: self.project_registry.get(pid) is not None)
         # ownership + sessions (§5/§6) — optional sources
         self.sessions_db = Path(sessions_db) if sessions_db else None
         self.mailbox_root = Path(mailbox_root) if mailbox_root else None
@@ -525,6 +538,8 @@ class DirectorConsumer:
         self.run_fleet(report)
         self.run_continuity(report)
         self.run_ownership(report)
+        if self.github_runtime is not None:
+            report.github_workloop = self.github_runtime.run_once()
         report.project_reconcile = self.run_projects(report)
         report.healed_writes = self.state.flush_pending_writes(
             lambda row: write_proposal_atomic(
@@ -545,6 +560,8 @@ class DirectorConsumer:
             "proposals_new": report.proposals_new,
             "healed_writes": report.healed_writes,
             "markers": report.markers,
+            "github_source_errors": (len(report.github_workloop["errors"])
+                                     if report.github_workloop else None),
             "elapsed_s": round(report.finished - report.started, 3)})
         # operational briefing (§10.10) — derived, written every run
         try:
