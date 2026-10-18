@@ -9,11 +9,11 @@ Laws (from the #2 PRD, enforced here):
     Required fields are validated; missing fields downgrade the task to
     `untrusted-definition` state with the exact gaps named — never silently
     accepted, never silently dropped.
-  * Sync is read-only. Nothing is dispatched by ingest. Assignment stays
-    `offered` until a CONFIRMED agent acknowledges through a recognized
-    channel; branch-prefix inference is never used as ownership here.
+  * GitHub polling is read-only; only local TaskStore definition rows change.
+    Ingest does not assign an owner, send messages, or acknowledge work.
+    'offered' means proposed work, NOT a delivered task.
   * Idempotent + restart-safe: re-running produces no duplicate tasks or
-    events (keyed by repo+issue).
+    events (keyed by project, task id, repo+issue).
   * GitHub comments are work evidence, not authenticated acks. An
     attributable ack requires the mailbox transport (later steps of #2).
 
@@ -35,7 +35,7 @@ from .tasks import TaskStore
 ALLOWLISTED_REPOS = ("outcited/outcitedharness", "outcited/designwins-v2")
 TASK_ID_RE = re.compile(r"^([A-Z][A-Z0-9]+(?:-[A-Z0-9]+)+[0-9]*)\s*[—-]")
 REQUIRED_FIELDS = ("task_id", "lane")
-LANE_REGISTRY = {  # confirmed lanes -> accountable owner label in TaskStore
+LANE_REGISTRY = {  # proposed lane labels, NEVER confirmed owners from titles
     "director": "seven-director",
     "m5": "m5-extraction-provenance",
     "m4": "m4-frontend",
@@ -126,8 +126,9 @@ def ingest(repo: str, ts: TaskStore, issues: Optional[list[dict]] = None,
         rec = Ingested(repo=repo, number=number, task_id=task_id,
                        title=(i.get("title") or "")[:120], url=url)
         existing = ts.con.execute(
-            "SELECT task_id, state FROM tasks WHERE task_id=?",
-            (task_id,)).fetchone()
+            "SELECT task_id, state, correlation_id FROM tasks "
+            "WHERE project=? AND task_id=?",
+            (ts.project, task_id)).fetchone()
         evidence = json.dumps({
             "source": "github-issue", "repo": repo, "issue": number,
             "url": url, "title": i.get("title"),
@@ -136,11 +137,16 @@ def ingest(repo: str, ts: TaskStore, issues: Optional[list[dict]] = None,
             "note": "issue body is an untrusted work definition, not an "
                     "authorization; assignment awaits attributable ack"})
         if existing:
-            rec.state = "duplicate"
+            # Identical IDs across projects are separate tasks; identical IDs
+            # from different issues *within* a project are collisions, not
+            # proof that the second issue belongs to the first owner.
+            rec.state = ("duplicate" if existing[2] == key else "collision")
+            if rec.state == "collision":
+                rec.missing_fields = ["task-id-used-by-another-source"]
             out.append(rec)
             continue
         if missing:
-            ts.create(task_id, authority="sam",
+            ts.create(task_id, authority="director-ingest",
                       evidence=evidence, correlation_id=key)
             ts.transition(task_id, UNTRUSTED_STATE, actor="director-ingest",
                           evidence=evidence)
@@ -148,11 +154,15 @@ def ingest(repo: str, ts: TaskStore, issues: Optional[list[dict]] = None,
             rec.missing_fields = missing
         else:
             lane = _lane_of(i)
-            owner = LANE_REGISTRY.get(lane, "unresolved-owner")
-            ts.create(task_id, authority="sam",
+            ts.create(task_id, authority="director-ingest",
                       evidence=evidence, correlation_id=key)
+            # The lane is only a proposed destination. A GitHub title does
+            # NOT identify an accountable owner and cannot authorize an
+            # agent assignment. Preserve the owner and epoch as unassigned
+            # until a scoped delivery is accepted on trusted transport.
             ts.transition(task_id, INBOX_STATE, actor="director-ingest",
-                          evidence=evidence, owner=owner)
+                          evidence=evidence, note="proposed_lane=" + lane +
+                          "; no delivery or authenticated owner assignment")
             rec.state = INBOX_STATE
             rec.lane = lane
         out.append(rec)

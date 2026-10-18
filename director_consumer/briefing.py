@@ -98,6 +98,40 @@ def write_briefing(consumer) -> Path:
                 f"verdict={h.get('verdict')} roles={','.join(h.get('roles', []))}"
                 + (" [MIGRATING]" if h.get("status") == "migrating" else ""))
 
+    # GitHub issue definitions are an OBSERVATION. In particular, a manual
+    # GitHub reply can never be rendered as an authenticated AgentMail ACK.
+    github_work = []
+    gh_snapshot = ws / "github-workloop-latest.json"
+    if gh_snapshot.exists():
+        try:
+            g = json.loads(gh_snapshot.read_text())
+            age_s = max(0, time.time() - float(g.get("observed_at", 0)))
+            github_work.append(
+                f"- observed {age_s/60:.0f} min ago; project="
+                f"{g.get('project_id', '?')}; "
+                f"source errors={len(g.get('errors', []))}")
+            for repo, info in sorted(g.get("repositories", {}).items()):
+                github_work.append(
+                    f"- {repo}: source={info.get('source_state', 'UNKNOWN')}; "
+                    f"issues={info.get('issues_observed', 'UNKNOWN')}; "
+                    f"new={info.get('new', 0)}; "
+                    f"duplicates={info.get('duplicates', 0)}; "
+                    f"untrusted={info.get('untrusted', 0)}")
+            for task in g.get("tasks", [])[:12]:
+                github_work.append(
+                    f"- {task.get('task_id')}: definition="
+                    f"{task.get('definition_state')} DB={task.get('task_state')} "
+                    f"trusted-mail-ack="
+                    f"{task.get('transport_ack', {}).get('state', 'UNKNOWN')}")
+            if g.get("errors"):
+                github_work.append(
+                    "- SOURCE ERROR(s) — issue count UNKNOWN, no empty-queue "
+                    "inference; see github-workloop-latest.json")
+        except (ValueError, OSError, TypeError, AttributeError):
+            github_work.append("- UNKNOWN: snapshot invalid/unreadable")
+    else:
+        github_work.append("- NOT CONFIGURED: no GitHub work-order polling snapshot")
+
     # coordination state (04): tasks / messages / incident lifecycles
     coord = []
     try:
@@ -135,6 +169,9 @@ map_version: {consumer.map.version}
 
 ## Source health
 {chr(10).join(health) or "- all feeds fresh"}
+
+## GitHub work-order ingestion (not delivery)
+{chr(10).join(github_work)}
 
 ## Coordination state
 {chr(10).join(coord) or "- nothing open"}

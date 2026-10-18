@@ -37,13 +37,13 @@ def test_missing_lane_is_untrusted_not_dropped(tmp_path):
     assert row[0] == "untrusted-definition"
 
 
-def test_lane_maps_to_confirmed_owner_and_stays_offered(tmp_path):
+def test_lane_is_proposed_but_never_confers_accountable_ownership(tmp_path):
     ts = _ts(tmp_path)
     out = ingest("outcited/outcitedharness", ts,
                  issues=[_issue(5, "DW-TRUTH-FUNNEL-01 — M5: actual claim/provenance", "m5 lane owner")])
     assert out[0].state == "offered" and out[0].lane == "m5"
-    row = ts.con.execute("SELECT state, accountable_owner FROM tasks WHERE task_id='DW-TRUTH-FUNNEL-01'").fetchone()
-    assert row[0] == "offered" and row[1] == "m5-extraction-provenance"
+    row = ts.con.execute("SELECT state, accountable_owner, epoch FROM tasks WHERE task_id='DW-TRUTH-FUNNEL-01'").fetchone()
+    assert row == ("offered", "", 0), "issue title never proves assignment"
     # ingest NEVER acks: no attributable-ack event exists
     evs = ts.con.execute("SELECT to_state FROM task_events WHERE task_id='DW-TRUTH-FUNNEL-01'").fetchall()
     assert all(e[0] != "attributable_ack" for e in evs)
@@ -61,10 +61,9 @@ def test_reingest_is_idempotent(tmp_path):
     assert ev[0] == 2, "no extra events on re-ingest"
 
 
-def test_repo_allowlist_is_enforced():
+def test_repo_allowlist_is_enforced(tmp_path):
     with pytest.raises(PermissionError):
-        ingest("evil/example", _ts(Path("/tmp/xtest-allowlist")),
-               issues=[])
+        ingest("evil/example", _ts(tmp_path), issues=[])
 
 
 def test_issue_body_is_labelled_untrusted(tmp_path):
