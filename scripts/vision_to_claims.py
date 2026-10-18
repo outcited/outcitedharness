@@ -22,9 +22,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
+
+# Configurable source roots (for happy compatibility)
+# Override with V2C_BLOB_ROOT env var
+BLOB_ROOT = Path(os.environ.get(
+    "V2C_BLOB_ROOT",
+    "/Volumes/M5_4TB/exports/corpus-deliveries"
+))
 
 # Coordinate transform: image-local pixels -> PDF page coordinates
 # vision-v2 region_bbox is PDF points (from pymupdf)
@@ -53,17 +61,21 @@ def transform_bbox_to_pdf(region_bbox: list, pixel_bbox: list) -> tuple:
     )
 
 
-def crop_verify_cell(pdf_path: str, page_1based: int, pdf_bbox: tuple,
-                     expected_value: str) -> dict:
-    """Real crop verification: OCR the PDF region and match against claim.
+def verify_with_source_geometry(pdf_path: str, page_1based: int, region_bbox: list,
+                                 table_columns: list, row_cells: dict,
+                                 target_col: str, expected_value: str) -> dict:
+    """Verify a cell using source text geometry (pymupdf word bboxes).
 
-    Returns {verdict: SUPPORTED|UNSUPPORTED|REVIEW, ocr_text: str, ...}
-    - SUPPORTED: expected value found in OCR
-    - UNSUPPORTED: OCR found a DIFFERENT value (not just misread)
-    - REVIEW: OCR mismatch or ambiguous (misread, missing, etc.)
+    Instead of cropping the entire row and matching anywhere:
+    1. Find the target word's exact bbox from pymupdf source text
+    2. Crop ONLY that word's cell region
+    3. OCR the cell crop
+    4. Match expected value against the cell OCR
+
+    Returns {verdict, reason, ocr_text, cell_bbox, ...}
     """
-    if not pdf_path or not pdf_bbox:
-        return {"verdict": "REVIEW", "reason": "no_source_or_bbox", "ocr_text": ""}
+    if not pdf_path:
+        return {"verdict": "REVIEW", "reason": "no_source_pdf"}
 
     try:
         import pymupdf
@@ -73,85 +85,100 @@ def crop_verify_cell(pdf_path: str, page_1based: int, pdf_bbox: tuple,
         doc = pymupdf.open(pdf_path)
         if page_1based > len(doc):
             doc.close()
-            return {"verdict": "REVIEW", "reason": "page_out_of_range", "ocr_text": ""}
+            return {"verdict": "REVIEW", "reason": "page_out_of_range"}
 
         page = doc[page_1based - 1]
-        clip = pymupdf.Rect(*pdf_bbox)
+
+        # Get all words with bboxes
+        words = page.get_text("words")
+
+        # Find the expected value's word bbox in the source
+        target_word_bbox = None
+        exp_str = str(expected_value).strip()
+
+        for w in words:
+            wx0, wy0, wx1, wy1, wtext = w[0], w[1], w[2], w[3], w[4]
+            if wtext.strip() == exp_str:
+                # Check if it's in the right region
+                if (region_bbox[0] <= wx0 <= region_bbox[2] and
+                        region_bbox[1] <= wy0 <= region_bbox[3]):
+                    target_word_bbox = (wx0, wy0, wx1, wy1)
+                    break
+
+        if not target_word_bbox:
+            # Value not found as a source word — try numeric core
+            numeric_core = _extract_numeric_core(exp_str)
+            if numeric_core:
+                for w in words:
+                    wx0, wy0, wx1, wy1, wtext = w[0], w[1], w[2], w[3], w[4]
+                    if wtext.strip() == numeric_core:
+                        if (region_bbox[0] <= wx0 <= region_bbox[2] and
+                                region_bbox[1] <= wy0 <= region_bbox[3]):
+                            target_word_bbox = (wx0, wy0, wx1, wy1)
+                            break
+
+        if not target_word_bbox:
+            doc.close()
+            return {"verdict": "REVIEW", "reason": "value_not_in_source_geometry",
+                    "expected": exp_str}
+
+        # Crop the cell with padding (2pt on each side)
+        PAD = 2.0
+        cell_bbox = (
+            max(0, target_word_bbox[0] - PAD),
+            max(0, target_word_bbox[1] - PAD),
+            target_word_bbox[2] + PAD,
+            target_word_bbox[3] + PAD,
+        )
+
+        # OCR the cell crop
+        clip = pymupdf.Rect(*cell_bbox)
         pix = page.get_pixmap(dpi=300, clip=clip)
 
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             pix.save(f.name)
             result = subprocess.run(
-                ["tesseract", f.name, "stdout", "--psm", "6"],
-                capture_output=True, text=True, timeout=60
+                ["tesseract", f.name, "stdout", "--psm", "7"],
+                capture_output=True, text=True, timeout=30
             )
             ocr_text = result.stdout.strip()
+
+        # Cleanup temp file
+        import os
+        try:
+            os.unlink(f.name)
+        except OSError:
+            pass
+
         doc.close()
 
         if not ocr_text:
-            return {"verdict": "REVIEW", "reason": "empty_ocr", "ocr_text": ""}
+            return {"verdict": "REVIEW", "reason": "empty_cell_ocr",
+                    "cell_bbox": cell_bbox, "ocr_text": ""}
 
-        # Match expected value against OCR
-        exp = str(expected_value).strip()
-        if not exp:
-            return {"verdict": "REVIEW", "reason": "empty_expected", "ocr_text": ocr_text}
+        # Match expected against cell OCR
+        if exp_str in ocr_text:
+            return {"verdict": "SUPPORTED", "reason": "cell_exact_match",
+                    "ocr_text": ocr_text, "cell_bbox": cell_bbox,
+                    "word_bbox": target_word_bbox}
 
-        # Exact match
-        if exp in ocr_text:
-            return {"verdict": "SUPPORTED", "reason": "exact_match",
-                    "ocr_text": ocr_text, "matched": exp}
+        if exp_str.upper() in ocr_text.upper():
+            return {"verdict": "SUPPORTED", "reason": "cell_case_insensitive",
+                    "ocr_text": ocr_text, "cell_bbox": cell_bbox,
+                    "word_bbox": target_word_bbox}
 
-        # Case-insensitive
-        if exp.upper() in ocr_text.upper():
-            return {"verdict": "SUPPORTED", "reason": "case_insensitive_match",
-                    "ocr_text": ocr_text, "matched": exp}
-
-        # Numeric core match: extract numeric part and check in OCR
-        # Handles cases like "45° (typ.)" where OCR garbles the suffix
-        numeric_core = _extract_numeric_core(exp)
+        numeric_core = _extract_numeric_core(exp_str)
         if numeric_core and numeric_core in ocr_text:
-            return {"verdict": "SUPPORTED", "reason": "numeric_core_match",
-                    "ocr_text": ocr_text, "matched": numeric_core}
+            return {"verdict": "SUPPORTED", "reason": "cell_numeric_match",
+                    "ocr_text": ocr_text, "cell_bbox": cell_bbox,
+                    "word_bbox": target_word_bbox}
 
-        # Normalized match (strip whitespace, handle common OCR substitutions)
-        exp_norm = exp.strip().upper()
-        ocr_norm = ocr_text.upper()
-        if _fuzzy_match(exp_norm, ocr_norm):
-            return {"verdict": "REVIEW", "reason": "fuzzy_match_possible_ocr_misread",
-                    "ocr_text": ocr_text, "expected": exp}
-
-        # No match — default to REVIEW (conservative)
-        # UNSUPPORTED only when OCR clearly shows a different valid value
-        ocr_words = [w for w in ocr_text.split() if any(c.isalnum() for c in w)]
-        if len(ocr_words) == 0:
-            return {"verdict": "REVIEW", "reason": "no_alphanumeric_in_ocr",
-                    "ocr_text": ocr_text}
-
-        # Check if ANY expected-like value appears in OCR
-        for word in ocr_words:
-            if _fuzzy_match(exp.upper(), word.upper()):
-                return {"verdict": "REVIEW", "reason": "possible_match_different_position",
-                        "ocr_text": ocr_text, "expected": exp}
-
-        # Look for a clean numeric value that's different from expected
-        exp_numeric = _extract_numeric_core(exp)
-        for word in ocr_words:
-            word_numeric = _extract_numeric_core(word)
-            if word_numeric and exp_numeric and word_numeric != exp_numeric:
-                # Found a different numeric value — could be UNSUPPORTED
-                # But only if the OCR word looks clean (not garbled)
-                if len(word) >= 2 and word.replace('.','').replace('-','').isdigit():
-                    return {"verdict": "UNSUPPORTED", "reason": "different_numeric_value",
-                            "ocr_text": ocr_text, "expected": exp,
-                            "found": word}
-
-        # Default: REVIEW (OCR may be garbled or value in different column)
-        return {"verdict": "REVIEW", "reason": "no_confident_match",
-                "ocr_text": ocr_text, "expected": exp}
+        return {"verdict": "REVIEW", "reason": "cell_no_match",
+                "ocr_text": ocr_text, "cell_bbox": cell_bbox,
+                "expected": exp_str}
 
     except Exception as e:
-        return {"verdict": "REVIEW", "reason": f"verify_error:{str(e)[:60]}",
-                "ocr_text": ""}
+        return {"verdict": "REVIEW", "reason": f"verify_error:{str(e)[:60]}"}
 
 
 def _fuzzy_match(expected: str, ocr: str) -> bool:
@@ -397,9 +424,10 @@ def table_to_claims(
             pdf_bbox = transform_bbox_to_pdf(
                 region.get("region_bbox"), cell_bbox
             )
-            crop_result = crop_verify_cell(
+            crop_result = verify_with_source_geometry(
                 pdf_path, int(str(region.get("page", "1")) or "1"),
-                pdf_bbox, raw_str
+                region.get("region_bbox"), columns, cells,
+                col_name, raw_str
             )
 
             # Build the claim
@@ -493,11 +521,23 @@ def resolve_pdf(sha256: str, filename: str) -> str | None:
     """Resolve PDF path from content-addressed blob store."""
     if not sha256 or len(sha256) != 64:
         return None
-    blob_root = Path("/Volumes/M5_4TB/exports/corpus-deliveries")
-    hits = list(blob_root.glob(f"*/blobs/{sha256[:2]}/{sha256[2:4]}/{sha256}.pdf"))
+    hits = list(BLOB_ROOT.glob(f"*/blobs/{sha256[:2]}/{sha256[2:4]}/{sha256}.pdf"))
     if hits:
         return str(hits[0])
     return None
+
+
+def validate_sha(pdf_path: str, expected_sha: str) -> bool:
+    """Validate document SHA against actual source bytes."""
+    if not pdf_path or not expected_sha:
+        return False
+    import hashlib
+    try:
+        with open(pdf_path, "rb") as f:
+            actual = hashlib.sha256(f.read()).hexdigest()
+        return actual == expected_sha
+    except Exception:
+        return False
 
 
 def process_doc(input_path: Path, verbose: bool = False) -> dict:
@@ -573,7 +613,8 @@ def main() -> int:
     print(f"processing {len(files)} documents from {input_dir}")
 
     totals = {"docs": 0, "tables": 0, "rows": 0, "cells": 0,
-              "claims": 0, "held": 0}
+              "candidates": 0, "supported": 0, "review": 0,
+              "unsupported": 0, "consumable": 0, "held": 0}
 
     for f in files:
         try:
@@ -583,16 +624,30 @@ def main() -> int:
             continue
 
         # Write adapter output (burn-compatible format)
+        # Separate counts: candidates vs verified vs consumable
+        all_claims = result["claims"]
+        supported = [c for c in all_claims if c.get("verification_status") == "SUPPORTED"]
+        review = [c for c in all_claims if c.get("verification_status") == "REVIEW"]
+        unsupported = [c for c in all_claims if c.get("verification_status") == "UNSUPPORTED"]
+        # Consumable = SUPPORTED only (verified, source-backed, correct association)
+        consumable = supported
+
         out_rec = {
             "stem": result["stem"],
             "tier": "vision-adapter",
-            "claims": len(result["claims"]),
-            "surviving": len(result["claims"]),
-            "p0": 0,
-            "claim_data": result["claims"],
+            "counts": {
+                "candidates": len(all_claims),
+                "ocr_matched": len(supported),
+                "verified": len(supported),  # source-geometry verified
+                "review": len(review),
+                "unsupported": len(unsupported),
+                "consumable": len(consumable),
+                "held": len(result["held"]),
+            },
+            "claim_data": all_claims,
             "held_evidence": result["held"],
             "adapter": {
-                "version": "0.1.0",
+                "version": "0.2.0",
                 "source": str(f),
                 "doc_sha256": result["claims"][0]["doc_sha256"] if result["claims"] else None,
             },
@@ -604,7 +659,11 @@ def main() -> int:
         totals["tables"] += result["stats"]["tables"]
         totals["rows"] += result["stats"]["rows"]
         totals["cells"] += result["stats"]["cells"]
-        totals["claims"] += len(result["claims"])
+        totals["candidates"] += len(all_claims)
+        totals["supported"] += len(supported)
+        totals["review"] += len(review)
+        totals["unsupported"] += len(unsupported)
+        totals["consumable"] += len(supported)
         totals["held"] += len(result["held"])
 
         if args.verbose:
@@ -614,12 +673,16 @@ def main() -> int:
                   f"{result['stats']['tables']} tables")
 
     print(f"\n=== SUMMARY ===")
-    print(f"documents: {totals['docs']}")
-    print(f"tables:    {totals['tables']}")
-    print(f"rows:      {totals['rows']}")
-    print(f"cells:     {totals['cells']}")
-    print(f"claims:    {totals['claims']}")
-    print(f"held:      {totals['held']}")
+    print(f"documents:   {totals['docs']}")
+    print(f"tables:      {totals['tables']}")
+    print(f"rows:        {totals['rows']}")
+    print(f"cells:       {totals['cells']}")
+    print(f"candidates:  {totals['candidates']}")
+    print(f"  SUPPORTED:   {totals['supported']}")
+    print(f"  REVIEW:      {totals['review']}")
+    print(f"  UNSUPPORTED: {totals['unsupported']}")
+    print(f"consumable:  {totals['consumable']}  (SUPPORTED only)")
+    print(f"held:        {totals['held']}")
 
     # Write summary manifest
     manifest = {

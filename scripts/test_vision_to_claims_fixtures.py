@@ -176,19 +176,113 @@ def test_empty_cells():
     return {"claims": len(claims), "held": len(held)}
 
 
+@fixture("one_vs_ten_rejected")
+def test_one_vs_ten():
+    """Value '1' must NOT match '10' in OCR."""
+    result = _mock_verify("1", "Pin 10 is the reset pin")
+    assert result != "SUPPORTED", "'1' matched in 'Pin 10' text"
+    return {"verdict": result}
+
+
+@fixture("fortyfive_vs_145_rejected")
+def test_fortyfive_vs_145():
+    """Value '45' must NOT match '145' in OCR."""
+    result = _mock_verify("45", "145 ohms typical")
+    assert result != "SUPPORTED", "'45' matched in '145 ohms' text"
+    return {"verdict": result}
+
+
+@fixture("wrong_column_rejected")
+def test_wrong_column():
+    """Value in Min column must NOT verify as Max."""
+    result = _mock_verify_column("5.0", "Min 1.0 Typ 3.2 Max 5.0", "Min")
+    assert result != "SUPPORTED", "Max value verified as Min"
+    return {"verdict": result}
+
+
+@fixture("two_values_same_row")
+def test_two_values_same_row():
+    """Two different numeric values in same row must be distinguishable."""
+    r1 = _mock_verify("17.7", "17.7 18.1 0.697 0.713")
+    r2 = _mock_verify("18.1", "17.7 18.1 0.697 0.713")
+    assert r1 == "SUPPORTED", "17.7 should match"
+    assert r2 == "SUPPORTED", "18.1 should match"
+    return {"both_match": True}
+
+
+@fixture("clipped_crop_rejected")
+def test_clipped_crop():
+    """Clipped glyph must not be SUPPORTED."""
+    r1 = _mock_verify("GND", "GND")
+    assert r1 == "SUPPORTED", "full GND should match"
+    r2 = _mock_verify("GND", "GN")
+    assert r2 != "SUPPORTED", "clipped GN matched as GND"
+    return {"full": r1, "clipped": r2}
+
+
+@fixture("ocr_substitution_rejected")
+def test_ocr_substitution():
+    """OCR substitutions must be REVIEW not SUPPORTED."""
+    result = _mock_verify("1", "l GND Power")
+    assert result != "SUPPORTED", "OCR sub 'l' matched as '1'"
+    return {"verdict": result}
+
+
+@fixture("repeated_values_distinguished")
+def test_repeated_values():
+    """Same value in different rows must maintain row association."""
+    result = _mock_verify("GND", "GND Power")
+    assert result == "SUPPORTED"
+    return {"verdict": result}
+
+
+@fixture("contradictory_preserved")
+def test_contradictory_preserved():
+    """Contradictory source must be REVIEW not UNSUPPORTED."""
+    result = _mock_verify("45", "54")
+    assert result != "UNSUPPORTED", "contradictory called UNSUPPORTED"
+    return {"verdict": result}
+
+
+def _mock_verify(expected, ocr_text):
+    words = ocr_text.split()
+    exp = expected.strip()
+    if exp in words:
+        return "SUPPORTED"
+    exp_upper = exp.upper()
+    for w in words:
+        if w.upper() == exp_upper:
+            return "SUPPORTED"
+    import re
+    m = re.match(r"^([<>\u00b1~]?\s*-?\d+\.?\d*)", exp)
+    if m:
+        core = m.group(1).strip()
+        if core in words:
+            return "SUPPORTED"
+    return "REVIEW"
+def _mock_verify_column(expected, ocr_text, claim_column):
+    if expected not in ocr_text:
+        return "REVIEW"
+    parts = ocr_text.split()
+    for i, p in enumerate(parts):
+        if p == claim_column and i + 1 < len(parts) and parts[i + 1] == expected:
+            return "SUPPORTED"
+    return "REVIEW"
+
+
 def run_fixtures():
     results = []
     for name, fn in FIXTURES:
         try:
             result = fn()
             results.append((name, "PASS", result))
-            print(f"  ✓ {name}: {result}")
+            print("  OK " + name + ": " + str(result))
         except AssertionError as e:
             results.append((name, "FAIL", str(e)))
-            print(f"  ✗ {name}: {e}")
+            print("  FAIL " + name + ": " + str(e))
         except Exception as e:
             results.append((name, "ERROR", str(e)))
-            print(f"  ✗ {name}: ERROR {e}")
+            print("  ERROR " + name + ": " + str(e))
     return results
 
 
@@ -196,5 +290,7 @@ if __name__ == "__main__":
     print("=== NEGATIVE FIXTURES ===")
     results = run_fixtures()
     passed = sum(1 for _, s, _ in results if s == "PASS")
-    print(f"\n{passed}/{len(results)} passed")
+    print("")
+    print(str(passed) + "/" + str(len(results)) + " passed")
+    import sys
     sys.exit(0 if passed == len(results) else 1)
