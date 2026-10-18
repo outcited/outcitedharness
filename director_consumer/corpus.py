@@ -29,32 +29,43 @@ from typing import Iterable, Optional
 
 from .memory import MemoryRecord, ProjectMemory
 
-AUTHORITY_PAT = re.compile(
-    r"(PRD|DECISION|ARCHITECTURE|POLICY|CONTRACT|AUTHORIZATION|"
-    r"ENGINEERING-REQUIREMENT|ACCEPTANCE|GATE|LAW)", re.I)
-RECEIPT_PAT = re.compile(
-    r"(RECEIPT|AUDIT|VERIFICATION|TEST|BENCHMARK|EVALUATION|RESULT|"
-    r"MEASURED|LEDGER)", re.I)
-HYPOTHESIS_PAT = re.compile(
-    r"(PROPOSAL|PLAN|RECOMMEND|DRAFT|PROPOSED|EXPERIMENT|SPEC)", re.I)
+# An explicit declaration inside the document is the only filename-independent
+# way to confer a class. Anything else is a hint, not evidence.
+MARKER_RE = re.compile(r"^\s*evidence-class:\s*(authority|verified-fact)"
+                       r"\s*$", re.I | re.M)
+AUTHORITY_NAME_RE = re.compile(
+    r"^(PRD-|DECISION-|ARCHORITY|POLICY|ARCHITECTURE-|CONTRACT-|"
+    r"AUTHORIZATION-|ENGINEERING-REQUIREMENT-)", re.I)
 
-SKIP_DIRS = {".git", "__pycache__", "node_modules", "results", "datasets",
+SKIP_DIRS = {".git", "__pycache__", "node_modules", "datasets",
              "build", "dist", ".venv", ".litellm-venv", ".pytest_cache",
-             "pdfs-incoming", "batches", "images", "renders"}
+             "pdfs-incoming", "batches", "images", "renders",
+             # bulk artefact dirs under results/ — receipts are .md/.json
+             "blobs", "renders", "output-cloud", "output"}
 SKIP_EXT = {".pdf", ".png", ".jpg", ".jpeg", ".pyc", ".so", ".bin", ".db",
-            ".sqlite", ".sqlite3", ".zip", ".tar", ".gz", ".whl", ".jsonl"}
+            ".sqlite", ".sqlite3", ".zip", ".tar", ".gz", ".whl", ".jsonl",
+            ".log", ".jsonl.tmp"}
 SECRET_PAT = re.compile(r"(\.env|id_rsa|id_ed25519|authorized_keys|\.pem$|"
                         r"credential|secret|token|\.key$|password)", re.I)
 
 
-def classify(path: Path, title: str) -> str:
-    n = (title or path.name)
-    if HYPOTHESIS_PAT.search(n) and not RECEIPT_PAT.search(n):
-        return "hypothesis"
-    if AUTHORITY_PAT.search(n):
+def classify(path: Path, title: str, body: str = "") -> str:
+    """Evidence class of a source. Rules (provenance law):
+
+    - An explicit `evidence-class:` line inside the document is honoured.
+    - A git commit message is ALWAYS an author assertion. Subject wording
+      ("verified", "tests green") confers nothing.
+    - Filenames never confer verified-fact: a file NAMED a receipt is a
+      locator, not proof. Verification is conferred only by the Director
+      verifying the artifact itself (index_experience with a
+      verification_artifact) or an explicit marker.
+    """
+    if body:
+        m = MARKER_RE.search(body[:4000])
+        if m:
+            return m.group(1).lower()
+    if AUTHORITY_NAME_RE.match(path.name):
         return "authority"
-    if RECEIPT_PAT.search(n):
-        return "verified-fact"
     return "assertion"
 
 
@@ -68,11 +79,16 @@ def index_tree(mem: ProjectMemory, root: Path, project_id: str = "designwins",
     n = 0
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        in_results = "results" in Path(dirpath).parts
         for fn in filenames:
             if n >= max_files:
                 return n
             p = Path(dirpath) / fn
             if p.suffix.lower() in SKIP_EXT:
+                continue
+            # inside results/ only receipts and small structured summaries
+            # are institutional memory; raw rows/blobs are not
+            if in_results and p.suffix.lower() not in (".md", ".json"):
                 continue
             if SECRET_PAT.search(str(p)):
                 continue
@@ -91,7 +107,7 @@ def index_tree(mem: ProjectMemory, root: Path, project_id: str = "designwins",
                 source_type="document", title=title, body=body[:20000],
                 event_ts=p.stat().st_mtime, indexed_ts=time.time(),
                 actor=actor or "indexer",
-                evidence_class=classify(p, title),
+                evidence_class=classify(p, title, body),
                 source_available="available",
                 source_freshness=time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                                time.gmtime(p.stat().st_mtime))))
@@ -114,8 +130,11 @@ def index_git_history(mem: ProjectMemory, repo: Path,
     a message that claims a fix is an ASSERTION until the code is inspected."""
     n = 0
     try:
+        # --all: disconnected branches and worktrees contain the actual work;
+        # plain `git log` sees only the current branch and silently misses it.
         out = subprocess.run(
-            ["git", "-C", str(repo), "log", f"-{max_commits}",
+            ["git", "-C", str(repo), "log", "--all",
+             f"--max-count={max_commits}",
              "--pretty=format:%H%n%an%n%ad%n%s%n%b%n---END---"],
             capture_output=True, text=True, timeout=120).stdout
     except Exception:  # noqa: BLE001
@@ -127,8 +146,8 @@ def index_git_history(mem: ProjectMemory, repo: Path,
         sha, author, date = parts[0], parts[1], parts[2]
         subject = parts[3] if len(parts) > 3 else ""
         body = "\n".join(parts[3:])
-        cls = "verified-fact" if re.search(
-            r"(verified|test|receipt|green|passed)", subject, re.I) else "assertion"
+        # a commit message is an author claim, always — regardless of wording
+        cls = "assertion"
         mem.index(MemoryRecord(
             project_id=project_id, source_id=f"commit:{sha[:12]}",
             locator=f"{repo}/commit/{sha}", content_sha=_sha(body),

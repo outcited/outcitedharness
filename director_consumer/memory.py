@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS mem (
 CREATE VIRTUAL TABLE IF NOT EXISTS mem_fts_idx USING fts5(
   title, body, content='mem', content_rowid='id',
   tokenize='porter unicode61 remove_diacritics 2');
+CREATE UNIQUE INDEX IF NOT EXISTS mem_identity
+  ON mem(project_id, source_id, content_sha);
 CREATE TABLE IF NOT EXISTS mem_meta(key TEXT PRIMARY KEY, value TEXT);
 """
 
@@ -154,6 +156,15 @@ class ProjectMemory:
                 f"refusing to index project {rec.project_id!r}: outside "
                 f"authorized scope {sorted(self.authorized)}")
         rec.indexed_ts = rec.indexed_ts or time.time()
+        # idempotency + versioning: same (project, source, content) is a
+        # no-op; same source with NEW content inserts a new version and
+        # marks the old row superseded (history preserved, never duplicated)
+        prior = self.con.execute(
+            "SELECT id FROM mem WHERE project_id=? AND source_id=? "
+            "AND content_sha=?", (rec.project_id, rec.source_id,
+                                  rec.content_sha)).fetchone()
+        if prior is not None:
+            return prior["id"]
         cur = self.con.execute(
             "INSERT INTO mem(project_id, source_id, locator, content_sha,"
             " source_type, title, body, event_ts, indexed_ts, actor,"
@@ -170,6 +181,12 @@ class ProjectMemory:
         self.con.execute(
             "INSERT INTO mem_fts_idx(rowid, title, body) VALUES (?,?,?)",
             (rid, rec.title or "", rec.body or ""))
+        # supersede earlier versions of the same source
+        self.con.execute(
+            "UPDATE mem SET evidence_class='superseded', superseded_by=? "
+            "WHERE project_id=? AND source_id=? AND id<>? AND "
+            "evidence_class<>'superseded'",
+            (f"{rec.source_id}@v{rid}", rec.project_id, rec.source_id, rid))
         self.con.commit()
         return rid
 
