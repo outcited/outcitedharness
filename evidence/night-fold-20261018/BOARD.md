@@ -1,10 +1,10 @@
-# Extraction board — 20261018T081209Z
+# Extraction board — 20261018T081745Z
 
 **Movement is the marker.** Δ since previous snapshot in `( )`.
 Total: **121,695 addressable parts** from 171,551 extraction records.
-Served (api-store-export): **24,464**.
+Served (api-store-export): **38,232**.
 Since last board: **+0 addressable**.
-Served store: **+9428 parts** (15,036 → 24,464).
+Served store: **+13768 parts** (24,464 → 38,232).
 
 ## The headline — per category, on a part basis
 

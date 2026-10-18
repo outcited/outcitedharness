@@ -212,6 +212,10 @@ def main() -> int:
             name = fpath.name
             if name == "parts_lane.jsonl":
                 key = (row.get("aisle") or "unclassified", "deterministic-lane", vendor)
+            elif name.startswith("parts_a_pinout") or name.startswith("parts_z_pinout"):
+                dim = ("pinout-staged" if row.get("join_status") == "unresolved"
+                       else "pinout-gold")
+                key = (row.get("aisle") or "mcu", dim, vendor)
             elif name == "parts_cr_core.jsonl":
                 key = (row.get("aisle") or "unassigned", "cr-core", vendor)
             elif name == "parts_family.jsonl":
