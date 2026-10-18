@@ -1,0 +1,503 @@
+{
+ "schema": "designwins.truth-funnel.v1",
+ "observed_at": "2026-10-18T17:53:48+00:00",
+ "reader": "scripts/truth_funnel.py",
+ "reader_sha": "UNKNOWN",
+ "host": "m5",
+ "policy": "read-only; fail-closed; no cross-grain sums; staging/export/served are distinct populations",
+ "sources": {
+  "vault_cas": {
+   "paths": [
+    "/Volumes/M5_4TB/vault/cas",
+    "/Volumes/M5_4TB/vault/landing"
+   ],
+   "host": "m5",
+   "available": true,
+   "producer_at": "2026-10-04T20:59:40+00:00",
+   "note": "filesystem CAS walk"
+  },
+  "board_snapshot": {
+   "path": "/Users/samkim/Harnessv1/results/api-coverage/board/20261018T081745Z.json",
+   "host": "m5",
+   "required": true,
+   "note": "",
+   "available": true,
+   "producer_at": "2026-10-18T08:17:45+00:00",
+   "size_bytes": 2984,
+   "is_dir": false,
+   "freshness_age_h": 9.6,
+   "source_sha256": "829f7ad228d745043f95181c37c1beee9c9376b2370311f1a918ddd723e44b1c"
+  },
+  "staging_root": {
+   "path": "/Volumes/M5_4TB/staging/datasheet_extractions",
+   "host": "m5",
+   "required": true,
+   "note": "",
+   "available": true,
+   "producer_at": "2026-10-09T18:52:24+00:00",
+   "size_bytes": 172,
+   "is_dir": true,
+   "freshness_age_h": 215.0
+  },
+  "cr_core": {
+   "path": "/Volumes/M5_4TB/staging/datasheet_extractions/mcu_family_content/from-cr-core",
+   "host": "m5",
+   "required": true,
+   "note": "",
+   "available": true,
+   "producer_at": "2026-08-10T16:33:37+00:00",
+   "size_bytes": 596770,
+   "is_dir": true,
+   "freshness_age_h": 1657.4
+  },
+  "pin_batch_dir": {
+   "path": "/Users/samkim/Harnessv1/results/pin-tables-20261014",
+   "host": "m5",
+   "required": true,
+   "note": "",
+   "available": true,
+   "producer_at": "2026-10-15T22:35:02+00:00",
+   "size_bytes": 768,
+   "is_dir": true,
+   "freshness_age_h": 67.4
+  },
+  "nas_gold": {
+   "path": "/Users/samkim/mnt/charleybasecamp-smb/m5-4tb/pinout-gold/pinout-gold-r1.1-20261012/manifest.json",
+   "host": "nas",
+   "required": true,
+   "note": "distinct population; rows are not parts",
+   "available": true,
+   "producer_at": "2026-10-12T04:32:45+00:00",
+   "size_bytes": 913,
+   "is_dir": false,
+   "freshness_age_h": 157.4,
+   "source_sha256": "f888ce9d8662dacf2b9d3e9d2604bebfcfbde7e75e15fbb44aaebf10c0cee63c"
+  },
+  "nas_validated": {
+   "path": "/Users/samkim/mnt/charleybasecamp-smb/m5-4tb/DigiKey_Reference_Designs/MCU_Pinout_Validated",
+   "host": "nas",
+   "required": true,
+   "note": "",
+   "available": true,
+   "producer_at": "2026-07-28T01:50:00+00:00",
+   "size_bytes": 16384,
+   "is_dir": true,
+   "freshness_age_h": 1984.1
+  },
+  "gold_mount_dead": {
+   "path": "/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/pinout-gold",
+   "host": "m5",
+   "required": false,
+   "note": "board GOLD_FREEZE path; dead since 2026-10-16",
+   "available": false,
+   "error": "FileNotFoundError: [Errno 2] No such file or directory: '/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/pinout-gold'",
+   "status": "UNKNOWN"
+  },
+  "export_root": {
+   "path": "/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/api-store-export/cube.json",
+   "host": "m5",
+   "required": true,
+   "note": "",
+   "available": true,
+   "producer_at": "2026-10-18T08:16:39+00:00",
+   "size_bytes": 28674,
+   "is_dir": false,
+   "freshness_age_h": 9.7,
+   "source_sha256": "056fbb25c4b9d64873547964dc946046f0fa8afc1440fc84d2de6a84579f7114"
+  }
+ },
+ "stages": [
+  {
+   "stage": "a.crawled_assets",
+   "grain": "asset",
+   "count": 118573,
+   "status": "measured",
+   "cohort": "vault cas+landing PDFs",
+   "denominator": "n/a",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "paths": [
+     "/Volumes/M5_4TB/vault/cas",
+     "/Volumes/M5_4TB/vault/landing"
+    ],
+    "host": "m5",
+    "available": true,
+    "producer_at": "2026-10-04T20:59:40+00:00",
+    "note": "filesystem CAS walk",
+    "unique_doc_shas": 70225
+   }
+  },
+  {
+   "stage": "b.addressable_parts",
+   "grain": "part",
+   "count": 121695,
+   "status": "measured",
+   "cohort": "board categories",
+   "denominator": "171551",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/api-coverage/board/20261018T081745Z.json",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-18T08:17:45+00:00",
+    "size_bytes": 2984,
+    "is_dir": false,
+    "freshness_age_h": 9.6,
+    "source_sha256": "829f7ad228d745043f95181c37c1beee9c9376b2370311f1a918ddd723e44b1c"
+   },
+   "release_id": "20261018T081745Z",
+   "served_parts": 38232
+  },
+  {
+   "stage": "b.addressable_parts.connector",
+   "grain": "part",
+   "count": 401,
+   "status": "measured",
+   "cohort": "connector",
+   "denominator": "401",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/api-coverage/board/20261018T081745Z.json",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-18T08:17:45+00:00",
+    "size_bytes": 2984,
+    "is_dir": false,
+    "freshness_age_h": 9.6,
+    "source_sha256": "829f7ad228d745043f95181c37c1beee9c9376b2370311f1a918ddd723e44b1c"
+   }
+  },
+  {
+   "stage": "b.addressable_parts.mcu",
+   "grain": "part",
+   "count": 64272,
+   "status": "measured",
+   "cohort": "mcu",
+   "denominator": "97718",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/api-coverage/board/20261018T081745Z.json",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-18T08:17:45+00:00",
+    "size_bytes": 2984,
+    "is_dir": false,
+    "freshness_age_h": 9.6,
+    "source_sha256": "829f7ad228d745043f95181c37c1beee9c9376b2370311f1a918ddd723e44b1c"
+   }
+  },
+  {
+   "stage": "b.addressable_parts.power",
+   "grain": "part",
+   "count": 36636,
+   "status": "measured",
+   "cohort": "power",
+   "denominator": "37899",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/api-coverage/board/20261018T081745Z.json",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-18T08:17:45+00:00",
+    "size_bytes": 2984,
+    "is_dir": false,
+    "freshness_age_h": 9.6,
+    "source_sha256": "829f7ad228d745043f95181c37c1beee9c9376b2370311f1a918ddd723e44b1c"
+   }
+  },
+  {
+   "stage": "b.addressable_parts.refdesign",
+   "grain": "part",
+   "count": 20386,
+   "status": "measured",
+   "cohort": "refdesign",
+   "denominator": "35533",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/api-coverage/board/20261018T081745Z.json",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-18T08:17:45+00:00",
+    "size_bytes": 2984,
+    "is_dir": false,
+    "freshness_age_h": 9.6,
+    "source_sha256": "829f7ad228d745043f95181c37c1beee9c9376b2370311f1a918ddd723e44b1c"
+   }
+  },
+  {
+   "stage": "c.facet_parts",
+   "grain": "part",
+   "count": 157944,
+   "status": "measured",
+   "cohort": "staging mcu+power+refdesign+connector",
+   "denominator": "226411 files",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Volumes/M5_4TB/staging/datasheet_extractions",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-09T18:52:24+00:00",
+    "size_bytes": 172,
+    "is_dir": true,
+    "freshness_age_h": 215.0
+   },
+   "per_facet": {
+    "connectors": 401,
+    "pillars": 50822,
+    "aec": 4668,
+    "used_in_designs": 32320,
+    "shared_specs": 282,
+    "deep_specs": 869,
+    "electrical": 694,
+    "enriched_specs": 1092,
+    "fine_tune_facets": 343,
+    "mistral_compatibility": 6799,
+    "mistral_deep_specs": 829,
+    "mistral_fine_tune_facets": 65,
+    "mistral_pin_functions": 59,
+    "peripheral_features": 84,
+    "pin_functions": 309,
+    "vision_electrical": 742,
+    "vision_ordering": 619,
+    "other": 388,
+    "parametric_specs": 6233,
+    "pinout": 9996,
+    "power": 157,
+    "claude_ground_truth": 3743,
+    "m5_local_validated": 676,
+    "vision_pin_functions": 6,
+    "description": 3180,
+    "thermal": 1279,
+    "vout_iq": 1203,
+    "errata": 24847,
+    "design": 5239
+   },
+   "truncated": false
+  },
+  {
+   "stage": "c.pinout_parts.staging",
+   "grain": "part",
+   "count": 9996,
+   "status": "measured",
+   "cohort": "staging files with non-empty pinout block",
+   "denominator": "226411 files",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Volumes/M5_4TB/staging/datasheet_extractions",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-09T18:52:24+00:00",
+    "size_bytes": 172,
+    "is_dir": true,
+    "freshness_age_h": 215.0
+   }
+  },
+  {
+   "stage": "d.staged_pin_rows",
+   "grain": "claim",
+   "count": 24162,
+   "status": "measured",
+   "cohort": "rows inside staging pinout blocks (quote-verified at batch retrieval per receipt; re-verification not re-run here)",
+   "denominator": "staging pinout parts",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Volumes/M5_4TB/staging/datasheet_extractions",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-09T18:52:24+00:00",
+    "size_bytes": 172,
+    "is_dir": true,
+    "freshness_age_h": 215.0
+   }
+  },
+  {
+   "stage": "c.pinout_parts.cr_core",
+   "grain": "part",
+   "count": 5471,
+   "status": "measured",
+   "cohort": "cr-core delivery files with pinout",
+   "denominator": "5721 files",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Volumes/M5_4TB/staging/datasheet_extractions/mcu_family_content/from-cr-core",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-08-10T16:33:37+00:00",
+    "size_bytes": 596770,
+    "is_dir": true,
+    "freshness_age_h": 1657.4
+   },
+   "note": "distinct population from staging; overlap with staging NOT measured here \u2014 no union claimed"
+  },
+  {
+   "stage": "e.verified_pin_docs",
+   "grain": "part",
+   "count": 14256,
+   "status": "measured",
+   "cohort": "pin batch verdict=ok docs",
+   "denominator": "23,318 batch docs (receipt)",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/pin-tables-20261014",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-15T22:35:02+00:00",
+    "size_bytes": 768,
+    "is_dir": true,
+    "freshness_age_h": 67.4
+   },
+   "staged_rows_in_ok_docs": 0
+  },
+  {
+   "stage": "e.completeness_tiers",
+   "grain": "part",
+   "count": 794,
+   "status": "measured",
+   "cohort": "admission tiers",
+   "denominator": "14256",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/pin-tables-20261014",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-15T22:35:02+00:00",
+    "size_bytes": 768,
+    "is_dir": true,
+    "freshness_age_h": 67.4
+   },
+   "tiers": {
+    "UNCONFIRMED COMPLETENESS": 11384,
+    "PARTIAL/VERIFIED": 2078,
+    "COMPLETE/VERIFIED": 794
+   }
+  },
+  {
+   "stage": "f.identity_exact_joined",
+   "grain": "identity-exact",
+   "count": 16,
+   "status": "measured",
+   "cohort": "identity-joins status=exact",
+   "denominator": "14147",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/Harnessv1/results/pin-tables-20261014",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-15T22:35:02+00:00",
+    "size_bytes": 768,
+    "is_dir": true,
+    "freshness_age_h": 67.4
+   },
+   "alias": 363,
+   "unresolved": 13768,
+   "note": "alias \u2260 exact; never summed"
+  },
+  {
+   "stage": "e.gold_rows",
+   "grain": "claim-verified",
+   "count": 5574,
+   "status": "measured",
+   "cohort": "pinout-gold r1.1 gold rows",
+   "denominator": "17292",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/mnt/charleybasecamp-smb/m5-4tb/pinout-gold/pinout-gold-r1.1-20261012/manifest.json",
+    "host": "nas",
+    "required": true,
+    "note": "distinct population; rows are not parts",
+    "available": true,
+    "producer_at": "2026-10-12T04:32:45+00:00",
+    "size_bytes": 913,
+    "is_dir": false,
+    "freshness_age_h": 157.4,
+    "source_sha256": "f888ce9d8662dacf2b9d3e9d2604bebfcfbde7e75e15fbb44aaebf10c0cee63c"
+   },
+   "docs_total": 173,
+   "rows_unverified_rejected": 914
+  },
+  {
+   "stage": "e.validated_gt_parts",
+   "grain": "part",
+   "count": 1487,
+   "status": "measured",
+   "cohort": "VALIDATED_GROUND_TRUTH files",
+   "denominator": "all validated-store files",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/mnt/charleybasecamp-smb/m5-4tb/DigiKey_Reference_Designs/MCU_Pinout_Validated",
+    "host": "nas",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-07-28T01:50:00+00:00",
+    "size_bytes": 16384,
+    "is_dir": true,
+    "freshness_age_h": 1984.1
+   }
+  },
+  {
+   "stage": "h.served_release_records",
+   "grain": "release-record",
+   "count": {
+    "laned": true
+   },
+   "status": "measured",
+   "cohort": "api-store-export served release",
+   "denominator": "n/a",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "path": "/Users/samkim/mnt/yosemiteraid5/Public/m5-opencode/api-store-export/cube.json",
+    "host": "m5",
+    "required": true,
+    "note": "",
+    "available": true,
+    "producer_at": "2026-10-18T08:16:39+00:00",
+    "size_bytes": 28674,
+    "is_dir": false,
+    "freshness_age_h": 9.7,
+    "source_sha256": "056fbb25c4b9d64873547964dc946046f0fa8afc1440fc84d2de6a84579f7114"
+   },
+   "release_manifest": "UNKNOWN",
+   "served_pinout_records": 378,
+   "note": "SERVED \u2260 STAGING; separate population"
+  },
+  {
+   "stage": "i.fe_click_resolvability",
+   "grain": "UNKNOWN",
+   "count": "UNKNOWN",
+   "status": "UNKNOWN",
+   "cohort": "",
+   "denominator": "",
+   "observed_at": "2026-10-18T17:53:48+00:00",
+   "source": {
+    "available": false,
+    "error": "requires live facade/FE probe; not measurable from M5"
+   }
+  }
+ ],
+ "errors": []
+}
