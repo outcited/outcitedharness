@@ -15,3 +15,5 @@ build/
 # on disk and backed up outside git.
 results/
 .DS_Store
+scratch/
+scripts/soak_model_shim_cloud.py
