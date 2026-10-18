@@ -37,24 +37,44 @@ class GithubIssueRuntime:
         self.registered = registered
         self.fetcher = fetcher or gh_workloop.fetch_open_issues
 
-    def _mail_ack(self, task_id: str, source_key: str) -> dict:
-        """Inspect already validated MailboxDelivery state, NOT GitHub comments.
+    def _mail_ack(self, task_id: str, source_key: str,
+                  epoch: Optional[int]) -> dict:
+        """Never turn a GitHub reply or stale assignment into a trusted ACK.
 
-        'acked' message rows can be written by MailboxDelivery.record_ack only
-        after origin/envelope validation on the supported runtime path.
-        This is an observation, not a new acknowledgment or a proof of
-        completed work. Other out-of-band DB writes remain untrusted.
+        The existing MailboxDelivery.record_ack() validates the sender,
+        scoped message digest, task, epoch and session origin before it marks
+        a message acked. Here we *observe* that persisted result and confirm
+        the delivery action envelope still matches this task's current epoch.
+        Only a separately authorized live assignment can have epoch > 0.
         """
+        none = {"state": "not-observed", "message_ids": []}
+        if not epoch or epoch < 1:
+            return none
         try:
             rows = self.con.execute(
-                "SELECT message_id FROM messages WHERE project=? "
-                "AND state='acked' AND acked_at IS NOT NULL "
-                "AND correlation_id IN (?,?) ORDER BY acked_at DESC LIMIT 3",
+                "SELECT m.message_id, a.envelope_json FROM messages m "
+                "JOIN action_envelopes a ON a.action_id=m.message_id "
+                "AND a.project=m.project "
+                "WHERE m.project=? AND m.state='acked' "
+                "AND m.acked_at IS NOT NULL "
+                "AND m.correlation_id IN (?,?) "
+                "ORDER BY m.acked_at DESC LIMIT 10",
                 (self.project_id, task_id, source_key)).fetchall()
-            return {"state": "recorded-mailbox-ack" if rows else "not-observed",
-                    "message_ids": [r[0] for r in rows]}
         except sqlite3.OperationalError:
-            return {"state": "not-observed", "message_ids": []}
+            return none
+        good = []
+        for mid, raw_envelope in rows:
+            try:
+                env = json.loads(raw_envelope)
+                if (env.get("project") == self.project_id
+                    and env.get("task_ref") in (task_id, source_key)
+                    and int(env.get("assignment_epoch", -1)) == epoch
+                    and env.get("action_id") == mid):
+                    good.append(mid)
+            except (ValueError, TypeError, json.JSONDecodeError):
+                continue
+        return {"state": "recorded-mailbox-ack" if good else "not-observed",
+                "message_ids": good[:3]}
 
     def run_once(self) -> dict:
         observed_at = time.time()
@@ -118,7 +138,8 @@ class GithubIssueRuntime:
                         "task_state": row[0] if correct_source else "UNKNOWN",
                         "owner_label": row[1] if correct_source else "UNKNOWN",
                         "assignment_epoch": row[2] if correct_source else None,
-                        "transport_ack": self._mail_ack(rec.task_id, source_key)
+                        "transport_ack": self._mail_ack(rec.task_id, source_key,
+                                                        row[2])
                             if correct_source else {"state": "not-observed",
                                                     "message_ids": []},
                     })
