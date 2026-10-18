@@ -1,0 +1,13 @@
+[Unit]
+Description=Extraction Work Feeder - keeps machine fed
+After=network.target
+
+[Service]
+Type=simple
+User=samsonkim
+ExecStart=/home/samsonkim/Harnessv1/.venv/bin/python /home/samsonkim/Harnessv1/scripts/work_feeder.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

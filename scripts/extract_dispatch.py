@@ -91,7 +91,8 @@ SCAN_INTERVAL = 21600  # seconds between full corpus rescans (6h); full walk ove
 # flaky .4.54 NFS is expensive and the queue is fully enqueued — rescans buy nothing
 # until the factory delivers new blobs. Lower this to force a fresh scan.
 REMOTE_WORKERS = {
-    "asus4": "samkimasus4@100.100.116.82",
+    # asus4 removed 2026-10-15: box is canon+embedder+GCI (services); the
+    # extraction workers live on dedicated fleet boxes, not the services box.
     "asus2": "samkimasus2@100.68.133.1",
 }
 ASUS2_TRAINING_CONTAINER = "lora-power-v1"
