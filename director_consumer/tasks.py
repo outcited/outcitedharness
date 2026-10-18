@@ -69,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_task_events ON task_events(task_id);
 
 # legal transitions (explicit; anything else is rejected)
 LEGAL = {
-    "unassigned": {"offered", "cancelled"},
+    "unassigned": {"offered", "cancelled", "untrusted-definition"},
     "offered": {"acknowledged", "unassigned", "cancelled", "conflicted",
                 "offered"},   # re-offer/reassignment bumps the epoch
     "acknowledged": {"active", "blocked", "stale", "conflicted", "cancelled"},
