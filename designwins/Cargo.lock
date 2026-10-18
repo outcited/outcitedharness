@@ -146,6 +146,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-bridge"
+version = "0.1.0"
+dependencies = [
+ "dw-normalize",
+ "dw-truth",
+ "dw-types",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "dw-controller"
 version = "0.1.0"
 dependencies = [
