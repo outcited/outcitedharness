@@ -146,7 +146,7 @@ def ingest(repo: str, ts: TaskStore, issues: Optional[list[dict]] = None,
             out.append(rec)
             continue
         if missing:
-            ts.create(task_id, authority="sam",
+            ts.create(task_id, authority="director-ingest",
                       evidence=evidence, correlation_id=key)
             ts.transition(task_id, UNTRUSTED_STATE, actor="director-ingest",
                           evidence=evidence)
