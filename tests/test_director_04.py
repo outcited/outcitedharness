@@ -486,11 +486,22 @@ class _M:
 
 
 def test_backlog_cannot_enter_queue_is_admission_gap():
+    """DIRECTOR-05E correction: a zero counter in one queue is NOT proof of
+    an admission gap. 'admission-gap' now requires a MEASURED identity join
+    showing inventory absent from the admitted work-unit set."""
     f = build_funnel(_M(queued=0, pending=0))
-    assert f.holdup == "admission-gap"
-    assert any("eligible rescan docs" in e for e in f.holdup_evidence)
+    assert f.holdup == "insufficient-evidence", \
+        "zero queue + unmeasured non-overlap must not conclude admission-gap"
+    assert any("does not establish that admission is broken" in e
+               for e in f.holdup_evidence)
     assert f.prioritized == "unknown" and any(
         "factory_targets" in n for n in f.notes)
+    # and the one legitimate case:
+    f2 = build_funnel(_M(queued=0, pending=0),
+                      admission_overlap=(12, 100),
+                      admission_overlap_measured=True)
+    assert f2.holdup == "admission-gap"
+    assert any("12 of 100" in e for e in f2.holdup_evidence)
 
 
 def test_queues_unavailable_not_confused_with_gap():

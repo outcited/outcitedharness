@@ -485,16 +485,34 @@ class FactoryContinuity:
                    {"severity_hint": "P1"})
         if m.ready_backlog_docs == 0 and \
                 m.starvation_basis == "backlog-zero":
-            # only when the zero is proven in a compatible lane; with
-            # inventory elsewhere the prophecy "workers will idle" is
-            # unsupported
-            ev("queue_empty", "extraction queues empty — workers will idle",
-               {"severity_hint": "P1"})
+            # 05E: an empty INSPECTED queue is never reported as "the
+            # queues are empty". Lane scope is stated and unobserved lanes
+            # are named; the idle prophecy is withheld while any lane is
+            # unobserved.
+            observed = [k for k, v in m.lane_counts.items()
+                        if isinstance(v, int)]
+            unobserved = [k for k, v in m.lane_counts.items()
+                          if not isinstance(v, int)]
+            scope = ",".join(observed) if observed else "none"
+            if unobserved:
+                ev("queue_empty",
+                   f"observed execution queue(s) empty (lanes={scope}) — "
+                   f"{len(unobserved)} lane(s) unobserved "
+                   f"({','.join(unobserved)}); this does NOT establish that "
+                   f"all queues are empty and is NOT evidence of starvation",
+                   {"severity_hint": "P2"})
+            else:
+                ev("queue_empty",
+                   f"all observed execution queues empty (lanes={scope}) and "
+                   f"eligible inventory measured at zero",
+                   {"severity_hint": "P1"})
         if isinstance(m.acquisition_rate_docs_day, (int, float)) and \
                 m.acquisition_rate_docs_day <= 0:
             ev("intake_anomaly",
-               f"acquisition rate {m.acquisition_rate_docs_day} docs/day — "
-               f"factory not growing the corpus",
+               f"corpus file counter not growing ({m.acquisition_rate_docs_day} "
+               f"docs/day) — source: rsync 'Number of files:' delta. This is "
+               f"inventory growth, NOT newly admitted documents; an mtime-based "
+               f"'new PDFs' counter is not trustworthy evidence of acquisition",
                {"severity_hint": "P2"})
         return out
 

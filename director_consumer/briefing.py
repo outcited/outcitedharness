@@ -37,12 +37,19 @@ def write_briefing(consumer) -> Path:
         m = json.loads(meas_file.read_text())
         risk.append(f"- ready backlog: {m.get('ready_backlog_docs')} docs "
                     f"(coverage target {m.get('coverage_target_h')}h)")
+        lc = m.get("lane_counts") or {}
+        risk.append(f"- queue by lane (never summed): {lc}")
         risk.append(f"- consumption: {m.get('consumption_rate_docs_hr')} "
-                    f"docs/hr · acquisition: "
-                    f"{m.get('acquisition_rate_docs_day')} docs/day")
-        risk.append(f"- starvation: {m.get('starvation_hours')}h · "
+                    f"docs/hr · corpus file-counter growth: "
+                    f"{m.get('acquisition_rate_docs_day')} docs/day "
+                    f"(inventory growth, not admitted documents)")
+        risk.append(f"- starvation basis: {m.get('starvation_basis')} · "
+                    f"hours: {m.get('starvation_hours')} · "
                     f"junk dead jobs: {m.get('junk_dead_jobs')} · "
                     f"stalled leases: {m.get('stalled_leases')}")
+        risk.append("- NOTE: an empty inspected queue is NOT proof that all "
+                    "queues are empty, and a zero counter is NOT proof of an "
+                    "admission failure or of starvation")
         for n in m.get("notes", []):
             risk.append(f"- UNKNOWN: {n}")
     p01 = con.execute(
