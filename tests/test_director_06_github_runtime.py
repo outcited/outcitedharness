@@ -143,4 +143,5 @@ def test_github_only_ack_is_reported_as_unverified(tmp_path):
     row = run.run_once()["tasks"][0]
     assert row["task_state"] == "acknowledged"
     assert row["transport_ack"]["state"] == "not-observed"
-    assert row["ack_from_github_only"] is False
+    # A GitHub-only transition remains visibly distinct from trusted mail.
+    assert row["transport_ack"]["message_ids"] == []
