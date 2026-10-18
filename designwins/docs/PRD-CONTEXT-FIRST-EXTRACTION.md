@@ -118,6 +118,22 @@ gates. Gold promotion unchanged.
 - **Provenance on everything** — kept; the envelope carries ours.
 - **FAIL CLOSED / Unknown never eliminates** — kept.
 
+## 6b. Measured 2026-10-18 (TP4 vision vs vector ground truth)
+
+Full evidence: `results/soak-m3-rust/CONTEXT-FIRST-TEST-20261018.md`.
+
+- **Full-page blind vision: 0 series extracted (0/2 pages).** Full-page
+  with envelope: 5/5 series digitized on 1/2. **WHERE is the load-bearing
+  field — without it vision fails outright.**
+- Tight crop (WHERE as pixels): text envelope adds **no accuracy**
+  (weighted y-span RMSE 0.087 blind vs 0.111 envelope, names 100% both)
+  but cuts **latency ~35%**. On clean vector plots the crop is the map.
+- **Operational rule:** every vision call carries WHERE — crop OR
+  bbox+map. Text envelope mandatory where the crop cannot be trusted
+  (scans, multi-figure pages) and for identity-heavy tasks.
+- Free wins stack: vector digitization > vision at crop > vision at full
+  page + envelope >> vision at full page blind.
+
 ## 7. One-line summary for the wall
 
 > **Extract context for free until vision is just reading.**
