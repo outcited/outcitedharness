@@ -60,7 +60,9 @@ class WorkThread:
     state: str = UNKNOWN           # active | stale | blocked | done | unknown
     last_activity: Any = UNKNOWN
     blockers: list[str] = field(default_factory=list)
-    proof_required: str = ""
+    proof_required: str = ""       # CRITERION for done — never a status
+    completion_evidence: str = "none"   # verified artifact, or explicitly none
+    assignment: str = "none-acknowledged"  # until an agent acks a task
     source: str = ""               # where this thread was measured
 
 
@@ -72,8 +74,9 @@ def _sh(cmd, timeout=30):
         return ""
 
 
-# branch prefix -> owning agent, from the declared agent network (fleet.yaml
-# agents:). Ownership declared in config beats commit-author guessing.
+# branch prefix -> likely agent, inferred from the agent-network doc. This is
+# a HEURISTIC, not an assignment: no agent has acknowledged any of these.
+# The label must say so everywhere it appears.
 BRANCH_OWNERS = {
     "agent/power-data-01": "power-data-01 (m5 sibling worktree)",
     "director/": "m5-opencode director session",
@@ -88,10 +91,16 @@ BRANCH_OWNERS = {
 
 
 def _owner_for(branch: str, author: str) -> tuple[str, str]:
+    """Returns (owner_label, evidence_label). An agent name here is an
+    INFERENCE from branch naming — activity signal, never an acknowledged
+    assignment. Until an agent acknowledges a task, assignment is NONE."""
     for prefix, agent in BRANCH_OWNERS.items():
         if branch.startswith(prefix):
-            return agent, f"declared owner of branch {branch!r}"
-    return author or UNKNOWN, "last commit author (no declared owner)"
+            return agent, (f"inferred from branch prefix {branch!r} "
+                           f"(agent-network doc; NOT an acknowledged "
+                           f"assignment)")
+    return author or UNKNOWN, ("last commit author (activity signal, not an "
+                               "assignment)")
 
 
 def git_threads(roots_glob: str = "/Users/samkim/Harnessv1*") -> list[WorkThread]:
@@ -225,7 +234,10 @@ def answer(query: str, threads: Optional[list[WorkThread]] = None) -> dict:
             "who_evidence": t.owner_evidence,
             "state": t.state,
             "blocking": t.blockers or [UNKNOWN],
-            "proof_required": t.proof_required or PROOF_MAP.get(t.kind, UNKNOWN),
+            "assignment": t.assignment,
+            "proof_required (criterion, not a status)":
+                t.proof_required or PROOF_MAP.get(t.kind, UNKNOWN),
+            "completion_evidence": t.completion_evidence,
             "source": t.source,
         } for t in hits],
         "note": "commit messages assert work; only the named proof artifact "
@@ -239,8 +251,12 @@ def render(a: dict) -> str:
     lines = [f"Q: {a['query']}"]
     for t in a["threads"]:
         lines.append(f"  {t['thread']} — {t['state']}")
-        lines.append(f"    who:     {t['who']}  ({t['who_evidence']})")
-        lines.append(f"    blocking: {', '.join(t['blocking'])}")
-        lines.append(f"    proof:   {t['proof_required']}")
-    lines.append(f"  {a['note']}")
+        lines.append(f"    who:       {t['who']}")
+        lines.append(f"      evidence: {t['who_evidence']}")
+        lines.append(f"    assignment: {t['assignment']}")
+        lines.append(f"    blocking:  {', '.join(t['blocking'])}")
+        lines.append(f"    done-when:  {t['proof_required (criterion, not a status)']}")
+        lines.append(f"    evidence-now: {t['completion_evidence']}")
+    lines.append("  ownership is inferred until acknowledged; proof text is a "
+                 "criterion, not evidence of completion")
     return "\n".join(lines)
