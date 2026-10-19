@@ -506,15 +506,51 @@ def build_context(hits: list[dict]) -> str:
     return "\n".join(parts)
 
 
+def _brain_call(brain, prompt: str) -> tuple[str, str]:
+    """Adapter over OpsBrainClient.assess (event_summary, classification)
+    or a single-argument test double. Returns (text, model_label)."""
+    try:
+        r = brain.assess(prompt, "code_intel_triage")
+    except TypeError:
+        r = brain.assess(prompt)
+    if isinstance(r, dict):
+        if r.get("unavailable"):
+            return "", str(r["unavailable"])[:120]
+        return (str(r.get("text") or r.get("assessment") or ""),
+                str(r.get("source") or r.get("model") or ""))
+    return (str(r) if r else "", "")
+
+
+def _retrieve(gci: GCIClient, question: str, limit: int) -> list[dict]:
+    """Distinctive-token retrieval: exact text on code-ish tokens, then a
+    symbol fallback. Deduped by (repo, path, line)."""
+    tokens = [t.strip(".,?:;()[]'\"") for t in question.split()]
+    tokens = [t for t in tokens if len(t) >= 5][:3] or [question[:32]]
+    hits: list[dict] = []
+    seen: set[tuple] = set()
+    for tok in tokens:
+        for h in gci.search_exact(tok, limit=limit):
+            k = (h.get("repo_root"), h.get("path"), h.get("start_line"))
+            if k not in seen:
+                seen.add(k)
+                hits.append(h)
+        if len(hits) >= limit:
+            break
+    if not hits and tokens:
+        for h in gci.search_symbol(tokens[0], limit=limit):
+            k = (h.get("repo_root"), h.get("path"), h.get("start_line"))
+            if k not in seen:
+                seen.add(k)
+                hits.append(h)
+    return hits[:limit]
+
+
 def triage_question(question: str, *, gci: GCIClient, brain,
                     repo_roots: list[str] | None = None) -> TriageResult:
     """Retrieve-then-reason. `brain` is an OpsBrainClient (or test double).
     The LLM may propose a hypothesis; verification is structurally out of
     scope — TriageResult.verified is always False."""
-    hits = gci.search_exact(question, limit=_MAX_HITS)
-    if not hits:
-        hits = gci.search_symbol(question.split()[0] if question.split()
-                                 else question, limit=_MAX_HITS)
+    hits = _retrieve(gci, question, _MAX_HITS)
     citations = [{"repo": h.get("repo_root"), "path": h.get("path"),
                   "line": h.get("start_line"),
                   "sha": h.get("revision")} for h in hits[:_MAX_HITS]]
@@ -530,14 +566,10 @@ def triage_question(question: str, *, gci: GCIClient, brain,
         "support a hypothesis, say INSUFFICIENT_EVIDENCE. Never claim "
         "verification.\n\nQUESTION: "
         + question + "\n\nSOURCE EXCERPTS:\n" + ctx)
-    answer = brain.assess(prompt) if hasattr(brain, "assess") else None
-    if isinstance(answer, dict):
-        result.hypothesis = str(answer.get("assessment", ""))[:4000]
-        result.model = str(answer.get("model", ""))
-    elif isinstance(answer, str):
-        result.hypothesis = answer[:4000]
-    else:
-        result.hypothesis = "SOURCE_UNAVAILABLE: brain returned nothing"
+    text, model = _brain_call(brain, prompt)
+    result.hypothesis = text[:4000] if text else \
+        f"SOURCE_UNAVAILABLE: brain returned nothing ({model})".strip()
+    result.model = model
     return result
 
 
