@@ -18,6 +18,21 @@ code_index_repos:
   - /Users/samkim/crownpointshrimp
   - /Users/samkim/locationlocationlocation
   - /Volumes/M5_4TB/DigiKey_Reference_Designs
+  # active agent worktrees — operator-authorized 2026-10-19 (issue #12:
+  # index relevant branches + active worktrees; read-only, dirty never touched)
+  - /Users/samkim/Harnessv1-powerdata01
+  - /Users/samkim/Harnessv1-curve04
+  - /Users/samkim/Harnessv1-curve07e
+  - /Users/samkim/Harnessv1-curve08
+  - /Users/samkim/Harnessv1-m4-08c
+  - /Users/samkim/Harnessv1-disc01final
+  - /Users/samkim/Harnessv1-discovery01
+  - /Users/samkim/Harnessv1-facet02
+  - /Users/samkim/Harnessv1-facet03
+  - /Users/samkim/Harnessv1-queuefix
+  - /Users/samkim/Harnessv1-search
+  - /Users/samkim/Harnessv1-v2c
+  - /Users/samkim/Harnessv1-codeintel
 gci_enabled: true
 gci_url: http://100.100.116.82:8810
 gci_token_env: HARNESS_GCI_TOKEN
