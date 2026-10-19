@@ -146,6 +146,22 @@ def test_nightly_writes_lkg(tmp_path):
     assert json.loads(lkg.read_text()) == {"checked": 0, "drifted": 0}
 
 
+def test_nightly_unwritable_sentinel_dir_fails_closed(tmp_path):
+    """The original production failure class (2026-10-19): sentinel dir
+    owned by _lpoperator:1026. Nightly must fail closed with a nonzero
+    exit, never silently skip the LKG write."""
+    results = tmp_path / "results"
+    results.mkdir()
+    locked = results / "sentinel"
+    locked.mkdir()
+    locked.chmod(0o000)
+    try:
+        r = run_sentinel(tmp_path, "nightly")
+        assert r.returncode != 0
+    finally:
+        locked.chmod(0o755)  # let pytest cleanup remove it
+
+
 # ---------------------------------------------------------------- defaults
 
 def test_production_defaults_unchanged():
