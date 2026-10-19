@@ -54,6 +54,22 @@ def main(argv=None) -> int:
     reh = sub.add_parser("rehearse")
     reh.add_argument("--workspace", required=True)
 
+    ci = sub.add_parser("code-intel")
+    ci.add_argument("--workspace", required=True)
+    ci.add_argument("--project", default="designwins")
+    ci.add_argument("--roots", nargs="*",
+                    default=["/Users/samkim/Harnessv1"],
+                    help="approved repository roots (read-only)")
+    ci.add_argument("--automation-db",
+                    default=str(Path.home() / ".harness/gci-refresh.sqlite"))
+    ci.add_argument("--gci-url",
+                    default="http://100.100.116.82:8810")
+    ci.add_argument("--action", default="status",
+                    choices=["status", "inventory", "query", "findings",
+                             "triage"])
+    ci.add_argument("--q", help="query text (query/triage)")
+    ci.add_argument("--repo-root", help="scope a query to one repo")
+
     a = ap.parse_args(argv)
     if a.cmd == "rehearse":
         from .rehearse import run_rehearsal
@@ -82,6 +98,80 @@ def main(argv=None) -> int:
         st = DirectorState(Path(a.workspace))
         ok, broken = st.verify_chain()
         print(json.dumps({"chain_ok": ok, "broken_at": broken}))
+        return 0 if ok else 1
+    if a.cmd == "code-intel":
+        from .code_intel import (GCIClient, FindingStore,
+                                 collect_automation_failures,
+                                 collect_github_checks,
+                                 collect_stale_indexes, fingerprint_repo,
+                                 index_status, status_brief, triage_question)
+        gci = GCIClient(base_url=a.gci_url)
+        if a.action == "status":
+            print(json.dumps(status_brief(
+                Path(a.workspace), a.roots,
+                automation_db=Path(a.automation_db) if a.automation_db
+                else None, gci=gci, project=a.project), indent=1))
+        elif a.action == "inventory":
+            rows = []
+            for raw in a.roots:
+                root = Path(raw).expanduser()
+                if not root.exists():
+                    rows.append({"root": raw, "state": "missing"})
+                    continue
+                try:
+                    ref = fingerprint_repo(root)
+                except Exception as e:                    # noqa: BLE001
+                    rows.append({"root": raw, "state": "access_required",
+                                 "detail": str(e)[:120]})
+                    continue
+                st = index_status(ref, automation_db=Path(a.automation_db)
+                                  if a.automation_db else None, gci=gci)
+                rows.append({"root": raw, "branch": ref.branch,
+                             "head": ref.head, "dirty": ref.dirty,
+                             "index_state": st.state, "detail": st.detail})
+            print(json.dumps(rows, indent=1))
+        elif a.action == "query":
+            hits = gci.search_exact(a.q or "", repo_root=a.repo_root)
+            print(json.dumps([{"repo": h.get("repo_root"), "path": h.get("path"),
+                               "line": h.get("start_line"),
+                               "sha": h.get("revision"),
+                               "match": h.get("match_type")}
+                              for h in hits], indent=1))
+        elif a.action == "findings":
+            store = FindingStore(Path(a.workspace), project=a.project)
+            findings: list[dict] = []
+            ran: set[str] = set()
+            try:
+                fs = collect_automation_failures(Path(a.automation_db))
+                findings += fs
+                ran.add("automation_failure")
+            except Exception:                            # noqa: BLE001
+                pass
+            statuses = [index_status(fingerprint_repo(Path(r).expanduser()),
+                                     automation_db=Path(a.automation_db),
+                                     gci=gci)
+                        for r in a.roots if Path(r).exists()]
+            findings += collect_stale_indexes(statuses)
+            ran.add("stale_index")
+            try:
+                findings += collect_github_checks("outcited/outcitedharness")
+                ran.add("github_check")
+            except Exception:                            # noqa: BLE001
+                pass
+            transitions = store.ingest(findings)
+            present = {t["fingerprint"] for t in transitions}
+            store.resolve_absent(present, ran)
+            print(json.dumps({"transitions": transitions,
+                              "open": store.open_findings()}, indent=1,
+                             default=str))
+        elif a.action == "triage":
+            if not a.q:
+                print(json.dumps({"error": "--q required"}))
+                return 2
+            from .llm import OpsBrainClient
+            r = triage_question(a.q, gci=gci, brain=OpsBrainClient())
+            print(json.dumps(r.to_dict(), indent=1))
+        return 0
         return 0 if ok else 1
 
     feeds = load_feeds(Path(a.feeds)) if a.feeds else {}
