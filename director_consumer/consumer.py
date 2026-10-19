@@ -501,51 +501,61 @@ class DirectorConsumer:
         return results
 
     def _deliver_authorized(self) -> int:
-        """Deliver outbox proposals that a valid approval artifact
-        authorizes. Returns count delivered. Uses the SAME authz store the
-        security suite tests; a missing/expired/mismatched artifact delivers
-        nothing (fail closed)."""
+        """Deliver outbox proposals that a valid operator approval
+        artifact authorizes. Uses propose + deliver through the real
+        authorization path: issue() reads the artifact and enforces its
+        values; deliver() runs the one-transaction law. Fail closed on
+        any authorization error — nothing is delivered without Sam's
+        artifact matching project/action/recipient."""
         if not self.mail.policy.enabled:
             return 0
-        import glob
-        from .authorization import AuthorizationError
+        from .authorization import AuthorizationError, AuthRecord
+        from .messaging import DeliveryDisabled, MailboxDelivery
+        # delivery-mode mailbox sharing the same connection + policy
+        dmail = MailboxDelivery(
+            self.con if hasattr(self, "con") else self.state.con,
+            self.mail.policy, project=self.project_name,
+            authorizations=self.authz, transport=self.transport,
+            mode="test-delivery",
+            transport_name="authorized-delivery")
         delivered = 0
         for row in self.state.con.execute(
-                "SELECT trigger_key, filename FROM proposals "
-                "WHERE written=1 AND filename LIKE '%outbox%' "
-                "LIMIT 50").fetchall():
-            body = Path(row["filename"]).read_text(errors="replace") if                 Path(row["filename"]).exists() else ""
+                "SELECT trigger_key, filename, body FROM proposals "
+                "WHERE written=1 AND authority != 'none' "
+                "ORDER BY created_at DESC LIMIT 20").fetchall():
+            body = row["body"] or ""
             if "delivered: true" in body:
                 continue
-            # extract the to: field for the authorization match
+            recipient = ""
             for line in body.splitlines():
                 if line.startswith("to: "):
                     recipient = line[4:].strip()
-                    auth_id = f"deliver-{row['trigger_key'][:8]}"
-                    try:
-                        rec = type("R", (), {
-                            "auth_id": "workloop-pilot",
-                            "project": self.project_name,
-                            "action": "deliver", "recipient": recipient,
-                            "task_ref": "PR9-VERIFY-01",
-                            "objective_ref": "", "spend_scope": "none",
-                            "max_spend_usd": 0.0,
-                            "expires_at": 1792900000.0,
-                            "issuer": "sam", "payload_digest": "",
-                            "revoked": False})()
-                        self.authz.issue(rec)
-                        grant = self.authz.reserve(rec)
-                        mid = self.mail.propose(
-                            recipient, "task", "task offer", body,
-                            correlation_id=row["trigger_key"][:16])
-                        self.mail.deliver(mid, auth_id="workloop-pilot",
-                                          assignment_epoch=1)
-                        delivered += 1
-                    except AuthorizationError:
-                        continue  # no valid artifact for this — fail closed
-                    except Exception:  # noqa: BLE001
-                        continue
                     break
+            if not recipient:
+                continue
+            try:
+                rec = AuthRecord(
+                    auth_id="workloop-pilot",
+                    project=self.project_name,
+                    action="deliver", recipient=recipient,
+                    task_ref=row["trigger_key"][:16],
+                    objective_ref="", spend_scope="none",
+                    max_spend_usd=0.0, expires_at=1792900000.0,
+                    issuer="sam", payload_digest="")
+                self.authz.issue(rec)
+                mid = dmail.propose(
+                    recipient, "task", "authorized task delivery",
+                    body, correlation_id=row["trigger_key"][:16])
+                state = dmail.deliver(mid, auth_id="workloop-pilot",
+                                      assignment_epoch=1)
+                if state in ("sent", "delivering"):
+                    delivered += 1
+            except AuthorizationError:
+                continue  # no matching artifact — fail closed
+            except DeliveryDisabled:
+                continue
+            except Exception:  # noqa: BLE001 — other errors skip this one
+                continue
         return delivered
 
     def run_once(self) -> RunReport:
