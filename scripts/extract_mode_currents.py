@@ -141,8 +141,11 @@ def main() -> int:
         else:
             tally["docs_no_rows"] += 1
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    # ensure_ascii=True: pymupdf text carries lone surrogates (broken PDF
+    # encodings); escaping them keeps the write UTF-8-safe instead of raising
+    # UnicodeEncodeError mid-run (this killed shard worker-5 on 2026-10-17).
     args.out.write_text(
-        "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in out_rows)
+        "".join(json.dumps(r, ensure_ascii=True, sort_keys=True) + "\n" for r in out_rows)
     )
     print(json.dumps({"documents": len(documents), "rows": len(out_rows), **dict(sorted(tally.items()))}, indent=1))
     return 0

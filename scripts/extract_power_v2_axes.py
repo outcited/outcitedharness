@@ -39,35 +39,52 @@ from harness.electronics.power_axes_v2 import (  # noqa: E402
 
 def _queue_parts(path: Path) -> list[dict]:
     payload = json.loads(path.read_text())
-    parts = payload.get("parts") or payload.get("queue") or payload
-    return [
-        {
-            "part_number": item["part_number"],
-            "source_url": item.get("datasheet_url")
-            or item.get("source_url")
-            or f"https://www.ti.com/lit/ds/symlink/{str(item['part_number']).lower()}.pdf",
-        }
-        for item in parts
-    ]
+    parts = payload.get("parts") or payload.get("queue") or payload.get("documents") or payload
+    out = []
+    for item in parts:
+        if not isinstance(item, dict):
+            continue
+        out.append(
+            {
+                "part_number": item["part_number"],
+                "source_path": item.get("source_path"),
+                "source_url": item.get("datasheet_url")
+                or item.get("source_url")
+                or f"https://www.ti.com/lit/ds/symlink/{str(item['part_number']).lower()}.pdf",
+            }
+        )
+    return out
 
 
 def _scan(item: dict, pdf_root: str) -> dict:
-    pdf = Path(pdf_root) / f"ti-{item['part_number']}.pdf"
-    if not pdf.exists():
-        return {"rows": [], "error": "missing_pdf"}
+    direct = item.get("source_path")
+    data = None
+    if direct and (str(direct).startswith("http://") or str(direct).startswith("https://")):
+        pdf = None
+    else:
+        pdf = Path(direct) if direct and Path(direct).exists() else Path(pdf_root) / f"ti-{item['part_number']}.pdf"
+        if not pdf.exists():
+            return {"rows": [], "error": "missing_pdf"}
     try:
         from harness.electronics.power_datasheet import read_characteristic_tables
 
-        doc = pymupdf.open(pdf)
+        if pdf is None:
+            from pdf_fetch import open_pdf, fetch_bytes
+
+            data = fetch_bytes(direct)
+            doc = pymupdf.open(stream=data, filetype="pdf")
+        else:
+            doc = pymupdf.open(pdf)
         try:
             facts = read_characteristic_tables(doc)
             front = [doc[index].get_text() for index in range(min(3, doc.page_count))]
         finally:
             doc.close()
+        sha = hashlib.sha256(data).hexdigest() if data is not None else ""
         rows = vout_rows(facts) + iq_rows(facts) + front_vout_rows(front)
         winner = collapse_rows(rows)
         out = list(winner.values())
-        return {"rows": out, "error": None, "found": sorted(winner)}
+        return {"rows": out, "error": None, "found": sorted(winner), "sha": sha}
     except Exception as exc:
         return {"rows": [], "error": type(exc).__name__}
 
@@ -94,8 +111,10 @@ def main() -> int:
             if result["error"]:
                 tally[result["error"]] += 1
                 continue
-            pdf = args.pdf_root / f"ti-{item['part_number']}.pdf"
-            sha = hashlib.sha256(pdf.read_bytes()).hexdigest()
+            # sha comes from the worker (it already holds the bytes); the old
+            # parent-side re-read of pdf_root/ti-{part}.pdf crashes on boxes
+            # without that layout and loses the whole run at shutdown
+            sha = result.get("sha", "")
             if result["rows"]:
                 tally["parts_with_rows"] += 1
             else:
@@ -109,7 +128,7 @@ def main() -> int:
                 tally[f"axis:{row['field']}"] += 1
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
-        "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in out_rows)
+        "".join(json.dumps(r, ensure_ascii=True, sort_keys=True) + "\n" for r in out_rows)
     )
     print(json.dumps({"parts": len(parts), "rows": len(out_rows), **dict(sorted(tally.items()))}, indent=1))
     return 0
