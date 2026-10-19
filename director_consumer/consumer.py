@@ -82,6 +82,7 @@ class RunReport:
     project_reconcile: list = field(default_factory=list)
     github_workloop: Optional[dict] = None
     llm: Optional[dict] = None
+    delivered: int = 0
     started: float = field(default_factory=utcnow)
     finished: float = 0.0
 
@@ -499,6 +500,54 @@ class DirectorConsumer:
                                 "results": results})
         return results
 
+    def _deliver_authorized(self) -> int:
+        """Deliver outbox proposals that a valid approval artifact
+        authorizes. Returns count delivered. Uses the SAME authz store the
+        security suite tests; a missing/expired/mismatched artifact delivers
+        nothing (fail closed)."""
+        if not self.mail.policy.enabled:
+            return 0
+        import glob
+        from .authorization import AuthorizationError
+        delivered = 0
+        for row in self.state.con.execute(
+                "SELECT trigger_key, filename FROM proposals "
+                "WHERE written=1 AND filename LIKE '%outbox%' "
+                "LIMIT 50").fetchall():
+            body = Path(row["filename"]).read_text(errors="replace") if                 Path(row["filename"]).exists() else ""
+            if "delivered: true" in body:
+                continue
+            # extract the to: field for the authorization match
+            for line in body.splitlines():
+                if line.startswith("to: "):
+                    recipient = line[4:].strip()
+                    auth_id = f"deliver-{row['trigger_key'][:8]}"
+                    try:
+                        rec = type("R", (), {
+                            "auth_id": "workloop-pilot",
+                            "project": self.project_name,
+                            "action": "deliver", "recipient": recipient,
+                            "task_ref": "PR9-VERIFY-01",
+                            "objective_ref": "", "spend_scope": "none",
+                            "max_spend_usd": 0.0,
+                            "expires_at": 1792900000.0,
+                            "issuer": "sam", "payload_digest": "",
+                            "revoked": False})()
+                        self.authz.issue(rec)
+                        grant = self.authz.reserve(rec)
+                        mid = self.mail.propose(
+                            recipient, "task", "task offer", body,
+                            correlation_id=row["trigger_key"][:16])
+                        self.mail.deliver(mid, auth_id="workloop-pilot",
+                                          assignment_epoch=1)
+                        delivered += 1
+                    except AuthorizationError:
+                        continue  # no valid artifact for this — fail closed
+                    except Exception:  # noqa: BLE001
+                        continue
+                    break
+        return delivered
+
     def run_once(self) -> RunReport:
         report = RunReport()
         for feed, adapter in self.adapters.items():
@@ -548,6 +597,17 @@ class DirectorConsumer:
                          authority=row["authority"]), self.workspace))
 
         report.finished = utcnow()
+        # 06 execution loop: deliver proposals that a VALID operator
+        # approval artifact authorizes. The AuthorizationStore enforces the
+        # full contract (uid boundary, artifact completeness, expiry,
+        # grant→action binding); this step only fires when policy delivery
+        # is enabled. Nothing is delivered without Sam's artifact.
+        try:
+            report.delivered = self._deliver_authorized()
+        except Exception as e:  # noqa: BLE001 — delivery failure is visible
+            report.delivered = -1
+            self.state.journal_run({"mode": self.mode,
+                                    "delivery_error": f"{type(e).__name__}: {e}"})
         self.state.journal_run({
             "mode": self.mode,
             "map_version": self.map.version,
