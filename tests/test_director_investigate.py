@@ -40,6 +40,7 @@ GCI_HITS = [
 def _db(tmp):
     con = sqlite3.connect(":memory:")
     con.execute("CREATE TABLE journal(ts REAL, kind TEXT, payload TEXT)")
+    con.execute("CREATE TABLE investigations(id INTEGER PRIMARY KEY, ts REAL, fingerprint TEXT, status TEXT, payload TEXT)")
     con.commit()
     return con
 
@@ -63,7 +64,7 @@ def test_dedupe_same_p1_two_ticks_one_model_call(tmp_path):
         assert r2.status == STATUS_DEDUPE_SKIP
         # Only ONE investigation was persisted
         rows = con.execute(
-            "SELECT COUNT(*) FROM journal WHERE kind='code_intel_investigation'"
+            "SELECT COUNT(*) FROM investigations"
         ).fetchone()[0]
         assert rows == 1, "exactly one model call, one receipt"
 
@@ -144,7 +145,7 @@ def test_investigation_persisted_to_journal(tmp_path):
         investigate(P1, "designwins", "rev1", "token",
                     "http://asus2:8900", "qwen", set(), con)
     rows = con.execute(
-        "SELECT payload FROM journal WHERE kind='code_intel_investigation'"
+        "SELECT payload FROM investigations"
     ).fetchall()
     assert len(rows) == 1
     d = json.loads(rows[0][0])
@@ -181,7 +182,7 @@ def test_dedupe_persists_across_process_restarts(tmp_path):
     # Simulate restart: rebuild dedupe from journal
     dedupe2 = set()
     for r in con.execute(
-            "SELECT payload FROM journal WHERE kind='code_intel_investigation'"):
+            "SELECT payload FROM investigations"):
         d = json.loads(r[0])
         if d.get("fingerprint"):
             dedupe2.add(d["fingerprint"])

@@ -249,8 +249,13 @@ def _persist(r: InvestigationResult, state_con) -> None:
     try:
         payload = json.dumps(r.to_dict(), default=str)
         state_con.execute(
-            "INSERT INTO journal(ts, kind, payload) VALUES (?,?,?)",
-            (time.time(), "code_intel_investigation", payload))
+            "CREATE TABLE IF NOT EXISTS investigations("
+            "id INTEGER PRIMARY KEY, ts REAL, fingerprint TEXT, "
+            "status TEXT, payload TEXT)")
+        state_con.execute(
+            "INSERT INTO investigations(ts, fingerprint, status, payload) "
+            "VALUES (?,?,?,?)",
+            (time.time(), r.fingerprint, r.status, payload))
         state_con.commit()
     except Exception:                                        # noqa: BLE001
         pass  # persistence is best-effort; never blocks observation

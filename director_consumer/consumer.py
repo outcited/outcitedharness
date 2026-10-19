@@ -408,8 +408,7 @@ class DirectorConsumer:
                 # Pre-populate from existing investigation journal entries
                 try:
                     for r in con.execute(
-                            "SELECT payload FROM journal WHERE kind="
-                            "'code_intel_investigation'").fetchall():
+                            "SELECT payload FROM investigations").fetchall():
                         d = json.loads(r[0])
                         if d.get("fingerprint"):
                             self._intel_dedupe.add(d["fingerprint"])
