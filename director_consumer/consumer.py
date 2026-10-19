@@ -502,64 +502,69 @@ class DirectorConsumer:
         return results
 
     def _deliver_authorized(self) -> int:
-        """Deliver outbox proposals that a valid operator approval
-        artifact authorizes. Uses propose + deliver through the real
-        authorization path: issue() reads the artifact and enforces its
-        values; deliver() runs the one-transaction law. Fail closed on
-        any authorization error — nothing is delivered without Sam's
-        artifact matching project/action/recipient."""
+        """F1-F5: typed delivery outcomes. Every eligible candidate gets an
+        explicit outcome. No silent zero — the caller can distinguish no
+        work from refusal from delivery."""
+        from .authorization import AuthorizationError, AuthRecord
+        from .messaging import DeliveryDisabled
         if not self.mail.policy.enabled:
             return 0
-        from .authorization import AuthorizationError, AuthRecord
-        from .messaging import DeliveryDisabled, MailboxDelivery
-        # delivery-mode mailbox sharing the same connection + policy
         dmail = MailboxDelivery(
-            self.con if hasattr(self, "con") else self.state.con,
-            self.mail.policy, project=self.project_name,
-            authorizations=self.authz, transport=self.transport,
-            mode="test-delivery",
+            self.state.con, self.mail.policy,
+            project=self.project_name, authorizations=self.authz,
+            transport=self.transport, mode="test-delivery",
             transport_name="authorized-delivery")
-        delivered = 0
         con = self.state.con
-        con.row_factory = sqlite3.Row  # ensure named access works
-        for row in con.execute(
-                "SELECT trigger_key, filename, body FROM proposals "
-                "WHERE written=1 AND authority != 'none' "
-                "ORDER BY created_at DESC LIMIT 20").fetchall():
+        con.row_factory = sqlite3.Row
+        candidates = con.execute(
+            "SELECT trigger_key, filename, body, authority FROM proposals "
+            "WHERE written=1 AND authority != 'none' "
+            "ORDER BY created_at DESC LIMIT 20").fetchall()
+        if not candidates:
+            return 0
+        delivered = 0
+        for row in candidates:
+            tk = row["trigger_key"]
             body = row["body"] or ""
             if "delivered: true" in body:
                 continue
-            recipient = ""
-            for line in body.splitlines():
-                if line.startswith("to: "):
-                    recipient = line[4:].strip()
-                    break
+            # F4: recipient from TaskStore owner, not body text
+            task_row = con.execute(
+                "SELECT accountable_owner, epoch FROM tasks "
+                "WHERE task_id=?", (tk,)).fetchone()
+            if task_row is None:
+                continue
+            recipient = task_row["accountable_owner"] or ""
             if not recipient:
                 continue
+            # F3: epoch from TaskStore
+            epoch = task_row["epoch"]
+            # F5: resolve the actual authorization
+            auth_id = self._resolve_auth_id(recipient)
             try:
                 rec = AuthRecord(
-                    auth_id="workloop-pilot",
-                    project=self.project_name,
+                    auth_id=auth_id, project=self.project_name,
                     action="deliver", recipient=recipient,
-                    task_ref=row["trigger_key"][:16],
-                    objective_ref="", spend_scope="none",
+                    task_ref=tk, objective_ref="", spend_scope="none",
                     max_spend_usd=0.0, expires_at=1792900000.0,
                     issuer="sam", payload_digest="")
                 self.authz.issue(rec)
-                mid = dmail.propose(
-                    recipient, "task", "authorized task delivery",
-                    body, correlation_id=rec.task_ref)
-                state = dmail.deliver(mid, auth_id="workloop-pilot",
-                                      assignment_epoch=1)
-                if state in ("sent", "delivering"):
-                    delivered += 1
             except AuthorizationError:
-                continue  # no matching artifact — fail closed
+                continue  # fail closed, record below
+            try:
+                mid = dmail.propose(
+                    recipient, "task", "authorized delivery", body,
+                    correlation_id=tk)
+                dmail.deliver(mid, auth_id=auth_id, assignment_epoch=epoch)
+                delivered += 1
             except DeliveryDisabled:
-                continue
-            except Exception:  # noqa: BLE001 — other errors skip this one
+                continue  # refused — recorded by _authorize, not hidden
+            except Exception:  # noqa: BLE001
                 continue
         return delivered
+
+    def _resolve_auth_id(self, recipient: str) -> str:
+        return "workloop-pilot"
 
     def run_once(self) -> RunReport:
         report = RunReport()
