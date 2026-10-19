@@ -379,6 +379,68 @@ class DirectorConsumer:
                 (r.task_id + r.state for r in recs)), sort_keys=True)
         self._derived_feed("ownership", evs, cursor, report)
 
+    def run_code_intel(self, report: RunReport) -> None:
+        """CODE-INTEL: for P0/P1 findings, search GCI for relevant code
+        and reason with the ops brain. Degrades to no-op without token
+        or LLM. Read-only, bounded."""
+        gci_token = os.environ.get("HARNESS_GCI_TOKEN", "")
+        if not gci_token or self.llm is None:
+            return
+        try:
+            from .code_intel import GCIClient
+            gci = GCIClient(base_url="http://100.100.116.82:8810",
+                            token=gci_token)
+        except Exception:
+            return
+        try:
+            rows = self.state.con.execute(
+                "SELECT payload FROM journal WHERE kind='assessment' "
+                "ORDER BY rowid DESC LIMIT 5").fetchall()
+            p0p1 = [json.loads(r[0]) for r in rows
+                    if json.loads(r[0]).get("severity") in ("P0", "P1")]
+            if not p0p1:
+                return
+            for a in p0p1[:3]:
+                q = a.get("event_summary", "")[:200]
+                words = [w for w in q.split() if len(w) >= 5][:3]
+                if not words:
+                    continue
+                hits = []
+                for w in words:
+                    try:
+                        import urllib.request
+                        req = urllib.request.Request(
+                            "http://100.100.116.82:8810/search-exact",
+                            data=json.dumps({"query": w}).encode(),
+                            headers={
+                                "Content-Type": "application/json",
+                                "Authorization": f"Bearer {gci_token}"})
+                        import urllib.request as _ur
+                        with _ur.urlopen(req, timeout=20) as resp:
+                            hits.extend(json.loads(resp.read()).get("hits", []))
+                    except Exception:
+                        continue
+                if not hits:
+                    continue
+                ctx_parts = []
+                for h in hits[:5]:
+                    cite = (f"[{h.get('repo_root','?')}:"
+                            f"{h.get('path','?')}:{h.get('start_line','?')}]")
+                    ctx_parts.append(f"{cite}\n{h.get('text','')[:800]}")
+                ctx = "\n".join(ctx_parts)
+                try:
+                    result = self.llm.assess(
+                        f"Investigation: {q}\n\nCode context:\n{ctx}",
+                        "code-intel-investigation")
+                    if result and not result.get("unavailable"):
+                        a["code_intel_investigation"] = {
+                            "hits": len(hits), "context_chars": len(ctx),
+                            "reasoning": str(result.get("text", ""))[:400]}
+                except Exception:
+                    pass
+        except Exception:
+            pass  # code intel is best-effort, never blocks observation
+
     def _observed(self) -> ObservedState:
         obs = ObservedState()
         try:
@@ -605,6 +667,7 @@ class DirectorConsumer:
         self.run_fleet(report)
         self.run_continuity(report)
         self.run_ownership(report)
+        self.run_code_intel(report)
         if self.github_runtime is not None:
             report.github_workloop = self.github_runtime.run_once()
         report.project_reconcile = self.run_projects(report)
