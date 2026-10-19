@@ -9,6 +9,7 @@ ever delivered, no production path is touched.
 from __future__ import annotations
 
 import json
+import sqlite3
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -519,7 +520,9 @@ class DirectorConsumer:
             mode="test-delivery",
             transport_name="authorized-delivery")
         delivered = 0
-        for row in self.state.con.execute(
+        con = self.state.con
+        con.row_factory = sqlite3.Row  # ensure named access works
+        for row in con.execute(
                 "SELECT trigger_key, filename, body FROM proposals "
                 "WHERE written=1 AND authority != 'none' "
                 "ORDER BY created_at DESC LIMIT 20").fetchall():
