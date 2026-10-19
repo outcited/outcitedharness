@@ -9,17 +9,23 @@ Fixes the four bugs in the first wiring (per issue #12 review 19:41Z):
    targeted retrieval from the rule/evidence, not word-based POSTs.
 4. Fail to INSUFFICIENT_EVIDENCE when retrieval finds nothing relevant,
    never invent services the codebase doesn't have.
+
+DIRECTOR-07 §1.B fixes (review 6277368358 pt 3 + 6277037762):
+5. Persistence goes through DirectorState.journal_investigation — the
+   canonical hash-chained journal. No ad-hoc side tables, no swallowed
+   persistence errors.
+6. Dedupe is ACKNOWLEDGED, not assumed: the fingerprint is added only
+   after the journal write commits AND the status is terminal. A failed
+   write or a retryable failure (LLM/GCI down) never suppresses retries.
 """
 from __future__ import annotations
 
 import hashlib
 import json
-import os
 import time
 import urllib.request
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 UNKNOWN = "unknown"
 
@@ -30,6 +36,14 @@ STATUS_SOURCE_UNAVAILABLE = "source_unavailable"
 STATUS_LLM_UNAVAILABLE = "llm_unavailable"
 STATUS_INSUFFICIENT_EVIDENCE = "insufficient_evidence"
 STATUS_DEDUPE_SKIP = "dedupe_skip"
+
+# Terminal statuses: once journaled, the fingerprint is acknowledged.
+# Retryable statuses are journaled as receipts but NOT acknowledged —
+# the incident is re-investigated on a later cycle.
+TERMINAL_STATUSES = frozenset({
+    STATUS_INVESTIGATED, STATUS_NO_HITS, STATUS_INSUFFICIENT_EVIDENCE})
+RETRYABLE_STATUSES = frozenset({
+    STATUS_LLM_UNAVAILABLE, STATUS_SOURCE_UNAVAILABLE})
 
 
 @dataclass
@@ -47,6 +61,8 @@ class InvestigationResult:
     tokens: int = 0
     retrieval_snapshot: dict = field(default_factory=dict)
     verified: bool = False         # ALWAYS False — enforced
+    persisted: bool = False        # True only after the journal commit
+    persist_error: str = ""        # set when the journal write failed
 
     def to_dict(self) -> dict:
         return {
@@ -160,8 +176,15 @@ def _llm_call(endpoint_url: str, model: str, prompt: str,
 def investigate(assessment: dict, project: str, source_revision: str,
                 gci_token: str, llm_url: str, llm_model: str,
                 dedupe: Optional[set] = None,
-                state_con=None) -> InvestigationResult:
-    """One investigation attempt. Dedupe by fingerprint; persist to journal."""
+                state=None) -> InvestigationResult:
+    """One investigation attempt.
+
+    Dedupe by fingerprint. Persistence goes through
+    state.journal_investigation (canonical hash-chained journal). The
+    fingerprint is added to `dedupe` only AFTER the journal write commits
+    AND the status is terminal — failed writes and retryable failures
+    never suppress a later retry.
+    """
     r = InvestigationResult()
     r.trigger_key = assessment.get("trigger_key", assessment.get("rule_id", ""))
     r.severity = assessment.get("severity", "")
@@ -169,16 +192,16 @@ def investigate(assessment: dict, project: str, source_revision: str,
     r.fingerprint = _fingerprint(project, r.trigger_key, source_revision)
 
     # Dedupe: same (project, trigger, source_rev) already investigated
-    if dedupe is not None:
-        if r.fingerprint in dedupe:
-            r.status = STATUS_DEDUPE_SKIP
-            return r
-        dedupe.add(r.fingerprint)
+    # (acknowledged only — see _ack below)
+    if dedupe is not None and r.fingerprint in dedupe:
+        r.status = STATUS_DEDUPE_SKIP
+        return r
 
     # Step 1: targeted GCI retrieval from the rule/evidence
     if not gci_token:
         r.status = STATUS_SOURCE_UNAVAILABLE
-        _persist(r, state_con)
+        _persist(r, state)
+        _ack(r, dedupe)
         return r
 
     terms = _extract_search_terms(assessment)
@@ -200,14 +223,16 @@ def investigate(assessment: dict, project: str, source_revision: str,
 
     if not all_hits:
         r.status = STATUS_NO_HITS
-        _persist(r, state_con)
+        _persist(r, state)
+        _ack(r, dedupe)
         return r
 
     # Step 2: build grounded context
     context = _build_context(all_hits)
     if not context.strip():
         r.status = STATUS_INSUFFICIENT_EVIDENCE
-        _persist(r, state_con)
+        _persist(r, state)
+        _ack(r, dedupe)
         return r
 
     # Step 3: ASUS2 reasoning over the ACTUAL code
@@ -238,24 +263,31 @@ def investigate(assessment: dict, project: str, source_revision: str,
         r.hypothesis = f"model call failed: {type(e).__name__}: {e}"
         r.model = llm_model
 
-    _persist(r, state_con)
+    _persist(r, state)
+    _ack(r, dedupe)
     return r
 
 
-def _persist(r: InvestigationResult, state_con) -> None:
-    """Persist to the Director journal as an advisory investigation."""
-    if state_con is None:
+def _persist(r: InvestigationResult, state) -> None:
+    """Persist the receipt through the canonical hash-chained journal.
+
+    Failure is recorded on the result (persisted/persist_error) and
+    surfaced to the caller — never silently swallowed, because a lost
+    receipt must not be treated as a completed investigation.
+    """
+    if state is None:
+        r.persist_error = "no state"
         return
     try:
-        payload = json.dumps(r.to_dict(), default=str)
-        state_con.execute(
-            "CREATE TABLE IF NOT EXISTS investigations("
-            "id INTEGER PRIMARY KEY, ts REAL, fingerprint TEXT, "
-            "status TEXT, payload TEXT)")
-        state_con.execute(
-            "INSERT INTO investigations(ts, fingerprint, status, payload) "
-            "VALUES (?,?,?,?)",
-            (time.time(), r.fingerprint, r.status, payload))
-        state_con.commit()
-    except Exception:                                        # noqa: BLE001
-        pass  # persistence is best-effort; never blocks observation
+        state.journal_investigation(r.to_dict())
+        r.persisted = True
+    except Exception as e:                                    # noqa: BLE001
+        r.persist_error = f"{type(e).__name__}: {e}"[:200]
+
+
+def _ack(r: InvestigationResult, dedupe: Optional[set]) -> None:
+    """Acknowledge dedupe only for committed, terminal outcomes."""
+    if dedupe is None:
+        return
+    if r.persisted and r.status in TERMINAL_STATUSES:
+        dedupe.add(r.fingerprint)
