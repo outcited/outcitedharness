@@ -545,7 +545,7 @@ class DirectorConsumer:
                 self.authz.issue(rec)
                 mid = dmail.propose(
                     recipient, "task", "authorized task delivery",
-                    body, correlation_id=row["trigger_key"][:16])
+                    body, correlation_id=rec.task_ref)
                 state = dmail.deliver(mid, auth_id="workloop-pilot",
                                       assignment_epoch=1)
                 if state in ("sent", "delivering"):
