@@ -84,6 +84,7 @@ class RunReport:
     github_workloop: Optional[dict] = None
     llm: Optional[dict] = None
     delivered: int = 0
+    intel_investigations: int = 0
     started: float = field(default_factory=utcnow)
     finished: float = 0.0
 
@@ -380,65 +381,60 @@ class DirectorConsumer:
         self._derived_feed("ownership", evs, cursor, report)
 
     def run_code_intel(self, report: RunReport) -> None:
-        """CODE-INTEL: for P0/P1 findings, search GCI for relevant code
-        and reason with the ops brain. Degrades to no-op without token
-        or LLM. Read-only, bounded."""
+        """CODE-INTEL: investigate P0/P1 findings using GCI retrieval
+        and ASUS2 reasoning. Advisory-only, deduped by fingerprint,
+        results persisted to the journal. Degrades to no-op without
+        GCI token or LLM endpoint."""
         gci_token = os.environ.get("HARNESS_GCI_TOKEN", "")
         if not gci_token or self.llm is None:
             return
         try:
-            from .code_intel import GCIClient
-            gci = GCIClient(base_url="http://100.100.116.82:8810",
-                            token=gci_token)
-        except Exception:
-            return
-        try:
-            rows = self.state.con.execute(
+            from .investigate import investigate, InvestigationResult
+            # Get P0/P1 assessments from this workspace's journal
+            con = self.state.con
+            rows = con.execute(
                 "SELECT payload FROM journal WHERE kind='assessment' "
-                "ORDER BY rowid DESC LIMIT 5").fetchall()
-            p0p1 = [json.loads(r[0]) for r in rows
-                    if json.loads(r[0]).get("severity") in ("P0", "P1")]
+                "ORDER BY rowid DESC LIMIT 20").fetchall()
+            p0p1 = []
+            for r in rows:
+                a = json.loads(r[0])
+                if a.get("severity") in ("P0", "P1"):
+                    p0p1.append(a)
             if not p0p1:
                 return
-            for a in p0p1[:3]:
-                q = a.get("event_summary", "")[:200]
-                words = [w for w in q.split() if len(w) >= 5][:3]
-                if not words:
-                    continue
-                hits = []
-                for w in words:
-                    try:
-                        import urllib.request
-                        req = urllib.request.Request(
-                            "http://100.100.116.82:8810/search-exact",
-                            data=json.dumps({"query": w}).encode(),
-                            headers={
-                                "Content-Type": "application/json",
-                                "Authorization": f"Bearer {gci_token}"})
-                        import urllib.request as _ur
-                        with _ur.urlopen(req, timeout=20) as resp:
-                            hits.extend(json.loads(resp.read()).get("hits", []))
-                    except Exception:
-                        continue
-                if not hits:
-                    continue
-                ctx_parts = []
-                for h in hits[:5]:
-                    cite = (f"[{h.get('repo_root','?')}:"
-                            f"{h.get('path','?')}:{h.get('start_line','?')}]")
-                    ctx_parts.append(f"{cite}\n{h.get('text','')[:800]}")
-                ctx = "\n".join(ctx_parts)
+            # Get or create the dedupe set (persisted across ticks)
+            if not hasattr(self, "_intel_dedupe"):
+                self._intel_dedupe = set()
+                # Pre-populate from existing investigation journal entries
                 try:
-                    result = self.llm.assess(
-                        f"Investigation: {q}\n\nCode context:\n{ctx}",
-                        "code-intel-investigation")
-                    if result and not result.get("unavailable"):
-                        a["code_intel_investigation"] = {
-                            "hits": len(hits), "context_chars": len(ctx),
-                            "reasoning": str(result.get("text", ""))[:400]}
-                except Exception:
+                    for r in con.execute(
+                            "SELECT payload FROM journal WHERE kind="
+                            "'code_intel_investigation'").fetchall():
+                        d = json.loads(r[0])
+                        if d.get("fingerprint"):
+                            self._intel_dedupe.add(d["fingerprint"])
+                except Exception:                            # noqa: BLE001
                     pass
-        except Exception:
+            # Investigate the first eligible P0/P1 (bounded: 1 per cycle)
+            source_rev = "unknown"
+            try:
+                source_rev = con.execute(
+                    "SELECT payload FROM journal WHERE kind='journal_run' "
+                    "ORDER BY rowid DESC LIMIT 1").fetchone()[0][:64]
+            except Exception:                                # noqa: BLE001
+                pass
+            for a in p0p1[:1]:  # Gate 4: one distinct investigation per cycle
+                result = investigate(
+                    a, self.project_name, source_rev,
+                    gci_token=gci_token,
+                    llm_url="http://100.68.133.1:8900",
+                    llm_model="qwen3.8-27b-nvfp4",
+                    dedupe=self._intel_dedupe,
+                    state_con=con)
+                if result.status not in ("dedupe_skip",):
+                    report.intel_investigations = getattr(
+                        report, "intel_investigations", 0) + 1
+        except Exception:                                    # noqa: BLE001
             pass  # code intel is best-effort, never blocks observation
 
     def _observed(self) -> ObservedState:
