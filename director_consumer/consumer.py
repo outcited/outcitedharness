@@ -383,15 +383,16 @@ class DirectorConsumer:
     def run_code_intel(self, report: RunReport) -> None:
         """CODE-INTEL: investigate P0/P1 findings using GCI retrieval
         and ASUS2 reasoning. Advisory-only, deduped by fingerprint,
-        results persisted to the journal. Degrades to no-op without
-        GCI token or LLM endpoint."""
+        receipts persisted to the hash-chained journal. Degrades to
+        no-op without GCI token or LLM endpoint."""
         gci_token = os.environ.get("HARNESS_GCI_TOKEN", "")
         if not gci_token or self.llm is None:
             return
         try:
-            from .investigate import investigate, InvestigationResult
-            # Get P0/P1 assessments from this workspace's journal
+            from .investigate import STATUS_DEDUPE_SKIP, investigate
             con = self.state.con
+            # P0/P1 assessments from this workspace's journal, newest
+            # first; keep the payload blob for typed source identity.
             rows = con.execute(
                 "SELECT payload FROM journal WHERE kind='assessment' "
                 "ORDER BY rowid DESC LIMIT 20").fetchall()
@@ -399,40 +400,51 @@ class DirectorConsumer:
             for r in rows:
                 a = json.loads(r[0])
                 if a.get("severity") in ("P0", "P1"):
-                    p0p1.append(a)
+                    p0p1.append((r[0], a))
             if not p0p1:
                 return
-            # Get or create the dedupe set (persisted across ticks)
+            # Typed source identity: sha256 of the assessment's journal
+            # payload blob. Stable while the evidence is unchanged (so
+            # dedupe holds across ticks), changes when the evidence
+            # content changes (so it re-opens). Replaces the broken
+            # kind='journal_run' lookup, which never matched the writer's
+            # kind='run' and sliced untrusted JSON regardless.
+            def source_revision(payload_blob: str) -> str:
+                import hashlib
+                return hashlib.sha256(payload_blob.encode()).hexdigest()[:32]
+
+            # Dedupe set persisted across ticks; rebuilt from the
+            # hash-chained journal after a restart.
             if not hasattr(self, "_intel_dedupe"):
                 self._intel_dedupe = set()
-                # Pre-populate from existing investigation journal entries
                 try:
                     for r in con.execute(
-                            "SELECT payload FROM investigations").fetchall():
+                            "SELECT payload FROM journal "
+                            "WHERE kind='investigation'").fetchall():
                         d = json.loads(r[0])
                         if d.get("fingerprint"):
                             self._intel_dedupe.add(d["fingerprint"])
                 except Exception:                            # noqa: BLE001
                     pass
-            # Investigate the first eligible P0/P1 (bounded: 1 per cycle)
-            source_rev = "unknown"
-            try:
-                source_rev = con.execute(
-                    "SELECT payload FROM journal WHERE kind='journal_run' "
-                    "ORDER BY rowid DESC LIMIT 1").fetchone()[0][:64]
-            except Exception:                                # noqa: BLE001
-                pass
-            for a in p0p1[:1]:  # Gate 4: one distinct investigation per cycle
+            # Gate 4: one NEW investigation per cycle. Deduped heads do
+            # not consume the budget — a stale top incident must never
+            # starve a distinct newer one (6277037762 bug 4).
+            budget = 1
+            for blob, a in p0p1:
+                if budget <= 0:
+                    break
                 result = investigate(
-                    a, self.project_name, source_rev,
+                    a, self.project_name, source_revision(blob),
                     gci_token=gci_token,
                     llm_url="http://100.68.133.1:8900",
                     llm_model="qwen3.8-27b-nvfp4",
                     dedupe=self._intel_dedupe,
-                    state_con=con)
-                if result.status not in ("dedupe_skip",):
-                    report.intel_investigations = getattr(
-                        report, "intel_investigations", 0) + 1
+                    state=self.state)
+                if result.status == STATUS_DEDUPE_SKIP:
+                    continue
+                report.intel_investigations = getattr(
+                    report, "intel_investigations", 0) + 1
+                budget -= 1
         except Exception:                                    # noqa: BLE001
             pass  # code intel is best-effort, never blocks observation
 

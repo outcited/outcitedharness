@@ -135,6 +135,13 @@ class DirectorState:
     def journal_llm(self, payload: dict) -> None:
         self._journal_standalone("llm", payload)
 
+    def journal_investigation(self, payload: dict) -> None:
+        """Advisory code-intel investigation receipt (verified=False
+        structurally, enforced by the caller). Goes through the same
+        hash-chained append as every other journal entry — no side
+        tables, no bypass."""
+        self._journal_standalone("investigation", payload)
+
     # ---------- ingestion batch (atomic) ----------
 
     def ingest_batch(self, feed: str, cursor: str, fingerprints: Iterable[str],
