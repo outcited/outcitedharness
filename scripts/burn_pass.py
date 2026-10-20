@@ -462,7 +462,12 @@ def main() -> int:
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--shard", default="0/1", help="i/n deterministic split by position")
     ap.add_argument("--workers", type=int, default=12)
-    ap.add_argument("--doc-timeout", type=float, default=60.0)
+    ap.add_argument("--doc-timeout", type=float, default=60.0,
+                    help="base per-doc budget seconds (size-aware: + per-MB)")
+    ap.add_argument("--timeout-per-mb", type=float, default=2.0,
+                    help="extra budget seconds per MB of source PDF (size-aware deadline)")
+    ap.add_argument("--timeout-cap", type=float, default=600.0,
+                    help="max per-doc budget seconds regardless of size")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--readers", nargs="+", default=list(READERS), choices=list(READERS))
     ap.add_argument("--map", action="append", default=[],
@@ -484,6 +489,26 @@ def main() -> int:
 
     idx, total = (int(x) for x in args.shard.split("/"))
     items = items[idx::total]
+
+    def _mapped(sp: str) -> str:
+        for old, new in path_map:
+            if sp.startswith(old):
+                return new + sp[len(old):]
+        return sp
+
+    def _doc_budget(sp: str) -> float:
+        """Size-aware deadline: base + per-MB, capped. Missing/remote = base."""
+        try:
+            mb = os.path.getsize(_mapped(sp)) / 1e6
+        except OSError:
+            mb = 0.0
+        return min(args.doc_timeout + args.timeout_per_mb * mb, args.timeout_cap)
+
+    # small-first: workers never stall behind monsters; missing files sort last
+    # (deterministic: size, then path). Set --timeout-per-mb 0 to disable only
+    # the size-aware part; sorting is always on (harmless, strictly better).
+    items.sort(key=lambda d: (_doc_budget(d.get("source_path", "")),
+                              str(d.get("source_path", ""))))
     if args.limit:
         items = items[: args.limit]
 
@@ -549,6 +574,7 @@ def main() -> int:
         payload = (doc, path_map, tuple(args.readers), args.doc_timeout, token)
         inflight[token] = {
             "item": doc, "attempt": attempt, "t0": time.time(),
+            "budget_kill": _doc_budget(doc.get("source_path", "")) * 2,
             "res": pool_ref[0].apply_async(_worker_tracked, (payload,)),
         }
 
@@ -593,11 +619,12 @@ def main() -> int:
                     _finish(token, result)
                 inflight.pop(token, None)
                 (pid_dir / token).unlink(missing_ok=True)
-        # deadline enforcement: SIGKILL the owning worker, Pool respawns it
+        # deadline enforcement (size-aware): SIGKILL the owning worker,
+        # Pool respawns it. budget_kill = 2 x per-doc budget (base + s/MB, cap)
         now = time.time()
         for token in list(inflight.keys()):
             entry = inflight[token]
-            if now - entry["t0"] > kill_budget:
+            if now - entry["t0"] > entry.get("budget_kill", kill_budget):
                 pid_file = pid_dir / token
                 if pid_file.exists():
                     try:
@@ -643,20 +670,10 @@ def main() -> int:
         "tally": dict(sorted(tally.items())),
         "wall_s": round(elapsed, 1),
         "docs_per_hour": round(len(items) / elapsed * 3600, 1) if elapsed else None,
-    }, indent=1))
-    return 0
-
-    for fh in fh_rows.values():
-        fh.close()
-    fh_ledger.close()
-    elapsed = time.time() - t_start
-    print(json.dumps({
-        "queue": str(args.queue), "shard": args.shard,
-        "items": len(items), "rows": {n: sum(1 for _ in open(args.out_dir / f"{n}{suffix}.jsonl"))
-                                      for n in args.readers},
-        "tally": dict(sorted(tally.items())),
-        "wall_s": round(elapsed, 1),
-        "docs_per_hour": round(len(items) / elapsed * 3600, 1) if elapsed else None,
+        "scheduling": {"doc_timeout_base_s": args.doc_timeout,
+                       "timeout_per_mb_s": args.timeout_per_mb,
+                       "timeout_cap_s": args.timeout_cap,
+                       "order": "size_ascending"},
     }, indent=1))
     return 0
 

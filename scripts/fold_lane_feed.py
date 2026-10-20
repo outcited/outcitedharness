@@ -222,6 +222,8 @@ def main() -> int:
                 key = ("mcu", "family-documents", vendor)
             elif name == "parts_burn.jsonl":
                 key = ("power/semiconductor", "burn", vendor)
+            elif name == "parts_board.jsonl":
+                key = ("boards", "design-containers", vendor)
             else:
                 key = ("power/semiconductor", "catalog", vendor)
             cell = cells.setdefault(key, {

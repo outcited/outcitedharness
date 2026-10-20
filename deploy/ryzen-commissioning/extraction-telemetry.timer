@@ -1,0 +1,10 @@
+[Unit]
+Description=Run extraction telemetry emitter every 60s
+
+[Timer]
+OnBootSec=90
+OnUnitActiveSec=60
+AccuracySec=10
+
+[Install]
+WantedBy=timers.target
