@@ -184,6 +184,12 @@ def main(argv=None) -> int:
     if a.github_project_id and not a.github_repo:
         ap.error("--github-repo is required when using --github-project-id")
 
+    from .writer_lock import workspace_writer
+    with workspace_writer(Path(a.workspace)):
+        return _run(a)
+
+
+def _run(a):
     feeds = load_feeds(Path(a.feeds)) if a.feeds else {}
     llm = None
     if not a.no_llm:

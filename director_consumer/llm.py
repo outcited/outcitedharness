@@ -42,7 +42,6 @@ class Endpoint:
 
 DEFAULT_ENDPOINTS = [
     Endpoint("asus2_ops_brain", "http://100.68.133.1:8900", "qwen3.8-27b-nvfp4"),
-    Endpoint("dgx1_overflow", "http://100.81.201.24:8901", "qwen3.8-27b-fp8"),
 ]
 
 
@@ -99,7 +98,15 @@ class OpsBrainClient:
         if not self.bucket.allow():
             return {"unavailable": "token bucket empty"}
         reasons = []
-        for ep in self.endpoints:
+        candidates = self.endpoints
+        if self.policy is not None:
+            # Policies may be attached after construction by DirectorConsumer.
+            # Route using the current policy's URL/model, not a stale same-name
+            # endpoint captured before policy attachment.
+            candidates = [Endpoint(name, spec.base_url, spec.model)
+                          for name, spec in self.policy.endpoints.items()
+                          if spec.role != "capacity-available-only"]
+        for ep in candidates:
             if self.policy is not None:
                 allowed, why = self.policy.check(ep.name, self.purpose)
                 if not allowed:
