@@ -179,10 +179,11 @@ pub fn search(
     registry: &dw_knives::PhraseRegistry,
     population: &Population,
     release: ReleaseId,
+    provenance: &dyn dw_decide::Provenance,
 ) -> SearchResponse {
     let cohort =
         dw_decide::Cohort::from_candidates(population.facts.keys().cloned().collect::<Vec<_>>());
-    let answer = dw_funnel::accept(sentence, registry, &cohort, &population.facts, release);
+    let answer = dw_funnel::accept(sentence, registry, &cohort, &population.facts, release, provenance);
     SearchResponse {
         residue: answer.bound.unmapped.clone(),
         build: answer.build,

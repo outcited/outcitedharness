@@ -52,12 +52,13 @@ pub fn accept(
     cohort: &Cohort,
     facts: &BTreeMap<Candidate, CandidateFacts>,
     release: ReleaseId,
+    provenance: &dyn dw_decide::Provenance,
 ) -> Answer {
     let bound = registry.bind(sentence);
     let (mut unknowns, mut residue_questions) =
         dw_knives::unknowns_from_residue(&bound, cohort.len());
 
-    let eval = evaluate(cohort, &bound.atoms, facts, &AlwaysResolvable);
+    let eval = evaluate(cohort, &bound.atoms, facts, provenance);
     unknowns.extend(eval.unknowns.clone());
 
     // Residue questions have no measured population behind them — a phrase
@@ -200,6 +201,7 @@ mod tests {
             &cohort,
             &facts,
             ReleaseId::new("designwins-2026-W46").unwrap(),
+            &dw_decide::AlwaysResolvable,
         );
 
         // "returns a cohort" — distinct parts, even when nothing eliminated.
@@ -306,6 +308,7 @@ mod tests {
             &cohort,
             &facts,
             ReleaseId::new("r").unwrap(),
+            &dw_decide::AlwaysResolvable,
         );
 
         assert_eq!(answer.build.cohort.len(), 1, "B is eliminated");
@@ -331,6 +334,7 @@ mod tests {
             &cohort,
             &facts,
             ReleaseId::new("r").unwrap(),
+            &dw_decide::AlwaysResolvable,
         );
         let s = answer.build.summary();
         assert!(s.contains("cohort       1 distinct parts"));

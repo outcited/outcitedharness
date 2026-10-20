@@ -70,7 +70,7 @@ fn journey_sentence_to_verdicts_on_real_rows() {
     // 87c1fef2…: printed max 0.2 µA (guaranteed ceiling UNDER budget) — PASS.
     let pass_part = verdicts
         .iter()
-        .find(|(p, _)| p.starts_with("87c1fef2"))
+        .find(|(p, _)| p.starts_with("STM32H747"))
         .map(|(_, (v, _))| *v)
         .expect("ceiling-under candidate present");
     assert_eq!(pass_part, Verdict::Pass, "guaranteed max 0.2 µA satisfies ≤ 2 µA");
@@ -80,7 +80,7 @@ fn journey_sentence_to_verdicts_on_real_rows() {
     // part draws more than 2 µA. This is the heart of the ruling.
     let over_part = verdicts
         .iter()
-        .find(|(p, _)| p.starts_with("8a4fee15"))
+        .find(|(p, _)| p.starts_with("TM4C1233"))
         .map(|(_, (v, _))| *v)
         .expect("ceiling-over candidate present");
     assert_ne!(over_part, Verdict::Fail, "a ceiling above budget never eliminates");
@@ -90,10 +90,22 @@ fn journey_sentence_to_verdicts_on_real_rows() {
     // Even at its best, the part draws more than the budget: violation proven.
     let floor_part = verdicts
         .iter()
-        .find(|(p, _)| p.starts_with("31106cf7"))
+        .find(|(p, _)| p.starts_with("TMS320F280015x"))
         .map(|(_, (v, _))| *v)
         .expect("floor-over candidate present");
-    assert_eq!(floor_part, Verdict::Fail, "guaranteed min 7.6 mA violates ≤ 2 µA");
+    assert_eq!(
+        floor_part,
+        Verdict::Fail,
+        "lowest guaranteed floor 10 µA (0.01 mA) > 2 µA across the FULL mode inventory"
+    );
+
+    // Identity law: candidates are parts, never shas.
+    for part in verdicts.keys() {
+        assert!(
+            !part.chars().take(16).all(|c| c.is_ascii_hexdigit()),
+            "candidate {part} looks like a sha — identity law violated"
+        );
+    }
 
     // 3. The per-MHz row was refused with a reason — a different quantity.
     assert!(

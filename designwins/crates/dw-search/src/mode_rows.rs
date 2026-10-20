@@ -39,6 +39,13 @@ pub struct ModeRow {
     pub conditions_verbatim: Option<String>,
     /// 1-based page of the printed row.
     pub page_1based: Option<u32>,
+    /// Manufacturer (page-1 evidence, stamped by the enrich step).
+    pub manufacturer: Option<String>,
+    /// Exact printed part identity — an OPN or the family the document
+    /// declares. A document sha is NOT an identity; this field is.
+    pub part_identity: Option<String>,
+    /// Where the identity was read ("DS12930 Rev 2 page 1").
+    pub identity_source: Option<String>,
 }
 
 /// Why a row did not become a fact. Surfaced to the UI, never swallowed.
@@ -117,7 +124,8 @@ pub fn population_from_mode_rows(rows: &[ModeRow]) -> ModePopulation {
     // shows its ceiling first (satisfaction is what the engineer asks for).
     let mut facts: BTreeMap<PCandidate, CandidateFacts> = BTreeMap::new();
     let mut provenance_keys: BTreeSet<(String, u32, String)> = BTreeSet::new();
-    let mut best: BTreeMap<PCandidate, (u8, Evidence)> = BTreeMap::new();
+    type Acc = Vec<(f64, Bound, bool, BTreeMap<String, dw_normalize::CondValue>, SourceRef)>;
+    let mut best: BTreeMap<PCandidate, (u8, Acc)> = BTreeMap::new();
 
     for row in rows {
         let mode = row.mode.clone();
@@ -147,13 +155,18 @@ pub fn population_from_mode_rows(rows: &[ModeRow]) -> ModePopulation {
             continue;
         };
 
+        // Identity law (2026-10-19 gate 2): a document sha is not an OPN.
+        // Use the enrich-stamped part identity; vendor from the stamped
+        // manufacturer. Absent identity -> the sha prefix, visibly not an
+        // OPN, so the journey layer flags it.
         let identity = row
-            .part_number
+            .part_identity
             .clone()
+            .or(row.part_number.clone())
             .unwrap_or_else(|| sha_str.chars().take(16).collect());
         let candidate = PCandidate {
             part_number: identity,
-            vendor: String::new(),
+            vendor: row.manufacturer.clone().unwrap_or_default(),
         };
         let source = SourceRef {
             sha256: sha,
@@ -168,28 +181,57 @@ pub fn population_from_mode_rows(rows: &[ModeRow]) -> ModePopulation {
             mode.clone(),
         ));
 
-        let rank = match bound {
-            Bound::Ceiling => 3,
-            Bound::Floor => 2,
-            Bound::Point => 1,
-        };
-        let evidence =
-            Evidence::measured_bound(amperes, bound, rating_allows_operating, vec![source])
-                .with_conditions(parse_conditions(row.conditions_verbatim.as_deref()));
-        let replace = best
-            .get(&candidate)
-            .map(|(r, _)| rank > *r)
-            .unwrap_or(true);
-        if replace {
-            best.insert(candidate.clone(), (rank, evidence));
-        }
+        // Mode-aware aggregation (the applicability ruling, 2026-10-19):
+        // a candidate's sleep evidence aggregates ACROSS its printed modes.
+        //   ceiling value = the TIGHTEST guaranteed max over all modes —
+        //     the satisfaction check the engineer asked for;
+        //   floor value   = the LOWEST guaranteed min over all modes — the
+        //     best the manufacturer will guarantee; a FAIL means even that
+        //     exceeds the budget (universal across the printed inventory).
+        // A floor in ONE mode never fails a part whose other mode floors
+        // lower; a single row never speaks for the inventory.
+        let entry = best.entry(candidate.clone()).or_insert_with(|| (0u8, Acc::new()));
+        entry.1.push((
+            amperes,
+            bound,
+            rating_allows_operating,
+            parse_conditions(row.conditions_verbatim.as_deref()),
+            source,
+        ));
         facts.entry(candidate).or_default();
     }
 
-    for (candidate, (_, evidence)) in best {
-        if let Some(cf) = facts.get_mut(&candidate) {
-            cf.axes.insert(Axis::SleepCurrentA, evidence);
+    for (candidate, (_, rows_acc)) in best {
+        let Some(cf) = facts.get_mut(&candidate) else {
+            continue;
+        };
+        let mut sources: Vec<SourceRef> = Vec::new();
+        for (_, _, _, _, s) in &rows_acc {
+            sources.push(s.clone());
         }
+        // Prefer the tightest ceiling (existential satisfaction); a part
+        // with any guaranteed-max sleep mode is judged on its best mode.
+        // Otherwise the lowest floor (universal violation); otherwise a
+        // typical point (never decides).
+        let ceilings: Vec<_> = rows_acc.iter().filter(|r| r.1 == Bound::Ceiling).collect();
+        let floors: Vec<_> = rows_acc.iter().filter(|r| r.1 == Bound::Floor).collect();
+        let evidence = if let Some(min_c) = ceilings.iter().min_by(|a, b| {
+            a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal)
+        }) {
+            Evidence::measured_bound(min_c.0, Bound::Ceiling, min_c.2, sources)
+                .with_conditions(min_c.3.clone())
+        } else if let Some(min_f) = floors.iter().min_by(|a, b| {
+            a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal)
+        }) {
+            Evidence::measured_bound(min_f.0, Bound::Floor, min_f.2, sources)
+                .with_conditions(min_f.3.clone())
+        } else if let Some(p) = rows_acc.first() {
+            Evidence::measured_bound(p.0, Bound::Point, p.2, sources)
+                .with_conditions(p.3.clone())
+        } else {
+            continue;
+        };
+        cf.axes.insert(Axis::SleepCurrentA, evidence);
     }
     population.facts = facts;
     ModePopulation {
