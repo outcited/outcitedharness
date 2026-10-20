@@ -85,6 +85,8 @@ class RunReport:
     llm: Optional[dict] = None
     delivered: int = 0
     intel_investigations: int = 0
+    product_graph_conflicts: int = 0
+    product_graph_new: int = 0
     started: float = field(default_factory=utcnow)
     finished: float = 0.0
 
@@ -436,6 +438,59 @@ class DirectorConsumer:
         except Exception:                                    # noqa: BLE001
             pass  # code intel is best-effort, never blocks observation
 
+    def run_product_graph(self, report: RunReport) -> None:
+        """§7 product graph: cross-repo contract-conflict detection +
+        critical-path ranking. Inputs are RECORDED read-only observations
+        (workspace/product-graph-observations.json, produced by the
+        read-only contract scanner) — the tick itself never does network
+        I/O here. State persists across restarts; one cause fingerprint
+        = one conflict record; only NEW conflicts raise events."""
+        try:
+            from .product_graph import (
+                ContractAssumption, Evidence, ProductGraphState,
+                detect_contract_conflicts, reconcile)
+            obs_path = self.workspace / "product-graph-observations.json"
+            if not obs_path.exists():
+                return
+            obs = json.loads(obs_path.read_text())
+            assumptions = []
+            for a in obs.get("assumptions", []):
+                ev = a.get("evidence", {})
+                assumptions.append(ContractAssumption(
+                    lane=a.get("lane", ""),
+                    endpoint_kind=a.get("endpoint_kind", ""),
+                    method=a.get("method", ""), path=a.get("path", ""),
+                    envelope=a.get("envelope", ""),
+                    release_pin=a.get("release_pin", "unknown"),
+                    reachability=a.get("reachability", "unknown"),
+                    evidence=Evidence(
+                        locator=ev.get("locator", ""),
+                        truth_class=ev.get("truth_class", "UNKNOWN"),
+                        as_of=ev.get("as_of", ""),
+                        detail=ev.get("detail", ""))))
+            conflicts = detect_contract_conflicts(
+                assumptions, obs.get("implemented_paths"),
+                now=utcnow())
+            prev = ProductGraphState.load(self.workspace)
+            state = reconcile(prev, conflicts, now=utcnow())
+            state.save(self.workspace)
+            prev_fps = {c.get("cause_fingerprint") for c in prev.conflicts}
+            new = [c for c in state.conflicts
+                   if c.get("cause_fingerprint") not in prev_fps]
+            report.product_graph_conflicts = len(state.conflicts)
+            report.product_graph_new = len(new)
+            if new:
+                evs = [Event(
+                    "product_graph", "contract-conflict", c["title"],
+                    [SourceRef("product_graph", c["conflict_id"], None,
+                               utcnow(), locator=c["conflict_id"])],
+                    attrs={"phase": c["phase"], "stage": c["stage"],
+                           "kind": c["kind"]}) for c in new]
+                cursor = f"product-graph:{int(float(obs.get('as_of') or 0))}"
+                self._derived_feed("product_graph", evs, cursor, report)
+        except Exception:                                    # noqa: BLE001
+            pass  # product graph is best-effort; never blocks observation
+
     def _observed(self) -> ObservedState:
         obs = ObservedState()
         try:
@@ -663,6 +718,7 @@ class DirectorConsumer:
         self.run_continuity(report)
         self.run_ownership(report)
         self.run_code_intel(report)
+        self.run_product_graph(report)
         if self.github_runtime is not None:
             report.github_workloop = self.github_runtime.run_once()
         report.project_reconcile = self.run_projects(report)
