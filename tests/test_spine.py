@@ -14,7 +14,7 @@ def check(name, cond, detail=""):
         FAILS.append(name)
 
 # ---- claim identity: deterministic + dedupe
-c1 = {"pdf_sha": "aa", "lane": "pillars", "field": "flash_kb", "value_raw": 64,
+c1 = {"pdf_sha": "aa11", "lane": "pillars", "field": "flash_kb", "value_raw": 64,
       "unit_raw": "KB", "value_role": None, "page_1based": 3, "verbatim": "64 kB"}
 c2 = dict(c1, source_file="other-lane.jsonl")
 id1, id2 = spine.claim_id(c1), spine.claim_id(c2)
@@ -40,24 +40,46 @@ check("conditions parse freq", cond.get("freq") == 500.0)
 
 # ---- L2 fail-closed paths (fake PDF via monkeypatched cache)
 class FakeCache:
-    def __init__(self, pages): self.pages = pages
-    def page_text(self, path, pg):
+    def __init__(self, pages, sha="aa11"): self.pages = pages; self.sha = sha
+    def page_text(self, path, pg, expect_sha=None):
         if path == "missing.pdf":
-            return "missing", None
-        return "ok", self.pages
+            return "missing", None, None
+        if expect_sha and expect_sha != self.sha:
+            return "sha_mismatch", None, self.sha
+        if not isinstance(pg, int) or pg < 1 or pg not in self.pages:
+            return "no_page", None, self.sha
+        return "ok", {0: self.pages[pg]}, self.sha
 
 claim = dict(c1, claim_id="x1", source_path="real.pdf")
-pages = {0: "Flash memory 64 kB program flash size", 1: "", -1: ""}
+PAGE_OK = "Flash memory 64 kB program flash size"
+pages = {3: PAGE_OK}
 r = spine.l2_verify_claim(claim, FakeCache(pages))
-check("verbatim on page verifies", r["verdict"] == "verified", str(r))
-r = spine.l2_verify_claim(claim, FakeCache({0: "nothing relevant here"}))
-check("verbatim not on page -> held", r["verdict"] == "held" and "verbatim_not_on_page" in r["reasons"])
-r = spine.l2_verify_claim(claim, FakeCache({5: "Flash memory 64 kB"}))
-check("no cited page -> held", r["verdict"] == "held")
+check("verbatim on exact page verifies", r["verdict"] == "verified", str(r))
+r = spine.l2_verify_claim(claim, FakeCache({4: PAGE_OK}))
+check("adjacent page does NOT verify (exact-page law)",
+      r["verdict"] != "verified", str(r))
+r = spine.l2_verify_claim(claim, FakeCache({3: "table of contents only", 4: PAGE_OK}))
+check("content on neighbor, cited page empty -> not verified",
+      r["verdict"] == "held", str(r))
+r = spine.l2_verify_claim(dict(claim, pdf_sha="deadbeef"), FakeCache(pages))
+check("sha mismatch -> rejected", r["verdict"] == "rejected" and "source_sha_mismatch" in r["reasons"], str(r))
+r = spine.l2_verify_claim(dict(claim, value_raw=64, unit_raw="kB"),
+                          FakeCache({3: "Flash memory 64 kB program flash"}))
+check("value present in evidence", r["verdict"] == "verified", str(r))
+r = spine.l2_verify_claim(dict(claim, value_raw=64, unit_raw="kB"),
+                          FakeCache({3: "Flash memory 65 kB program flash size"}))
+check("value absent from page -> held", r["verdict"] == "held" and "value_not_in_evidence" in r["reasons"], str(r))
+r = spine.l2_verify_claim(claim, FakeCache({3: "nothing relevant here"}))
+check("verbatim not on cited page -> held",
+      r["verdict"] == "held" and "verbatim_not_on_cited_page" in r["reasons"], str(r))
+r = spine.l2_verify_claim(claim, FakeCache({5: PAGE_OK}))
+check("cited page absent from doc -> rejected (evidence broken)",
+      r["verdict"] == "rejected", str(r))
 r = spine.l2_verify_claim(dict(claim, source_path="missing.pdf"), FakeCache(pages))
 check("missing source -> rejected", r["verdict"] == "rejected")
-r = spine.l2_verify_claim(dict(claim, value_raw=7290, field="n_gpio", unit_raw="pins"),
-                          FakeCache({0: "GPIO count 7290 pins printed here"}))
+r = spine.l2_verify_claim(dict(claim, value_raw=7290, field="n_gpio", unit_raw="pins",
+                               verbatim="7290 pins GPIO count"),
+                          FakeCache({3: "GPIO count 7290 pins printed here"}))
 check("range violation held (7290 gpio)", r["verdict"] == "held" and "value_out_of_range" in r["reasons"], str(r))
 
 # value None -> held
@@ -67,7 +89,7 @@ check("no value -> held", r["verdict"] == "held" and "no_value" in r["reasons"])
 # categorical fields verify on verbatim alone
 r = spine.l2_verify_claim(dict(claim, field="package", value_raw="QFN30", unit_raw=None,
                                verbatim="QFN30 package marking"),
-                          FakeCache({0: "device QFN30 package marking top view"}))
+                          FakeCache({3: "device QFN30 package marking top view"}))
 check("categorical package verifies", r["verdict"] == "verified", str(r))
 
 # ---- L3 purity + preservation
@@ -97,8 +119,10 @@ check("wildcard/family marker stays family", t["tier"] == "family")
 t = spine.identity_tier(None, cat)
 check("no slug unresolved", t["tier"] == "unresolved")
 
-# ---- L5 axis gating
-a = {"unit_canon": "A", "mode_canon": "Run", "conditions_typed": {"vin": 3.3}, "conditions_raw": "VIN=3.3V"}
+# ---- L5 axis gating (hardened: exact identity, roles, empty-condition law)
+EX = {"tier": "exact_opn"}
+a = {"unit_canon": "A", "mode_canon": "Run", "tier": "exact_opn",
+     "conditions_typed": {"vin": 3.3}, "conditions_raw": "VIN=3.3V", "value_role": "typ"}
 b_same = dict(a)
 b_diff_cond = dict(a, conditions_typed={"vin": 5.0}, conditions_raw="VIN=5V")
 b_diff_mode = dict(a, mode_canon="Sleep")
@@ -109,10 +133,22 @@ s, q = spine.axis_status(a, b_diff_mode, "mode")
 check("different modes noncomparable", s == "noncomparable")
 s, q = spine.axis_status(dict(a, unit_canon="W"), b_same, "mode")
 check("unit mismatch noncomparable", s == "noncomparable")
-ta = {"unit_canon": "C/W", "conditions_raw": "2-layer board"}
-tb = {"unit_canon": "C/W", "conditions_raw": "4-layer board"}
+s, q = spine.axis_status(dict(a, tier="family"), b_same, "mode")
+check("identity not exact -> noncomparable", s == "noncomparable" and "identity" in q)
+s, q = spine.axis_status(dict(a, conditions_typed={}, conditions_raw=None), b_same, "mode")
+check("empty conditions NEVER comparable (mode)",
+      s == "qualified" and "unspecified" in q, f"{s} {q}")
+s, q = spine.axis_status(dict(a, value_role="max"), b_same, "mode")
+check("role mismatch qualified", s == "qualified" and "role" in q)
+ta = {"unit_canon": "C/W", "tier": "exact_opn", "conditions_raw": "2-layer board", "value_role": "typ"}
+tb = dict(ta, conditions_raw="4-layer board")
 s, q = spine.axis_status(ta, tb, "thermal")
 check("thermal board difference qualified", s == "qualified")
+s, q = spine.axis_status(dict(ta, conditions_raw=None), tb, "thermal")
+check("thermal unspecified condition qualified", s == "qualified")
+pa = {"unit_canon": "kB", "tier": "exact_opn", "value_role": None}
+check("pillars {} conditions are inherent, comparable",
+      spine.axis_status(pa, dict(pa), "pillars")[0] == "comparable")
 
 print()
 if FAILS:

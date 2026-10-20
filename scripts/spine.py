@@ -161,34 +161,37 @@ class PdfCache:
                 return new + path[len(old):]
         return path
 
-    def page_text(self, path, page_1based):
+    def page_text(self, path, page_1based, expect_sha=None):
+        """Exact page only (no adjacent-page shortcut). On first open we
+        recompute the file's sha256; a mismatch breaks evidence identity."""
         import pymupdf
         p = self.resolve(path)
         if p not in self.cache:
             if len(self.cache) >= self.max_open:
                 self.cache.pop(next(iter(self.cache)))
             if not os.path.exists(p):
-                self.cache[p] = ("missing", None)
+                self.cache[p] = ("missing", None, None)
             else:
                 try:
-                    self.cache[p] = ("ok", pymupdf.open(p))
+                    h = hashlib.sha256()
+                    with open(p, "rb") as fh:
+                        while chunk := fh.read(1 << 20):
+                            h.update(chunk)
+                    self.cache[p] = ("ok", pymupdf.open(p), h.hexdigest())
                 except Exception:
-                    self.cache[p] = ("bad", None)
-        st, doc = self.cache[p]
+                    self.cache[p] = ("bad", None, None)
+        st, doc, sha = self.cache[p]
         if st != "ok":
-            return st, None
+            return st, None, sha
+        if expect_sha and sha != expect_sha:
+            return "sha_mismatch", None, sha
         try:
-            if not isinstance(page_1based, int) or page_1based < 1:
-                return "no_page", None
-            # exact page, and neighbors for ±1 tolerance (recorded, not silent)
-            out = {}
-            for off in (0, -1, 1):
-                pg = page_1based + off
-                if 1 <= pg <= doc.page_count:
-                    out[off] = doc[pg - 1].get_text() or ""
-            return "ok", out
+            if not isinstance(page_1based, int) or page_1based < 1 or page_1based > doc.page_count:
+                return "no_page", None, sha
+            # EXACT cited page — adjacency is re-extraction territory, not L2
+            return "ok", {0: doc[page_1based - 1].get_text() or ""}, sha
         except Exception:
-            return "bad", None
+            return "bad", None, sha
 
 
 def verbatim_fragments(verbatim: str) -> list[str]:
@@ -220,25 +223,67 @@ def check_verbatim(pages: dict, verbatim: str | None):
     return False, None, best, len(frags)
 
 
+def value_forms(val):
+    """Printed string forms a numeric value can legitimately take on a page."""
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        return []
+    forms = {str(val), repr(f)}
+    if f == int(f):
+        forms.add(str(int(f)))
+        forms.add(f"{int(f):,}")          # 1,234 grouping
+        forms.add(f"{int(f)} ")
+    for decimals in (1, 2, 3):
+        forms.add(f"{f:.{decimals}f}")
+    return [x for x in forms if x and x not in (".",)]
+
+
+def value_in_evidence(val, unit_raw, page_text_norm):
+    """The asserted value (and its printed unit, when one exists) must appear
+    on the cited page. String presence of the verbatim alone is NOT enough."""
+    forms = value_forms(val)
+    if not forms:
+        return None  # non-numeric: verbatim check is the evidence check
+    val_ok = any(f in page_text_norm for f in forms)
+    unit_ok = True
+    u = unit_raw
+    if u:
+        u_variants = {str(u).strip()}
+        for a, b in (("µ", "μ"), ("μ", "µ"), ("µ", "u"), ("°", "")):
+            u_variants.update(x.replace(a, b) for x in list(u_variants))
+        low = page_text_norm.lower()
+        unit_ok = any(v.lower() in low for v in u_variants)
+    return val_ok and unit_ok
+
+
 def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
     reasons = []
     checks = {}
     field = c.get("field")
     categorical = (isinstance(field, str) and
                    (field.startswith(CATEGORICAL_FIELDS)))
-    # 1) source exists
-    st, pages = cache.page_text(c["source_path"], c["page_1based"])
+    # 1) source exists AND its actual sha256 matches the claim's evidence sha
+    st, pages, actual_sha = cache.page_text(c["source_path"], c["page_1based"],
+                                            expect_sha=c.get("pdf_sha"))
     checks["source"] = st == "ok"
+    checks["sha256_recomputed"] = actual_sha
     if st != "ok":
         return {"claim_id": c["claim_id"], "verdict": "rejected",
                 "reasons": [f"source_{st}"], "checks": checks}
-    # 2) verbatim fragments on cited page (±1 recorded tolerance)
+    # 2) verbatim fragments on the EXACT cited page
     ok, off, matched, total = check_verbatim(pages, c.get("verbatim"))
     checks["verbatim_on_page"] = ok
     checks["page_offset"] = off
     checks["fragments"] = f"{matched}/{total}"
     if not ok:
-        reasons.append("verbatim_not_on_page")
+        reasons.append("verbatim_not_on_cited_page")
+    # 3) asserted value + unit appear in the cited page evidence
+    page_norm = norm_text(pages.get(0, ""))
+    vie = value_in_evidence(c.get("value_raw"), c.get("unit_raw"), page_norm)
+    checks["value_in_evidence"] = vie
+    if vie is False:
+        reasons.append("value_not_in_evidence")
     # 3) value/unit/range (categorical fields: verbatim-only)
     unit_c = canon_unit(c.get("unit_raw"))
     val = c.get("value_raw")
@@ -360,15 +405,28 @@ def identity_tier(slug: str | None, catalog: set, alias_index: dict | None = Non
 
 # ------------------------------------------------------------------- L5
 
+CONDITIONED_LANES = {"mode", "thermal"}   # empty conditions never imply comparability here
+
+
 def axis_status(a: dict, b: dict, lane: str) -> tuple[str, str | None]:
-    """(comparable|qualified|noncomparable, qualification or None)."""
+    """(comparable|qualified|noncomparable, qualification or None).
+    Release law: exact identity both sides, compatible roles, and for
+    conditioned lanes EXPLICIT matching conditions — absence is never
+    permission."""
+    if a.get("tier") != "exact_opn" or b.get("tier") != "exact_opn":
+        return "noncomparable", "identity not proven exact on both sides"
+    ra, rb = a.get("value_role"), b.get("value_role")
+    if ra != rb:
+        return "qualified", f"role mismatch ({ra} vs {rb})"
     if a.get("unit_canon") != b.get("unit_canon"):
         return "noncomparable", f"units differ ({a.get('unit_canon')} vs {b.get('unit_canon')})"
     ca, cb = a.get("conditions_typed") or {}, b.get("conditions_typed") or {}
     if lane == "mode":
         if a.get("mode_canon") != b.get("mode_canon"):
             return "noncomparable", f"modes differ ({a.get('mode_canon')} vs {b.get('mode_canon')})"
-        for k in ("vin", "vdd", "iout", "temp"):
+        if not ca or not cb:
+            return "qualified", "operating conditions unspecified on at least one side"
+        for k in ("vin", "vdd", "iout", "temp", "freq"):
             if k in ca and k in cb and ca[k] != cb[k]:
                 return "qualified", f"{k.upper()} differs ({ca[k]} vs {cb[k]})"
             if (k in ca) != (k in cb):
@@ -377,12 +435,12 @@ def axis_status(a: dict, b: dict, lane: str) -> tuple[str, str | None]:
     if lane == "thermal":
         cond_a = norm_text(a.get("conditions_raw"))
         cond_b = norm_text(b.get("conditions_raw"))
-        if cond_a and cond_b and cond_a != cond_b:
+        if not cond_a or not cond_b:
+            return "qualified", "package/board condition unspecified on at least one side"
+        if cond_a != cond_b:
             return "qualified", f"package/condition differs ('{cond_a[:40]}' vs '{cond_b[:40]}')"
-        if bool(cond_a) != bool(cond_b):
-            return "qualified", "condition specified on only one side"
         return "comparable", None
-    # pillars / aec: unconditioned printed specs
+    # pillars / aec: unconditioned printed specs; {} is inherent, not missing
     return "comparable", None
 
 # ------------------------------------------------------------------ CLIs
