@@ -1,0 +1,8 @@
+[Unit]
+Description=Extraction telemetry emitter (harness.extraction-telemetry.v1)
+After=network.target
+
+[Service]
+Type=oneshot
+User=samkim
+ExecStart=/home/samkim/Harnessv1/.venv/bin/python /home/samkim/Harnessv1/deploy/emit-extraction-telemetry.py
