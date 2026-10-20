@@ -48,11 +48,16 @@ def make_results_db(path: Path, *, recent: int = 0, stale: int = 0,
             result_id INTEGER NOT NULL, judge TEXT NOT NULL,
             verdict TEXT NOT NULL);
     """)
+    # created_at is a unix epoch value in the live schema (floats in
+    # prod; ints here compare identically). Earlier fixtures wrongly
+    # used datetime() STRINGS, which made the old text-compare code
+    # pass tests while failing against real data (SENTINEL-EPOCH-01).
     for _ in range(recent):
-        con.execute("INSERT INTO results (created_at) VALUES (datetime('now'))")
+        con.execute("INSERT INTO results (created_at) "
+                    "VALUES (strftime('%s','now'))")
     for _ in range(stale):
-        con.execute("INSERT INTO results (created_at)"
-                    " VALUES (datetime('now', '-3 hours'))")
+        con.execute("INSERT INTO results (created_at) "
+                    "VALUES (strftime('%s','now','-3 hours'))")
     for rid, judge, verdict in ledger:
         con.execute("INSERT INTO adjudication_ledger VALUES (?,?,?)",
                     (rid, judge, verdict))
