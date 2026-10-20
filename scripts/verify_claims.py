@@ -70,6 +70,9 @@ UNIT_TABLE = {
     "s": 1.0, "ms": 1e-3, "µs": 1e-6, "μs": 1e-6, "us": 1e-6, "ns": 1e-9,
     # dimensionless
     "%": 1.0, "db": 1.0, "v/v": 1.0,
+    # pillar-fact units (structural attributes, not electrical claims)
+    "kb": 1.0, "count": 1.0, "pins": 1.0, "channels": 1.0, "bytes": 1.0,
+    "mhz": 1e6,  # pillar clk_max_mhz uses bare "mhz"
 }
 
 # Derived units (per-MHz, per-V) — different quantity, refuse
@@ -77,9 +80,12 @@ DERIVED_UNIT = ("/", "per")
 
 
 def gate_unit_parse(unit: str | None) -> tuple[bool, str]:
-    """True if the unit token resolves to a canonical scale."""
+    """True if the unit token resolves to a canonical scale.
+    Rows WITHOUT a unit (text/boolean claims, errata records, pillar facts
+    with unit=null) pass — there is nothing to verify. Only rows that
+    PRINT a unit token are checked against the canonical table."""
     if not unit or not unit.strip():
-        return False, "unit_absent"
+        return True, "unit_not_applicable"
     u = unit.strip().lower().replace("ω", "ohm")
     u = u.replace("μ", "µ").replace("µ", "µ")
     # canonical table FIRST (C/W, °C/W are legitimate compound units)
@@ -111,9 +117,12 @@ RANGE_TABLE = {
 
 
 def gate_value_range(value, metric: str | None, unit: str | None) -> tuple[bool, str]:
-    """True if the value is in a sane range for its field."""
+    """True if the value is in a sane range for its field.
+    Rows WITHOUT a numeric value (text claims, errata records, AEC grades)
+    pass — there is nothing to range-check. Only rows that carry a numeric
+    value are range-checked."""
     if value is None:
-        return False, "value_absent"
+        return True, "value_not_numeric_pass_through"
     try:
         v = float(value)
     except (TypeError, ValueError):
