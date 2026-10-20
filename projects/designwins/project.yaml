@@ -6,10 +6,43 @@ description: >
 objectives:
   - {id: SUPPLY-CONTINUITY, text: keep prioritized PDF supply ahead of extraction}
   - {id: EXTRACTION-COVERAGE, text: complete multi-facet extraction over the rescan backlog}
+  - {id: PROVENANCE-TRUTH, text: every displayed claim source-located and verified on the release-pinned cohort}
+  - {id: ENGINEER-JOURNEY, text: Sam can test a two-scenario UI on real data with honest gaps}
 success_criteria:
   - ready-work coverage >= 24h at all times
   - every claim resolves to quote+page+sha provenance
+# Observation scope: every registered repo is watched read-only (issues,
+# PRs, route trees as facts). This list is the ONLY place observation
+# scope grows — adding a dependency here makes it visible without code
+# edits. It does NOT expand execution/ingest authority (see
+# gh_workloop.ALLOWLISTED_REPOS) or message-delivery authorization.
 repositories:
-  - github.com/outcited/outcitedharness
-policy_version: '2026-10-16.1'
+  - github.com/outcited/outcitedharness      # director + M5 lane
+  - github.com/outcited/designwins-v2        # M4 frontend
+  - github.com/outcited/outcited.com         # cr-core platform/facade
+  - github.com/outcited/MFGDosierfactory     # upstream PDF factory
+# Typed ownership boundary (issue #7 amendment §2). proposed lanes, NOT
+# authenticated ownership — confirmed stays false until an attributable
+# ack exists on trusted transport. Tapes is a separate project; only
+# shared resource contention appears as a cross-project dependency.
+ownership_boundary:
+  m5:
+    owns: [extraction, source-sha-page-quote-verification, truth-funnel,
+           evidence-correctness-at-handoff]
+    confirmed: false
+  cr-core:
+    owns: [release-pinned-store, facade, decision-api,
+           authenticated-pdf-resolver]
+    confirmed: false
+  m4:
+    owns: [fe-client, engineer-journeys, evidence-presentation]
+    confirmed: false
+  pdf-factory:
+    owns: [acquisition-to-receiver-receipts]
+    confirmed: false
+  seven:
+    owns: [blockers, interface-contract-reconciliation,
+           integration-acceptance, escalation]
+    confirmed: false
+policy_version: '2026-10-20.1'
 human_authority: sam
