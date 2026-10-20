@@ -238,7 +238,49 @@ def index_status(ref: RepoRef, *, automation_db: Path | None = None,
 # --------------------------------------------------------------------------
 
 FINDING_KINDS = ("automation_failure", "stale_index", "github_check",
-                 "service_down", "queue_blocked", "disk_full")
+                 "service_down", "queue_blocked", "disk_full",
+                 "crashed_lane")
+
+
+def collect_crashed_lanes(results_root: Path, *,
+                          max_age_s: float = 14 * 86400.0,
+                          now: float | None = None) -> list[dict]:
+    """Lane run-logs that ended in a traceback (results/*/run.log).
+
+    The 2026-10-14 power-axes crash sat in a run.log for six days because
+    nothing read these logs — this collector is the fix. A log is a
+    finding when it contains a Traceback and was written recently."""
+    now = now if now is not None else time.time()
+    if not results_root.is_dir():
+        raise SourceUnavailable(f"results root missing: {results_root}")
+    out = []
+    for log in sorted(results_root.glob("*/run.log")):
+        try:
+            st = log.stat()
+        except OSError:
+            continue
+        if now - st.st_mtime > max_age_s:
+            continue
+        try:
+            text = log.read_text(errors="replace")[-4000:]
+        except OSError:
+            continue
+        if "Traceback (most recent call last)" not in text:
+            continue
+        last = [l.strip() for l in text.splitlines() if l.strip()]
+        head = last[-1][:160] if last else ""
+        out.append({
+            "kind": "crashed_lane",
+            "key": str(log.parent),
+            "severity": "warning",
+            "repo": str(results_root),
+            "path": str(log),
+            "detail": f"lane crashed: {head}",
+            "evidence": {"run_log": str(log), "mtime": st.st_mtime,
+                         "last_line": head},
+            "source_produced_at": st.st_mtime,
+        })
+    return out
 
 
 def _fp(kind: str, key: str) -> str:

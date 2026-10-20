@@ -72,6 +72,9 @@ def main(argv=None) -> int:
     ci.add_argument("--action", default="status",
                     choices=["status", "inventory", "query", "findings",
                              "triage"])
+    ci.add_argument("--results-root", default=None,
+                    help="lane results dir for crashed_lane collection"
+                         " (default: <repo>/results)")
     ci.add_argument("--q", help="query text (query/triage)")
     ci.add_argument("--repo-root", help="scope a query to one repo")
 
@@ -150,6 +153,15 @@ def main(argv=None) -> int:
                 fs = collect_automation_failures(Path(a.automation_db))
                 findings += fs
                 ran.add("automation_failure")
+            except Exception:                            # noqa: BLE001
+                pass
+            from pathlib import Path as _P
+            rroot = _P(a.results_root) if a.results_root else \
+                _P(__file__).resolve().parents[1] / "results"
+            try:
+                from .code_intel import collect_crashed_lanes
+                findings += collect_crashed_lanes(rroot)
+                ran.add("crashed_lane")
             except Exception:                            # noqa: BLE001
                 pass
             statuses = [index_status(fingerprint_repo(Path(r).expanduser()),
