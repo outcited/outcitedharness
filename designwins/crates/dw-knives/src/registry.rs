@@ -178,6 +178,22 @@ pub const AXES: &[AxisSpec] = &[
         default_near_miss_pct: 10.0,
         min_column_evidence: false,
     },
+    AxisSpec {
+        axis: Axis::SleepCurrentA,
+        // Conservative symbol set: the EC-table spellings of sleep-mode
+        // supply current. Mode-name evidence ("Deep Sleep", "Stop 1") is
+        // bridged by dw-search's mode-row adapter, not symbol matching.
+        symbols: &["ISLEEP", "IDD_SLEEP", "IDD-SLEEP", "ILPM", "ISTBY2"],
+        op: Op::AtMost,
+        // Sleep rows print as spec limits (max col = guaranteed ceiling) or
+        // recommended operating values; typ is discovery-only (C9.5) and is
+        // handled by the rating class, not by exclusion here.
+        accepts_classes: Some(&["rated_limit", "recommended", "unknown"]),
+        default_near_miss_pct: 10.0,
+        // A Min-column sleep current is a guaranteed floor — valid
+        // evidence, and the only thing that can PROVE violation.
+        min_column_evidence: true,
+    },
 ];
 
 /// `_norm_symbol` from the reference: strip whitespace and underscores,

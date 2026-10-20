@@ -39,6 +39,8 @@ use dw_knives::{rating_class, RatingClass};
 use dw_types::ReleaseId;
 use serde::{Deserialize, Serialize};
 
+pub mod mode_rows;
+
 /// One claim row as the corpus prints it (`claims_canonical`-shaped).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ClaimRow {
