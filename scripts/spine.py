@@ -336,17 +336,23 @@ def l3_normalize_claim(v: dict, claim: dict) -> dict:
 
 # ------------------------------------------------------------------- L4
 
-def identity_tier(slug: str | None, catalog: set) -> dict:
+def identity_tier(slug: str | None, catalog: set, alias_index: dict | None = None) -> dict:
     if not slug:
         return {"tier": "unresolved", "opn": None, "rule": "no_slug"}
     s = slug.strip()
     if s in catalog:
         return {"tier": "exact_opn", "opn": s, "rule": "catalog_exact"}
-    # canonical alias: uppercase, strip punctuation that vendors ignore
     alias = re.sub(r"[^A-Z0-9]", "", s.upper())
-    for cat in catalog:
-        if re.sub(r"[^A-Z0-9]", "", cat.upper()) == alias:
-            return {"tier": "exact_opn", "opn": cat, "rule": "canonical_alias"}
+    hit = None
+    if alias_index is not None:
+        hit = alias_index.get(alias)
+    else:
+        for cat in catalog:
+            if re.sub(r"[^A-Z0-9]", "", cat.upper()) == alias:
+                hit = cat
+                break
+    if hit:
+        return {"tier": "exact_opn", "opn": hit, "rule": "canonical_alias"}
     if re.search(r"[#*]|\bfamily\b|\bseries\b", s.lower()):
         return {"tier": "family", "opn": None, "rule": "family_marker"}
     return {"tier": "document_slug", "opn": None,
@@ -503,6 +509,12 @@ def cmd_l4(args):
                 slug = re.sub(r"[^a-z0-9]+", "-", (pre + stem).lower()).strip("-")[:96]
                 if slug:
                     sha_slug[sha] = slug
+    # precomputed alias index (O(1) per claim — the naive loop was O(catalog))
+    alias_index = {}
+    for c in catalog:
+        a = re.sub(r"[^A-Z0-9]", "", c.upper())
+        if a and a not in alias_index:
+            alias_index[a] = c
     out = Path(args.out_dir) / "l4-bound.jsonl"
     counts = Counter()
     joined = 0
