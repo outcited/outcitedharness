@@ -377,10 +377,20 @@ impl PhraseRegistry {
                         }
                     }
                     bindings.push(instantiated);
+                    // Consume the WHOLE matched expression (e.g. "sleeps
+                    // under 2 µa"), not just the concept word — residue
+                    // must not carry fragments of a bound requirement
+                    // (review 2026-10-20 P1).
+                    let whole = caps.get(0).map(|m| m.as_str()).unwrap_or(&needle);
+                    if let Some(wpos) = normalised.find(whole) {
+                        matched_spans.push((wpos, wpos + whole.len()));
+                    } else {
+                        matched_spans.push((pos, pos + needle.len()));
+                    }
                 } else {
                     bindings.push(binding.clone());
+                    matched_spans.push((pos, pos + needle.len()));
                 }
-                matched_spans.push((pos, pos + needle.len()));
             }
         }
 
@@ -621,7 +631,7 @@ pub fn unknowns_from_residue(
         // cohort is honestly reported as such.
         questions.push(dw_decide::Question {
             axis: dw_decide::KnifeId::Axis(dw_decide::Axis::TempRangeC),
-            prompt: format!("What must this survive that {chunk:?} implies?"),
+            prompt: format!("What engineering requirement does {chunk:?} express? (unbound phrase)"),
             help: format!(
                 "{chunk:?} is not in the axis vocabulary. Answering with a typed \
                  requirement (temperature span, ingress, interface) turns an \

@@ -198,7 +198,7 @@ pub fn seed_from_measured_chips() -> PhraseRegistry {
     registry.insert(
         ColloquialBinding::new(
             "sleep_current_budget",
-            "sleep",
+            "sleeps under",
             vec![AtomTemplate {
                 knife: KnifeId::Axis(Axis::SleepCurrentA),
                 constraint: Constraint::Scalar {
@@ -219,7 +219,7 @@ pub fn seed_from_measured_chips() -> PhraseRegistry {
         .expect("sourced")
         .with_value_capture(crate::phrase::ValueCapture {
             // "2 µA" / "2uA" / "2 μA" (micro sign and Greek mu both match)
-            pattern: r"([\d.]+)\s*[µμu]\s*a\b".into(),
+            pattern: r"sleeps?\s+(?:under|below|less than)\s+([\d.]+)\s*[µμu]\s*a\b".into(),
             scale: 1e-6,
         }),
     );

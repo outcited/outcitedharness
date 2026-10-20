@@ -50,7 +50,7 @@ fn crop_index() -> CropIndex {
         pages.insert((sha, p), v);
     }
     let crops: Vec<serde_json::Value> =
-        serde_json::from_str(&std::fs::read_to_string(base.join("index.json")).expect("crops index"))
+        serde_json::from_str(&std::fs::read_to_string(base.join("rows/index.json")).expect("crops index"))
             .expect("crops index parses");
     CropIndex { pages, crops }
 }
@@ -117,18 +117,40 @@ fn d7_export_real_query_result() {
             let sha_str = src.sha256.as_str().to_string();
             let sha16: String = sha_str.chars().take(12).collect();
             let page = src.page;
+            // Exact join (review 2026-10-20 P0): page render must exist for
+            // THE (sha, page); the row-band crop must match (sha, page) AND
+            // the evidence's column. A missing artifact is a hard error —
+            // evidence never silently disappears from an elimination.
             let page_asset = idx
                 .pages
                 .get(&(sha16.clone(), page))
-                .map(|v| asset_for(v, "page", &sha16, page));
+                .map(|v| asset_for(v, "page", &sha16, page))
+                .unwrap_or_else(|| {
+                    panic!(
+                        "no C13 page render for {sha16} p{page} — evidence must fail closed"
+                    )
+                });
             let crop_asset = idx
                 .crops
                 .iter()
                 .find(|c| {
-                    c["file"].as_str().map(|f| f.starts_with(&sha16)).unwrap_or(false)
+                    c["sha16"].as_str() == Some(sha16.as_str())
+                        && c["page"].as_u64() == Some(u64::from(page))
                 })
-                .map(|v| asset_for(v, "crop", &sha16, page));
-            if let Some(pa) = page_asset {
+                .and_then(|c| {
+                    // exact (sha, page) already matched; verify the column
+                    // when the evidence names one, else any row-band on the
+                    // page is honest context
+                    let col_ok = match src.column_header.as_deref() {
+                        None => true,
+                        Some(col) => c["columns"].as_array().map(|a| {
+                            a.iter().any(|x| x.as_str() == Some(col))
+                        }).unwrap_or(false),
+                    };
+                    col_ok.then(|| asset_for(c, "crop", &sha16, page))
+                });
+            {
+                let pa = page_asset;
                 evidence_refs.push(EvidenceRef {
                     field: format!("sleep_current_a/{}", j.candidate.part_number),
                     document_sha256: src.sha256.clone(),

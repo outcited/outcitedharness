@@ -58,12 +58,19 @@ pub enum ModeSkip {
     NotSleepMode(String),
     /// The row carried no resolvable document sha — no provenance, no fact.
     MissingSha,
+    /// The row carries no part identity (and no sha-prefix fallback exists,
+    /// by law). Quarantined: feeds provenance, never judged as a candidate.
+    MissingIdentity(String),
 }
 
 /// The sleep-family mode vocabulary (measured: 75 spellings fold to these).
 fn is_sleep_mode(mode: &str) -> bool {
     let m = mode.to_lowercase();
-    ["sleep", "standby", "hibernate", "shutdown", "lpm", "stop"].iter().any(|k| m.contains(k))
+    // Idle is a low-power mode (review 2026-10-20: excluding it from the
+    // family while using its floors for universality was inconsistent).
+    ["sleep", "standby", "hibernate", "shutdown", "lpm", "stop", "idle"]
+        .iter()
+        .any(|k| m.contains(k))
 }
 
 /// Scale a printed current value to Amperes via the frozen unit table
@@ -155,15 +162,25 @@ pub fn population_from_mode_rows(rows: &[ModeRow]) -> ModePopulation {
             continue;
         };
 
-        // Identity law (2026-10-19 gate 2): a document sha is not an OPN.
-        // Use the enrich-stamped part identity; vendor from the stamped
-        // manufacturer. Absent identity -> the sha prefix, visibly not an
-        // OPN, so the journey layer flags it.
-        let identity = row
+        // Identity law (2026-10-20 review, fail-closed): a document sha is
+        // not an OPN and must NEVER become one. A row without an enrich-
+        // stamped part identity is quarantined with an explicit reason —
+        // it still feeds provenance, but it can never be judged as a
+        // candidate. No sha-prefix fallback exists anymore.
+        let Some(identity) = row
             .part_identity
             .clone()
             .or(row.part_number.clone())
-            .unwrap_or_else(|| sha_str.chars().take(16).collect());
+            .filter(|p| !p.is_empty())
+        else {
+            skipped.push((mode.clone(), ModeSkip::MissingIdentity(sha_str.clone())));
+            provenance_keys.insert((
+                sha_str.clone(),
+                row.page_1based.unwrap_or(1),
+                mode.clone(),
+            ));
+            continue;
+        };
         let candidate = PCandidate {
             part_number: identity,
             vendor: row.manufacturer.clone().unwrap_or_default(),
@@ -211,10 +228,17 @@ pub fn population_from_mode_rows(rows: &[ModeRow]) -> ModePopulation {
         }
         // Prefer the tightest ceiling (existential satisfaction); a part
         // with any guaranteed-max sleep mode is judged on its best mode.
-        // Otherwise the lowest floor (universal violation); otherwise a
-        // typical point (never decides).
+        // Otherwise the lowest floor — but a Floor verdict can only PROVE
+        // violation when the mode inventory is complete: every sleep-family
+        // row for this candidate must be a floor (a ceiling/typ anywhere
+        // means the manufacturer prints a mode whose floor we do not know,
+        // so universality fails and the evidence is a Point that never
+        // decides). Review 2026-10-20 P1: no all-modes FAIL without this
+        // receipt.
         let ceilings: Vec<_> = rows_acc.iter().filter(|r| r.1 == Bound::Ceiling).collect();
         let floors: Vec<_> = rows_acc.iter().filter(|r| r.1 == Bound::Floor).collect();
+        let inventory_complete = !rows_acc.is_empty() && ceilings.is_empty()
+            && rows_acc.iter().all(|r| r.1 == Bound::Floor);
         let evidence = if let Some(min_c) = ceilings.iter().min_by(|a, b| {
             a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal)
         }) {
@@ -223,8 +247,15 @@ pub fn population_from_mode_rows(rows: &[ModeRow]) -> ModePopulation {
         } else if let Some(min_f) = floors.iter().min_by(|a, b| {
             a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal)
         }) {
-            Evidence::measured_bound(min_f.0, Bound::Floor, min_f.2, sources)
-                .with_conditions(min_f.3.clone())
+            if inventory_complete {
+                Evidence::measured_bound(min_f.0, Bound::Floor, min_f.2, sources)
+                    .with_conditions(min_f.3.clone())
+            } else {
+                // Incomplete inventory: the floor is information, not
+                // proof — a Point cannot eliminate (judge -> Unknown).
+                Evidence::measured_bound(min_f.0, Bound::Point, false, sources)
+                    .with_conditions(min_f.3.clone())
+            }
         } else if let Some(p) = rows_acc.first() {
             Evidence::measured_bound(p.0, Bound::Point, p.2, sources)
                 .with_conditions(p.3.clone())
@@ -263,14 +294,20 @@ impl RowsProvenance {
 }
 
 impl dw_decide::Provenance for RowsProvenance {
+    /// The trait contract (C9.1): **every** source on the evidence must
+    /// resolve. A mixed valid+forged list is NOT proven — one forged ref
+    /// poisons the assertion, exactly as one unopenable page would.
     fn resolvable(&self, sources: &[SourceRef]) -> bool {
-        sources.iter().any(|s| {
-            let page = s.page;
-            s.row_header
-                .as_ref()
-                .map(|row| self.keys.contains(&(s.sha256.as_str().to_string(), page, row.clone())))
-                .unwrap_or(false)
-        })
+        !sources.is_empty()
+            && sources.iter().all(|s| {
+                let page = s.page;
+                s.row_header
+                    .as_ref()
+                    .map(|row| {
+                        self.keys.contains(&(s.sha256.as_str().to_string(), page, row.clone()))
+                    })
+                    .unwrap_or(false)
+            })
     }
 }
 

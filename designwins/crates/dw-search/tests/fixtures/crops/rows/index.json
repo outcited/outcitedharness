@@ -1,0 +1,179 @@
+[
+ {
+  "sha16": "8a4fee15a132",
+  "full_sha": "8a4fee15a13295068f8f63dc0ea769f5035c33235d6c279f223651c936ca1f0d",
+  "page": 1236,
+  "row": "Hibernate",
+  "column": "max",
+  "value": 5.2,
+  "crop_sha256": "7346b8b1e234270c0fbea29a5accd04aa434dd17af0b12cb0a96220895a6925b",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   974,
+   157
+  ],
+  "file": "rows/8a4fee15a132.p1236.r0.png",
+  "bytes": 20471,
+  "located_by": "table_row",
+  "columns": [
+   "max",
+   "typ"
+  ],
+  "values": [
+   5.2,
+   1.23
+  ]
+ },
+ {
+  "sha16": "87c1fef22b49",
+  "full_sha": "87c1fef22b49e28e6634ce6df84accc312e2c62f75afc1af233644bb7c2852af",
+  "page": 122,
+  "row": "Standby",
+  "column": "max",
+  "value": 0.2,
+  "crop_sha256": "e1c0cb4792086cf2319b8685eb92e5b2368618eb1d3b1dfee228b9ee438be429",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   746,
+   205
+  ],
+  "file": "rows/87c1fef22b49.p122.r2.png",
+  "bytes": 31405,
+  "located_by": "table_row",
+  "columns": [
+   "max"
+  ],
+  "values": [
+   0.2
+  ]
+ },
+ {
+  "sha16": "31106cf7e25e",
+  "full_sha": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+  "page": 49,
+  "row": "Standby",
+  "column": "min",
+  "value": 7.6,
+  "crop_sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   998,
+   280
+  ],
+  "file": "rows/31106cf7e25e.p49.r3.png",
+  "bytes": 52084,
+  "located_by": "table_row",
+  "columns": [
+   "min"
+  ],
+  "values": [
+   7.6
+  ]
+ },
+ {
+  "sha16": "31106cf7e25e",
+  "full_sha": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+  "page": 49,
+  "row": "Idle",
+  "column": "min",
+  "value": 19.3,
+  "crop_sha256": "95c2567fea79a3b6e42ba76aa1b0ffd96fb3fe9c71c8bd08102802d857ba9a39",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   998,
+   280
+  ],
+  "file": "rows/31106cf7e25e.p49.r5.png",
+  "bytes": 51859,
+  "located_by": "table_row",
+  "columns": [
+   "min"
+  ],
+  "values": [
+   19.3
+  ]
+ },
+ {
+  "sha16": "31106cf7e25e",
+  "full_sha": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+  "page": 49,
+  "row": "Idle",
+  "column": "min",
+  "value": 0.01,
+  "crop_sha256": "fe550b6e251056e788477f7b3b446aea3b23bfaa3d9f40c8df09e92bdbfdb9db",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   998,
+   140
+  ],
+  "file": "rows/31106cf7e25e.p49.r6.png",
+  "bytes": 25239,
+  "located_by": "table_row",
+  "columns": [
+   "min"
+  ],
+  "values": [
+   0.01
+  ]
+ },
+ {
+  "sha16": "31106cf7e25e",
+  "full_sha": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+  "page": 49,
+  "row": "Standby",
+  "column": "min",
+  "value": 0.01,
+  "crop_sha256": "dc03bbf4e6688c4f1f512a8d93d99e89c88dc0aa33e351e80c8b03832b85cb2a",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   998,
+   141
+  ],
+  "file": "rows/31106cf7e25e.p49.r7.png",
+  "bytes": 24989,
+  "located_by": "table_row",
+  "columns": [
+   "min"
+  ],
+  "values": [
+   0.01
+  ]
+ },
+ {
+  "sha16": "31106cf7e25e",
+  "full_sha": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+  "page": 53,
+  "row": "Standby",
+  "column": "min",
+  "value": 2.8,
+  "crop_sha256": "cad78a13a2b78b47574dc9c637c463efd86111786e15c2a207300fdbfdb97a8e",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   998,
+   420
+  ],
+  "file": "rows/31106cf7e25e.p53.r9.png",
+  "bytes": 71550,
+  "located_by": "table_row",
+  "columns": [
+   "min"
+  ],
+  "values": [
+   2.8
+  ]
+ }
+]

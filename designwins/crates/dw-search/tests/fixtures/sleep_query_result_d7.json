@@ -83,6 +83,20 @@
         {
           "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
           "page": 49,
+          "row_header": "Idle",
+          "column_header": "min",
+          "crop": null
+        },
+        {
+          "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+          "page": 49,
+          "row_header": "Idle",
+          "column_header": "min",
+          "crop": null
+        },
+        {
+          "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+          "page": 49,
           "row_header": "Standby",
           "column_header": "min",
           "crop": null
@@ -117,6 +131,20 @@
           {
             "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
             "page": 49,
+            "row_header": "Idle",
+            "column_header": "min",
+            "crop": null
+          },
+          {
+            "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+            "page": 49,
+            "row_header": "Idle",
+            "column_header": "min",
+            "crop": null
+          },
+          {
+            "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+            "page": 49,
             "row_header": "Standby",
             "column_header": "min",
             "crop": null
@@ -138,92 +166,15 @@
       "phrase": "i need an mcu that",
       "why": "no knife or axis binds to \"i need an mcu that\"; the cohort cannot be narrowed by it",
       "affected": 3
-    },
-    {
-      "phrase": "s under 2 µa",
-      "why": "no knife or axis binds to \"s under 2 µa\"; the cohort cannot be narrowed by it",
-      "affected": 3
     }
   ],
   "next": [
     {
       "axis": {
-        "axis": "vds_rating_v"
-      },
-      "prompt": "What is the VdsRatingV requirement? (nothing measured yet)",
-      "help": "The blocking voltage the switch must survive. For a 24 V industrial rail (18-36 V) pick at least the 36 V maximum, plus margin you choose (a 20%% margin makes the effective requirement %.1f V).",
-      "expected_reduction_pct": 0.0,
-      "askable": false,
-      "proposed_value": null,
-      "parts_with_claims": 0,
-      "expected_fail_at_median": 0
-    },
-    {
-      "axis": {
-        "axis": "id_continuous_a"
-      },
-      "prompt": "What is the IdContinuousA requirement? (nothing measured yet)",
-      "help": "Continuous current the device must carry at temperature. Datasheets derate: a part rated 5 A at TC=25C may carry far less at 100C — add a required condition to pin the evidence.",
-      "expected_reduction_pct": 0.0,
-      "askable": false,
-      "proposed_value": null,
-      "parts_with_claims": 0,
-      "expected_fail_at_median": 0
-    },
-    {
-      "axis": {
-        "axis": "rds_on_ohm"
-      },
-      "prompt": "What is the RdsOnOhm requirement? (nothing measured yet)",
-      "help": "Maximum on-resistance (conduction loss driver). Softer constraint: fails score lower, never eliminate.",
-      "expected_reduction_pct": 0.0,
-      "askable": false,
-      "proposed_value": null,
-      "parts_with_claims": 0,
-      "expected_fail_at_median": 0
-    },
-    {
-      "axis": {
-        "axis": "tj_max_c"
-      },
-      "prompt": "What is the TjMaxC requirement? (nothing measured yet)",
-      "help": "Maximum junction temperature the part is rated for. 125C is common; 150C+ for automotive/industrial.",
-      "expected_reduction_pct": 0.0,
-      "askable": false,
-      "proposed_value": null,
-      "parts_with_claims": 0,
-      "expected_fail_at_median": 0
-    },
-    {
-      "axis": {
-        "axis": "tstg_range_c"
-      },
-      "prompt": "What is the TstgRangeC requirement? (nothing measured yet)",
-      "help": "The storage/operating temperature span that must contain your environment.",
-      "expected_reduction_pct": 0.0,
-      "askable": false,
-      "proposed_value": null,
-      "parts_with_claims": 0,
-      "expected_fail_at_median": 0
-    },
-    {
-      "axis": {
         "axis": "temp_range_c"
       },
-      "prompt": "What must this survive that \"i need an mcu that\" implies?",
+      "prompt": "What engineering requirement does \"i need an mcu that\" express? (unbound phrase)",
       "help": "\"i need an mcu that\" is not in the axis vocabulary. Answering with a typed requirement (temperature span, ingress, interface) turns an unevaluable phrase into a constraint that can narrow the cohort.",
-      "expected_reduction_pct": 0.0,
-      "askable": true,
-      "proposed_value": null,
-      "parts_with_claims": 0,
-      "expected_fail_at_median": 0
-    },
-    {
-      "axis": {
-        "axis": "temp_range_c"
-      },
-      "prompt": "What must this survive that \"s under 2 µa\" implies?",
-      "help": "\"s under 2 µa\" is not in the axis vocabulary. Answering with a typed requirement (temperature span, ingress, interface) turns an unevaluable phrase into a constraint that can narrow the cohort.",
       "expected_reduction_pct": 0.0,
       "askable": true,
       "proposed_value": null,
@@ -235,7 +186,7 @@
   "derived": [
     {
       "id": "sleep_current_budget",
-      "rationale": "\"sleep\" bound to 1 knife(s) at confidence 0.85 (ProvenFit)",
+      "rationale": "\"sleeps under\" bound to 1 knife(s) at confidence 0.85 (ProvenFit)",
       "atoms": [
         {
           "knife": {
@@ -287,17 +238,17 @@
         ]
       },
       "crop": {
-        "sha256": "39ca422190080f51f29061cdf5a89e65afd4c56da255af6a3226fca09495466e",
-        "href": "evidence://slice-sleep/87c1fef22b49.p122.r2.png",
+        "sha256": "e1c0cb4792086cf2319b8685eb92e5b2368618eb1d3b1dfee228b9ee438be429",
+        "href": "evidence://slice-sleep/rows/87c1fef22b49.p122.r2.png",
         "dpi": 144,
         "bbox": [
           0,
           0,
-          1190,
-          1684
+          746,
+          205
         ]
       },
-      "crop_sha256": "39ca422190080f51f29061cdf5a89e65afd4c56da255af6a3226fca09495466e"
+      "crop_sha256": null
     },
     {
       "field": "sleep_current_a/TM4C1233H6PZ",
@@ -318,17 +269,17 @@
         ]
       },
       "crop": {
-        "sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d",
-        "href": "evidence://slice-sleep/8a4fee15a132.p1236.r0.png",
+        "sha256": "7346b8b1e234270c0fbea29a5accd04aa434dd17af0b12cb0a96220895a6925b",
+        "href": "evidence://slice-sleep/rows/8a4fee15a132.p1236.r0.png",
         "dpi": 144,
         "bbox": [
           0,
           0,
-          1224,
-          1584
+          974,
+          157
         ]
       },
-      "crop_sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d"
+      "crop_sha256": null
     },
     {
       "field": "sleep_current_a/TM4C1233H6PZ",
@@ -349,17 +300,17 @@
         ]
       },
       "crop": {
-        "sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d",
-        "href": "evidence://slice-sleep/8a4fee15a132.p1236.r0.png",
+        "sha256": "7346b8b1e234270c0fbea29a5accd04aa434dd17af0b12cb0a96220895a6925b",
+        "href": "evidence://slice-sleep/rows/8a4fee15a132.p1236.r0.png",
         "dpi": 144,
         "bbox": [
           0,
           0,
-          1224,
-          1584
+          974,
+          157
         ]
       },
-      "crop_sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d"
+      "crop_sha256": null
     },
     {
       "field": "sleep_current_a/TMS320F280015x",
@@ -380,17 +331,79 @@
         ]
       },
       "crop": {
-        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
-        "href": "evidence://slice-sleep/31106cf7e25e.p49.r3.png",
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
         "dpi": 144,
         "bbox": [
           0,
           0,
-          1224,
-          1584
+          998,
+          280
         ]
       },
-      "crop_sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e"
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 49,
+      "row_header": "Idle",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p49.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          280
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 49,
+      "row_header": "Idle",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p49.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          280
+        ]
+      },
+      "crop_sha256": null
     },
     {
       "field": "sleep_current_a/TMS320F280015x",
@@ -411,17 +424,48 @@
         ]
       },
       "crop": {
-        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
-        "href": "evidence://slice-sleep/31106cf7e25e.p49.r3.png",
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
         "dpi": 144,
         "bbox": [
           0,
           0,
-          1224,
-          1584
+          998,
+          280
         ]
       },
-      "crop_sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e"
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 53,
+      "row_header": "Standby",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f4bd44730dd116ee8f3888362b72ffd7bfd7756724b3f71f38212e8d9fec2e76",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p53.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "cad78a13a2b78b47574dc9c637c463efd86111786e15c2a207300fdbfdb97a8e",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p53.r9.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          420
+        ]
+      },
+      "crop_sha256": null
     }
   ]
 }

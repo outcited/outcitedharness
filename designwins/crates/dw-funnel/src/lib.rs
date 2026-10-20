@@ -94,6 +94,22 @@ pub fn accept(
     let mut questions = dw_decide::next_questions(facts, &pinned);
     questions.extend(residue_questions);
 
+    // Relevance gate (review 2026-10-20 P1): probe questions for axes the
+    // cohort carries NO evidence for are noise — MOSFET Vds/Rds questions
+    // on an MCU journey. Unaskable probes on unmeasured axes are dropped;
+    // D5 honesty is preserved by residue questions and by probes on axes
+    // the parts actually answer.
+    let measured_axes: std::collections::BTreeSet<dw_decide::Axis> = facts
+        .values()
+        .flat_map(|f| f.axes.keys().copied())
+        .collect();
+    questions.retain(|q| match &q.axis {
+        dw_decide::KnifeId::Axis(ax) => {
+            q.askable || measured_axes.contains(ax) || pinned.contains(ax)
+        }
+        dw_decide::KnifeId::Category(_) => true,
+    });
+
     let build = Build {
         id: format!("build:{}", 0),
         release,
