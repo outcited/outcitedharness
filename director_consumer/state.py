@@ -97,14 +97,15 @@ class DirectorState:
     # can never leave the chain pointing at ghost entries.
 
     def _head_hash(self) -> str:
-        if self._head is None:
-            row = self.con.execute(
-                "SELECT entry_hash FROM journal ORDER BY id DESC LIMIT 1"
-            ).fetchone()
-            self._head = row[0] if row else "GENESIS"
-        return self._head
+        # Read under the SQLite write transaction, never a process-local cache.
+        row = self.con.execute(
+            "SELECT entry_hash FROM journal ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+        return row[0] if row else "GENESIS"
 
     def _append(self, cur: sqlite3.Cursor, kind: str, payload: dict) -> int:
+        if not self.con.in_transaction:
+            self.con.execute("BEGIN IMMEDIATE")
         prev = self._head_hash()
         blob = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         ts = utcnow()

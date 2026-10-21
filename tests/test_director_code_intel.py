@@ -242,6 +242,40 @@ def test_stale_collector():
     assert len(fs) == 1 and fs[0]["key"] == "/a"
 
 
+def test_crashed_lane_collector(tmp_path):
+    from director_consumer.code_intel import collect_crashed_lanes
+    lane = tmp_path / "results" / "power-axes-fullcorpus-1"
+    lane.mkdir(parents=True)
+    (lane / "run.log").write_text(
+        'Traceback (most recent call last)\n  File "x.py", line 1\n'
+        "TypeError: string indices must be integers\n")
+    ok = tmp_path / "results" / "healthy-lane"
+    ok.mkdir(parents=True)
+    (ok / "run.log").write_text('{"progress": 100}\n')
+    fs = collect_crashed_lanes(tmp_path / "results")
+    assert len(fs) == 1
+    assert fs[0]["kind"] == "crashed_lane"
+    assert "TypeError" in fs[0]["detail"]
+
+
+def test_crashed_lane_collector_old_logs_ignored(tmp_path):
+    import os
+    from director_consumer.code_intel import collect_crashed_lanes
+    lane = tmp_path / "results" / "old-lane"
+    lane.mkdir(parents=True)
+    f = lane / "run.log"
+    f.write_text("Traceback (most recent call last)\nboom\n")
+    os.utime(f, (time.time() - 30 * 86400, time.time() - 30 * 86400))
+    assert collect_crashed_lanes(tmp_path / "results") == []
+
+
+def test_crashed_lane_collector_missing_root(tmp_path):
+    from director_consumer.code_intel import SourceUnavailable, \
+        collect_crashed_lanes
+    with pytest.raises(SourceUnavailable):
+        collect_crashed_lanes(tmp_path / "nope")
+
+
 def test_github_checks_allowlist():
     with pytest.raises(PermissionError):
         collect_github_checks("evil/repo")

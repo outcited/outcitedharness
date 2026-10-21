@@ -29,26 +29,6 @@ models:
       base_url: http://100.68.133.1:8900
       model: qwen3.8-27b-nvfp4
       role: routine-preferred
-    - name: dgx1_overflow
-      provider: local
-      base_url: http://100.81.201.24:8901
-      model: qwen3.8-27b-fp8
-      role: overflow
-    - name: tp4_dsv41
-      provider: local
-      base_url: http://100.116.221.82:8888
-      model: deepseek-v4.1-flash
-      role: capacity-available-only
-    - name: glm53_sub
-      provider: subscription
-      base_url: https://api.z.ai/v1   # existing subscription; env key GLM53_KEY
-      model: glm-5.3
-      role: subscription
-    - name: mimo_pro
-      provider: subscription
-      base_url: https://token-plan-sgp.xiaomimimo.com/v1
-      model: mimo-v2.6-pro
-      role: subscription
   # METERED INFERENCE IS NEVER AUTOMATICALLY AUTHORIZED. OpenRouter and any
   # pay-per-token endpoint are refused by the router regardless of config
   # mistakes above; adding one requires a task-specific spend authorization

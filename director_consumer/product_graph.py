@@ -62,6 +62,10 @@ STAGES = (
     "m5-admission",         # L0 admission into extraction queues
     "extraction",           # claims + quotes from PDFs (M5/Ryzen fleet)
     "verification",         # quote/page/SHA verification + adjudication
+    "normalization",        # comparability law: units/conditions/typed axes
+                            # — prerequisite for ANY cross-manufacturer
+                            # comparison (operator truth 2026-10-20:
+                            # no normalization, no comparison)
     "identity-release",     # OPN identity joins + release export/pinning
     "store-api",            # release-pinned store/facade/decision API (cr-core)
     "evidence-wire",        # evidence DTO + document resolver at handoff
@@ -74,7 +78,8 @@ EDGES = (
     ("receiver-manifests", "m5-admission"),
     ("m5-admission", "extraction"),
     ("extraction", "verification"),
-    ("verification", "identity-release"),
+    ("verification", "normalization"),
+    ("normalization", "identity-release"),
     ("identity-release", "store-api"),
     ("store-api", "evidence-wire"),
     ("evidence-wire", "fe-journeys"),
