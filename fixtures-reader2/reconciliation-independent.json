@@ -1,0 +1,12 @@
+{
+ "buckets": {
+  "recovered-independently-verified": 10406,
+  "divergent-held-value-form": 92,
+  "shadow-covered-by-sibling": 459,
+  "not-recovered-unique": 39302
+ },
+ "pairwise_intersections_empty": true,
+ "union_equals_population": true,
+ "union": 50259,
+ "population": 50259
+}
