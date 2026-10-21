@@ -329,11 +329,23 @@ def run(con: sqlite3.Connection, limit: int, log=print,
             todo += [w for w in waves_on_mirror(families=("incremental",))
                      if w.name > mark]
         else:
-            todo += [w for w in waves_on_mirror(families=(fam,))
-                     if (con.execute(
-                         "SELECT 1 FROM docs WHERE wave=? AND state IN "
-                         "('admitted','admitted-mirror','rejected')",
-                         (w.name,)).fetchone() is None)]
+            # a legacy wave is pending unless EVERY manifest sha is in the
+            # ledger (capped canary rows must not mark it complete)
+            for w in waves_on_mirror(families=(fam,)):
+                try:
+                    rows = load_manifest(w)
+                except Exception:                      # noqa: BLE001
+                    continue
+                shas = [(r.get("sha256") or "").lower()
+                        for r in rows
+                        if re.fullmatch(r"[0-9a-f]{64}",
+                                        (r.get("sha256") or ""))]
+                q = ",".join("?" * len(shas)) or "''"
+                have = con.execute(
+                    f"SELECT count(*) FROM docs WHERE sha256 IN ({q})",
+                    shas).fetchone()[0] if shas else 0
+                if have < len(set(shas)):
+                    todo.append(w)
     todo.sort(key=lambda w: w.name)
     log(f"watermark={mark or 'START'} waves_to_process={len(todo)}")
     quarters = {max(1, int(len(todo) * q)): f"{int(q*100)}%"
