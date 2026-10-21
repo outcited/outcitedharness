@@ -188,6 +188,21 @@ class ContextCompiler:
                             f"{o.get('text', '')[:120]}",
                             source=f"project_registry:{project_id}",
                             authority="registered objective"))
+                    # DIRECTOR-CODE-INTEL-02: operational doctrine is
+                    # compiled as AUTHORITY — ranking/constraint context,
+                    # never silently dropped from decision packets.
+                    doctrine = getattr(spec, "operational_doctrine", None) \
+                        or {}
+                    if doctrine:
+                        packet.sections["operational_doctrine"] = sorted(
+                            doctrine.keys())
+                        for key in sorted(doctrine):
+                            text = str(doctrine[key]).strip()
+                            packet.items.append(ContextItem(
+                                "authority",
+                                f"doctrine {key}: {text[:160]}",
+                                source=f"project_registry:{project_id}",
+                                authority="operator doctrine"))
             except Exception:  # noqa: BLE001
                 packet.uncertainties.append("project registry unavailable")
         for sha in refs["shas"]:

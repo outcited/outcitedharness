@@ -1,0 +1,89 @@
+{
+ "as_of": 1792500000.0,
+ "blockers": [],
+ "conflicts": [
+  {
+   "affected": [],
+   "cause_fingerprint": "0c6dcf0296b683a0",
+   "conflict_id": "conflict:0c6dcf0296b683a0",
+   "created_at": 1792500000.0,
+   "factual_gaps": [
+    "route-base mapping between DECISION_API_URL and the facade prefix is undocumented; no agreed version-pinned contract exists"
+   ],
+   "kind": "contract-conflict",
+   "phase": "proposed",
+   "phase_evidence": [],
+   "proposed_resolution": "owners (m4 + cr-core, m5 for evidence pins) agree ONE version-pinned path contract incl. base mapping, envelope, release pins; then same-fixture contract tests on both sides",
+   "sides": [
+    {
+     "endpoint_kind": "decision-api",
+     "envelope": "harness.electronics-decision-api.v1 (per cr-core #103)",
+     "evidence": {
+      "as_of": "1792500000",
+      "detail": "",
+      "locator": "designwins-v2:agent/golden-path-01:src/lib/labs/decision-api.ts",
+      "truth_class": "GITHUB_OBSERVED"
+     },
+     "lane": "m4",
+     "method": "POST",
+     "path": "{base}/v1/engineering/decisions",
+     "reachability": "proven host-local against harness :8794 only",
+     "release_pin": "curve-evidence-bundle-v3-powerdata01-74cc003023f9"
+    },
+    {
+     "endpoint_kind": "decision-api",
+     "envelope": "harness.electronics-decision-api.v1",
+     "evidence": {
+      "as_of": "1792500000",
+      "detail": "",
+      "locator": "outcited.com:main:route-tree + issue #103 task 2",
+      "truth_class": "GITHUB_OBSERVED"
+     },
+     "lane": "cr-core",
+     "method": "POST",
+     "path": "/api/designwins/v1/engineering/decisions",
+     "reachability": "no authenticated FE-reachable facade confirmed",
+     "release_pin": "unknown"
+    }
+   ],
+   "stage": "evidence-wire",
+   "title": "decision-api: consumer path '{base}/v1/engineering/decisions' cannot reach producer path '/api/designwins/v1/engineering/decisions'",
+   "updated_at": 1792500000.0
+  },
+  {
+   "affected": [],
+   "cause_fingerprint": "62170ee92181c839",
+   "conflict_id": "conflict:62170ee92181c839",
+   "created_at": 1792500000.0,
+   "factual_gaps": [
+    "no implemented route matches the asserted path (scanned producer repo route tree)"
+   ],
+   "kind": "missing-implementation",
+   "phase": "proposed",
+   "phase_evidence": [],
+   "proposed_resolution": "producer lane implements the asserted endpoint or corrects the asserted contract; scanner re-runs on the producer repo tree each tick",
+   "sides": [
+    {
+     "endpoint_kind": "decision-api",
+     "envelope": "harness.electronics-decision-api.v1",
+     "evidence": {
+      "as_of": "1792500000",
+      "detail": "",
+      "locator": "outcited.com:main:route-tree + issue #103 task 2",
+      "truth_class": "GITHUB_OBSERVED"
+     },
+     "lane": "cr-core",
+     "method": "POST",
+     "path": "/api/designwins/v1/engineering/decisions",
+     "reachability": "no authenticated FE-reachable facade confirmed",
+     "release_pin": "unknown"
+    }
+   ],
+   "stage": "store-api",
+   "title": "decision-api: asserted endpoint '/api/designwins/v1/engineering/decisions' not found in implemented routes",
+   "updated_at": 1792500000.0
+  }
+ ],
+ "stages": {},
+ "version": 1
+}

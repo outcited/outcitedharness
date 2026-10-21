@@ -67,12 +67,23 @@ class ProjectSpec:
     lifecycle: str = "active"
     shared_sources: list = field(default_factory=list)   # 05C §7: private
                                                          # by default
+    # DIRECTOR-CODE-INTEL-02: operator doctrine (provenance_first,
+    # normalization_prerequisite, ...) — consumed by the context compiler
+    # as authority items, never silently dropped.
+    operational_doctrine: dict = field(default_factory=dict)
 
 
 class ProjectRegistry:
     def __init__(self, con):
         self.con = con
         con.executescript(SCHEMA)
+        # additive migration for pre-doctrine registries (2026-10-20.2)
+        cols = [d[1] for d in con.execute(
+            "PRAGMA table_info(project_registry)").fetchall()]
+        if "operational_doctrine" not in cols:
+            con.execute("ALTER TABLE project_registry ADD COLUMN "
+                        "operational_doctrine TEXT NOT NULL DEFAULT '{}'")
+            con.commit()
 
     def register(self, spec: ProjectSpec) -> ProjectSpec:
         if spec.lifecycle not in LIFECYCLE:
@@ -82,13 +93,14 @@ class ProjectRegistry:
             "INSERT OR REPLACE INTO project_registry(project_id, name, "
             "description, objectives, success_criteria, repositories, "
             "policy_version, config_digest, evidence, human_authority, "
-            "lifecycle, created_at, updated_at) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "lifecycle, operational_doctrine, created_at, updated_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (spec.project_id, spec.name, spec.description,
              json.dumps(spec.objectives), json.dumps(spec.success_criteria),
              json.dumps(spec.repositories), spec.policy_version,
              spec.config_digest, json.dumps(spec.evidence),
-             spec.human_authority, spec.lifecycle, now, now))
+             spec.human_authority, spec.lifecycle,
+             json.dumps(spec.operational_doctrine), now, now))
         self.con.execute(
             "INSERT INTO registry_events(project_id, ts, event, detail) "
             "VALUES (?,?,?,?)", (spec.project_id, now, "register",
@@ -126,6 +138,8 @@ class ProjectRegistry:
             policy_version=d["policy_version"],
             config_digest=d["config_digest"],
             evidence=json.loads(d["evidence"]),
+            operational_doctrine=json.loads(
+                d.get("operational_doctrine") or "{}"),
             human_authority=d["human_authority"], lifecycle=d["lifecycle"])
 
     def all(self) -> list[ProjectSpec]:
@@ -153,4 +167,6 @@ def load_spec_from_config(project_dir: Path) -> ProjectSpec:
         config_digest=digest,
         evidence=[f"config:{f.name}" for f in digest_files],
         human_authority=cfg.get("human_authority", "sam"),
-        shared_sources=cfg.get("shared_sources", []))
+        shared_sources=cfg.get("shared_sources", []),
+        operational_doctrine=cfg.get("operational_doctrine", {})
+        if isinstance(cfg.get("operational_doctrine"), dict) else {})
