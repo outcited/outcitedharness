@@ -181,6 +181,50 @@ with tempfile.TemporaryDirectory() as tmp:
           "approval" not in init_src.lower(),
           "mode set only at construction; approvals never read for mode")
 
+# 9. CRASH/REPLAY: deliver once, restart (new DirectorState on the SAME
+#    workspace), replay same mid -> refused; new propose+deliver on the
+#    consumed single-action grant -> refused
+tmp9 = tempfile.mkdtemp()
+import director_consumer.schema as _s9
+BODY9 = "restart-safe single body"
+D9 = _s9.fp("msg-body", BODY9)
+con9, store9, appr9 = make_store(tmp9, artifact_kwargs=dict(
+    payload_digest=D9))
+register(store9)
+ws9 = Path(tmp9) / "ws"          # same workspace the store was built on
+pol9 = DeliveryPolicy(outbox_root=str(Path(tmp9) / "out9"))
+mb9 = MailboxDelivery(con9, pol9, sender="engineering-director",
+                      project="designwins", authorizations=store9,
+                      mode="test-delivery")
+mid9 = mb9.propose("mac-mini", "escalation", "s9", BODY9,
+                   correlation_id="OPERATOR-GRANT-SEVEN-MAIL-20261021")
+r9a = mb9.deliver(mid9, auth_id=AUTH)
+st9 = DirectorState(ws9)         # RESTART: fresh handle, same sqlite
+store9b = AuthorizationStore(st9.con, approvals_dir=appr9,
+                             operator_uid=os.getuid(), service_uid=1000,
+                             test_identities=True)
+mb9b = MailboxDelivery(st9.con, pol9, sender="engineering-director",
+                       project="designwins", authorizations=store9b,
+                       mode="test-delivery")
+files_before = sorted(str(p) for p in (Path(tmp9) / "out9").rglob("*.md"))
+content_before = [Path(f).read_text() for f in files_before]
+r9b = mb9b.deliver(mid9, auth_id=AUTH)   # restart + identical re-delivery
+files_after = sorted(str(p) for p in (Path(tmp9) / "out9").rglob("*.md"))
+content_after = [Path(f).read_text() for f in files_after]
+check("replay-same-mid-reconciles-idempotently",
+      files_before == files_after and content_before == content_after
+      and len(files_after) == 1,
+      f"05C resume semantics: re-deliver reconciled ({r9b}), exactly 1"
+      " unchanged file — no rewrite, no duplicate")
+mid9b = mb9b.propose("mac-mini", "escalation", "s9-other", "other body",
+                     correlation_id="OPERATOR-GRANT-SEVEN-MAIL-20261021")
+try:
+    mb9b.deliver(mid9b, auth_id=AUTH)
+    check("consumed-grant-refuses-new-message", False, "second ride?!")
+except Exception as e:
+    check("consumed-grant-refuses-new-message", True,
+          f"{type(e).__name__}: {e}"[:120])
+
 print(json.dumps(RESULTS, indent=1))
 fails = [r for r in RESULTS if not r["pass"]]
 print(f"SUMMARY: {len(RESULTS) - len(fails)}/{len(RESULTS)} passed")
