@@ -1,0 +1,551 @@
+{
+ "sample": 42,
+ "causes": {
+  "multi_page_table_span": 9,
+  "fragments_absent_everywhere": 19,
+  "no_fragments": 7,
+  "value_form_mismatch": 5,
+  "fragments_scattered_pages": 2
+ },
+ "traces": [
+  {
+   "claim_id": "0ee66d14e163ca8af864a94c6b93a4dc9edbbb9f7c411efb0c76fefb194eca39",
+   "path": "54ac2e641bdd204834101ae6605b0c229a62974a8245284634d65ab1.pdf",
+   "cited_page": 47,
+   "frag_pages": [
+    [
+     47
+    ],
+    [],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "Power-down",
+   "verbatim": "100 \u00b5A | V = 5.5V, T = -40\u00b0C CC A | Power-down Mode(2)  100 \u00b5A"
+  },
+  {
+   "claim_id": "a63490ad0dc0bfe12852be133ef61a42eeda07bc5e42e222fbc6bb973a30eb53",
+   "path": "78453a1f515975a8288011b2a6ccddfed9b75f06a84c10a5ab76fcce.pdf",
+   "cited_page": 4,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "TQFP32-Pin"
+  },
+  {
+   "claim_id": "f739854a97b8880f2d5b8b2f8bfb1b70a8c2caea4fc8c17b74aa4147d7e6c4ea",
+   "path": "5_4TB/DigiKey_Reference_Designs/pdf_cache/st_stm32f407ve.pdf",
+   "cited_page": 91,
+   "frag_pages": [
+    [
+     91
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "STOP",
+   "verbatim": "1.5 | Flash in Stop mode, low-speed and high- speed internal RC oscillators and high-speed oscillator OFF (no independent watchdog) | Supply"
+  },
+  {
+   "claim_id": "69cc588245d19906c7d01bb64c2ad5614dd7425a7fb774f5bd3fcc8e32a36a0d",
+   "path": "5_4TB/DigiKey_Reference_Designs/pdf_cache/st_stm32h7r3z8.pdf",
+   "cited_page": 310,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "thermal",
+   "field": "RthetaJA",
+   "verbatim": "\u0398JA | Thermal resistance junction-ambient VFQFPN68 - 8 x 8 mm / 0.35 mm pitch Thermal resistance junction-ambient LQFP100 - 14 x 14 mm / 0.5"
+  },
+  {
+   "claim_id": "f4afa2057c2ee658e1a3d449573d742a6005c8de4a9d43a72a4a638d9ed1ea55",
+   "path": "c36da28dccd9544de50201d05d0a487a2e3601386c93ee84c5616aa6.pdf",
+   "cited_page": 2,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "LQFP-40"
+  },
+  {
+   "claim_id": "9832c9371cb33794223558d796326bff6443902286b44d13f84ab3265feaed36",
+   "path": "4a53eb9f6be426f7e591a5fb9cfb9d61f2a06a644ab0b49a6bff6dd2.pdf",
+   "cited_page": 4,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "MSOP-100"
+  },
+  {
+   "claim_id": "0a734f3a63a3c6470d16d6b7982f582c75107608c28e8b1e77f299d77e3b3ced",
+   "path": "86feebec8d4b8d6462057ac3fcd28d859bf31d77cbe80edce1486f45.pdf",
+   "cited_page": 5,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "SOIC52"
+  },
+  {
+   "claim_id": "b36850e1b32396f1240275ef3a0d8cf4c5335cbbfcfa6a1565348f4833224977",
+   "path": "196138cdf21284fb6d07686800881bc5504f32a9724831bf4695c983.pdf",
+   "cited_page": 3,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "LQFP48"
+  },
+  {
+   "claim_id": "909ff845ae341b99556ac7fb7f99c068881605bce23304cb2f54588525df3130",
+   "path": "5_4TB/DigiKey_Reference_Designs/pdf_cache/st_stm32h562vg.pdf",
+   "cited_page": 140,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "mode",
+   "field": "standby",
+   "verbatim": "4.3 | OFF | Supply current in standby mode, IWDG OFF OFF 2.58 2.78 3.01 3.19 4.3 8.8 16.5 42.6 \u03bcA"
+  },
+  {
+   "claim_id": "a1b524a3042c2fc8332e061755e5f4ddb803d0476411433f195299cf9f04e2c1",
+   "path": "5_4TB/DigiKey_Reference_Designs/pdf_cache/st_stm32f405zg.pdf",
+   "cited_page": 85,
+   "frag_pages": [
+    [
+     85
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "Run",
+   "verbatim": "102 | External clock(3), all peripherals enabled(4)(5) | Supply current in Run mode 168 MHz 87 102 109 mA"
+  },
+  {
+   "claim_id": "4506503dc11b9529ae4a7d73bc4bb89ab9158b42937f294255555f82e8ef8fca",
+   "path": "4ecfb1c248cea4670db00c5bba6ed82e339a172db3d04acb017797cb.pdf",
+   "cited_page": 1,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "PDIP8-Pin"
+  },
+  {
+   "claim_id": "97927ea4303d442a715e89ca72e67d1a2bec700d7c65716e3da07bc5f9ec2b5c",
+   "path": "e5ba9a6761bc261c5ba17ce80bb608bf2372debfedd8c73c02245cc0.pdf",
+   "cited_page": 6,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "LQFP64-pin"
+  },
+  {
+   "claim_id": "38251655275b73f9f00013454d90d1416295b9e127c8df7c671a8521fc41d272",
+   "path": "c9590cb6a84c74068df9136e2ccbb79a0694598f7be94eb8c064cb3e.pdf",
+   "cited_page": 3,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "200- to480"
+  },
+  {
+   "claim_id": "f0a908ca4d64c420c35fcbd67323ccee6de2f0a7bc7dc5930740938b53cf76ed",
+   "path": "2e4b3fc2ec5d9c23fbb4727d6a77551e2294f5b49e5dd482bcf1c94c.pdf",
+   "cited_page": 1,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "SOIC-8"
+  },
+  {
+   "claim_id": "25410810af55e9f63d80b2cc60bc5f864fae6488a8df5a85223f504e3ae9ad22",
+   "path": "81f205bbed7b8301d13f99296fb94088ce058890b7a5e78b53c995ec.pdf",
+   "cited_page": 2,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "tssop4"
+  },
+  {
+   "claim_id": "4a2ea0abe5fd56ca8112eaafbdfd47aae07e7d8571ffb40da6bd8bbe03544341",
+   "path": "394b8ce988c9f2cf7c96059a3ee00dc116e3a37bcf7d3c2d4eced112.pdf",
+   "cited_page": 3,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "SOIC169"
+  },
+  {
+   "claim_id": "d54f7966b7b79d9d0e63091cfe6b49d9ba1bd4f56fce62a756b29123a5579844",
+   "path": "70c382ce8c793b8495a6d721287e81f714e27d586013bdfb39cc2c0b.pdf",
+   "cited_page": 6,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "LQFP32-pin"
+  },
+  {
+   "claim_id": "935766a5abf26f2e15009f82b369fffb94e5c6b59ae484791078cc7409c49008",
+   "path": "5_4TB/DigiKey_Reference_Designs/pdf_cache/st_stm32u585qi.pdf",
+   "cited_page": 193,
+   "frag_pages": [
+    [
+     193
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "Standby",
+   "verbatim": "0.56 | RTC(2) clocked by LSI 32 kHz, no IWDG(3) ULPMEN = 0 | Supply current in Standby mode (backup registers retained), RTC enabled 1.8 0.5"
+  },
+  {
+   "claim_id": "7824cd39376571dbfe9a1ca4bab38cb35f25ba87f3401703c272a78f25b2b2e1",
+   "path": "260809_mcu_datasheets/silabs.com/EFM32GG11B520F2048GL120.pdf",
+   "cited_page": 32,
+   "frag_pages": [
+    [
+     32,
+     34,
+     35,
+     37
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "EM1",
+   "verbatim": "67 | 72 MHz HFRCO | I EM1 \u2014 57 67 \u00b5A/MHz"
+  },
+  {
+   "claim_id": "ba0fb6f64ee499cd9ed86a5c14e2dc206d1b8e882b90a3d95b09ed6241f5eab7",
+   "path": "5_4TB/DigiKey_Reference_Designs/pdf_cache/st_stm32wb55ve.pdf",
+   "cited_page": 109,
+   "frag_pages": [
+    [
+     109
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "Standby",
+   "verbatim": "0.270 | Bluetooth Low Energy disabled No independent watchdog | Supply current in Standby mode (backup registers and SRAM2a retained), RTC d"
+  },
+  {
+   "claim_id": "e2a45a77be42a99db7d4ef38dfc6948b68e43723496c88891b0026ce9c8554fd",
+   "path": "260809_mcu_datasheets/silabs.com/EFM32GG11B520F2048GL120.pdf",
+   "cited_page": 62,
+   "frag_pages": [
+    [
+     62
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "EM2",
+   "verbatim": "690 | 12-bit SAR conversions, 20 ms scan rate, CS0CG=0 (Gain = 10x), 8 samples per scan1 | I CSEN EM2 _ \u2014 690 \u2014 nA"
+  },
+  {
+   "claim_id": "1e1dedc1d99ada3f9e8bcde7a007b4ff1cd635f89a0cfb9fb873ca016b32bd97",
+   "path": "d958752db7c036c803f5b8332c925c85b30e96fd2acf8a147d4d08b0.pdf",
+   "cited_page": 5,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "TO-2203"
+  },
+  {
+   "claim_id": "07b4e089930f5bac3962727ebe7067ae78816df2339015b33c0e2cc0ab9cf795",
+   "path": "418d61afdabf8e28f8dc8adbb0f9027bf384e7160a27f2b67c4f609e.pdf",
+   "cited_page": 5,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "SOIC8-Lead"
+  },
+  {
+   "claim_id": "6e7d22c9aeb70b2dbdcda3b3fe737f198ceee4fa0b98aaa9b1b111fed5337722",
+   "path": "a703f1ce009e51091309e48edd2203152e00396c1560c745d018584e.pdf",
+   "cited_page": 1,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "pillars",
+   "field": "package",
+   "verbatim": "LQFP20"
+  },
+  {
+   "claim_id": "da2513fff3254816a191ae054ef2fcc50c616145cbabebc2ef57ee80e3a3ef14",
+   "path": "_4TB/DigiKey_Reference_Designs/pdf_cache/ti_tm4c123gh6pm.pdf",
+   "cited_page": 1399,
+   "frag_pages": [
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "mode",
+   "field": "Deep-Sleep mode",
+   "verbatim": "2.54 | Deep-Sleep mode 30 kHz LFIOSC 2.54 2.54 2.54 2.54 3.68 3.69 mA"
+  },
+  {
+   "claim_id": "c876fef19646c7b3d1e46224daea4aa9f793228b5cd53f97bb9000cffc87b66f",
+   "path": "ports/cr_drops/20260809_mcu_datasheets/ti.com/MSPM0G3107.pdf",
+   "cited_page": 21,
+   "frag_pages": [
+    [
+     21
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "thermal",
+   "field": "RthetaJC",
+   "verbatim": "R\u03b8JC(top) | Junction-to-ambient thermal resistance Junction-to-case (top) thermal resistance Junction-to-board thermal resistance VQFN-32 (R"
+  },
+  {
+   "claim_id": "6dc023ae2ffc43026046e737f702d4926ed79875068d0285f118b540b1c3237b",
+   "path": "5_4TB/DigiKey_Reference_Designs/pdf_cache/st_stm32h743vg.pdf",
+   "cited_page": 113,
+   "frag_pages": [
+    [
+     113
+    ],
+    []
+   ],
+   "cause": "multi_page_table_span",
+   "lane": "mode",
+   "field": "Run",
+   "verbatim": "71 | All peripherals disabled, cache ON | Supply current in Run mode ITCM 400 2012 71 mA 35 \u00b5A/ CoreMark"
+  },
+  {
+   "claim_id": "80155d8fe9d196290dfa1556408d2e57057121bad299141214397492ebd1a46f",
+   "path": "DigiKey_Reference_Designs/pdf_cache/mcu_ti_tm4c129xkczad.pdf",
+   "cited_page": 2181,
+   "frag_pages": [
+    [],
+    []
+   ],
+   "cause": "fragments_absent_everywhere",
+   "lane": "mode",
+   "field": "Hibernate",
+   "verbatim": "1.04 | V = 3.0 V BAT V = 0 V DD V = 0 V DDA System Clock = OFF Hibernate Module = 32.768 kHz | Hibernate mode (external wake, RTC disabled) "
+  },
+  {
+   "claim_id": "e4a400a7561eca0ec2cf69ce87f0cf7ff1fdb28ef9566f733c306ec4679ce7c3",
+   "path": "ports/cr_drops/20260809_mcu_datasheets/nxp.com/MKL17Z256.pdf",
+   "cited_page": 4,
+   "frag_pages": [
+    [
+     4
+    ]
+   ],
+   "cause": "value_form_mismatch",
+   "lane": "pillars",
+   "field": "flash_kb",
+   "verbatim": "3.4.1 Flash electrical specifications.................................29"
+  },
+  {
+   "claim_id": "ffcdb01dea08ccbac221eff9483d6227a748afcc9fd098c3f63cd642aab0cfee",
+   "path": "9ec732b74d618e60bd50032b381810e6bdb076cab007f1de7f4bbb49.pdf",
+   "cited_page": 2,
+   "frag_pages": [
+    [
+     2
+    ]
+   ],
+   "cause": "value_form_mismatch",
+   "lane": "pillars",
+   "field": "flash_kb",
+   "verbatim": "512 KB of flash, \u20186\u2019 indicates 1 MB of flash."
+  },
+  {
+   "claim_id": "ba551f273a671b4b797e419e987018a6bba49740719e4ad4e4a4bc1ded139107",
+   "path": "96026ae0e350180d1c27166c2a7ac8a8a26506bdaa79e64f6c0b71af.pdf",
+   "cited_page": 6,
+   "frag_pages": [
+    [
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74
+    ]
+   ],
+   "cause": "fragments_scattered_pages",
+   "lane": "pillars",
+   "field": "flash_kb",
+   "verbatim": "Kinetis K24 Sub-Family Data Sheet With 1 MB Flash, Rev. 7, 10/2016"
+  },
+  {
+   "claim_id": "37ed409f2e03f39ffe787f4a8415629696fdeae6376e6c3cd13447449ed19b46",
+   "path": "14783f4a9ed0933434f0ddad74cfd4dbd7a6f5c9041c210ec73fdb60.pdf",
+   "cited_page": 4,
+   "frag_pages": [
+    [
+     4,
+     6
+    ]
+   ],
+   "cause": "fragments_scattered_pages",
+   "lane": "pillars",
+   "field": "n_gpio",
+   "verbatim": "15 GPIOs"
+  },
+  {
+   "claim_id": "53a928bae0b669e6a5585fac00493f0b7118f3d78f5713ad56de7b1f837d186c",
+   "path": "4TB/DigiKey_Reference_Designs/pdf_cache/ti_tm4c129enczad.pdf",
+   "cited_page": 6,
+   "frag_pages": [
+    [
+     6
+    ]
+   ],
+   "cause": "value_form_mismatch",
+   "lane": "pillars",
+   "field": "n_dma",
+   "verbatim": "11.3.3 DMA Operation ........................................................................................................... 834"
+  },
+  {
+   "claim_id": "b842e5bb5741ef5d72f9899568a5486e24177acaf8f44ebd248db47340042eff",
+   "path": "2a5164f3ada8351c10fbac9376c8e46747f601675fbb2fd289066bef.pdf",
+   "cited_page": 1,
+   "frag_pages": [
+    [
+     1
+    ]
+   ],
+   "cause": "value_form_mismatch",
+   "lane": "pillars",
+   "field": "n_gpio",
+   "verbatim": "3.2.22 GPIO . . . . . . . . . . . . . . . . . . . . . . . . . 15"
+  },
+  {
+   "claim_id": "9882e18f2577f8c2ad9186ce684e3e46b21a620e58fb4974c5a34b64d8de342e",
+   "path": "b2efaca6e0abacc7843b6142a0a2a78d6019b0af49d074b5e8c0dabe.pdf",
+   "cited_page": 4,
+   "frag_pages": [
+    [
+     4
+    ]
+   ],
+   "cause": "value_form_mismatch",
+   "lane": "pillars",
+   "field": "flash_kb",
+   "verbatim": "However, the C55 flash memory of the MPC5744P has different electrical characteristics from the C90 flash memory of the"
+  }
+ ]
+}
