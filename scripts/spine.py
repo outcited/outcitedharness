@@ -243,6 +243,39 @@ def value_forms(val):
     return [x for x in forms if x and x not in (".",)]
 
 
+# unit families for printed-form equivalence (memory is 1024-based — a
+# claim of 1024 kB may be PRINTED as "1 MB"; engineering meaning preserved)
+UNIT_FAMILY = {
+    "kB": [("kB", 1.0), ("MB", 1/1024), ("GB", 1/1024**2), ("B", 1024)],
+    "MB": [("MB", 1.0), ("kB", 1024), ("GB", 1/1024)],
+    "uA": [("uA", 1.0), ("mA", 1/1000), ("A", 1/1e6)],
+    "mA": [("mA", 1.0), ("uA", 1000), ("A", 1/1000)],
+    "A": [("A", 1.0), ("mA", 1000), ("uA", 1e6)],
+    "MHz": [("MHz", 1.0), ("GHz", 1/1000), ("kHz", 1000), ("Hz", 1e6)],
+    "V": [("V", 1.0), ("mV", 1000)],
+}
+
+
+def value_in_evidence_family(val, unit_raw, page_text_norm):
+    """Value+unit must appear on the page in the claim's unit family —
+    covers 1024-based memory and 1000-based SI conversions (a 1024 kB
+    claim may be printed '1 MB'). Returns (ok, matched) or None for
+    non-numeric values."""
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        return None
+    unit_c = canon_unit(unit_raw)
+    low = page_text_norm.lower()
+    fam = UNIT_FAMILY.get(unit_c, [])
+    candidates = ([(unit_c, f)] if unit_c else []) + [(u, f * k) for u, k in fam]
+    for u, v in candidates:
+        for form in value_forms(v):
+            if form in page_text_norm and (not u or u.lower() in low):
+                return True, f"{form} {u}".strip()
+    return False, None
+
+
 def value_in_evidence(val, unit_raw, page_text_norm):
     """The asserted value (and its printed unit, when one exists) must appear
     on the cited page. String presence of the verbatim alone is NOT enough."""
@@ -267,12 +300,25 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
     field = c.get("field")
     categorical = (isinstance(field, str) and
                    (field.startswith(CATEGORICAL_FIELDS)))
-    # 0) Reader-v2 per-cell provenance: every cell verified on ITS OWN page
+    # 0) Reader-v2 per-cell provenance: every cell verified on ITS OWN page.
+    #    Mandatory-law: no evidence sha on the claim => rejected regardless
+    #    of any other field; malformed cells => held (never accepted).
     cells = c.get("cells")
     if cells is not None:
+        if not c.get("pdf_sha"):
+            return {"claim_id": c["claim_id"], "verdict": "rejected",
+                    "reasons": ["no_evidence_sha"], "checks": {"sha_mandatory": False}}
+        if not isinstance(cells, list) or not all(
+                isinstance(x, dict) and isinstance(x.get("page_1based"), int)
+                and isinstance(x.get("text"), str) for x in cells):
+            return {"claim_id": c["claim_id"], "verdict": "held",
+                    "reasons": ["malformed_cells"], "checks": {"cells": False}}
         if c.get("provenance") in ("synthetic", "partial-synthetic"):
             checks["cells"] = False
             reasons.append("synthetic_fragments_present")
+        if c.get("provenance") == "ambiguous":
+            checks["cells"] = False
+            reasons.append("ambiguous_page_attribution")
         cell_ok = not reasons
         for cell in cells:
             st, pages, actual_sha = cache.page_text(
@@ -289,15 +335,29 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
                 break
         if cell_ok:
             checks["cells"] = True
-            vcell = next((x for x in cells if x.get("role") == "value"), cells[0])
-            st, pages, actual_sha = cache.page_text(
-                c["source_path"], vcell["page_1based"], expect_sha=c.get("pdf_sha"))
-            checks["sha256_recomputed"] = actual_sha
-            page_norm = norm_text(pages.get(0, ""))
-            vie = value_in_evidence(c.get("value_raw"), c.get("unit_raw"), page_norm)
-            checks["value_in_evidence"] = vie
-            if vie is False:
-                reasons.append("value_not_in_evidence")
+            vcell = next((x for x in cells if x.get("role") == "value"), None)
+            if vcell is None:
+                # no value cell: the value may be printed in a family unit
+                # (1024 kB as "1 MB") — verify on the row's page, else hold
+                anchor = cells[0]
+                st2, pages2, _ = cache.page_text(
+                    c["source_path"], anchor["page_1based"], expect_sha=c.get("pdf_sha"))
+                fam = (value_in_evidence_family(c.get("value_raw"), c.get("unit_raw"),
+                                                norm_text(pages2.get(0, "")))
+                       if st2 == "ok" else (False, None))
+                checks["value_in_evidence"] = bool(fam and fam[0])
+                checks["value_matched_form"] = fam[1] if fam else None
+                if not checks["value_in_evidence"]:
+                    reasons.append("no_value_cell_and_no_family_form")
+            else:
+                st2, pages2, _ = cache.page_text(
+                    c["source_path"], vcell["page_1based"], expect_sha=c.get("pdf_sha"))
+                page_norm = norm_text(pages2.get(0, ""))
+                fam = value_in_evidence_family(c.get("value_raw"), c.get("unit_raw"), page_norm)
+                checks["value_in_evidence"] = bool(fam and fam[0])
+                checks["value_matched_form"] = fam[1] if fam else None
+                if not checks["value_in_evidence"]:
+                    reasons.append("value_not_in_evidence")
             # unit/range checks shared with the classic path below
             unit_c = canon_unit(c.get("unit_raw"))
             try:
@@ -326,7 +386,11 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
                     "verdict": "verified" if not reasons else "held",
                     "reasons": reasons, "checks": checks,
                     "evidence_mode": "per-cell-v2"}
-    # 1) source exists AND its actual sha256 matches the claim's evidence sha
+    # 1) source exists AND its actual sha256 matches the claim's evidence sha.
+    #    Mandatory: a claim without an evidence sha can never be accepted.
+    if not c.get("pdf_sha"):
+        return {"claim_id": c["claim_id"], "verdict": "rejected",
+                "reasons": ["no_evidence_sha"], "checks": {"sha_mandatory": False}}
     st, pages, actual_sha = cache.page_text(c["source_path"], c["page_1based"],
                                             expect_sha=c.get("pdf_sha"))
     checks["source"] = st == "ok"
