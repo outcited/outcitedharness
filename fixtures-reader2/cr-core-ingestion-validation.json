@@ -1,0 +1,19 @@
+{
+ "release_id": "spine-rc1",
+ "ingestion_validation": {
+  "manifest_self_sha": "e3c2b0042a40ad1e87348f465f20f9fc72dec735d13fd14efcf6e8ad56859226",
+  "feed_hash_matches_manifest": true,
+  "code_head_pin": "e0d74147 (spine impl a7170204)",
+  "row_count": 1870,
+  "claim_count": 7375,
+  "live_parts": 1870,
+  "live_claims": 7375,
+  "live_values": 7375,
+  "duplicate_values_present": 0,
+  "conflict_values_present": 0,
+  "exclusions_enforced": true,
+  "all_parts_exact_opn_subset_of_served": true,
+  "provenance_fields_complete": true
+ },
+ "verdict": "PASS"
+}

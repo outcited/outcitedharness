@@ -696,16 +696,31 @@ def cmd_l2(args):
                       "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, indent=1))
 
 
-DEFAULT_BLOCKLIST = Path("/Users/samkim/lane-out/spine/reader2/wave2-receipts/ACCEPTANCE-BLOCKLIST.json")
+import os as _os
+
+# Portability: env override first (SPINE_BLOCKLIST), then ./ACCEPTANCE-BLOCKLIST.json
+# beside the run, then the canonical m5 receipts path. Missing file with the env
+# var SET is a hard error (fail closed); missing file without it means "no
+# blocklist declared for this environment" and downstream consumers MUST pass
+# --blocklist explicitly — documented contract in PR #20.
+DEFAULT_BLOCKLIST = Path(_os.environ.get(
+    "SPINE_BLOCKLIST",
+    "/Users/samkim/lane-out/spine/reader2/wave2-receipts/ACCEPTANCE-BLOCKLIST.json"))
 
 
 def load_blocklist(path=None):
     p = Path(path) if path else DEFAULT_BLOCKLIST
+    if _os.environ.get("SPINE_BLOCKLIST") and not p.exists():
+        raise FileNotFoundError(
+            "SPINE_BLOCKLIST is set but the blocklist is missing — failing closed")
     if p.exists():
         try:
-            return set(json.loads(p.read_text()).get("batches", []))
+            bl = json.loads(p.read_text())
+            if not isinstance(bl, dict) or not isinstance(bl.get("batches", []), list):
+                return {"*"}  # malformed => fail closed on everything
+            return set(bl["batches"])
         except json.JSONDecodeError:
-            return {"*"}  # corrupt blocklist => fail closed on everything
+            return {"*"}  # corrupt => fail closed on everything
     return set()
 
 

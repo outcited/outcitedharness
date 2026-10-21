@@ -1,0 +1,21 @@
+{
+ "comparison_store_snapshot": {
+  "root": "api-store-export (yosemiteraid5 NAS)",
+  "observation": "2026-10-21",
+  "feed_rows": 41180,
+  "unique_parts": 37281,
+  "claims": 541071
+ },
+ "rc1": {
+  "parts": 1870,
+  "claims": 7375,
+  "part_grain_relation": "strict subset of served unique parts (exact_opn by construction)",
+  "subset_verified": true
+ },
+ "store_figures": {
+  "37281": "ACCEPTED unique-part snapshot",
+  "41180": "feed rows",
+  "51221": "UNKNOWN \u2014 source not yet identified"
+ },
+ "no_double_count": "7,375 values verified absent from served at (opn,field,value) grain"
+}
