@@ -244,7 +244,10 @@ def main() -> int:
                 out.write(json.dumps(rec) + "\n")
                 unresolved += 1
                 continue
-            rec = stamp_document(pdf)
+            try:
+                rec = stamp_document(pdf)
+            except Exception:
+                rec = {"sha256": sha, "identity_status": "unresolved", "reason": "pdf_open_failed"}
             # Manifest join: secondary identity source. If page-1 didn't
             # find the part, the source_url path often carries it.
             if not rec.get("part_identity"):

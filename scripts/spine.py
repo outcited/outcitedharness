@@ -263,6 +263,65 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
     field = c.get("field")
     categorical = (isinstance(field, str) and
                    (field.startswith(CATEGORICAL_FIELDS)))
+    # 0) Reader-v2 per-cell provenance: every cell verified on ITS OWN page
+    cells = c.get("cells")
+    if cells is not None:
+        if c.get("provenance") in ("synthetic", "partial-synthetic"):
+            checks["cells"] = False
+            reasons.append("synthetic_fragments_present")
+        cell_ok = not reasons
+        for cell in cells:
+            st, pages, actual_sha = cache.page_text(
+                c["source_path"], cell["page_1based"], expect_sha=c.get("pdf_sha"))
+            if st != "ok":
+                checks["cells"] = False
+                reasons.append(f"cell_source_{st}")
+                cell_ok = False
+                break
+            if norm_text(cell["text"]) not in norm_text(pages.get(0, "")):
+                checks["cells"] = False
+                reasons.append("cell_not_on_cited_page")
+                cell_ok = False
+                break
+        if cell_ok:
+            checks["cells"] = True
+            vcell = next((x for x in cells if x.get("role") == "value"), cells[0])
+            st, pages, actual_sha = cache.page_text(
+                c["source_path"], vcell["page_1based"], expect_sha=c.get("pdf_sha"))
+            checks["sha256_recomputed"] = actual_sha
+            page_norm = norm_text(pages.get(0, ""))
+            vie = value_in_evidence(c.get("value_raw"), c.get("unit_raw"), page_norm)
+            checks["value_in_evidence"] = vie
+            if vie is False:
+                reasons.append("value_not_in_evidence")
+            # unit/range checks shared with the classic path below
+            unit_c = canon_unit(c.get("unit_raw"))
+            try:
+                f = float(c.get("value_raw"))
+                ok_parse = True
+            except (TypeError, ValueError):
+                f, ok_parse = None, False
+            checks["value_parse"] = ok_parse
+            if not ok_parse and c.get("value_raw") is not None:
+                reasons.append("value_unparseable")
+            if f is not None and c.get("lane") != "mode" and not categorical:
+                window = RANGE_TABLE.get(field)
+                checks["unit"] = True
+                checks["range"] = bool(window and window[0] <= f <= window[1]) if window else True
+                if window and not checks["range"]:
+                    reasons.append("value_out_of_range")
+            elif f is not None and c.get("lane") == "mode":
+                scale = {"nA": 1e-9, "uA": 1e-6, "mA": 1e-3, "A": 1.0}.get(unit_c)
+                checks["unit"] = scale is not None
+                checks["range"] = scale is not None and 1e-9 <= abs(f) * scale <= 10
+                if not checks["unit"]:
+                    reasons.append("unknown_current_unit")
+                elif not checks["range"]:
+                    reasons.append("current_out_of_range")
+            return {"claim_id": c["claim_id"],
+                    "verdict": "verified" if not reasons else "held",
+                    "reasons": reasons, "checks": checks,
+                    "evidence_mode": "per-cell-v2"}
     # 1) source exists AND its actual sha256 matches the claim's evidence sha
     st, pages, actual_sha = cache.page_text(c["source_path"], c["page_1based"],
                                             expect_sha=c.get("pdf_sha"))
