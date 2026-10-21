@@ -1,4 +1,0 @@
-{"sha256": "8a4fee15a13295068f8f63dc0ea769f5035c33235d6c279f223651c936ca1f0d", "manufacturer": "texas_instruments", "part_identity": "TM4C1233H6PZ", "identity_source": "page_1_title_line", "identity_status": "stamped"}
-{"sha256": "87c1fef22b49e28e6634ce6df84accc312e2c62f75afc1af233644bb7c2852af", "manufacturer": "st", "part_identity": "STM32H747xI/G", "identity_source": "page_1_title_line", "identity_status": "stamped"}
-{"sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e", "manufacturer": null, "part_identity": "TMS320F280015x", "identity_source": "page_1_title_line", "identity_status": "stamped_no_mfr"}
-{"sha256": "b2e7944dec0ee8e933042de69eb418da28a959d75afddde660775e9395739240", "manufacturer": "espressif", "part_identity": "ESP32-C5", "identity_source": "page_1_title_line", "identity_status": "stamped"}

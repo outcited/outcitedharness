@@ -1,9 +1,0 @@
-{
- "total": 37,
- "verified": 19,
- "mismatch": 0,
- "missing": 0,
- "skipped": 18,
- "findings": [],
- "history_note": "cp-100 receipt ID list truncated at write (500); dispositions/*.ids are authoritative; counts identical (10,406); manifest self-sha verified prior."
-}

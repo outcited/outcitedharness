@@ -1,7 +1,0 @@
-Consider using the pymupdf_layout package for a greatly improved page layout analysis.
-st-stm32f398ve-p141 fig 0 -> extracted | problems: [] | ungrounded: [] | anchor: {'comparable': 0, 'agreed': 0, 'agreement_rate': None}
-st-stm32f358cc-p117 fig 0 -> extracted | problems: [] | ungrounded: [] | anchor: {'comparable': 0, 'agreed': 0, 'agreement_rate': None}
-st-stm32f301c6-p114 fig 0 -> rejected_structure | problems: ['series[0]_points_empty'] | ungrounded: [] | anchor: {'comparable': 0, 'agreed': 0, 'agreement_rate': None}
-st-stm32f302r6-p116 fig 0 -> extracted | problems: [] | ungrounded: [] | anchor: {'comparable': 0, 'agreed': 0, 'agreement_rate': None}
-st-stm32f328c8-p99 fig 0 -> extracted | problems: [] | ungrounded: [] | anchor: {'comparable': 0, 'agreed': 0, 'agreement_rate': None}
-rows: 5

@@ -1,6 +1,0 @@
-[
- "PORTABILITY (low): DEFAULT_BLOCKLIST is an m5-absolute path \u2014 downstream consumers on other hosts must pass --blocklist explicitly (contract documented in PR)",
- "ALIAS (info): truncated/prefix OPNs fall to document_slug tier (fail-closed) rather than matching multiple catalog aliases \u2014 correct behavior, no collision risk found",
- "MODE (verified): distinct modes EM0-3/Stop 0-2/LPRun/Deep-sleep all preserved; only case-variant/synonym merges",
- "UNITS (verified): nA cannot silently match through the A family \u2014 meaning never bent"
-]

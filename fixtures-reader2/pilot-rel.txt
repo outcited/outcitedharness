@@ -1,5 +1,0 @@
-DigiKey_Reference_Designs/pdf_cache/mcu_ti_tms570ls0232.pdf
-DigiKey_Reference_Designs/pdf_cache/ambiq_apollo510.pdf
-DigiKey_Reference_Designs/pdf_cache/st_stm32h563zg.pdf
-DigiKey_Reference_Designs/pdf_cache/ti_msp430f6767.pdf
-DigiKey_Reference_Designs/pdf_cache/microchip_dsPIC33CH512MP508-Family-Data-Sheet-DS70005371D.pdf

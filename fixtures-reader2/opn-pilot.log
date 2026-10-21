@@ -1,7 +1,0 @@
-{
- "pilot": 50,
- "decoded": 50,
- "with_package_or_temp_semantics": 6,
- "candidate_only": true,
- "gold_promotion": "NONE (review-gated)"
-}

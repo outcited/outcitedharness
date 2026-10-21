@@ -1,2 +1,0 @@
-bind queue: 5 docs, workers=8
-{"docs": 5, "bindings": 28, "wall_s": 127.3}
