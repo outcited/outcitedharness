@@ -128,6 +128,22 @@ def main() -> int:
                     "_spine": {"identity_source": row.get("identity_source")},
                 }
 
+            # DEDUPLICATION (2026-10-20 review): when a part has multiple
+            # claims for the same field, keep the one from the earliest page
+            # (title/summary page is authoritative; TOC pages carry section
+            # numbers that masquerade as spec values — e.g., efr32mg24 TOC
+            # page 6 yields flash_kb=7 from a chapter reference).
+            page = row.get("page_1based") or row.get("page") or 9999
+            # TOC entries carry dot leaders ("Flash Memory ....... 3") — never spec values
+            quote_text = str(row.get("verbatim") or "")
+            if "....." in quote_text or "......." in quote_text:
+                continue  # skip TOC artifacts
+            existing_claim = next((c for c in parts[part]["claims"] if c["field"] == axis), None)
+            if existing_claim is not None:
+                existing_page = existing_claim.get("source", {}).get("page", 9999)
+                if page >= existing_page:
+                    continue  # earlier page wins, skip this duplicate
+
             # build the claim
             role = row.get("value_role") or norm.get("rating_role") or "unknown"
             claim = {
