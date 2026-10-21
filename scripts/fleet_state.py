@@ -19,7 +19,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path("/Volumes/M5_4TB/fleet-state")
+ROOT = Path(os.environ.get(
+    "FLEET_STATE_ROOT", "/Volumes/M5_4TB/fleet-state"))
+# 2026-10-21: the NAS tree is owned by uid 1026 (_lpoperator) and not
+# group-writable by samkim, which silently killed the hourly job from
+# 2026-10-12 (PermissionError on CHANGES.md append). FLEET_STATE_ROOT moves
+# the writable state (snapshots + CHANGES.md) to a samkim-owned directory;
+# the NAS copy stays as frozen history.
 SNAP_DIR = ROOT / "snapshots"
 CHANGES = ROOT / "CHANGES.md"
 
@@ -247,6 +253,15 @@ def main():
             print(f"CHANGED:\n{entry}" + note)
         else:
             print(f"OK: no change ({stamp})")
+            # Heartbeat: a quiet fleet is legitimate, but downstream freshness
+            # watchers (Director fleet_changes feed) read CHANGES.md mtime.
+            # Append ONE dated line per calendar day maximum so a steady fleet
+            # never reads as a dead probe.
+            today = now.strftime("%Y-%m-%d")
+            last_lines = CHANGES.read_text().splitlines()[-5:] if CHANGES.exists() else []
+            if not any(l.startswith(f"- heartbeat {today}") for l in last_lines):
+                with CHANGES.open("a") as f:
+                    f.write(f"\n## {stamp}\n- heartbeat {today}: probe ran, no fleet changes\n")
     path = SNAP_DIR / (now.strftime("%Y%m%dT%H%M%SZ") + ".json")
     path.write_text(json.dumps(state, indent=2, sort_keys=True))
     for old in sorted(SNAP_DIR.glob("*.json"))[:-168]:
