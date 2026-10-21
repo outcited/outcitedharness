@@ -98,17 +98,30 @@ def local_blob_path(sha: str) -> Path:
     return base / sha[:2] / sha[2:4] / f"{sha}.pdf"
 
 
+class ManifestCorruption(RuntimeError):
+    pass
+
+
+_PREAMBLE = (re.compile(r"^CREATE TABLE", re.I),
+             re.compile(r"^COPY \d+", re.I))
+
+
 def load_manifest(wave_dir: Path) -> list[dict]:
     mf = wave_dir / "corpus-delivery-manifest.jsonl"
     rows = []
-    for line in mf.read_text().splitlines():
+    for n, line in enumerate(mf.read_text().splitlines(), 1):
         line = line.strip()
         if not line:
             continue
+        # recognized psql-dump framing (CREATE TABLE / COPY N / terminator)
+        if any(rx.match(line) for rx in _PREAMBLE) or line == "\\.":
+            continue
         try:
             rows.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
+        except json.JSONDecodeError as e:
+            # structural errors are never silently skipped (operator law 6)
+            raise ManifestCorruption(
+                f"{mf.name}:{n}: {e}") from e
     return rows
 
 
@@ -203,23 +216,88 @@ def waves_on_mirror(limit: int = 0) -> list[Path]:
     return ws[-limit:] if limit else ws
 
 
-def run(con: sqlite3.Connection, limit: int, log=print) -> dict:
+def _checkpoint(con, log, label, integrity_failures):
+    ledger = dict(con.execute(
+        "SELECT state, count(*) FROM docs GROUP BY state").fetchall())
+    queue_rows = sum(1 for _ in QUEUE_JSONL.open()) \
+        if QUEUE_JSONL.exists() else 0
+    dupe_ledger = con.execute(
+        "SELECT sha256, count(*) c FROM (SELECT sha256 FROM docs) "
+        "GROUP BY sha256 HAVING c > 1").fetchall()
+    log(json.dumps({
+        "checkpoint": label,
+        "ledger_states": ledger,
+        "queue_jsonl_rows": queue_rows,
+        "integrity_failures": integrity_failures,
+        "duplicate_ledger_keys": len(dupe_ledger)}, sort_keys=True))
+    if dupe_ledger or integrity_failures:
+        raise SystemExit(f"STOP: integrity failure at {label}")
+
+
+def rebuild_queue_from_ledger(con, log=print) -> dict:
+    """Queue is REGENERATED from the ledger (authoritative), then asserted
+    one-row-per-admitted-sha: ledger-to-queue idempotency, proven."""
+    rows = con.execute(
+        "SELECT sha256, asset_id, source_url, manufacturer, category, "
+        "wave, blob_path FROM docs WHERE state IN "
+        "('admitted','admitted-mirror')").fetchall()
+    seen = set()
+    docs = []
+    for sha, aid, url, mfr, cat, wave, blob in rows:
+        if sha in seen:
+            raise SystemExit(f"STOP: nondeterministic admission {sha}")
+        seen.add(sha)
+        docs.append({
+            "source_path": blob, "part_number": part_slug(url or "", sha[:16]),
+            "sha256": sha, "source_url": url, "asset_id": aid,
+            "manufacturer": mfr, "category": cat, "wave": wave})
+    QUEUE_JSONL.write_text("".join(
+        json.dumps(d, ensure_ascii=False, sort_keys=True) + "\n"
+        for d in docs))
+    QUEUE_JSON.write_text(json.dumps({"documents": docs}))
+    proof = {"ledger_admitted": len(rows), "queue_rows": len(docs),
+             "distinct_shas": len(seen)}
+    log(json.dumps({"queue_rebuild": proof}, sort_keys=True))
+    assert proof["ledger_admitted"] == proof["queue_rows"] \
+        == proof["distinct_shas"], "ledger-to-queue idempotency FAILED"
+    return proof
+
+
+def run(con: sqlite3.Connection, limit: int, log=print,
+        full: bool = False) -> dict:
     total = {"admitted": 0, "duplicate": 0, "held": 0, "rejected": 0}
+    integrity: list[str] = []
+    held_waves: list[str] = []
     mark = (con.execute("SELECT v FROM watermark WHERE k='wave'")
               .fetchone() or [""])[0]
     todo = [w for w in waves_on_mirror() if w.name > mark]
     log(f"watermark={mark or 'START'} waves_to_process={len(todo)}")
+    quarters = {max(1, int(len(todo) * q)): f"{int(q*100)}%"
+                for q in (0.25, 0.50, 0.75)}
     with QUEUE_JSONL.open("a") as q:
-        for w in todo:
-            c = process_wave(con, w, queue_out=q, log=log)
+        for i, w in enumerate(todo, 1):
+            if not (w / "corpus-delivery-manifest.jsonl").exists():
+                held_waves.append(w.name)   # incomplete wave: recorded
+                log(json.dumps({"wave-held": w.name,
+                                "reason": "manifest-missing"}))
+                continue
+            try:
+                c = process_wave(con, w, queue_out=q, log=log)
+            except ManifestCorruption as e:
+                integrity.append(str(e))
+                break
             for k in total:
                 total[k] += c.get(k, 0)
+            if i in quarters:
+                _checkpoint(con, log, quarters[i], integrity)
             if limit and sum(total.values()) >= limit:
                 break
-    if QUEUE_JSONL.exists():
-        lines = QUEUE_JSONL.read_text().splitlines()
-        docs = [json.loads(x) for x in lines if x.strip()][-50000:]
-        QUEUE_JSON.write_text(json.dumps({"documents": docs}, indent=1))
+    _checkpoint(con, log, "100%", integrity)
+    if held_waves:
+        log(json.dumps({"held_waves": held_waves}, sort_keys=True))
+    if integrity:
+        raise SystemExit("STOP: manifest corruption — " + "; ".join(integrity))
+    rebuild_queue_from_ledger(con, log=log)
     return total
 
 
@@ -244,6 +322,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--canary", action="store_true")
     ap.add_argument("--waves", type=int, default=0)
+    ap.add_argument("--full", action="store_true",
+                    help="drain ALL remaining waves (operator-gated)")
     ap.add_argument("--reconcile", action="store_true")
     ap.add_argument("--fixture", type=Path,
                     default=ROOT / "tests/fixtures/admission/canary-wave")
@@ -267,7 +347,7 @@ def main() -> int:
             total["duplicate"] += c2["duplicate"]
         print("CANARY:", json.dumps(total, sort_keys=True))
         return 0
-    total = run(con, a.waves)
+    total = run(con, a.waves, full=a.full)
     print("TOTAL:", json.dumps(total, sort_keys=True))
     return 0
 
