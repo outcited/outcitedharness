@@ -43,7 +43,7 @@ def test_doctrine_persists_in_registry_roundtrip(registry):
         "provenance_first", "normalization_prerequisite",
         "frontend_acceptance_honesty", "energy_economics",
         "dependency_chain_truth"}
-    assert back.policy_version == "2026-10-20.2"
+    assert back.policy_version == "2026-10-20.3"
 
 
 def test_doctrine_reaches_compiled_packet(registry, tmp_path):
@@ -71,9 +71,9 @@ REAL_BLOCKERS = [
         title="S6: normalization-to-release gate — un-normalized values "
               "cannot cross into release comparison",
         stage="normalization", severity="P0", confidence=0.85, age_h=120.0,
-        smallest_next_action="run typed-axis normalization over "
-                             "pinout-staged feed; owner typing pending "
-                             "(boundary has no normalization lane)"),
+        smallest_next_action="m5 (typed owner 2026-10-21): run typed-axis "
+                             "normalization over pinout-staged feed; "
+                             "Seven coordinates cross-lane handoff"),
     Blocker(
         blocker_id="REAL-Reader2-provenance-recovery",
         title="Reader-v2 provenance recovery — quote/page/sha chain must "
@@ -119,17 +119,18 @@ def test_hermetic_four_blocker_ranking():
         assert len(downstream_of(b.stage)) >= 1
 
 
-def test_normalization_owner_is_honestly_missing():
-    """The ownership boundary has NO normalization lane — the doctrine-
-    carrying DAG makes that gap visible instead of misattributing it."""
+def test_normalization_ownership_typed_per_operator_20261021():
+    """Operator-directed clarification 2026-10-21: M5 owns normalization +
+    identity-binding evidence correctness; cr-core owns release/store
+    integration; Seven owns cross-lane coordination. Responsibility typing
+    only — confirmed stays false (no authenticated ownership)."""
     reg = yaml.safe_load((PROJECT_DIR / "project.yaml").read_text())
     lanes = reg["ownership_boundary"]
-    owning = [l for l, v in lanes.items()
-              if "normalization" in (v.get("owns") or [])]
-    assert owning == []   # honest gap: next owner action = Sam types it
-    # and the S6 blocker's smallest_next_action says exactly that
-    s6 = next(b for b in REAL_BLOCKERS if "S6" in b.blocker_id)
-    assert "owner typing pending" in s6.smallest_next_action
+    assert "normalization" in lanes["m5"]["owns"]
+    assert "identity-binding-evidence-correctness" in lanes["m5"]["owns"]
+    assert "store-integration" in lanes["cr-core"]["owns"]
+    assert "cross-lane-coordination" in lanes["seven"]["owns"]
+    assert all(v.get("confirmed") is False for v in lanes.values())
 
 
 def test_github_comment_is_not_ack_untouched_by_pr():
@@ -146,3 +147,57 @@ def test_github_comment_is_not_ack_untouched_by_pr():
                          "director_consumer/messaging.py",
                          "director_consumer/authorization.py")
                    for f in diff), f"gate files touched: {diff}"
+
+
+def test_old_schema_migrates_and_old_writer_still_works(tmp_path):
+    """Deployment safety (operator req 3+5): a pre-doctrine project_registry
+    (the shape Seven's live director.db has today) migrates additively, the
+    NEW code reads it, and an OLD-style explicit-column INSERT (what the
+    running ingest code would do against the migrated DB) still succeeds —
+    old app and new schema coexist during staged activation."""
+    import json as _json
+    import sqlite3
+    con = sqlite3.connect(":memory:")
+    con.executescript("""
+        CREATE TABLE project_registry (
+            project_id TEXT PRIMARY KEY, name TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            objectives TEXT NOT NULL DEFAULT '[]',
+            success_criteria TEXT NOT NULL DEFAULT '[]',
+            repositories TEXT NOT NULL DEFAULT '[]',
+            policy_version TEXT NOT NULL DEFAULT '',
+            config_digest TEXT NOT NULL DEFAULT '',
+            evidence TEXT NOT NULL DEFAULT '[]',
+            human_authority TEXT NOT NULL DEFAULT '',
+            lifecycle TEXT NOT NULL DEFAULT 'active',
+            created_at REAL NOT NULL, updated_at REAL NOT NULL);
+    """)
+    con.execute(
+        "INSERT INTO project_registry(project_id, name, description,"
+        " objectives, success_criteria, repositories, policy_version,"
+        " config_digest, evidence, human_authority, lifecycle,"
+        " created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        ("designwins", "DesignWins", "pre-doctrine", "[]", "[]", "[]",
+         "2026-10-16.1", "abc", "[]", "sam", "active", 1.0, 1.0))
+    con.commit()
+    reg = ProjectRegistry(con)                 # triggers guarded ALTER
+    spec = reg.get("designwins")               # new code reads old row
+    assert spec.policy_version == "2026-10-16.1"
+    assert spec.operational_doctrine == {}
+    # old-style write (no operational_doctrine column) still succeeds
+    con.execute(
+        "INSERT OR REPLACE INTO project_registry(project_id, name,"
+        " description, objectives, success_criteria, repositories,"
+        " policy_version, config_digest, evidence, human_authority,"
+        " lifecycle, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        ("old-writer", "Old", "", "[]", "[]", "[]", "x", "x", "[]", "sam",
+         "active", 2.0, 2.0))
+    con.commit()
+    assert reg.get("old-writer").operational_doctrine == {}
+    # and a new-code register roundtrips doctrine into the same DB
+    spec2 = load_spec_from_config(PROJECT_DIR)
+    spec2.project_id = "designwins"
+    reg.register(spec2)
+    back = reg.get("designwins")
+    assert back.policy_version == "2026-10-20.3"
+    assert "energy_economics" in back.operational_doctrine

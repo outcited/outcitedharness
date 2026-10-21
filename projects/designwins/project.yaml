@@ -53,17 +53,20 @@ repositories:
   - github.com/outcited/designwins-v2        # M4 frontend
   - github.com/outcited/outcited.com         # cr-core platform/facade
   - github.com/outcited/MFGDosierfactory     # upstream PDF factory
-# Typed ownership boundary (issue #7 amendment §2). proposed lanes, NOT
-# authenticated ownership — confirmed stays false until an attributable
-# ack exists on trusted transport. Tapes is a separate project; only
-# shared resource contention appears as a cross-project dependency.
+# Typed ownership boundary (issue #7 amendment §2; normalization
+# clarification operator-directed 2026-10-21 — responsibility typing only,
+# NOT agent reassignment). proposed lanes, NOT authenticated ownership —
+# confirmed stays false until an attributable ack exists on trusted
+# transport. Tapes is a separate project; only shared resource contention
+# appears as a cross-project dependency.
 ownership_boundary:
   m5:
-    owns: [extraction, source-sha-page-quote-verification, truth-funnel,
+    owns: [extraction, normalization, identity-binding-evidence-correctness,
+           source-sha-page-quote-verification, truth-funnel,
            evidence-correctness-at-handoff]
     confirmed: false
   cr-core:
-    owns: [release-pinned-store, facade, decision-api,
+    owns: [release-pinned-store, store-integration, facade, decision-api,
            authenticated-pdf-resolver]
     confirmed: false
   m4:
@@ -73,8 +76,9 @@ ownership_boundary:
     owns: [acquisition-to-receiver-receipts]
     confirmed: false
   seven:
-    owns: [blockers, interface-contract-reconciliation,
-           integration-acceptance, escalation]
+    owns: [blockers, cross-lane-coordination,
+           interface-contract-reconciliation, integration-acceptance,
+           escalation]
     confirmed: false
-policy_version: '2026-10-20.2'
+policy_version: '2026-10-20.3'
 human_authority: sam
