@@ -45,34 +45,49 @@ def value_forms(val):
 
 
 def bind_row(row: dict, page_norm: list[str], doc_pages: int) -> dict:
-    """Bind per-cell provenance for one reader row against raw page texts."""
+    """Bind per-cell provenance. Structure-first law: the reader's cited page
+    is trusted as PRIMARY attribution when the fragment verifiably occurs
+    there; single-alternative corrections are recorded; genuine ambiguity
+    (repeated values/headings on multiple pages, cited page not among them)
+    FAILS CLOSED — cell text on a page never establishes parentage alone."""
     verbatim = row.get("verbatim") or row.get("standard_verbatim") or ""
+    cited = row.get("page_1based")
     frags = [nrm(x) for x in verbatim.split(" | ")]
     frags = [f for f in frags if len(f) >= 2]
     cells = []
     synthetic = []
+    ambiguous = []
     vforms = value_forms(row.get("value"))
     for f in frags:
-        loc = None
-        for pi in range(doc_pages):
-            if f in page_norm[pi]:
-                loc = pi + 1
-                break
+        candidates = [pi + 1 for pi in range(doc_pages) if f in page_norm[pi]]
         role = "value" if (vforms and any(v in f for v in vforms)) else "context"
-        if loc is None:
+        if not candidates:
             synthetic.append(f)
+        elif isinstance(cited, int) and cited in candidates:
+            cells.append({"text": f, "page_1based": cited, "role": role,
+                          "attribution": "reader-structure-verified"})
+        elif len(candidates) == 1:
+            cells.append({"text": f, "page_1based": candidates[0], "role": role,
+                          "attribution": "corrected-unique"})
         else:
-            cells.append({"text": f, "page_1based": loc, "role": role})
+            ambiguous.append({"text": f, "candidate_pages": candidates[:8], "role": role})
     out = dict(row)
     out["cells"] = cells
     out["synthetic_fragments"] = synthetic
+    out["ambiguous_fragments"] = ambiguous
     vcells = [c for c in cells if c["role"] == "value"]
     if cells:
         pages = [c["page_1based"] for c in cells]
         out["page_span"] = [min(pages), max(pages)]
         out["page_1based"] = (vcells[0] if vcells else cells[0])["page_1based"]
-    out["provenance"] = "per-cell-v2" if (cells and not synthetic) else (
-        "partial-synthetic" if cells else "synthetic")
+    if ambiguous:
+        out["provenance"] = "ambiguous"
+    elif cells and not synthetic:
+        out["provenance"] = "per-cell-v2"
+    elif cells:
+        out["provenance"] = "partial-synthetic"
+    else:
+        out["provenance"] = "synthetic"
     return out
 
 
@@ -106,9 +121,19 @@ def process_doc(item: dict, path_map=None) -> dict:
             "synthetic": sum(1 for b in bound if b["provenance"] == "synthetic"),
         }
     return {"status": res.get("status"), "source_path": item["source_path"],
+            "sha256": res.get("sha256"),
             "rows": rows_out, "binder_stats": stats,
             "wall_ms": round((time.time() - t0) * 1000, 1)}
 
+
+_RUN_PATH_MAP = []
+
+def _process_one(d):
+    try:
+        return process_doc(d, _RUN_PATH_MAP)
+    except Exception as exc:  # noqa: BLE001 — per-doc fail-closed
+        return {"status": f"error:{type(exc).__name__}",
+                "source_path": d.get("source_path"), "rows": {}}
 
 def main():
     import argparse
@@ -116,6 +141,9 @@ def main():
     ap.add_argument("--queue", required=True)
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--map", action="append", default=[],
+                    help="path prefix rewrite OLD=NEW (repeatable)")
     args = ap.parse_args()
     q = json.loads(Path(args.queue).read_text())
     docs = q.get("documents") or q
@@ -127,9 +155,21 @@ def main():
     agg = Counter()
     fh_rows = {r: (out / f"{r}.jsonl").open("a") for r in ("thermal", "mode", "aec", "pillars")}
     fh_led = (out / "ledger.jsonl").open("a")
+    path_map = []
+    for m in args.map:
+        old, _, new = m.partition("=")
+        if old and new:
+            path_map.append((old, new))
+    from concurrent.futures import ProcessPoolExecutor
     t0 = time.time()
-    for i, d in enumerate(docs, 1):
-        r = process_doc(d)
+    global _RUN_PATH_MAP
+    _RUN_PATH_MAP = path_map
+    if args.workers > 1:
+        with ProcessPoolExecutor(max_workers=args.workers) as ex:
+            results = list(ex.map(_process_one, docs, chunksize=4))
+    else:
+        results = [_process_one(d) for d in docs]
+    for i, r in enumerate(results, 1):
         sha = r.get("sha256")
         for reader, rows in (r.get("rows") or {}).items():
             for row in rows:

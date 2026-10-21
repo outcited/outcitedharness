@@ -51,6 +51,10 @@ def row_to_claim(row: dict, lane: str, source_file: str) -> dict:
         "part_slug": row.get("part_number"),
         "doc_class": row.get("doc_class"),
         "source_file": source_file,
+        # Reader-v2 provenance passthrough (extraction-time binding)
+        "cells": row.get("cells"),
+        "provenance": row.get("provenance"),
+        "page_span": row.get("page_span"),
     }
 
 # ------------------------------------------------------------- unit canonical
@@ -263,12 +267,25 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
     field = c.get("field")
     categorical = (isinstance(field, str) and
                    (field.startswith(CATEGORICAL_FIELDS)))
-    # 0) Reader-v2 per-cell provenance: every cell verified on ITS OWN page
+    # 0) Reader-v2 per-cell provenance: every cell verified on ITS OWN page.
+    #    Mandatory-law: no evidence sha on the claim => rejected regardless
+    #    of any other field; malformed cells => held (never accepted).
     cells = c.get("cells")
     if cells is not None:
+        if not c.get("pdf_sha"):
+            return {"claim_id": c["claim_id"], "verdict": "rejected",
+                    "reasons": ["no_evidence_sha"], "checks": {"sha_mandatory": False}}
+        if not isinstance(cells, list) or not all(
+                isinstance(x, dict) and isinstance(x.get("page_1based"), int)
+                and isinstance(x.get("text"), str) for x in cells):
+            return {"claim_id": c["claim_id"], "verdict": "held",
+                    "reasons": ["malformed_cells"], "checks": {"cells": False}}
         if c.get("provenance") in ("synthetic", "partial-synthetic"):
             checks["cells"] = False
             reasons.append("synthetic_fragments_present")
+        if c.get("provenance") == "ambiguous":
+            checks["cells"] = False
+            reasons.append("ambiguous_page_attribution")
         cell_ok = not reasons
         for cell in cells:
             st, pages, actual_sha = cache.page_text(
@@ -322,7 +339,11 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
                     "verdict": "verified" if not reasons else "held",
                     "reasons": reasons, "checks": checks,
                     "evidence_mode": "per-cell-v2"}
-    # 1) source exists AND its actual sha256 matches the claim's evidence sha
+    # 1) source exists AND its actual sha256 matches the claim's evidence sha.
+    #    Mandatory: a claim without an evidence sha can never be accepted.
+    if not c.get("pdf_sha"):
+        return {"claim_id": c["claim_id"], "verdict": "rejected",
+                "reasons": ["no_evidence_sha"], "checks": {"sha_mandatory": False}}
     st, pages, actual_sha = cache.page_text(c["source_path"], c["page_1based"],
                                             expect_sha=c.get("pdf_sha"))
     checks["source"] = st == "ok"
@@ -645,6 +666,14 @@ def cmd_l4(args):
                     r["slug_source"] = "manifest_join"
             t = identity_tier(r.get("part_slug"), catalog)
             r.update(t)
+            # identity anchor law: the VERIFIED CONTENT sha is the document
+            # identity; manifest URL stems are retrieval hints, never identity
+            r["identity_anchor"] = {
+                "document_sha256": r.get("pdf_sha"),
+                "sha_verified_by": "L2-recompute" if r.get("verdict") == "verified" else "unverified",
+                "part_slug_is": "url_derived_hint" if r.get("slug_source") == "manifest_join" else "as-provided",
+                "note": "slug never substitutes for content sha; exact_opn requires catalog match on the hint",
+            }
             fh.write(json.dumps(r, sort_keys=True) + "\n")
             counts[t["tier"]] += 1
     print(json.dumps({"catalog_size": len(catalog),
