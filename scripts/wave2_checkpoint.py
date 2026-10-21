@@ -53,8 +53,29 @@ def collect():
                 sh(["rsync", "-az", "-e",
                     "ssh -o ConnectTimeout=30 -o BatchMode=yes",
                     f"{user}@{ip}:~/lane-out/wave2/{name}/{f}.jsonl", str(dest) + "/"])
+            # per-batch multiset hash (deterministic replay evidence)
+            h = _batch_hash(dest)
+            (dest / ".batchhash").write_text(h)
             marker.touch()
     return docs_done, batches
+
+
+def _batch_hash(dest):
+    import hashlib as _h
+    rows = []
+    for lane in ("pillars", "mode", "thermal", "aec", "ledger"):
+        f = dest / f"{lane}.jsonl"
+        if not f.exists():
+            continue
+        for line in f.open():
+            x = json.loads(line)
+            key = [x.get("pdf_sha") or x.get("sha256"),
+                   x.get("field") or x.get("mode") or x.get("metric") or x.get("grade") or x.get("status"),
+                   x.get("value"), x.get("unit"), x.get("page_1based"), x.get("verbatim"),
+                   json.dumps(x.get("cells"), sort_keys=True) if x.get("cells") is not None else None]
+            rows.append(json.dumps(key, sort_keys=True, default=str))
+    rows.sort()
+    return _h.sha256("\n".join(rows).encode()).hexdigest()
 
 
 def analyze():
@@ -209,6 +230,8 @@ def violations(batches):
     return alerts
 
 
+_regression_last = {}
+
 def main():
     RECEIPTS.mkdir(parents=True, exist_ok=True)
     docs_done, batches = collect()
@@ -243,10 +266,48 @@ def main():
         (RECEIPTS / f"{name}.receipt").write_text(json.dumps(receipt, indent=1))
         print(f"RECEIPT {name}: docs={docs_done} verified={summary.get('verdicts')} "
               f"spine-recovered={len(spine_rec)} indep-pass={len(indep)} divergent={len(divergent)}")
+    reg = _regression_check()
+    _regression_last.clear(); _regression_last.update(reg)
+    print("regression:", reg)
     if alerts:
         print("VIOLATIONS:", alerts)
+        # rule: violation BLOCKS downstream acceptance of affected batches
+        blocked = sorted({a.split(":")[1].strip(" {}'") for a in alerts
+                          if a.startswith("duplicate batch names")})
+        blocklist = RECEIPTS / "ACCEPTANCE-BLOCKLIST.json"
+        bl = json.loads(blocklist.read_text()) if blocklist.exists() else {"batches": []}
+        for b in blocked:
+            if b not in bl["batches"]:
+                bl["batches"].append(b)
+        bl["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        bl["law"] = "blocked batches are excluded from every recovery count and " \
+                    "from any future L3/L4/L5 acceptance until reviewed"
+        blocklist.write_text(json.dumps(bl, indent=1))
+        print("BLOCKED batches:", blocked)
     _telemetry(docs_done, batches, summary, alerts,
                spine=len(spine_rec), indep=len(indep), divergent=len(divergent))
+
+
+def _regression_check(n=400):
+    """Re-verify n previously-verified classic claims; any regression blocks."""
+    import random
+    sys.path.insert(0, str(HARNESS / "scripts"))
+    from spine import l2_verify_claim, PdfCache
+    l1 = {}
+    for l in open("/Users/samkim/lane-out/spine/claims-l1.jsonl"):
+        c = json.loads(l)
+        l1[c["claim_id"]] = c
+    ver = []
+    for l in open("/Users/samkim/lane-out/spine/full-v2/l2-ledger.jsonl"):
+        r = json.loads(l)
+        if r["verdict"] == "verified":
+            ver.append(r["claim_id"])
+    sample = random.Random(20261021).sample(ver, min(n, len(ver)))
+    cache = PdfCache()
+    ok = sum(1 for cid in sample
+             if l2_verify_claim(l1[cid], cache)["verdict"] == "verified")
+    return {"sample": len(sample), "still_verified": ok,
+            "regressions": len(sample) - ok}
 
 
 def _telemetry(docs_done, batches, summary, alerts, **kw):
@@ -261,6 +322,16 @@ def _telemetry(docs_done, batches, summary, alerts, **kw):
         "recovered_independently_verified_total": kw.get("indep"),
         "divergent_held_total": kw.get("divergent"),
         "alerts": alerts or [],
+        "s6_release_dependency": {
+            "gate": "S6 spine->ExportStore promotion (HOLD per Sam 2026-10-21)",
+            "recovery_independently_verified": kw.get("indep"),
+            "interpretation": "processed documents are NOT released claims; "
+                              "only independently-verified recovered IDs advance "
+                              "the S6 dependency",
+            "confidence": ("high" if (alerts == [] and kw.get("indep", 0) > 0 and
+                                      _regression_last.get("regressions") == 0)
+                           else "reduced"),
+        },
         "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     })
     p.write_text(json.dumps(t, indent=1, sort_keys=True))
