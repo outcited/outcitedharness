@@ -1,0 +1,7 @@
+#!/usr/bin/expect -f
+set timeout 25
+spawn ssh -o StrictHostKeyChecking=accept-new samsonkim@[lindex $argv 0] [lindex $argv 1]
+expect {
+    "assword:" { send "Yosemite92109!\r"; exp_continue }
+    eof
+}

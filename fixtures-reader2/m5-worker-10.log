@@ -1,0 +1,51 @@
+Consider using the pymupdf_layout package for a greatly improved page layout analysis.
+MuPDF error: format error: cmsOpenProfileFromMem failed
+
+MuPDF error: unsupported error: cannot create appearance stream for 3D annotations
+
+MuPDF error: unsupported error: cannot create appearance stream for 3D annotations
+
+MuPDF error: format error: cmsOpenProfileFromMem failed
+
+MuPDF error: format error: cmsOpenProfileFromMem failed
+
+MuPDF error: format error: cmsOpenProfileFromMem failed
+
+MuPDF error: format error: cmsOpenProfileFromMem failed
+
+MuPDF error: format error: No default Layer config
+
+MuPDF error: format error: cmsOpenProfileFromMem failed
+
+MuPDF error: format error: No default Layer config
+
+MuPDF error: format error: No default Layer config
+
+MuPDF error: syntax error: too many sub-functions in stitching function
+
+MuPDF error: syntax error: too many sub-functions in stitching function
+
+MuPDF error: syntax error: too many sub-functions in stitching function
+
+MuPDF error: syntax error: too many sub-functions in stitching function
+
+MuPDF error: syntax error: too many sub-functions in stitching function
+
+MuPDF error: unsupported error: cannot create appearance stream for 3D annotations
+
+MuPDF error: unsupported error: cannot create appearance stream for 3D annotations
+
+{
+ "documents": 14556,
+ "rows": 19,
+ "docs_no_rows": 14538,
+ "docs_with_rows": 15,
+ "error:AttributeError": 3,
+ "mode:active": 2,
+ "mode:idle": 2,
+ "mode:run": 1,
+ "mode:shutdown": 5,
+ "mode:sleep": 3,
+ "mode:standby": 5,
+ "mode:standby current": 1
+}

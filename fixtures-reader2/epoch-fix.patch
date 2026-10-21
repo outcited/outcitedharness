@@ -1,0 +1,19 @@
+diff --git a/scripts/sentinel.py b/scripts/sentinel.py
+index 93b27f58..f22f5e71 100644
+--- a/scripts/sentinel.py
++++ b/scripts/sentinel.py
+@@ -35,9 +35,13 @@ LEGACY_SENTINEL = Path("/Volumes/M5_4TB/extract-results/sentinel")
+ 
+ 
+ def hourly_claims_check(con):
++    # created_at is a unix epoch FLOAT in the live schema (verified
++    # 2026-10-20: MAX(created_at) = 1792068026.02). Comparing it against
++    # datetime('now', ...) TEXT always evaluated false — the alert fired
++    # "no claims" even while claims flowed (SENTINEL-EPOCH-01).
+     rows = con.execute(
+         "SELECT COUNT(*) FROM results WHERE created_at > "
+-        "datetime('now', '-2 hours')").fetchall()
++        "CAST(strftime('%s','now','-2 hours') AS REAL)").fetchall()
+     n = rows[0][0] if rows else 0
+     if n == 0:
+         ALERTS.write_text(

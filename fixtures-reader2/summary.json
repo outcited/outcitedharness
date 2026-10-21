@@ -1,0 +1,9 @@
+{
+ "total_held": 50259,
+ "recovered_independently_verified": 10406,
+ "recovered_spine_only_divergent_held": 92,
+ "content_covered_by_verified_sibling_shadow": 459,
+ "not_recovered_unique": 39302,
+ "mutually_exclusive_sum": 50259,
+ "checker": "spine.value_in_evidence_family @ a7170204 (deterministic rules, rule-ids recorded)"
+}

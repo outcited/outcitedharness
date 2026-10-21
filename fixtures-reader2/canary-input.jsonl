@@ -1,0 +1,2 @@
+{"pdf_sha":"test1","page_1based":1,"verbatim":"RthetaJA = 64.4 C/W","value":64.4,"unit":"C/W","metric":"RthetaJA","condition_verbatim":null,"table_title":"Thermal Info"}
+{"pdf_sha":"test2","page_1based":2,"verbatim":"VDS = 40 V","value":40,"unit":"V","metric":"VDS","condition_verbatim":"VGS = 0 V","table_title":"Absolute Max"}

@@ -1,0 +1,131 @@
+{
+ "a": "nxp-k22p80m120sf5v2",
+ "a_claims": 12,
+ "axes": [
+  {
+   "a": {
+    "conditions": {},
+    "evidence": {
+     "page": 1,
+     "sha": "0d0cfa9a853c2543f656f96db3a81dec7d25977a2a671b51eb14fa1a7f65409d",
+     "verbatim": "\u2022 Up to 120 MHz ARM Cortex-M4-based core with DSP"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "MHz",
+    "value": 120.0
+   },
+   "b": {
+    "conditions": {},
+    "evidence": {
+     "page": 1,
+     "sha": "1010649cc8e7a1d0da2d2c8357971869c7d0ae931523a84d56490381af291862",
+     "verbatim": "processor. It operates at a maximum speed of 100 MHz and features up to 1024"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "MHz",
+    "value": 100.0
+   },
+   "field": "clk_max_mhz",
+   "lane": "pillars",
+   "qualification": null,
+   "status": "comparable"
+  },
+  {
+   "a": {
+    "conditions": {},
+    "evidence": {
+     "page": 4,
+     "sha": "0d0cfa9a853c2543f656f96db3a81dec7d25977a2a671b51eb14fa1a7f65409d",
+     "verbatim": "3.4.1 Flash (FTFE) electrical specifications............... 27"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "kB",
+    "value": 1.0
+   },
+   "b": {
+    "conditions": {},
+    "evidence": {
+     "page": 4,
+     "sha": "1010649cc8e7a1d0da2d2c8357971869c7d0ae931523a84d56490381af291862",
+     "verbatim": "64 Kbytes Flash"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "kB",
+    "value": 64.0
+   },
+   "field": "flash_kb",
+   "lane": "pillars",
+   "qualification": null,
+   "status": "comparable"
+  },
+  {
+   "a": {
+    "conditions": {},
+    "evidence": {
+     "page": 3,
+     "sha": "0d0cfa9a853c2543f656f96db3a81dec7d25977a2a671b51eb14fa1a7f65409d",
+     "verbatim": "2 Timers"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "count",
+    "value": 2.0
+   },
+   "b": {
+    "conditions": {},
+    "evidence": {
+     "page": 1,
+     "sha": "1010649cc8e7a1d0da2d2c8357971869c7d0ae931523a84d56490381af291862",
+     "verbatim": "USARTs, 4 UARTs, 3 TWIs, 1 SPI, as well as 1 PWM timer, 2 three-channel"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "count",
+    "value": 1.0
+   },
+   "field": "n_timer",
+   "lane": "pillars",
+   "qualification": null,
+   "status": "comparable"
+  },
+  {
+   "a": {
+    "conditions": {},
+    "evidence": {
+     "page": 1,
+     "sha": "0d0cfa9a853c2543f656f96db3a81dec7d25977a2a671b51eb14fa1a7f65409d",
+     "verbatim": "\u2022 Up to 1 MB of flash memory with up to 128 KB of SRAM"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "kB",
+    "value": 128.0
+   },
+   "b": {
+    "conditions": {},
+    "evidence": {
+     "page": 1,
+     "sha": "1010649cc8e7a1d0da2d2c8357971869c7d0ae931523a84d56490381af291862",
+     "verbatim": "Kbytes of Flash and up to 80 Kbytes of SRAM. The peripheral set includes 3"
+    },
+    "identity": "exact_opn",
+    "role": null,
+    "unit": "kB",
+    "value": 80.0
+   },
+   "field": "sram_kb",
+   "lane": "pillars",
+   "qualification": null,
+   "status": "comparable"
+  }
+ ],
+ "axis_counts": {
+  "comparable": 4
+ },
+ "b": "ww1-atmel-11158-32-bitcortex-m4-microcontroller-sam4n16-sam4n8-datasheet",
+ "b_claims": 13
+}
