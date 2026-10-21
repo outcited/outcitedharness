@@ -263,11 +263,38 @@ def rebuild_queue_from_ledger(con, log=print) -> dict:
     return proof
 
 
+def retry_held(con: sqlite3.Connection, log=print) -> dict:
+    """Objective 1 (operator 2026-10-21): held rows re-examine on rerun —
+    a blob that arrived since the last pass admits now. Rejected rows are
+    NEVER retried (deterministic verdicts)."""
+    recovered = 0
+    still_held = 0
+    for sha, wave, aid, url, mfr, cat in con.execute(
+            "SELECT sha256, wave, asset_id, source_url, manufacturer, "
+            "category FROM docs WHERE state='held'").fetchall():
+        blob = local_blob_path(sha)
+        if blob.exists() and sha256_file(blob) == sha:
+            con.execute(
+                "UPDATE docs SET state='admitted', reason='', blob_path=?, "
+                "admitted_at=? WHERE sha256=?", (str(blob), time.time(), sha))
+            recovered += 1
+        else:
+            still_held += 1
+    con.commit()
+    if recovered:
+        rebuild_queue_from_ledger(con, log=log)
+    log(json.dumps({"held_retry": {"recovered": recovered,
+                                   "still_held": still_held}},
+                   sort_keys=True))
+    return {"recovered": recovered, "still_held": still_held}
+
+
 def run(con: sqlite3.Connection, limit: int, log=print,
         full: bool = False) -> dict:
     total = {"admitted": 0, "duplicate": 0, "held": 0, "rejected": 0}
     integrity: list[str] = []
     held_waves: list[str] = []
+    retry_held(con, log=log)
     mark = (con.execute("SELECT v FROM watermark WHERE k='wave'")
               .fetchone() or [""])[0]
     todo = [w for w in waves_on_mirror() if w.name > mark]
