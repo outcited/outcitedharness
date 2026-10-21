@@ -1,0 +1,12 @@
+{
+ "rows": 9264,
+ "unique_triples": 7864,
+ "intra_wave_duplicate_rows": 1400,
+ "unique_opn_field_keys": 6132,
+ "exact_duplicates_of_served": 47,
+ "conflict_values_excluded": 442,
+ "conflict_keys_excluded": 277,
+ "pure_new_values_rc_included": 7375,
+ "accounting_closed": true,
+ "grains": "row -> (opn,field,value) triple -> (opn,field) key -> value classification"
+}
