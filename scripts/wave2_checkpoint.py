@@ -138,48 +138,22 @@ def recovered_intersection(claims_path, l2dir):
         k = ck(c)
         if k in held_keys:
             spine_rec.extend(held_keys[k])
-    # independent check on the recovered subset (compact in-line checker)
+    # independent check on the recovered subset — SINGLE SOURCE OF TRUTH:
+    # spine.value_in_evidence_family (deterministic rules, rule ids recorded)
     import hashlib, re, unicodedata
     import pymupdf
+    sys.path.insert(0, str(HARNESS / "scripts"))
+    from spine import value_in_evidence_family as fam_match_with_field
+
     _WS = re.compile(r"\s+")
 
     def nrm(s):
         s = unicodedata.normalize("NFKC", s or "").replace("−", "-")
         return _WS.sub(" ", s).strip()
 
-    FAM = {"kB": [("kB", 1.0), ("KB", 1.0), ("MB", 1 / 1024), ("GB", 1 / 1024 ** 2),
-                  ("B", 1024), ("bytes", 1024)],
-           "uA": [("uA", 1.0), ("µA", 1.0), ("mA", 1 / 1000)],
-           "mA": [("mA", 1.0), ("uA", 1000), ("µA", 1000)],
-           "V": [("V", 1.0), ("mV", 1000)],
-           "MHz": [("MHz", 1.0), ("GHz", 1 / 1000), ("kHz", 1000)]}
-
-    def canon(u):
-        return {"KB": "kB", "kb": "kB", "µA": "uA", "μA": "uA"}.get(str(u or "").strip(), u)
-
-    def forms(f):
-        out = {str(f)}
-        try:
-            if f == int(f):
-                out |= {str(int(f)), f"{int(f):,}"}
-            for d in (1, 2, 3):
-                out.add(f"{f:.{d}f}")
-        except Exception:
-            pass
-        return {x for x in out if x}
-
-    def fam_match(val, unit, text):
-        try:
-            f = float(val)
-        except (TypeError, ValueError):
-            return None
-        uc = canon(unit)
-        low = text.lower()
-        for u, k in ([(uc, 1.0)] if uc else []) + FAM.get(uc, []):
-            for form in forms(f * k):
-                if form in text and (not u or re.search(rf"\b{re.escape(u.lower())}s?\b", low)):
-                    return f"{form} {u}"
-        return None
+    def fam_match(val, unit, text, field=None):
+        r = fam_match_with_field(val, unit, text, field=field)
+        return r[0] if r else None
 
     docs, indep_pass_ids, divergent_ids = {}, set(), set()
     kmap = {}
@@ -209,7 +183,8 @@ def recovered_intersection(claims_path, l2dir):
                     if 1 <= pg <= d.page_count:
                         t = nrm(d[pg - 1].get_text() or "")
                         if nrm(anchor["text"]) in t and fam_match(
-                                c.get("value_raw"), c.get("unit_raw"), t):
+                                c.get("value_raw"), c.get("unit_raw"), t,
+                                field=c.get("field")):
                             ok = True
             if ok:
                 ok_any = True
@@ -269,6 +244,19 @@ def main():
     reg = _regression_check()
     _regression_last.clear(); _regression_last.update(reg)
     print("regression:", reg)
+    if reg.get("regressions", 0) > 0:
+        # law: regression BLOCKS all unreviewed wave-2 batches from acceptance
+        bl = RECEIPTS / "ACCEPTANCE-BLOCKLIST.json"
+        bldata = json.loads(bl.read_text()) if bl.exists() else {"batches": []}
+        for host in ("winter", "happy"):
+            for d in sorted((OUT / host).glob("*")):
+                name = d.name
+                if name not in bldata["batches"]:
+                    bldata["batches"].append(name)
+        bldata["reason"] = f"regression check failed: {reg}"
+        bldata["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        bl.write_text(json.dumps(bldata, indent=1))
+        print("REGRESSION -> all wave-2 batches BLOCKED from acceptance")
     if alerts:
         print("VIOLATIONS:", alerts)
         # rule: violation BLOCKS downstream acceptance of affected batches

@@ -254,25 +254,77 @@ UNIT_FAMILY = {
     "MHz": [("MHz", 1.0), ("GHz", 1/1000), ("kHz", 1000), ("Hz", 1e6)],
     "V": [("V", 1.0), ("mV", 1000)],
 }
+# Memory fields use binary (1024) conventions per datasheet industry practice.
+MEMORY_FIELDS = {"flash_kb", "sram_kb", "eeprom_kb"}
+
+# Deterministic printed-form rules (cp-50 acceptance, 2026-10-21). Each rule
+# records its id in the check; manufacturer text and value_raw are NEVER
+# modified. Anything not covered stays HELD — never bend meaning to agree.
+_HYPHEN_TOKEN = None  # compiled lazily
 
 
-def value_in_evidence_family(val, unit_raw, page_text_norm):
-    """Value+unit must appear on the page in the claim's unit family —
-    covers 1024-based memory and 1000-based SI conversions (a 1024 kB
-    claim may be printed '1 MB'). Returns (ok, matched) or None for
-    non-numeric values."""
+def _printed_unit_tokens(u):
+    """Word-boundary unit token patterns for a canonical unit."""
+    import re as _re
+    variants = {u.lower(), u.lower() + "s"} if u else set()
+    if u == "B":
+        variants |= {"byte", "bytes", "b"}
+    if u == "kB":
+        variants |= {"kb", "kbyte", "kbytes"}
+    if u == "MB":
+        variants |= {"mb", "mbyte", "mbytes"}
+    return _re.compile(rf"\b(?:{'|'.join(_re.escape(v) for v in variants)})\b") if variants else None
+
+
+def value_in_evidence_family(val, unit_raw, page_text_norm, field=None):
+    """Deterministic source-preserving printed-form verification.
+
+    Rules (id recorded on match):
+      mem-1024-{unit}   memory fields: kB family at 1024, incl. 'B/bytes'
+      si-1000-{unit}    non-memory: SI family at 1000 (uA..A, V, MHz)
+      int-comma         integer grouping '1,024'
+      hyphen-join       '4352-bytes' tokenization (hyphen == space)
+      k-prefix-exact    '2K Bytes' ONLY when K*1024 equals the value exactly
+    Ambiguous forms (K prefix that doesn't factor exactly, unknown units,
+    decimal/binary conflict) return (False, None) -> HELD upstream."""
     try:
         f = float(val)
     except (TypeError, ValueError):
         return None
     unit_c = canon_unit(unit_raw)
-    low = page_text_norm.lower()
+    is_mem = field in MEMORY_FIELDS if field else (unit_c in ("kB", "MB"))
+    base = 1024 if (is_mem and unit_c in ("kB", "MB", "GB")) else 1000
+    import re as _re
     fam = UNIT_FAMILY.get(unit_c, [])
-    candidates = ([(unit_c, f)] if unit_c else []) + [(u, f * k) for u, k in fam]
-    for u, v in candidates:
+    candidates = ([(unit_c, f, "base")] if unit_c else []) + \
+                 [(u, f * k, f"family-{base}") for u, k in fam]
+    for u, v, how in candidates:
         for form in value_forms(v):
-            if form in page_text_norm and (not u or u.lower() in low):
-                return True, f"{form} {u}".strip()
+            if form in page_text_norm:
+                pat = _printed_unit_tokens(u)
+                if pat is None or pat.search(page_text_norm.lower()):
+                    return True, f"{form} {u} [rule:{'mem-1024' if base==1024 else 'si-1000'}-{u or how}]"
+    # integer comma grouping
+    if f == int(f) and f"{int(f):,}" in page_text_norm:
+        return True, f"{int(f):,} [rule:int-comma]"
+    # hyphen-joined tokens: '4352-bytes' == '4352 bytes'
+    for u, v, how in candidates:
+        for form in value_forms(v):
+            if u:
+                pat = _printed_unit_tokens(u)
+                if pat and _re.search(rf"{_re.escape(form)}[-–—]({_re.escape(u.lower())}|bytes|byte)",
+                                      page_text_norm.lower()):
+                    return True, f"{form}-{u} [rule:hyphen-join]"
+    # K-prefix exact binary factor ('2K Bytes' when value == 2*1024)
+    if unit_c in ("kB", "B") and f == int(f):
+        import math
+        n = int(f)
+        for kprefix in ("K", "k"):
+            if n % 1024 == 0:
+                m = n // 1024
+                if _re.search(rf"\b{m}\s*{kprefix}\s*(?:bytes|Bytes|BYTE|byte|B)\b", page_text_norm):
+                    return True, f"{m}K [rule:k-prefix-exact-1024]"
+            break
     return False, None
 
 
@@ -343,7 +395,7 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
                 st2, pages2, _ = cache.page_text(
                     c["source_path"], anchor["page_1based"], expect_sha=c.get("pdf_sha"))
                 fam = (value_in_evidence_family(c.get("value_raw"), c.get("unit_raw"),
-                                                norm_text(pages2.get(0, "")))
+                                                norm_text(pages2.get(0, "")), field=c.get("field"))
                        if st2 == "ok" else (False, None))
                 checks["value_in_evidence"] = bool(fam and fam[0])
                 checks["value_matched_form"] = fam[1] if fam else None
@@ -353,7 +405,8 @@ def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
                 st2, pages2, _ = cache.page_text(
                     c["source_path"], vcell["page_1based"], expect_sha=c.get("pdf_sha"))
                 page_norm = norm_text(pages2.get(0, ""))
-                fam = value_in_evidence_family(c.get("value_raw"), c.get("unit_raw"), page_norm)
+                fam = value_in_evidence_family(c.get("value_raw"), c.get("unit_raw"),
+                                               page_norm, field=c.get("field"))
                 checks["value_in_evidence"] = bool(fam and fam[0])
                 checks["value_matched_form"] = fam[1] if fam else None
                 if not checks["value_in_evidence"]:
@@ -588,6 +641,7 @@ def cmd_l1(args):
             if row.get("verdict") not in (None, "printed_row"):
                 continue
             c = row_to_claim(row, lane, os.path.basename(path))
+            c["source_batch"] = os.path.basename(os.path.dirname(path)) or "unknown"
             cid = claim_id(c)
             c["claim_id"] = cid
             total += 1
@@ -642,7 +696,25 @@ def cmd_l2(args):
                       "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, indent=1))
 
 
+DEFAULT_BLOCKLIST = Path("/Users/samkim/lane-out/spine/reader2/wave2-receipts/ACCEPTANCE-BLOCKLIST.json")
+
+
+def load_blocklist(path=None):
+    p = Path(path) if path else DEFAULT_BLOCKLIST
+    if p.exists():
+        try:
+            return set(json.loads(p.read_text()).get("batches", []))
+        except json.JSONDecodeError:
+            return {"*"}  # corrupt blocklist => fail closed on everything
+    return set()
+
+
+def blocked(row, bl):
+    return bool(bl) and (row.get("source_batch") in bl or "*" in bl)
+
+
 def cmd_l3(args):
+    bl = load_blocklist(getattr(args, "blocklist", None))
     claims = {json.loads(l)["claim_id"]: json.loads(l)
               for l in open(args.claims) if l.strip()}
     led = Path(args.out_dir) / "l3-normalized.jsonl"
@@ -656,6 +728,9 @@ def cmd_l3(args):
             if not c:
                 counts["missing_claim"] += 1
                 continue
+            if blocked(c, bl):
+                counts["blocked_by_blocklist"] += 1
+                continue
             nrow = l3_normalize_claim(r, c)
             nrow.update({k: c[k] for k in ("field", "part_slug", "lane",
                                            "conditions_raw", "verbatim",
@@ -666,6 +741,7 @@ def cmd_l3(args):
 
 
 def cmd_l4(args):
+    bl = load_blocklist(getattr(args, "blocklist", None))
     catalog = set()
     for f in args.catalog:
         for line in open(f):
@@ -729,7 +805,9 @@ def cmd_l4(args):
 
 
 def cmd_l5(args):
+    bl = load_blocklist(getattr(args, "blocklist", None))
     rows = [json.loads(l) for l in open(args.l4) if l.strip()]
+    rows = [r for r in rows if not blocked(r, bl)]
     by_part = defaultdict(list)
     for r in rows:
         key = r.get("opn") or r.get("part_slug")
@@ -783,14 +861,16 @@ def main():
     p.add_argument("--map", action="append"); p.set_defaults(fn=cmd_l2)
     p = sub.add_parser("l3"); p.add_argument("--claims", required=True)
     p.add_argument("--l2", required=True); p.add_argument("--out-dir", required=True)
-    p.set_defaults(fn=cmd_l3)
+    p.add_argument("--blocklist", default=None); p.set_defaults(fn=cmd_l3)
     p = sub.add_parser("l4"); p.add_argument("--l3", required=True)
     p.add_argument("--catalog", nargs="+", required=True)
     p.add_argument("--manifests", default="/Users/samkim/lane-out/fold-bank-20261020/manifests")
-    p.add_argument("--out-dir", required=True); p.set_defaults(fn=cmd_l4)
+    p.add_argument("--out-dir", required=True)
+    p.add_argument("--blocklist", default=None); p.set_defaults(fn=cmd_l4)
     p = sub.add_parser("l5"); p.add_argument("--l4", required=True)
     p.add_argument("--a", required=True); p.add_argument("--b", required=True)
-    p.add_argument("--out", required=True); p.set_defaults(fn=cmd_l5)
+    p.add_argument("--out", required=True)
+    p.add_argument("--blocklist", default=None); p.set_defaults(fn=cmd_l5)
     args = ap.parse_args()
     sys.exit(args.fn(args) or 0)
 
