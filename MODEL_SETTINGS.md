@@ -84,3 +84,20 @@ REQUIRED settings (all measured):
 3. Point form varies (`[x,y]` pairs vs `{x,y}` objects) — normalize before
    validation (`_normalize_curve_points`).
 4. Latency: ~80s per plot crop at 200 DPI; image ~620 tokens.
+
+## ENGINE ROUTING LAW (Sam ruling, 2026-10-21 — DO NOT OVERRIDE)
+
+**Cloud subscriptions are PRIMARY for volume extraction. TP4 is ADJUDICATION-ONLY.**
+
+| engine | role | rate limit | cost |
+|---|---|---|---|
+| **QwenCloud DSV41** (`token-plan.maas.qwencloudapi.com`) | PRIMARY for ALL text extraction (readers, classification, table extraction, binding) | subscription = unlimited | tokens |
+| **MiMo** (`token-plan-sgp.xiaomimimo.com`) | PRIMARY for ALL vision extraction (images, drawings, raster curves) | free, unlimited | free |
+| **TP4** (`dgx2:8888`) | ADJUDICATION ONLY — genuinely ambiguous cases the cloud rejects or needs 1M context | 8 concurrent | local GPU |
+| **OpenRouter** | OVERFLOW when cloud subscriptions are throttled | pay-per-doc | $0.004/doc |
+
+**Why:** measured 2026-10-21 — QwenCloud 1.9s/call unlimited parallel vs TP4 8-request ceiling.
+Volume extraction on TP4 starves every other lane. This rule exists because an agent
+routed reader-v3 through TP4 and bottlenecked 6 boxes on one GPU cluster.
+
+**Code defaults MUST point to QwenCloud.** TP4 is explicitly opted into, never the default.
