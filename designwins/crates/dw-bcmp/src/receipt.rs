@@ -163,6 +163,38 @@ fn engine_git(repo_root: &Path) -> String {
         )
 }
 
+/// The engine crates' git TREE hashes — the true engine-code identity.
+///
+/// `HEAD` moves when unrelated lanes commit; the tree hash of `dw-decide` +
+/// friends only moves when the engine itself changes. Receipts pin both;
+/// replay comparison strips the informational `git` and requires the trees
+/// to match (a changed tree is `replay_required`, exactly as a changed feed).
+fn engine_trees(repo_root: &Path) -> BTreeMap<String, String> {
+    let crates = [
+        "dw-decide",
+        "dw-knives",
+        "dw-types",
+        "dw-normalize",
+        "dw-extract",
+    ];
+    let mut out = BTreeMap::new();
+    for c in crates {
+        let spec = format!("HEAD:designwins/crates/{c}");
+        let hit = std::process::Command::new("git")
+            .args(["rev-parse", &spec])
+            .current_dir(repo_root)
+            .output()
+            .ok()
+            .filter(|o| o.status.success())
+            .map_or_else(
+                || "unknown".into(),
+                |o| String::from_utf8_lossy(&o.stdout).trim().to_string(),
+            );
+        out.insert(c.to_string(), hit);
+    }
+    out
+}
+
 fn atomic_write(path: &Path, body: &str) -> Result<(), RunError> {
     let tmp = path.with_extension("tmp");
     fs::write(&tmp, body).map_err(|e| RunError::Failed(format!("write {}: {e}", tmp.display())))?;
@@ -258,7 +290,10 @@ pub fn run_batch(opts: &RunOpts) -> Result<BatchOutcome, RunError> {
         "feed_sha256": loaded.meta.feed_sha256,
         "feed_path": opts.feed.display().to_string(),
         "engine": {
+            // Informational: repo HEAD at run time (moves with unrelated
+            // lanes). Replay gates on `engine_trees` + feed sha, not this.
             "git": state.engine_git,
+            "engine_trees": engine_trees(&opts.repo_root),
             "evaluate": "dw_decide::evaluate (M4-owned, unmodified)",
         },
         "knife_spec_version": knife::KNIFE_SPEC_VERSION,
