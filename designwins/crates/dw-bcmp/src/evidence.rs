@@ -97,6 +97,40 @@ const SUBSTRATES: &[Substrate] = &[
 /// matching `per_part`.
 const MCU_MARKERS: &[&str] = &["flash_kb"];
 
+/// Admission policy version — receipts pin it; a change is a replay event.
+pub const ADMISSION_POLICY_VERSION: &str = "bcmp-admission-v2";
+
+/// Is this stamped identity a DOCUMENT id rather than an orderable part?
+///
+/// A cohort member is a candidate you could buy (CONTRACTS law 2). Measured
+/// 2026-10-22: 231/1,856 cohort "parts" (12.45%) were vendor document-series
+/// identities — NXP `AN13224`, ST `RM0316…`, onsemi `and9097-d`/`ena2150-d`
+/// (doc-numbering filenames), Espressif `…_datasheet` slugs. Their claims
+/// are real datasheet content behind a broken identity join; the part behind
+/// them is Unknown to us, so refusing the row is honest (Unknown never
+/// eliminates) while keeping it would invent phantom OPNs.
+fn is_document_identity(part: &str, mfr: &str) -> bool {
+    if part.ends_with("_datasheet") || part.ends_with("-datasheet") {
+        return true;
+    }
+    let doc_series: &[&str] = match mfr {
+        "st" => &["an", "en", "ta", "um", "pm", "rm", "db", "is", "ts"],
+        "nxp" => &["an"],
+        "onsemi" => &["and", "ena", "en", "br", "dn"],
+        "texas_instruments" => &["slaa", "slau", "slas", "slds", "slla", "sllu", "spr"],
+        _ => &[],
+    };
+    let lower = part.to_lowercase();
+    let stem = lower.split('-').next().unwrap_or(&lower);
+    for prefix in doc_series {
+        let rest = stem.strip_prefix(prefix).unwrap_or_default();
+        if !rest.is_empty() && rest.chars().all(|c| c.is_ascii_digit()) {
+            return true;
+        }
+    }
+    false
+}
+
 /// One pillar feed row, as written by the spine.
 #[derive(Debug, Clone, Deserialize)]
 pub struct PillarRow {
@@ -158,6 +192,9 @@ pub struct FeedMeta {
     pub rows_admitted: usize,
     /// Rows refused by the plausibility bands (garbage values).
     pub rows_refused_implausible: usize,
+    /// Rows refused because the stamped identity is a document series
+    /// (app note / reference manual / datasheet slug), not an OPN.
+    pub rows_refused_doc_identity: usize,
     /// Parts in the MCU cohort.
     pub cohort_parts: usize,
     /// Parts stamped but outside the MCU cohort (no memory/clock evidence).
@@ -263,6 +300,7 @@ pub fn load_feed(path: &Path) -> Result<LoadedEvidence, String> {
         rows_identity_verified: 0,
         rows_admitted: 0,
         rows_refused_implausible: 0,
+        rows_refused_doc_identity: 0,
         cohort_parts: 0,
         parts_outside_cohort: 0,
         parts_with_conflicts: 0,
@@ -285,6 +323,11 @@ pub fn load_feed(path: &Path) -> Result<LoadedEvidence, String> {
             continue;
         };
         if row.identity_status.as_deref() != Some("stamped") {
+            continue;
+        }
+        if is_document_identity(&part, &mfr) {
+            // Phantom OPN: a document-series identity, not a buyable part.
+            meta.rows_refused_doc_identity += 1;
             continue;
         }
         if row.verify_verdict() != Some("verified") {

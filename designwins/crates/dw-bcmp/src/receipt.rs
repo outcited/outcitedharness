@@ -297,6 +297,7 @@ pub fn run_batch(opts: &RunOpts) -> Result<BatchOutcome, RunError> {
             "evaluate": "dw_decide::evaluate (M4-owned, unmodified)",
         },
         "knife_spec_version": knife::KNIFE_SPEC_VERSION,
+        "admission_policy_version": crate::evidence::ADMISSION_POLICY_VERSION,
         "knife_spec": knife::knife_spec_json(),
         "provenance_policy": {
             "policy": "vault-cas-pdf-exists",

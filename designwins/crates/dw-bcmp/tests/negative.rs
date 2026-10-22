@@ -622,3 +622,98 @@ fn receipt_quotes_the_winning_claim_not_a_superseded_one() {
     assert_eq!(qual["verbatim"]["flash_kb"][0]["verbatim"], "512 KB flash");
     assert_eq!(qual["verbatim"]["flash_kb"][0]["page"], 9);
 }
+
+#[test]
+fn document_series_identities_are_refused_not_phantom_opns() {
+    // Measured 2026-10-22: 231/1856 cohort entries were vendor doc ids
+    // (NXP AN13224, ST RM0316…, onsemi and9097-d/ena2150-d, Espressif
+    // …_datasheet slugs). A cohort member is buyable (CONTRACTS law 2).
+    let dir = tmp_dir("docid");
+    let feed = dir.join("feed.jsonl");
+    write_feed(
+        &feed,
+        &[
+            feed_row(
+                "AN4340",
+                "st",
+                "flash_kb",
+                &8.0.into(),
+                DOC_A,
+                1,
+                "app note flash",
+            ),
+            feed_row(
+                "rm0316",
+                "st",
+                "flash_kb",
+                &256.0.into(),
+                DOC_A,
+                2,
+                "RM table flash",
+            ),
+            feed_row(
+                "AN13224",
+                "nxp",
+                "flash_kb",
+                &128.0.into(),
+                DOC_A,
+                3,
+                "AN flash",
+            ),
+            feed_row(
+                "and9097-d",
+                "onsemi",
+                "flash_kb",
+                &64.0.into(),
+                DOC_A,
+                4,
+                "AND doc flash",
+            ),
+            feed_row(
+                "ena2150-d",
+                "onsemi",
+                "flash_kb",
+                &96.0.into(),
+                DOC_A,
+                5,
+                "ENA doc flash",
+            ),
+            feed_row(
+                "esp32-wrover-e_datasheet",
+                "espressif",
+                "flash_kb",
+                &448.0.into(),
+                DOC_A,
+                6,
+                "slug flash",
+            ),
+            feed_row(
+                "stm32f103rb",
+                "st",
+                "flash_kb",
+                &512.0.into(),
+                DOC_A,
+                7,
+                "512 KB",
+            ),
+            feed_row(
+                "lpc1114fn",
+                "nxp",
+                "flash_kb",
+                &32.0.into(),
+                DOC_A,
+                8,
+                "32 kB",
+            ),
+        ],
+    );
+    let loaded = dw_bcmp::load_feed(&feed).unwrap();
+    let members: Vec<&str> = loaded
+        .cohort
+        .members
+        .iter()
+        .map(|c| c.part_number.as_str())
+        .collect();
+    assert_eq!(members, vec!["lpc1114fn", "stm32f103rb"]);
+    assert_eq!(loaded.meta.rows_refused_doc_identity, 6);
+}
