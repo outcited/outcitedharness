@@ -81,10 +81,23 @@ impl From<&dw_types::SourceRef> for ClaimSource {
 pub struct PartClaim {
     /// Which parameter.
     pub field: String,
-    /// The printed value, as printed.
+    /// The printed value, as printed (numerics pass through verbatim).
     pub value: String,
     /// The quote that proves it, when the surface shows one.
     pub quote: Option<String>,
+    /// Canonical unit, when the spine normalized one (r2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
+    /// Rating class, when classified (r2) — absmax never satisfies operating.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rating_class: Option<String>,
+    /// Role as printed (min/max/typ), when the feed carried it (r2).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
+    /// Operating conditions that bound the value, as normalized (r2).
+    /// Applicability lives here — never silently dropped.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conditions: Option<String>,
     /// Where it came from. Resolved to assets by the handler.
     pub source: ClaimSource,
 }
@@ -98,6 +111,70 @@ pub struct PartRecord {
     pub vendor: String,
     /// Its claims.
     pub claims: Vec<PartClaim>,
+    /// Verified structural facts (pin tables, typical curves), joined only
+    /// on the exact part string (r2). Absent means the release carries none
+    /// for this part — never an empty placeholder.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub structural: Option<PartStructural>,
+}
+
+/// One verified pin row, as the extraction lane printed it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PinRowRef {
+    /// Pin number/label as printed.
+    pub pin: String,
+    /// Pin name as printed.
+    pub name: String,
+    /// Pin type when classified, else absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
+    /// Verbatim row text on the page — the receipt.
+    pub quote: String,
+}
+
+/// A verified pin table with its locator.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PinTableRef {
+    /// Document the table was read from.
+    pub sha: String,
+    /// Page within it, when located.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+    /// Verified rows.
+    pub rows: Vec<PinRowRef>,
+}
+
+/// One page carrying typical-characteristics curves.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CurvePageRef {
+    /// Document.
+    pub sha: String,
+    /// Page.
+    pub page: u32,
+    /// Curves on this page.
+    pub n: u32,
+}
+
+/// Typical-characteristics curves for a part.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CurveFacts {
+    /// Total verified curves.
+    pub count: u32,
+    /// Pages carrying them.
+    pub pages: Vec<CurvePageRef>,
+}
+
+/// Structural facts joined onto a part record, 1:1 by exact part number.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PartStructural {
+    /// Verified pin tables.
+    pub pin_tables: Vec<PinTableRef>,
+    /// Total verified pin rows.
+    pub pin_row_total: u32,
+    /// Typical curves.
+    pub typical_curves: CurveFacts,
+    /// Which extraction lanes contributed (provenance surface).
+    pub association_methods: Vec<String>,
 }
 
 /// Pipeline job state. Every variant is renderable — no `Other(String)`.
@@ -270,17 +347,26 @@ impl DemoStore {
             PartRecord {
                 part_number: "BU15TA2WHFV".into(),
                 vendor: "ROHM".into(),
+                structural: None,
                 claims: vec![
                     PartClaim {
                         field: "vout_typ_v".into(),
                         value: "1.5".into(),
                         quote: Some("1.5V(Typ.)".into()),
+                        unit: Some("v".into()),
+                        rating_class: None,
+                        role: Some("typ".into()),
+                        conditions: None,
                         source: source(2, "Output voltage (V)", "Typ"),
                     },
                     PartClaim {
                         field: "temp_max_c".into(),
                         value: "85".into(),
                         quote: Some("-40 to +85".into()),
+                        unit: Some("c".into()),
+                        rating_class: None,
+                        role: Some("max".into()),
+                        conditions: Some("unless otherwise noted".into()),
                         source: source(3, "Operating temperature", "Max"),
                     },
                 ],

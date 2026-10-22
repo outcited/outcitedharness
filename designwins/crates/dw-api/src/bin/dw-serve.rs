@@ -33,22 +33,36 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 
 use dw_api::{handle, Request};
-use dw_api::{ApiStore, DemoStore, ExportStore};
+use dw_api::{ApiStore, DemoStore, ExportStore, ReleaseStore};
 
 const DEFAULT_ADDR: &str = "127.0.0.1:8787";
 
 fn main() {
     let addr = std::env::var("DW_SERVE_ADDR").unwrap_or_else(|_| DEFAULT_ADDR.to_string());
     let token = std::env::var("DW_API_TOKEN").unwrap_or_else(|_| "crk_dev".to_string());
-    let evidence_root = std::env::var("DW_EVIDENCE_ROOT").ok();
+    let evidence_root: Option<String> = std::env::var("DW_EVIDENCE_ROOT").ok();
     // DW_EXPORT_ROOT slots dw-extract's api-store-export behind ApiStore;
     // without it the demo substrate serves (same wire, demo data).
-    let store: Arc<dyn ApiStore + Send + Sync> = match std::env::var("DW_EXPORT_ROOT") {
-        Ok(root) => {
-            eprintln!("dw-serve: export store at {root}");
-            Arc::new(ExportStore::open(root))
+    let store: Arc<dyn ApiStore + Send + Sync> = if let Ok(root) = std::env::var("DW_RELEASE_ROOT") {
+        match ReleaseStore::open_with_evidence(&root, evidence_root.clone().map(std::path::PathBuf::from)) {
+            Ok(s) => {
+                eprintln!("dw-serve: release store at {root} ({})", s.release_id());
+                Arc::new(s)
+            }
+            Err(e) => {
+                // Fail-closed: a release that cannot verify does not serve.
+                eprintln!("dw-serve: {e}");
+                std::process::exit(2);
+            }
         }
-        Err(_) => Arc::new(DemoStore::new()),
+    } else {
+        match std::env::var("DW_EXPORT_ROOT") {
+            Ok(root) => {
+                eprintln!("dw-serve: export store at {root}");
+                Arc::new(ExportStore::open(root))
+            }
+            Err(_) => Arc::new(DemoStore::new()),
+        }
     };
     eprintln!(
         "dw-serve on {addr} · release {} · token {}",

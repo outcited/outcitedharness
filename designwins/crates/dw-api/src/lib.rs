@@ -44,10 +44,12 @@
 pub mod export;
 pub mod feed;
 pub mod problem;
+pub mod release;
 pub mod routes;
 pub mod store;
 
 pub use export::ExportStore;
+pub use release::{MountError, ReleaseStore};
 pub use feed::{EvidenceAsset, EvidenceRef, FeedAudit, Lineage, Query, QueryResult};
 pub use problem::Problem;
 pub use routes::{decode_segment, handle, parse_route, Request, Response, Route};
