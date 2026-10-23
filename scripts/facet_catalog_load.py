@@ -89,6 +89,11 @@ def load_lane_file(con, path, kind, dry=False):
             opn = m["opn"]
             if not plausible_opn(opn):
                 opn = f"doc:{m['doc_sha'][:16]}"
+            key = (opn, m["doc_sha"], m["symbol"].upper(), str(m["value"]), m["qualifier"])
+            if key in existing:
+                n_skipped += 1
+                continue
+            existing.add(key)
             if dry:
                 n_attached += 1
                 continue
@@ -104,12 +109,21 @@ def load_lane_file(con, path, kind, dry=False):
     return n_attached, n_skipped, n_rejected
 
 
+def build_existing(con):
+    existing = set()
+    for r in con.execute(
+            "SELECT opn, doc_sha256, symbol, value, qualifier FROM claims_canonical"):
+        existing.add(tuple(r))
+    return existing
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--lanes-dir", action="append", required=True)
     ap.add_argument("--dry", action="store_true")
     args = ap.parse_args()
     con = connect(CATALOG_DB)
+    existing = build_existing(con)
     totals = {}
     for d in args.lanes_dir:
         d = Path(d)
