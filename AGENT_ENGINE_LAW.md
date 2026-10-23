@@ -23,3 +23,18 @@
 
 Agents were defaulting to different engines (cloud first, TP4 first, Qwen first).
 This stops now. Every agent follows the same escalation path.
+
+## VISION CONTEXT LAW (Sam, 2026-10-21)
+
+Vision cohort = pinouts, ballouts, package drawings, curves, raster/scanned pages —
+things text extraction can't read but HAS context around.
+
+The vision prompt includes the surrounding text context: "Page 56 talks about
+XYZ here and here — here's the image I can't read from text extraction."
+The text tells the vision model WHAT the image contains (section headers,
+figure captions, table titles). Vision reads the pixels text can't see,
+but goes in knowing what it's looking at.
+
+Better step 1 (local extraction) = better context = better vision results.
+This is why local extraction is the foundation — it builds the context
+that makes everything downstream cheaper and more accurate.
