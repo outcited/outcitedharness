@@ -47,7 +47,7 @@ from harness.electronics.curve_atoms import (  # noqa: E402
 
 CONTRACT_VERSION = "extraction-v1.1"
 CATALOG = os.environ.get(
-    "DISCOVERY_CATALOG", "/Volumes/M5_4TB/extract-results/catalog.db")
+    "DISCOVERY_CATALOG", "/Users/samkim/Harnessv1/results/catalog-live.db")
 KEYS = [k.strip() for k in os.environ.get(
     "CR_API_KEYS", "crk_dev_local_stub,crk_m5_extraction_v1").split(",")
     if k.strip()]
