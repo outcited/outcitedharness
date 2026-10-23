@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 from collections import defaultdict
 from typing import Any
@@ -23,7 +24,7 @@ from harness.discovery.evaluator import (
     evaluate_part,
 )
 
-CATALOG_DEFAULT = "/Volumes/M5_4TB/extract-results/catalog.db"
+CATALOG_DEFAULT = os.environ.get("CATALOG_DB", "/Users/samkim/Harnessv1/results/catalog-live.db")
 TOPOLOGY_WAVE_DEFAULT = (
     "/Volumes/M5_4TB/extract-results/power-topology-v1.jsonl")
 
