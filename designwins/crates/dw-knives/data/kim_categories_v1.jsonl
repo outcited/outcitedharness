@@ -1,0 +1,253 @@
+{"kim_category_id": "16-bit-microcontrollers", "display_name": "16-bit Microcontrollers", "parent_slug": null}
+{"kim_category_id": "32-bit-microcontrollers", "display_name": "32-bit Microcontrollers", "parent_slug": null}
+{"kim_category_id": "8-bit-microcontrollers", "display_name": "8-bit Microcontrollers", "parent_slug": null}
+{"kim_category_id": "accelerometers", "display_name": "Accelerometers", "parent_slug": null}
+{"kim_category_id": "adc", "display_name": "ADC", "parent_slug": null}
+{"kim_category_id": "aluminum-electrolytic", "display_name": "Aluminum Electrolytic Capacitors", "parent_slug": null}
+{"kim_category_id": "aluminum-electrolytic-capacitors", "display_name": "Aluminum Electrolytic Capacitors", "parent_slug": null}
+{"kim_category_id": "ambient-light-sensors", "display_name": "Ambient Light Sensors", "parent_slug": null}
+{"kim_category_id": "amplifier-ics", "display_name": "Amplifier ICs", "parent_slug": null}
+{"kim_category_id": "antennas", "display_name": "Antennas", "parent_slug": null}
+{"kim_category_id": "application-processors", "display_name": "Application Processors", "parent_slug": null}
+{"kim_category_id": "arm-cortex-m", "display_name": "ARM Cortex-M", "parent_slug": null}
+{"kim_category_id": "audio-amplifiers", "display_name": "Audio Amplifiers", "parent_slug": null}
+{"kim_category_id": "audio-ics", "display_name": "Audio ICs", "parent_slug": null}
+{"kim_category_id": "automotive-connectors", "display_name": "Automotive Connectors", "parent_slug": null}
+{"kim_category_id": "automotive-electronics", "display_name": "Automotive Electronics", "parent_slug": null}
+{"kim_category_id": "backplane-connectors", "display_name": "Backplane Connectors", "parent_slug": null}
+{"kim_category_id": "battery-management", "display_name": "Battery Management", "parent_slug": null}
+{"kim_category_id": "bjts", "display_name": "Bipolar Transistors (BJT)", "parent_slug": null}
+{"kim_category_id": "bluetooth-modules", "display_name": "Bluetooth Modules", "parent_slug": null}
+{"kim_category_id": "board-mount-pressure-sensors", "display_name": "Board Mount Pressure Sensors", "parent_slug": null}
+{"kim_category_id": "board-to-board-connectors", "display_name": "Board-to-Board Connectors", "parent_slug": null}
+{"kim_category_id": "boost-converters", "display_name": "Boost Converters", "parent_slug": null}
+{"kim_category_id": "bridge-rectifiers", "display_name": "Bridge Rectifiers", "parent_slug": null}
+{"kim_category_id": "buck-boost-converters", "display_name": "Buck Boost Converters", "parent_slug": null}
+{"kim_category_id": "buck-converters", "display_name": "Buck Converters", "parent_slug": null}
+{"kim_category_id": "buffers-drivers", "display_name": "Buffers & Drivers", "parent_slug": null}
+{"kim_category_id": "bus-transceivers", "display_name": "Bus Transceivers", "parent_slug": null}
+{"kim_category_id": "cable-assemblies", "display_name": "Cable Assemblies", "parent_slug": null}
+{"kim_category_id": "can-transceivers", "display_name": "CAN Transceivers", "parent_slug": null}
+{"kim_category_id": "capacitors", "display_name": "Capacitors", "parent_slug": null}
+{"kim_category_id": "card-edge-connectors", "display_name": "Card Edge Connectors", "parent_slug": null}
+{"kim_category_id": "cellular-modules", "display_name": "Cellular Modules", "parent_slug": null}
+{"kim_category_id": "ceramic-capacitors", "display_name": "Ceramic Capacitors", "parent_slug": null}
+{"kim_category_id": "chip-inductors", "display_name": "Chip Inductors", "parent_slug": null}
+{"kim_category_id": "chip-resistors", "display_name": "Chip Resistor - Surface Mount", "parent_slug": null}
+{"kim_category_id": "circular-connectors", "display_name": "Circular Connectors", "parent_slug": null}
+{"kim_category_id": "clock-timing", "display_name": "Clock & Timing", "parent_slug": null}
+{"kim_category_id": "cloud-computing-services", "display_name": "Cloud Computing Services", "parent_slug": null}
+{"kim_category_id": "coaxial-cables", "display_name": "Coaxial Cables", "parent_slug": null}
+{"kim_category_id": "combo-wireless-modules", "display_name": "Combo Wireless Modules", "parent_slug": null}
+{"kim_category_id": "communication-ics", "display_name": "Communication ICs", "parent_slug": null}
+{"kim_category_id": "comparators", "display_name": "Comparators", "parent_slug": null}
+{"kim_category_id": "connectors-interconnects", "display_name": "Connectors & Interconnects", "parent_slug": null}
+{"kim_category_id": "consumer-electronics", "display_name": "Consumer Electronics", "parent_slug": null}
+{"kim_category_id": "contactors", "display_name": "Contactors", "parent_slug": null}
+{"kim_category_id": "counters", "display_name": "Counters", "parent_slug": null}
+{"kim_category_id": "coupled-inductors", "display_name": "Coupled Inductors", "parent_slug": null}
+{"kim_category_id": "cpld", "display_name": "CPLD", "parent_slug": null}
+{"kim_category_id": "cplds", "display_name": "Embedded - CPLDs", "parent_slug": null}
+{"kim_category_id": "crimp-tools", "display_name": "Crimp Tools", "parent_slug": null}
+{"kim_category_id": "crystal-oscillators-xo", "display_name": "Crystal Oscillators (XO)", "parent_slug": null}
+{"kim_category_id": "current-sense-amplifiers", "display_name": "Current Sense Amplifiers", "parent_slug": null}
+{"kim_category_id": "current-sense-resistors", "display_name": "Current Sense Resistors", "parent_slug": null}
+{"kim_category_id": "current-sensors", "display_name": "Current Sensors", "parent_slug": null}
+{"kim_category_id": "cybersecurity-solutions", "display_name": "Cybersecurity Solutions", "parent_slug": null}
+{"kim_category_id": "d-sub-connectors", "display_name": "D-Sub Connectors", "parent_slug": null}
+{"kim_category_id": "dac", "display_name": "DAC", "parent_slug": null}
+{"kim_category_id": "data-acquisition", "display_name": "Data Acquisition", "parent_slug": null}
+{"kim_category_id": "data-converter-ics", "display_name": "Data Converter ICs", "parent_slug": null}
+{"kim_category_id": "dc-dc-converters", "display_name": "DC-DC Converters", "parent_slug": null}
+{"kim_category_id": "differential-amplifiers", "display_name": "Differential Amplifiers", "parent_slug": null}
+{"kim_category_id": "digital-isolators", "display_name": "Digital Isolators", "parent_slug": null}
+{"kim_category_id": "diodes", "display_name": "Diodes", "parent_slug": null}
+{"kim_category_id": "diodes-general-purpose", "display_name": "Diodes (General Purpose)", "parent_slug": null}
+{"kim_category_id": "discrete-semiconductors", "display_name": "Discrete Semiconductors", "parent_slug": null}
+{"kim_category_id": "display-drivers", "display_name": "Display Drivers", "parent_slug": null}
+{"kim_category_id": "displays", "display_name": "Displays", "parent_slug": null}
+{"kim_category_id": "dram", "display_name": "DRAM", "parent_slug": null}
+{"kim_category_id": "driver-ics", "display_name": "Driver ICs", "parent_slug": null}
+{"kim_category_id": "dsp", "display_name": "DSP", "parent_slug": null}
+{"kim_category_id": "dsp-processors", "display_name": "Dsp Processors", "parent_slug": null}
+{"kim_category_id": "dsps", "display_name": "DSP - Digital Signal Processors", "parent_slug": null}
+{"kim_category_id": "eeprom", "display_name": "EEPROM", "parent_slug": null}
+{"kim_category_id": "electrolytic-capacitors", "display_name": "Electrolytic Capacitors", "parent_slug": null}
+{"kim_category_id": "electromechanical", "display_name": "Electromechanical", "parent_slug": null}
+{"kim_category_id": "embedded-computing", "display_name": "Embedded Computing", "parent_slug": null}
+{"kim_category_id": "emi-rfi-suppression", "display_name": "EMI RFI Suppression", "parent_slug": null}
+{"kim_category_id": "enclosures", "display_name": "Enclosures", "parent_slug": null}
+{"kim_category_id": "encoders", "display_name": "Encoders", "parent_slug": null}
+{"kim_category_id": "esd-protection-devices", "display_name": "ESD Protection Devices", "parent_slug": null}
+{"kim_category_id": "ethernet-phy", "display_name": "Ethernet PHY", "parent_slug": null}
+{"kim_category_id": "fans-and-blowers", "display_name": "Fans and Blowers", "parent_slug": null}
+{"kim_category_id": "ferrite-beads", "display_name": "Ferrite Beads", "parent_slug": null}
+{"kim_category_id": "ffc-fpc-connectors", "display_name": "FFC/FPC Connectors", "parent_slug": null}
+{"kim_category_id": "fiber-optic-cables", "display_name": "Fiber Optic Cables", "parent_slug": null}
+{"kim_category_id": "fiber-optic-connectors", "display_name": "Fiber Optic Connectors", "parent_slug": null}
+{"kim_category_id": "fiber-optics", "display_name": "Fiber Optics", "parent_slug": null}
+{"kim_category_id": "film-capacitors", "display_name": "Film Capacitors", "parent_slug": null}
+{"kim_category_id": "filters", "display_name": "Filters", "parent_slug": null}
+{"kim_category_id": "fixed-resistors", "display_name": "Fixed Resistors", "parent_slug": null}
+{"kim_category_id": "flash-memory", "display_name": "Flash", "parent_slug": null}
+{"kim_category_id": "flat-cables", "display_name": "Flat Cables", "parent_slug": null}
+{"kim_category_id": "flip-flops", "display_name": "Flip-Flops", "parent_slug": null}
+{"kim_category_id": "fpga", "display_name": "FPGA", "parent_slug": null}
+{"kim_category_id": "fpgas", "display_name": "FPGA - Field Programmable Gate Array", "parent_slug": null}
+{"kim_category_id": "fram", "display_name": "FRAM", "parent_slug": null}
+{"kim_category_id": "frequency-control-devices", "display_name": "Frequency Control Devices", "parent_slug": null}
+{"kim_category_id": "fuses", "display_name": "Fuses", "parent_slug": null}
+{"kim_category_id": "gate-drivers", "display_name": "Gate Drivers", "parent_slug": null}
+{"kim_category_id": "gyroscopes", "display_name": "Gyroscopes", "parent_slug": null}
+{"kim_category_id": "hardware", "display_name": "Hardware", "parent_slug": null}
+{"kim_category_id": "hdmi-connectors", "display_name": "HDMI Connectors", "parent_slug": null}
+{"kim_category_id": "headers-wire-housings", "display_name": "Headers Wire Housings", "parent_slug": null}
+{"kim_category_id": "heat-sinks", "display_name": "Heat Sinks", "parent_slug": null}
+{"kim_category_id": "hook-up-wire", "display_name": "Hook-up Wire", "parent_slug": null}
+{"kim_category_id": "hot-swap-controllers", "display_name": "Hot Swap Controllers", "parent_slug": null}
+{"kim_category_id": "humidity-sensors", "display_name": "Humidity Sensors", "parent_slug": null}
+{"kim_category_id": "i2c-expanders", "display_name": "I2C Expanders", "parent_slug": null}
+{"kim_category_id": "igbts", "display_name": "IGBTs", "parent_slug": null}
+{"kim_category_id": "image-sensors", "display_name": "Image Sensors", "parent_slug": null}
+{"kim_category_id": "imu", "display_name": "Imu", "parent_slug": null}
+{"kim_category_id": "imus", "display_name": "IMUs", "parent_slug": null}
+{"kim_category_id": "inductors", "display_name": "Inductors", "parent_slug": null}
+{"kim_category_id": "industrial-automation", "display_name": "Industrial Automation", "parent_slug": null}
+{"kim_category_id": "industrial-power", "display_name": "Industrial Power", "parent_slug": null}
+{"kim_category_id": "industrial-pressure-sensors", "display_name": "Industrial Pressure Sensors", "parent_slug": null}
+{"kim_category_id": "infrared-leds", "display_name": "Infrared LEDs", "parent_slug": null}
+{"kim_category_id": "instrumentation-amplifiers", "display_name": "Instrumentation Amplifiers", "parent_slug": null}
+{"kim_category_id": "integrated-circuits-ics", "display_name": "Integrated Circuits (ICs)", "parent_slug": null}
+{"kim_category_id": "interface-ics", "display_name": "Interface ICs", "parent_slug": null}
+{"kim_category_id": "iot-solutions", "display_name": "IoT Solutions", "parent_slug": null}
+{"kim_category_id": "isolation", "display_name": "Isolation", "parent_slug": null}
+{"kim_category_id": "laser-diodes", "display_name": "Laser Diodes", "parent_slug": null}
+{"kim_category_id": "ldo-regulators", "display_name": "LDO Regulators", "parent_slug": null}
+{"kim_category_id": "led-drivers", "display_name": "LED Drivers", "parent_slug": null}
+{"kim_category_id": "led-emitters", "display_name": "LED Emitters", "parent_slug": null}
+{"kim_category_id": "led-indication", "display_name": "Led Indication", "parent_slug": null}
+{"kim_category_id": "led-lighting", "display_name": "LED Lighting", "parent_slug": null}
+{"kim_category_id": "leds", "display_name": "LEDs", "parent_slug": null}
+{"kim_category_id": "level-shifters", "display_name": "Level Shifters", "parent_slug": null}
+{"kim_category_id": "linear-analog-ics", "display_name": "Linear / Analog ICs", "parent_slug": null}
+{"kim_category_id": "linear-regulators", "display_name": "Linear Regulators", "parent_slug": null}
+{"kim_category_id": "logic-gates", "display_name": "Logic Gates", "parent_slug": null}
+{"kim_category_id": "logic-ics", "display_name": "Logic ICs", "parent_slug": null}
+{"kim_category_id": "lvds-transceivers", "display_name": "Lvds Transceivers", "parent_slug": null}
+{"kim_category_id": "m12-connectors", "display_name": "M12 Connectors", "parent_slug": null}
+{"kim_category_id": "magnetic-sensors", "display_name": "Magnetic Sensors", "parent_slug": null}
+{"kim_category_id": "memory", "display_name": "Memory", "parent_slug": null}
+{"kim_category_id": "mems-oscillators", "display_name": "MEMS Oscillators", "parent_slug": null}
+{"kim_category_id": "microcontrollers", "display_name": "Microcontrollers", "parent_slug": null}
+{"kim_category_id": "microprocessors", "display_name": "CPU - Central Processing Units", "parent_slug": null}
+{"kim_category_id": "mil-spec-connectors", "display_name": "MIL-Spec Connectors", "parent_slug": null}
+{"kim_category_id": "mlcc", "display_name": "Mlcc", "parent_slug": null}
+{"kim_category_id": "mlcc-capacitors", "display_name": "MLCC Capacitors", "parent_slug": null}
+{"kim_category_id": "mosfets", "display_name": "MOSFETs", "parent_slug": null}
+{"kim_category_id": "motion-sensors", "display_name": "Motion Sensors", "parent_slug": null}
+{"kim_category_id": "motor-control-ics", "display_name": "Motor Control ICs", "parent_slug": null}
+{"kim_category_id": "motors-and-drives", "display_name": "Motors and Drives", "parent_slug": null}
+{"kim_category_id": "mpu", "display_name": "MPU", "parent_slug": null}
+{"kim_category_id": "mram", "display_name": "Mram", "parent_slug": null}
+{"kim_category_id": "multi-conductor-cables", "display_name": "Multi-Conductor Cables", "parent_slug": null}
+{"kim_category_id": "multiplexers", "display_name": "Multiplexers", "parent_slug": null}
+{"kim_category_id": "multiprotocol-modules", "display_name": "Multiprotocol Modules", "parent_slug": null}
+{"kim_category_id": "nand-flash", "display_name": "NAND Flash", "parent_slug": null}
+{"kim_category_id": "network-and-communication", "display_name": "Network and Communication", "parent_slug": null}
+{"kim_category_id": "nfc-rfid-readers", "display_name": "NFC/RFID Readers", "parent_slug": null}
+{"kim_category_id": "nfc-rfid-tags", "display_name": "Nfc Rfid Tags", "parent_slug": null}
+{"kim_category_id": "nor-flash", "display_name": "NOR Flash", "parent_slug": null}
+{"kim_category_id": "op-amps", "display_name": "Operational Amplifiers (Op Amps)", "parent_slug": null}
+{"kim_category_id": "operational-amplifiers", "display_name": "Operational Amplifiers", "parent_slug": null}
+{"kim_category_id": "optical-encoders", "display_name": "Optical Encoders", "parent_slug": null}
+{"kim_category_id": "optical-sensors", "display_name": "Optical Sensors", "parent_slug": null}
+{"kim_category_id": "optocouplers", "display_name": "Optocouplers", "parent_slug": null}
+{"kim_category_id": "optoelectronics", "display_name": "Optoelectronics", "parent_slug": null}
+{"kim_category_id": "panel-meters", "display_name": "Panel Meters", "parent_slug": null}
+{"kim_category_id": "passive-components", "display_name": "Passive Components", "parent_slug": null}
+{"kim_category_id": "pcb-headers", "display_name": "PCB Headers & Receptacles", "parent_slug": null}
+{"kim_category_id": "peltier-modules", "display_name": "Peltier Modules", "parent_slug": null}
+{"kim_category_id": "photodetectors", "display_name": "Photo Detectors", "parent_slug": null}
+{"kim_category_id": "photodiodes", "display_name": "Photodiodes", "parent_slug": null}
+{"kim_category_id": "photoelectric-sensors", "display_name": "Photoelectric Sensors", "parent_slug": null}
+{"kim_category_id": "phototransistors", "display_name": "Phototransistors", "parent_slug": null}
+{"kim_category_id": "pir-sensors", "display_name": "PIR Sensors", "parent_slug": null}
+{"kim_category_id": "pmic", "display_name": "PMIC", "parent_slug": null}
+{"kim_category_id": "potentiometers", "display_name": "Potentiometers", "parent_slug": null}
+{"kim_category_id": "power-connectors", "display_name": "Power Connectors", "parent_slug": null}
+{"kim_category_id": "power-factor-correction", "display_name": "Power Factor Correction", "parent_slug": null}
+{"kim_category_id": "power-inductors", "display_name": "Power Inductors", "parent_slug": null}
+{"kim_category_id": "power-management", "display_name": "Power Management", "parent_slug": null}
+{"kim_category_id": "power-supplies", "display_name": "Power Supplies", "parent_slug": null}
+{"kim_category_id": "power-supply-modules", "display_name": "Power Supply Modules", "parent_slug": null}
+{"kim_category_id": "pressure-sensors", "display_name": "Pressure Sensors", "parent_slug": null}
+{"kim_category_id": "prototyping-products", "display_name": "Prototyping Products", "parent_slug": null}
+{"kim_category_id": "proximity-sensors", "display_name": "Proximity Sensors", "parent_slug": null}
+{"kim_category_id": "ptc-resettable-fuses", "display_name": "PTC Resettable Fuses", "parent_slug": null}
+{"kim_category_id": "quartz-crystals", "display_name": "Quartz Crystals", "parent_slug": null}
+{"kim_category_id": "racks-and-cabinets", "display_name": "Racks And Cabinets", "parent_slug": null}
+{"kim_category_id": "rectangular-connectors", "display_name": "Rectangular Connectors", "parent_slug": null}
+{"kim_category_id": "rectifier-diodes", "display_name": "Rectifier Diodes", "parent_slug": null}
+{"kim_category_id": "rectifiers", "display_name": "Rectifiers", "parent_slug": null}
+{"kim_category_id": "relays-and-solenoids", "display_name": "Relays and Solenoids", "parent_slug": null}
+{"kim_category_id": "resistor-networks", "display_name": "Resistor Networks", "parent_slug": null}
+{"kim_category_id": "resistors", "display_name": "Resistors", "parent_slug": null}
+{"kim_category_id": "rf-amplifiers", "display_name": "RF Amplifiers", "parent_slug": null}
+{"kim_category_id": "rf-coaxial-connectors", "display_name": "RF / Coaxial Connectors", "parent_slug": null}
+{"kim_category_id": "rf-connectors", "display_name": "RF Connectors", "parent_slug": null}
+{"kim_category_id": "rf-inductors", "display_name": "RF Inductors", "parent_slug": null}
+{"kim_category_id": "rf-interconnect", "display_name": "RF Interconnect", "parent_slug": null}
+{"kim_category_id": "rf-modules", "display_name": "RF Modules", "parent_slug": null}
+{"kim_category_id": "rf-semiconductors", "display_name": "RF Semiconductors", "parent_slug": null}
+{"kim_category_id": "rf-switches", "display_name": "RF Switches", "parent_slug": null}
+{"kim_category_id": "rf-transceivers", "display_name": "RF Transceivers", "parent_slug": null}
+{"kim_category_id": "rfid-nfc", "display_name": "RFID / NFC", "parent_slug": null}
+{"kim_category_id": "rj45-connectors", "display_name": "RJ45 Connectors", "parent_slug": null}
+{"kim_category_id": "rs-232-transceivers", "display_name": "RS-232 Transceivers", "parent_slug": null}
+{"kim_category_id": "rs-485-transceivers", "display_name": "Rs 485 Transceivers", "parent_slug": null}
+{"kim_category_id": "schottky-diodes", "display_name": "Schottky Diodes", "parent_slug": null}
+{"kim_category_id": "sensors-transducers", "display_name": "Sensors & Transducers", "parent_slug": null}
+{"kim_category_id": "shift-registers", "display_name": "Shift Registers", "parent_slug": null}
+{"kim_category_id": "signal-conditioning", "display_name": "Signal Conditioning", "parent_slug": null}
+{"kim_category_id": "soc", "display_name": "System on Chip", "parent_slug": null}
+{"kim_category_id": "socs", "display_name": "RF System on a Chip - SoC", "parent_slug": null}
+{"kim_category_id": "soldering-equipment", "display_name": "Soldering Equipment", "parent_slug": null}
+{"kim_category_id": "spi-interface", "display_name": "SPI Interface", "parent_slug": null}
+{"kim_category_id": "sram", "display_name": "SRAM", "parent_slug": null}
+{"kim_category_id": "supercapacitors", "display_name": "Supercapacitors", "parent_slug": null}
+{"kim_category_id": "supervisors-reset-ics", "display_name": "Supervisors Reset Ics", "parent_slug": null}
+{"kim_category_id": "surge-protection-devices", "display_name": "Surge Protection Devices", "parent_slug": null}
+{"kim_category_id": "switch-ics", "display_name": "Switch ICs", "parent_slug": null}
+{"kim_category_id": "switches", "display_name": "Switches", "parent_slug": null}
+{"kim_category_id": "switching-regulators", "display_name": "Switching Regulators", "parent_slug": null}
+{"kim_category_id": "tantalum-capacitors", "display_name": "Tantalum Capacitors", "parent_slug": null}
+{"kim_category_id": "tcxo", "display_name": "TCXO", "parent_slug": null}
+{"kim_category_id": "temperature-humidity-sensors", "display_name": "Temperature & Humidity Sensors", "parent_slug": null}
+{"kim_category_id": "temperature-probes", "display_name": "Temperature Probes", "parent_slug": null}
+{"kim_category_id": "temperature-sensors", "display_name": "Temperature Sensors", "parent_slug": null}
+{"kim_category_id": "terminal-blocks", "display_name": "Terminal Blocks", "parent_slug": null}
+{"kim_category_id": "terminals", "display_name": "Terminals", "parent_slug": null}
+{"kim_category_id": "thermal-interface-products", "display_name": "Thermal Interface Products", "parent_slug": null}
+{"kim_category_id": "thermistors", "display_name": "NTC Thermistors", "parent_slug": null}
+{"kim_category_id": "thermostats", "display_name": "Thermostats", "parent_slug": null}
+{"kim_category_id": "through-hole-resistors", "display_name": "Through Hole Resistors", "parent_slug": null}
+{"kim_category_id": "thyristors", "display_name": "Thyristors", "parent_slug": null}
+{"kim_category_id": "tools", "display_name": "Tools", "parent_slug": null}
+{"kim_category_id": "transformers", "display_name": "Transformers", "parent_slug": null}
+{"kim_category_id": "transistors", "display_name": "Transistors", "parent_slug": null}
+{"kim_category_id": "tvs-diodes", "display_name": "TVS Diodes", "parent_slug": null}
+{"kim_category_id": "usb-connectors", "display_name": "USB Connectors", "parent_slug": null}
+{"kim_category_id": "usb-controllers", "display_name": "USB Controllers", "parent_slug": null}
+{"kim_category_id": "variable-resistors", "display_name": "Variable Resistors", "parent_slug": null}
+{"kim_category_id": "varistors", "display_name": "Varistors", "parent_slug": null}
+{"kim_category_id": "vcxo", "display_name": "VCXO", "parent_slug": null}
+{"kim_category_id": "video-amplifiers", "display_name": "Video Amplifiers", "parent_slug": null}
+{"kim_category_id": "visible-leds", "display_name": "Visible LEDs", "parent_slug": null}
+{"kim_category_id": "voltage-references", "display_name": "Voltage References", "parent_slug": null}
+{"kim_category_id": "voltage-regulators", "display_name": "Voltage Regulators", "parent_slug": null}
+{"kim_category_id": "wifi-modules", "display_name": "WiFi Modules", "parent_slug": null}
+{"kim_category_id": "wire-cable", "display_name": "Wire & Cable", "parent_slug": null}
+{"kim_category_id": "wireless-modules", "display_name": "Wireless Modules", "parent_slug": null}
+{"kim_category_id": "wireless-rf", "display_name": "Wireless & RF", "parent_slug": null}
+{"kim_category_id": "wirewound-inductors", "display_name": "Wirewound Inductors", "parent_slug": null}
+{"kim_category_id": "zener-diodes", "display_name": "Zener Diodes", "parent_slug": null}
