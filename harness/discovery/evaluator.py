@@ -37,8 +37,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping, Sequence
 
-from harness.electronics.condition_model import (
-    condition_covers,
+from harness.electronics.condition_model import condition_covers
+from harness.electronics.normalize_provider import (  # RUST-CUTOVER-02 seam (default engine: python)
     parse_condition,
 )
 from harness.electronics.rating_class import compare_with_margin, rating_class

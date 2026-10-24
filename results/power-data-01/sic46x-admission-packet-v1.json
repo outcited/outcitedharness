@@ -1,0 +1,157 @@
+{
+ "schema": "designwins.sic46x-admission-packet.v1",
+ "produced_by": "scripts/build_power_data_01_packets.py",
+ "task": "POWER-DATA-01 Ask 1 (m4opencode findings 15853d5 §3)",
+ "authority_note": "PREPARATION ONLY. Admission, binding write and release are cr-core/cursor-cr authority per the four-gate contract (docs/api/designwins-ingest-to-browsable.md).",
+ "document": {
+  "sha256": "0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175",
+  "vault_path": "/Volumes/M5_4TB/vault/cas/0c/0cef2db3d1a1b022d13de380a3038cf9f3a2c5155bc12cbd44daae708eaba175.pdf",
+  "bytes": 1205324,
+  "pages": 29,
+  "vendor": "vishay.com",
+  "title_page": "SiC461, SiC462, SiC463, SiC464 — Vishay Siliconix, Document Number: 65124, S25-1437-Rev. S, 17-Nov-2025",
+  "mpns_served": [],
+  "binding_write_owed": true
+ },
+ "parts": [
+  {
+   "part": "SiC461",
+   "record_id": "part:vishay.com:SiC461",
+   "rated_iout_a": 10.0,
+   "ec_header_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC461 (10 A), unless otherwise noted)",
+   "ec_header_page_1based": 14,
+   "orderable_mpns": [
+    "SiC461ED-T1-GE3"
+   ],
+   "package": "PowerPAK MLP55-27L",
+   "ordering_page_1based": 3
+  },
+  {
+   "part": "SiC462",
+   "record_id": "part:vishay.com:SiC462",
+   "rated_iout_a": 6.0,
+   "ec_header_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC462 (6 A), unless otherwise noted)",
+   "ec_header_page_1based": 15,
+   "orderable_mpns": [
+    "SiC462ED-T1-GE3"
+   ],
+   "package": "PowerPAK MLP55-27L",
+   "ordering_page_1based": 3
+  },
+  {
+   "part": "SiC463",
+   "record_id": "part:vishay.com:SiC463",
+   "rated_iout_a": 4.0,
+   "ec_header_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC463 (4 A), unless otherwise noted)",
+   "ec_header_page_1based": 16,
+   "orderable_mpns": [
+    "SiC463ED-T1-GE3"
+   ],
+   "package": "PowerPAK MLP55-27L",
+   "ordering_page_1based": 3
+  },
+  {
+   "part": "SiC464",
+   "record_id": "part:vishay.com:SiC464",
+   "rated_iout_a": 2.0,
+   "ec_header_quote": "ELECTRICAL CHARACTERISTICS (VIN = 48 V, VOUT = 5 V, fsw = 300 kHz, SiC464 (2 A), unless otherwise noted)",
+   "ec_header_page_1based": 17,
+   "orderable_mpns": [
+    "SiC464ED-T1-GE3"
+   ],
+   "package": "PowerPAK MLP55-27L",
+   "ordering_page_1based": 3
+  }
+ ],
+ "family_grain": {
+  "family_group": "SiC46x",
+  "quote": "SiC46x is a high efficiency synchronous buck regulator family capable of delivering up to 10 A continuous current.",
+  "page_1based": 6,
+  "note": "4 base devices from one family datasheet; orderable MPNs record as asserted_members (Gate 2 grain per the ingest contract)"
+ },
+ "gate1_binding_spellings": {
+  "note": "vishay verbatim field spellings observed in this document for the power-stack atoms — aliases are per-vendor",
+  "verbatim_rows": [
+   {
+    "page_1based": 4,
+    "section": "RECOMMENDED OPERATING CONDITIONS",
+    "rows": [
+     {
+      "parameter": "Input voltage (VIN)",
+      "min": 4.5,
+      "typ": null,
+      "max": 60.0,
+      "unit": "V"
+     },
+     {
+      "parameter": "Control input voltage (VCIN)",
+      "min": 4.5,
+      "typ": null,
+      "max": 60.0,
+      "unit": "V"
+     }
+    ]
+   },
+   {
+    "page_1based": 3,
+    "section": "ABSOLUTE MAXIMUM RATINGS",
+    "rows": [
+     {
+      "parameter": "VIN (Reference to PGND)",
+      "limits": "-0.3 to 66",
+      "unit": "V"
+     },
+     {
+      "parameter": "TJ Junction temperature",
+      "limits": "-40 to +150",
+      "unit": "°C"
+     }
+    ]
+   },
+   {
+    "page_1based": 5,
+    "section": "Fault Protections (per-part valley limits)",
+    "rows": [
+     {
+      "parameter": "IOCP SiC461 (10 A)",
+      "conditions": "RILIM = 60 kΩ, TJ = -10 °C to +125 °C",
+      "min": 10.4,
+      "typ": 13.0,
+      "max": 15.6,
+      "unit": "A"
+     },
+     {
+      "parameter": "IOCP SiC462 (6 A)",
+      "conditions": "RILIM = 60 kΩ, TJ = -10 °C to +125 °C",
+      "min": 6.4,
+      "typ": 8.0,
+      "max": 9.6,
+      "unit": "A"
+     },
+     {
+      "parameter": "IOCP SiC463 (4 A)",
+      "conditions": "RILIM = 40 kΩ, TJ = -10 °C to +125 °C",
+      "min": 4.8,
+      "typ": 6.0,
+      "max": 7.2,
+      "unit": "A"
+     }
+    ]
+   }
+  ]
+ },
+ "gate3_placement": {
+  "question": "which hierarchy source supplies the power-aisle family edge for vishay SiC46x — awaiting cr-core answer (mail power-data-01-sic46x-admission-requirements-20261014)",
+  "proposed": "new family node SiC46x under vishay in the power aisle; the curve evidence already carries family_group SiC46x (bundle v3 rows)"
+ },
+ "mpns_served_payload_proposed": [
+  "SiC461ED-T1-GE3",
+  "SiC462ED-T1-GE3",
+  "SiC463ED-T1-GE3",
+  "SiC464ED-T1-GE3"
+ ],
+ "cross_references": {
+  "decision_evidence": "docs/audits/qa/2026-10-14/power-decision-08c/POWER_DECISION_08C_FINDINGS.md at outcited.com 15853d5",
+  "device_ratings_fixture": "tests/fixtures/gold/curve_evidence_pilot/_device_ratings.json (curve/08c lane — 4 SiC46x rows, same quotes)"
+ }
+}

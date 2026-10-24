@@ -1,2 +1,5 @@
 target/
 vendor/
+scratch/
+PowerData scratch artifacts
+../scratch/

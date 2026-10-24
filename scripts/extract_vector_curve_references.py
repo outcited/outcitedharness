@@ -58,6 +58,17 @@ _NUM_TICK = re.compile(r"[+-]?\d+(?:\.\d+)?")
 _MIN_SEGS = 5
 _TICK_BAND = 32.0
 _MAX_POINTS = 60
+# Gridline-anchored axis fit (added for POWER-DATA-01): some vector datasheets
+# (e.g. TPS54360 rev G, LM5005 rev F) print tick labels with ~1pt hand-placement
+# jitter, so the strict 1e-3 word-center bar refuses pages whose drawings are
+# otherwise clean. Internal gridlines and the exact frame edges are geometric
+# anchors; snapping each already-paired tick word to its nearest anchor removes
+# the label jitter and leaves only drawing jitter. The acceptance bar is
+# relaxed to 5e-3 ONLY on this anchored path, the anchor used is recorded per
+# plot (``_axis_anchor``), and the residual still rides ``_numeric_quality`` —
+# the row ships human_review_pending either way. No gridlines -> no fallback.
+_GRIDLINE_MAX_RESID = 5e-3
+_GRIDLINE_SNAP_PT = 8.0
 
 
 def _words(page) -> list[tuple[float, float, float, float, str]]:
@@ -77,6 +88,12 @@ def _frames(page, words) -> list[tuple[float, float, float, float]]:
     for d in page.get_drawings():
         r = d.get("rect")
         if r is None or r.width < 80 or r.height < 60:
+            continue
+        # A plot frame is STROKED. Unstroked rects are background fills that
+        # span figure rows (LM5005 rev F draws a white container behind the
+        # whole figure row); admitting them swallows the real frame in the
+        # containment dedupe and the tick bands then miss every label.
+        if d.get("color") is None and d.get("fill") is not None:
             continue
         box = (float(r.x0), float(r.y0), float(r.x1), float(r.y1))
         near = sum(
@@ -173,19 +190,91 @@ def _fit_linear(pairs) -> tuple[float, float, float] | None:
     return (a, b, resid / abs(span))
 
 
-def _fit_axis(pairs):
+def _fit_axis(pairs, max_resid: float = 1e-3):
     """Linear first; log10 when tick values are decades on a linear grid.
     Returns (kind, slope, intercept, residual-as-fraction-of-value-span)."""
 
     lin = _fit_linear(pairs)
-    if lin and lin[2] < 1e-3:
+    if lin and lin[2] < max_resid:
         return ("linear", lin[0], lin[1], lin[2])
     log_pairs = [(p, (v if v > 0 else None)) for p, v in pairs]
     if all(v is not None for _, v in log_pairs):
         logv = _fit_linear([(p, math.log10(v)) for p, v in log_pairs])
-        if logv and logv[2] < 1e-3:
+        if logv and logv[2] < max_resid:
             return ("log10", logv[0], logv[1], logv[2])
     return None
+
+
+def _gridline_anchors(drawings, box):
+    """Deduped exact x (vertical-line) and y (horizontal-line) gridline
+    positions strictly inside the frame. Frame edges are deliberately NOT
+    anchors: vendors draw them a hair off-grid (measured ~1pt on TPS54360
+    rev G), which alone pushes the fit residual over the relaxed bar."""
+
+    xs: list[float] = []
+    ys: list[float] = []
+    for d in drawings:
+        r = d.get("rect")
+        if r is None:
+            continue
+        if not (box[0] - 2 <= r.x0 and r.x1 <= box[2] + 2
+                and box[1] - 2 <= r.y0 and r.y1 <= box[3] + 2):
+            continue
+        if r.height > 0.5 * (box[3] - box[1]) and r.width <= 1.5:
+            xs.append(float(r.x0))
+        if r.width > 0.5 * (box[2] - box[0]) and r.height <= 1.5:
+            ys.append(float(r.y0))
+
+    def uniq(sorted_vals):
+        out = []
+        for v in sorted_vals:
+            if not out or v - out[-1] > 0.5:
+                out.append(v)
+        return out
+
+    return uniq(sorted(xs)), uniq(sorted(ys))
+
+
+def _anchor_positions(internal, box, axis):
+    """Internal gridlines; frame edges join only when < 3 gridlines exist
+    (a log axis often draws gridlines only at internal decades, and its
+    end labels sit ON the frame edge, which is drawn on-grid there)."""
+
+    if len(internal) >= 3:
+        return internal
+    if axis == "x":
+        return sorted(set(internal + [float(box[0]), float(box[2])]))
+    return sorted(set(internal + [float(box[1]), float(box[3])]))
+
+
+def _snap_pairs(pairs, anchors):
+    """Snap (position, value) word ticks onto nearest geometric anchors.
+
+    Each anchor keeps the majority snapped value; conflicting assignments
+    or non-monotone values refuse the anchored fit (fail closed)."""
+
+    if len(anchors) < 3:
+        return None
+    votes: dict[float, list[float]] = {}
+    for pos, val in pairs:
+        best = min(anchors, key=lambda a: abs(a - pos))
+        if abs(best - pos) > _GRIDLINE_SNAP_PT:
+            continue
+        votes.setdefault(best, []).append(val)
+    snapped = []
+    for a in sorted(votes):
+        vals = votes[a]
+        majority = max(set(vals), key=vals.count)
+        if vals.count(majority) != len(vals):
+            return None  # one anchor, two values: geometry does not decide
+        snapped.append((a, majority))
+    if len(snapped) < 3:
+        return None
+    vals = [v for _, v in snapped]
+    if not (all(a < b for a, b in zip(vals, vals[1:]))
+            or all(a > b for a, b in zip(vals, vals[1:]))):
+        return None
+    return snapped
 
 
 _COND_SPLIT = re.compile(
@@ -402,12 +491,30 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
         words = _words(page)
         boxes = _frames(page, words)
         page_lines = _page_lines(words)
+        drawings = page.get_drawings()
         plots, skips = [], []
         for fig, box in enumerate(boxes):
             x_row, x_pairs = _ticks_for_axis(words, box, "x")
             y_row, y_pairs = _ticks_for_axis(words, box, "y")
             x_fit = _fit_axis(x_pairs)
             y_fit = _fit_axis(y_pairs)
+            anchor_x = anchor_y = "word_centers"
+            if not x_fit or not y_fit:
+                gx, gy = _gridline_anchors(drawings, box)
+                if not x_fit and x_pairs:
+                    snapped = _snap_pairs(
+                        x_pairs, _anchor_positions(gx, box, "x"))
+                    if snapped:
+                        cand = _fit_axis(snapped, max_resid=_GRIDLINE_MAX_RESID)
+                        if cand:
+                            x_fit, anchor_x = cand, "gridlines"
+                if not y_fit and y_pairs:
+                    snapped = _snap_pairs(
+                        y_pairs, _anchor_positions(gy, box, "y"))
+                    if snapped:
+                        cand = _fit_axis(snapped, max_resid=_GRIDLINE_MAX_RESID)
+                        if cand:
+                            y_fit, anchor_y = cand, "gridlines"
             if not x_fit or not y_fit:
                 skips.append({"figure_index": fig, "reason": "axis_fit_failed"})
                 continue
@@ -601,6 +708,7 @@ def extract_page(pdf: Path, page_1based: int) -> dict:
                     "retained_point_fraction": round(retained, 4),
                     "points_outside_axis_pct": round(outside_pct, 4),
                 },
+                "_axis_anchor": {"x": anchor_x, "y": anchor_y},
                 "_title_axes_note": _title_axes_note(
                     caption, x_label, y_label
                 ),

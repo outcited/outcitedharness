@@ -1,0 +1,87 @@
+{"rust_stems": 1994, "python_stems": 1993, "common": 1993}
+{
+ "skips_match": 1819,
+ "skips_diff": 138,
+ "raw_identical_stems": 17,
+ "raw_differing_stems": 19,
+ "verdict_mismatches_on_identical_raw": 0,
+ "doc_sha_mismatches": 0,
+ "page_attribution": {
+  "surviving_claims_compared": 135,
+  "page_null_rust": 1,
+  "page_null_python": 1
+ },
+ "counter_mismatch_examples": [
+  {
+   "stem": "BQ2022A",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ2024",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ20Z80-V110",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ24018",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ24032A",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ24035",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ24045",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  },
+  {
+   "stem": "BQ24074",
+   "kind": "skip",
+   "rust": "no_claims",
+   "python": null
+  },
+  {
+   "stem": "BQ24075",
+   "kind": "raw_claims",
+   "rust": {
+    "tier": "local-v41",
+    "claims": 30,
+    "surviving": 19,
+    "p0": 9
+   },
+   "python": {
+    "tier": "local-v41",
+    "claims": 27,
+    "surviving": 18,
+    "p0": 9
+   }
+  },
+  {
+   "stem": "BQ24083",
+   "kind": "skip",
+   "rust": null,
+   "python": "no_claims"
+  }
+ ],
+ "verdict_mismatch_examples": []
+}

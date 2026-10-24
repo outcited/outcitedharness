@@ -55,6 +55,9 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+use dw_decide::Constraint;
+use regex::Regex;
+
 /// The minimum fraction of the decision universe that must be classified
 /// before a substrate may be trusted at all.
 ///
@@ -167,6 +170,23 @@ pub struct AtomTemplate {
     pub drawer: Drawer,
 }
 
+/// Parametric value capture: how a binding takes its requirement value
+/// from the engineer's sentence instead of a fixed template.
+///
+/// A binding with a capture fires ONLY when both the phrase and the value
+/// pattern match. A concept without its number ("an MCU that sleeps…")
+/// does not fire and falls to residue — which D5 turns into the question
+/// "what threshold?", the honest outcome.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ValueCapture {
+    /// Regex over the sentence (case-insensitive). Capture group 1 is the
+    /// numeral.
+    pub pattern: String,
+    /// Multiply the captured numeral to the axis's canonical unit
+    /// (e.g. `2 µA` -> `2e-6` A).
+    pub scale: f64,
+}
+
 /// One colloquial phrase and what it means technically.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ColloquialBinding {
@@ -183,6 +203,10 @@ pub struct ColloquialBinding {
     pub evidence: Vec<String>,
     /// The license to eliminate.
     pub stamp: Stamp,
+    /// Optional sentence-value capture (see [`ValueCapture`]). `None` on
+    /// every fixed-value binding.
+    #[serde(default)]
+    pub value_capture: Option<ValueCapture>,
 }
 
 impl ColloquialBinding {
@@ -219,7 +243,16 @@ impl ColloquialBinding {
             confidence,
             evidence,
             stamp,
+            value_capture: None,
         })
+    }
+
+    /// Attach a sentence-value capture to this binding (parametric
+    /// requirement). Consumes and returns self for builder-style use.
+    #[must_use]
+    pub fn with_value_capture(mut self, capture: ValueCapture) -> Self {
+        self.value_capture = Some(capture);
+        self
     }
 
     /// The atoms this phrase contributes to a [`dw_decide::Build`].
@@ -319,8 +352,45 @@ impl PhraseRegistry {
                 continue;
             }
             if let Some(pos) = normalised.find(&needle) {
-                bindings.push(binding.clone());
-                matched_spans.push((pos, pos + needle.len()));
+                // Parametric bindings fire only when the sentence ALSO
+                // carries the requirement value. A concept without its
+                // number contributes nothing here and the words stay in
+                // residue — D5 turns that into the threshold question.
+                if let Some(capture) = &binding.value_capture {
+                    let Ok(re) = Regex::new(&format!(r"(?i){}", capture.pattern)) else {
+                        continue;
+                    };
+                    let Some(caps) = re.captures(&normalised) else {
+                        continue;
+                    };
+                    let Some(raw) = caps.get(1) else {
+                        continue;
+                    };
+                    let Ok(value) = raw.as_str().trim().parse::<f64>() else {
+                        continue;
+                    };
+                    let scaled = value * capture.scale;
+                    let mut instantiated = binding.clone();
+                    for template in &mut instantiated.knives {
+                        if let Constraint::Scalar { value, .. } = &mut template.constraint {
+                            *value = scaled;
+                        }
+                    }
+                    bindings.push(instantiated);
+                    // Consume the WHOLE matched expression (e.g. "sleeps
+                    // under 2 µa"), not just the concept word — residue
+                    // must not carry fragments of a bound requirement
+                    // (review 2026-10-20 P1).
+                    let whole = caps.get(0).map(|m| m.as_str()).unwrap_or(&needle);
+                    if let Some(wpos) = normalised.find(whole) {
+                        matched_spans.push((wpos, wpos + whole.len()));
+                    } else {
+                        matched_spans.push((pos, pos + needle.len()));
+                    }
+                } else {
+                    bindings.push(binding.clone());
+                    matched_spans.push((pos, pos + needle.len()));
+                }
             }
         }
 
@@ -561,7 +631,7 @@ pub fn unknowns_from_residue(
         // cohort is honestly reported as such.
         questions.push(dw_decide::Question {
             axis: dw_decide::KnifeId::Axis(dw_decide::Axis::TempRangeC),
-            prompt: format!("What must this survive that {chunk:?} implies?"),
+            prompt: format!("What engineering requirement does {chunk:?} express? (unbound phrase)"),
             help: format!(
                 "{chunk:?} is not in the axis vocabulary. Answering with a typed \
                  requirement (temperature span, ingress, interface) turns an \

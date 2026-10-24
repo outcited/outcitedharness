@@ -1,0 +1,57 @@
+[
+ {
+  "crop_sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   1224,
+   1584
+  ],
+  "file": "8a4fee15a132.p1236.r0.png"
+ },
+ {
+  "crop_sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   1224,
+   1584
+  ],
+  "file": "8a4fee15a132.p1236.r1.png"
+ },
+ {
+  "crop_sha256": "39ca422190080f51f29061cdf5a89e65afd4c56da255af6a3226fca09495466e",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   1190,
+   1684
+  ],
+  "file": "87c1fef22b49.p122.r2.png"
+ },
+ {
+  "crop_sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   1224,
+   1584
+  ],
+  "file": "31106cf7e25e.p49.r3.png"
+ },
+ {
+  "crop_sha256": "947b39bfb7b95b7aff3e312988be41d247e16551531c0bdd0741db41fccddfce",
+  "dpi": 144,
+  "bbox": [
+   0,
+   0,
+   1224,
+   1584
+  ],
+  "file": "a394a9a17f2c.p2015.r4.png"
+ }
+]

@@ -1,0 +1,41 @@
+{
+ "side": "rust",
+ "docs_completed": 1994,
+ "docs_with_claims": 163,
+ "skip_classes": {
+  "no_claims": 1831
+ },
+ "tiers": {
+  "local-v41": 163
+ },
+ "claims_total": 1990,
+ "claims_per_claim_doc": 12.209,
+ "surviving_claims": 1873,
+ "surviving_rate": 0.9412,
+ "supported": 1873,
+ "p0": 105,
+ "provenance": {
+  "quote_pct": 100.0,
+  "page_pct": 88.68,
+  "doc_sha_pct": 100.0
+ },
+ "elapsed_s": 24111.0,
+ "docs_per_hour": 297.7,
+ "verified_claims_per_hour": 279.7,
+ "controller": {
+  "chunks_by_status": {
+   "completed": 200
+  },
+  "events": {
+   "chunk_claimed": 201,
+   "chunk_completed": 200,
+   "chunk_lease_expired": 1,
+   "chunk_lease_renewed": 2007,
+   "chunk_registered": 200
+  },
+  "chunks_total": 200,
+  "max_attempt": 2,
+  "first_created": "2026-10-15T08:27:42.955445+00:00",
+  "last_updated": "2026-10-15T15:03:17.075233+00:00"
+ }
+}

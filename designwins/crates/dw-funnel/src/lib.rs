@@ -52,12 +52,13 @@ pub fn accept(
     cohort: &Cohort,
     facts: &BTreeMap<Candidate, CandidateFacts>,
     release: ReleaseId,
+    provenance: &dyn dw_decide::Provenance,
 ) -> Answer {
     let bound = registry.bind(sentence);
     let (mut unknowns, mut residue_questions) =
         dw_knives::unknowns_from_residue(&bound, cohort.len());
 
-    let eval = evaluate(cohort, &bound.atoms, facts, &AlwaysResolvable);
+    let eval = evaluate(cohort, &bound.atoms, facts, provenance);
     unknowns.extend(eval.unknowns.clone());
 
     // Residue questions have no measured population behind them — a phrase
@@ -92,6 +93,22 @@ pub fn accept(
         .collect();
     let mut questions = dw_decide::next_questions(facts, &pinned);
     questions.extend(residue_questions);
+
+    // Relevance gate (review 2026-10-20 P1): probe questions for axes the
+    // cohort carries NO evidence for are noise — MOSFET Vds/Rds questions
+    // on an MCU journey. Unaskable probes on unmeasured axes are dropped;
+    // D5 honesty is preserved by residue questions and by probes on axes
+    // the parts actually answer.
+    let measured_axes: std::collections::BTreeSet<dw_decide::Axis> = facts
+        .values()
+        .flat_map(|f| f.axes.keys().copied())
+        .collect();
+    questions.retain(|q| match &q.axis {
+        dw_decide::KnifeId::Axis(ax) => {
+            q.askable || measured_axes.contains(ax) || pinned.contains(ax)
+        }
+        dw_decide::KnifeId::Category(_) => true,
+    });
 
     let build = Build {
         id: format!("build:{}", 0),
@@ -200,6 +217,7 @@ mod tests {
             &cohort,
             &facts,
             ReleaseId::new("designwins-2026-W46").unwrap(),
+            &dw_decide::AlwaysResolvable,
         );
 
         // "returns a cohort" — distinct parts, even when nothing eliminated.
@@ -306,6 +324,7 @@ mod tests {
             &cohort,
             &facts,
             ReleaseId::new("r").unwrap(),
+            &dw_decide::AlwaysResolvable,
         );
 
         assert_eq!(answer.build.cohort.len(), 1, "B is eliminated");
@@ -331,6 +350,7 @@ mod tests {
             &cohort,
             &facts,
             ReleaseId::new("r").unwrap(),
+            &dw_decide::AlwaysResolvable,
         );
         let s = answer.build.summary();
         assert!(s.contains("cohort       1 distinct parts"));

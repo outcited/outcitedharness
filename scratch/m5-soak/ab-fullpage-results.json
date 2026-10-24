@@ -1,0 +1,113 @@
+[
+ {
+  "case": "tps54360_p35",
+  "arm": "C_fullpage_blind",
+  "latency_s": 2.6,
+  "score": {
+   "rmse_norm": null,
+   "series_matched": 0,
+   "points": 0,
+   "oor": 0,
+   "name_hits": 0,
+   "note": "no series returned"
+  },
+  "vision_labels": {
+   "x": "I_O - Output Current - A",
+   "y": "Efficiency - %"
+  }
+ },
+ {
+  "case": "tps54360_p35",
+  "arm": "D_fullpage_envelope",
+  "latency_s": 16.5,
+  "score": {
+   "series_matched": 5,
+   "series_gt": 5,
+   "points": 25,
+   "oor": 10,
+   "name_hits": 5,
+   "rmse_norm": 0.18,
+   "assignments": [
+    {
+     "gt_series": null,
+     "vision_name": "8Vin",
+     "name_match": true,
+     "pts": 5,
+     "oor": 2,
+     "rmse_norm": 0.13777703195638621
+    },
+    {
+     "gt_series": null,
+     "vision_name": "12Vin",
+     "name_match": true,
+     "pts": 5,
+     "oor": 2,
+     "rmse_norm": 0.12162959576008407
+    },
+    {
+     "gt_series": null,
+     "vision_name": "24Vin",
+     "name_match": true,
+     "pts": 5,
+     "oor": 2,
+     "rmse_norm": 0.17591179279558886
+    },
+    {
+     "gt_series": null,
+     "vision_name": "36Vin",
+     "name_match": true,
+     "pts": 5,
+     "oor": 2,
+     "rmse_norm": 0.15223950676948403
+    },
+    {
+     "gt_series": null,
+     "vision_name": "48Vin",
+     "name_match": true,
+     "pts": 5,
+     "oor": 2,
+     "rmse_norm": 0.31268575176536717
+    }
+   ]
+  },
+  "vision_labels": {
+   "x": "I_O - Output Current - A",
+   "y": "Efficiency - %"
+  }
+ },
+ {
+  "case": "lm5005_p25",
+  "arm": "C_fullpage_blind",
+  "latency_s": 2.4,
+  "score": {
+   "rmse_norm": null,
+   "series_matched": 0,
+   "points": 0,
+   "oor": 0,
+   "name_hits": 0,
+   "note": "no series returned"
+  },
+  "vision_labels": {
+   "x": "Output Current (A)",
+   "y": "Efficiency (%)"
+  }
+ },
+ {
+  "case": "lm5005_p25",
+  "arm": "D_fullpage_envelope",
+  "latency_s": 4.1,
+  "score": {
+   "series_matched": 0,
+   "series_gt": 6,
+   "points": 0,
+   "oor": 0,
+   "name_hits": 0,
+   "rmse_norm": null,
+   "assignments": []
+  },
+  "vision_labels": {
+   "x": "Output Current (A)",
+   "y": "Efficiency (%)"
+  }
+ }
+]
