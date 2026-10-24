@@ -1,0 +1,23 @@
+# Canonical machine identity — DIRECTOR-01A #6
+schema: 1
+version: "2026-10-16.1"
+#
+# Derived from /Volumes/M5_4TB/AGENT_NETWORK.md (who's-who, verified
+# 2026-09-12) and RUNBOOK.md fleet table. Evidence per row in comments.
+# Discipline: append aliases only; canonical ids are never renamed.
+#
+aliases:
+  e10b: dgx1                # AGENT_NETWORK: spark (DGX1), hostname spark-e10b
+  spark: dgx1               # fleet shorthand for the DGX1 box
+  spark-e10b: dgx1
+  spark-49af: dgx2          # RUNBOOK fleet table hostnames
+  spark-69c8: dgx3
+  m5max-ai: m5              # AGENT_NETWORK tree/machine names
+  samsons-macbook-pro-2: mbp-intel   # old extraction MBP (i9, front waves)
+  macbook-pro: m4           # AGENT_NETWORK: M4 laptop (frontend agents)
+  samsons-mac-mini: mac-mini         # PDF factory / crawler controller
+  whitepine-n100: whitepine
+  gx10-26b6: asus2
+  gx10-33af: asus4
+  gx10-fc2e: asus1
+  gx10-0309: asus3

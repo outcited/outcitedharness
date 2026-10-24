@@ -1,0 +1,44 @@
+# DesignWins project configuration — DIRECTOR-02
+# Project-specific policy; the engine (director_consumer/) stays generic.
+# Every value here is DesignWins institutional knowledge, NOT engine law.
+
+schema: 1
+version: "2026-10-16.1"
+
+# ---- decision authority (was hardcoded SAM_ONLY_CATEGORIES) ----
+authority:
+  human_owner: sam
+  # action -> why it is human-only (fail-closed default for unknown actions)
+  human_only_actions:
+    propose_promotion_freeze: "freeze change (HANDOFF-m5: Sam's calls only)"
+    propose_spend_review: "cloud expense (HANDOFF-m5: Sam's calls only)"
+    propose_release_nudge: "release execution (promotion packet owner)"
+    propose_destructive_cleanup: "destructive change (standing rule)"
+  # agents trusted with autonomous execution of proposed actions (future)
+  agent_authorities:
+    "agent:m5-opencode": [propose_status_note, propose_investigation,
+                          propose_backup_response, propose_park_review,
+                          propose_handoff_status]
+
+# ---- model resource governance (§6) ----
+models:
+  # tiers the director may use. Anything NOT listed is REFUSED by the router.
+  allowed:
+    - name: asus2_ops_brain
+      provider: local
+      base_url: http://100.68.133.1:8900
+      model: qwen3.8-27b-nvfp4
+      role: routine-preferred
+  # METERED INFERENCE IS NEVER AUTOMATICALLY AUTHORIZED. OpenRouter and any
+  # pay-per-token endpoint are refused by the router regardless of config
+  # mistakes above; adding one requires a task-specific spend authorization
+  # recorded by the human owner, then an explicit entry with
+  # authorization_ref. The router hard-refuses provider == metered without it.
+  metered:
+    provider_blocklist: [openrouter, metered]
+  rate_limits:
+    per_minute: 6
+    burst: 3
+  usage_note: >
+    Approved production OpenRouter extraction workflows (pin batch etc.) are
+    untouched by this policy — the director governs ONLY its own calls.

@@ -1,0 +1,125 @@
+# Ubuntu deployment plan — Engineering Director on Ryzen #1 (32 GB)
+
+**goal:** the director runs permanently on the Ryzen controller with NO M5
+runtime dependency. The M5 is a development workstation (see
+projects/designwins/fleet.yaml migration note). Read-only mirrors only; no
+competing truth stores.
+
+## Runtime
+
+- Ubuntu, python3.11+, `pip install pyyaml` (stdlib + pyyaml — nothing else)
+- App dir: `/opt/harness-director` (rsync from the reviewed branch; pinned
+  commit SHA in `VERSION`)
+- Config: `/etc/harness-director/` — `feeds.yaml` (mirror paths),
+  `policy.yaml`, `fleet.yaml`, `machine-aliases.yaml`, `deps.yaml`
+  (per DIRECTOR-02-BOUNDARIES resolution order: project dir → defaults)
+- State: `/var/lib/harness-director/` (workspace: director.db, outbox/,
+  escalations/, briefings/, fleet-state.json, continuity-*.json) — this is
+  the only writable location
+- Feed mirrors: rsync pull every 5 min from the NAS/production sources
+  (fleet-state/, sentinel/, factory.sqlite3 copy, pipeline-live.db copy,
+  facet ledgers, intake log, AGENT_NETWORK.md). Mirrors are READ sources;
+  staleness is measured, never masked.
+
+## systemd units
+
+```
+harness-director.service   (Type=simple, Restart=always, RestartSec=30)
+  ExecStart=/opt/harness-director/venv/bin/python -m director_consumer.cli \
+    run --workspace /var/lib/harness-director \
+    --deps /etc/harness-director/deps.yaml \
+    --feeds /etc/harness-director/feeds.yaml \
+    --project /etc/harness-director \
+    --fleet-yaml /etc/harness-director/fleet.yaml \
+    --agent-network /var/lib/harness-director/mirrors/AGENT_NETWORK.md \
+    --snap-dir /var/lib/harness-director/mirrors/fleet-state/snapshots \
+    --factory-db /var/lib/harness-director/mirrors/factory.sqlite3 \
+    --pipeline-db /var/lib/harness-director/mirrors/pipeline-live.db \
+    --facet-root /var/lib/harness-director/mirrors/facet-ledgers \
+    --intake-log /var/lib/harness-director/mirrors/pdf-intake.log \
+    --l0-index /var/lib/harness-director/mirrors/l0-records.jsonl \
+    --backlog-paths /var/lib/harness-director/mirrors/vault-paths.json \
+    --class-costs /etc/harness-director/class-costs.json \
+    --sessions-db /var/lib/harness-director/mirrors/opencode.db \
+    --mailbox /var/lib/harness-director/mirrors/shared-docs-queue \
+    --repo /opt/harness-director \
+    --machine-id ryzen-1 \
+    --interval 600
+harness-director-mirror.timer  (OnCalendar=*:0/5)
+harness-director-health.timer  (hourly: cli verify + briefing freshness)
+```
+
+DIRECTOR-03 additions: `--l0-index/--backlog-paths/--class-costs`
+(class-aware continuity), `--sessions-db/--mailbox/--repo/--machine-id`
+(ownership + session discovery). OpenCode metadata and git history are
+mirror-only sources; the director never writes to them.
+
+## Health checks
+
+1. `cli verify` (journal hash chain) exits 0 — hourly timer + post-run.
+2. Workspace heartbeat: `journal` run entries fresh < 2× interval.
+3. systemd `Restart=always` + `WatchdogSec` optional (the loop is
+   crash-safe by design: atomic ingest, outbox heal on startup).
+
+## Backup / restore
+
+- Backup: `sqlite3 director.db ".backup backup.db"` + tar outbox/ +
+  escalations/ + briefings/ → daily, copied to NAS (append-only journal
+  makes any consistent copy verifiable: `cli verify` on restore).
+- Restore: untar workspace, run `cli verify` — chain proves integrity.
+
+## Restart recovery
+
+No recovery procedure needed beyond restart: cursors/dedup/journal are
+transactional (crash mid-batch rolls back; outbox heals unwritten
+proposals on the next run). Proven by failure injection (01A/01B tests).
+
+## DIRECTOR-05 additions
+
+- **Project registry:** one workspace DB now hosts N projects
+  (`project_registry`, scoped keys). Project config lives in
+  `/etc/harness-director/projects/<id>/`; registration is data, engine
+  unchanged.
+- **Scope migration:** first boot on a pre-05 workspace runs the
+  transactional project-scope migration once (`schema_meta` guard);
+  `*_legacy` tables are kept as provenance. Backup BEFORE first boot of
+  a new version (standard procedure above).
+- **SQLite mirror consistency:** feed mirrors must use
+  `sqlite3 source '.backup mirror.db'` (or `VACUUM INTO`) for
+  `pipeline-live.db` / `factory.sqlite3` — never raw `cp` of a live WAL
+  database. File feeds (ledgers, logs, CHANGES.md) rsync as before.
+- **Reconciliation + context services:** same process, same 600s loop;
+  no new daemons. Health timer covers `cli verify` (journal chain) and
+  finding freshness.
+- **AuthorizationStore** lives in director.db; approvals are inserted by
+  human-signed records only. The service cannot issue its own.
+
+## Rollback (unchanged semantics)
+
+Stop unit → restore workspace backup → reinstall previous `VERSION`.
+Scope migration is forward-additive; previous binaries read old tables
+via the `*_legacy` names if needed. No destructive schema steps exist.
+
+## DIRECTOR-04 additions
+
+- New tables in director.db (tasks, task_events, task_contributors,
+  messages, message_events, incident_recovery, incidents.lifecycle_state)
+  — all additive; `_migrate`-style ALTER guards keep old workspaces
+  readable. Journal state migrates by workspace copy + `cli verify` as
+  before.
+- **Delivery gate:** `delivery: {enabled: false}` is the shipped default in
+  `/etc/harness-director/policy.yaml`. Production delivery is enabled only
+  by explicit human edit with an `authorization_ref`; the service cannot
+  grant it to itself. Test/experiment mailboxes are separate directories —
+  never the NAS inbox.
+- Coordination state (tasks/messages/incident lifecycles) appears in every
+  briefing; no new processes required.
+
+## No-M5-dependency checklist
+
+- All feed paths live in config (mirrors), never code
+- No M5 hostnames in code; fleet.yaml roles are declarative data
+- Model endpoints come from policy.yaml (Tailscale IPs — same on Ryzen)
+- Tailscale binary path configurable; registry degrades to UNKNOWN when
+  the probe fails (never fabricates state)
+- Journal migration from M5 dev workspace = file copy + `cli verify`

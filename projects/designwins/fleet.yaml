@@ -1,0 +1,70 @@
+# DesignWins fleet assignments — operational facts + migration targets.
+# Declared configuration with provenance; the registry DERIVES live state and
+# never trusts these entries as health. Roles change by editing this file,
+# never by code. These are current facts/targets as of 2026-10-16, including
+# the M5 -> Ryzen migration in progress.
+
+schema: 1
+version: "2026-10-16.1"
+
+machines:
+  ryzen-1:
+    capability: {cpu: 12c, ram_gb: 32, storage: local-nvme }
+    roles: [engineering-director-controller]
+    status: planned            # not yet onboarded
+  ryzen-2:
+    capability: {cpu: 12c, ram_gb: 32, storage: local-nvme }
+    roles: [extraction-worker, normalization-worker]
+    status: planned
+  ryzen-3:
+    capability: {cpu: 16c, ram_gb: 64, storage: local-nvme }
+    roles: [extraction-worker-heavy, normalization-worker-heavy]
+    status: planned
+  m5:
+    capability: {cpu: 18c, ram_gb: 128, storage: m5-4tb-external }
+    roles: [control-plane-interim, dev-workstation]
+    migration: >
+      M5 is migrating BOTH extraction workloads and their managing agents to
+      the Ryzen workers; target end-state is dev workstation only.
+    status: migrating
+  m4:
+    capability: {cpu: 16c, ram_gb: 48 }
+    roles: [frontend-dev, interactive-opencode]
+    status: active
+  mac-mini:
+    roles: [pdf-factory-controller, crawler-coordinator]
+    status: active
+  whitepine:
+    roles: [n100-crawler]
+    status: active
+  mbp-intel:
+    capability: {cpu: 8c, ram_gb: 16 }
+    roles: [extraction-worker-slow]
+    status: active
+  dgx1: {roles: [inference-overflow-unstable], status: active}
+  dgx2: {roles: [inference-tp4, nfs-models], status: active}
+  dgx3: {roles: [inference-tp4], status: active}
+  asus1: {roles: [inference-tp4], status: active}
+  asus2: {roles: [inference-ops-brain], status: active}
+  asus3: {roles: [inference-tp4], status: active}
+  asus4: {roles: [inference-adjudicator, embedder, gci], status: active}
+
+agents:
+  # identity -> machine + kind. Kinds are factual classifications from
+  # AGENT_NETWORK.md; human-interactive sessions are never interrupted.
+  m5-cursor:    {machine: m5,  kind: human-interactive}
+  m5:           {machine: m5,  kind: autonomous-worker}
+  m5-opencode:  {machine: m5,  kind: autonomous-worker}
+  power-data-01: {machine: m5, kind: autonomous-worker, note: "sibling checkout, agent/power-data-01 branch"}
+  cursor-cr:    {machine: m4,  kind: human-interactive}
+  m4opencode:   {machine: m4,  kind: autonomous-worker}
+  claude-code-browser-m4: {machine: m4, kind: autonomous-worker}
+  engineering-director: {machine: ryzen-1, kind: director-managed-future,
+                         note: "this system; spawning disabled in DIRECTOR-02"}
+
+# Factory continuity thresholds (docs vs worker-hours are separate)
+factory_continuity:
+  ready_coverage_target_h: 24
+  junk_flood_threshold: 1000        # dead ._ jobs before it is an incident
+  lease_stall_window_m: 60          # expired leases older than this = stall
+  starvation_alert_h: 24            # predicted starvation below target

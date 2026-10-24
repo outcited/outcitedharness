@@ -1,0 +1,410 @@
+# Dependency / impact map — DIRECTOR-01
+# versioned; supersede by version bump + changelog entry, never edit silently
+schema: 1
+version: "2026-10-16.4"   # 01A: structured service matching, alias identity,
+                          # replica/primary split, watcher-health rule
+                          # 02: fleet_health + factory continuity rules
+                          # 03: ownership/sessions rules + incident correlations
+
+# Downstream dependency graph: node -> nodes it feeds. A change in X impacts
+# the transitive closure of X. Derived from HANDOFF-m5-20261012 extraction
+# ladder + ARCHITECTURE.md + 25K-WEEK-READINESS stage model.
+nodes:
+  crawler:        {description: "mac-mini / whitepine PDF acquisition"}
+  intake:         {description: "pdf-intake rsync spool (com.harness.pdf-intake)"}
+  substrate:      {description: "PDF->text substrate builders (81K layer)"}
+  l0:             {description: "L0 deterministic characterization (198,240 docs)"}
+  facets:         {description: "CPU facet rescans (thermal/mode/aec/errata/pillars/paxes/conn/ti)"}
+  verify:         {description: "quote_verify deterministic gate"}
+  canon:          {description: "asus4 FP8 adjudicator endpoint :8900"}
+  adjudication:   {description: "verdict issuance + adjudication_ledger"}
+  fold_board:     {description: "fold + extraction board snapshots"}
+  promotion:      {description: "promotion packet -> release owner (human)"}
+  release:        {description: "dw-release ReleaseId append-only publish"}
+  served_export:  {description: "api-store-export served store (NAS Public)"}
+  backups:        {description: "nightly results archive to NAS"}
+  budget:         {description: "cloud spend (budget_spend)"}
+  fleet_infra:    {description: "boxes, endpoints, containers (fleet_state)"}
+
+edges:
+  crawler: [intake]
+  intake: [substrate]
+  substrate: [l0]
+  l0: [facets]
+  facets: [verify]
+  verify: [canon, promotion]
+  canon: [adjudication]
+  adjudication: [fold_board]
+  fold_board: [promotion]
+  promotion: [release]
+  release: [served_export]
+  backups: []
+  budget: []
+  fleet_infra: [canon, substrate, facets, served_export, backups]
+
+# Deterministic rules. match: {feed, any: [substrings]} on event summary.
+# severity / impacts / action / authority. Actions are PROPOSALS only.
+rules:
+  - id: canon-primary-outage
+    feed: fleet_changes
+    match:
+      change_kinds: [container_delta]
+      service_tokens: [canon-qwen38-27b]
+      service_direction: removed
+    dedupe_window_h: 6
+    severity: P0
+    impacts: [canon, adjudication, promotion, release]
+    action: propose_promotion_freeze
+    authority: sam
+    rationale: >
+      Structured (01A #5): the canon PRIMARY container left the running set
+      (confirmed container delta, not a probe blind spot). MODEL_SETTINGS
+      canon law: verdict determinism is the adjudication basis. Freeze
+      changes are Sam-only (HANDOFF-m5). Recommendation, never execution.
+
+  - id: canon-primary-recovered
+    feed: fleet_changes
+    match:
+      change_kinds: [container_delta]
+      service_tokens: [canon-qwen38-27b]
+      service_direction: added
+    dedupe_window_h: 6
+    severity: P2
+    impacts: [canon, adjudication]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      Canon primary returned. Status note; sentinel canon 5x5 re-probe
+      confirms before any freeze lift is even discussed.
+
+  - id: canon-primary-unreachable
+    feed: fleet_changes
+    match:
+      change_kinds: [probe_state]
+      service_tokens: [canon-qwen38-27b]
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [canon, adjudication]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      01A #5: SSH_FAIL/UNREACHABLE means the PROBE lost the box — canon
+      state is UNKNOWN, not confirmed down. Investigation (agent), not a
+      P0 freeze on a blind probe (this exact false positive paged Sam three
+      times in the aadad37e backfill).
+
+  - id: canon-replica-change
+    feed: fleet_changes
+    match:
+      service_tokens: [canon-replica, dgx1_canon_replica]
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [canon]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      01A: replica redundancy change, NOT the verdict path. The primary on
+      its own box still adjudicates; redundancy loss is agent-level review
+      (dgx1 is the designated fragile overflow box by design).
+
+  - id: embedder-service-change
+    feed: fleet_changes
+    match:
+      service_tokens: [spark_embedder, bge-m3-embed, harness-gci]
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [fleet_infra, served_export]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Production embedder/GCI face search traffic; unreachable/degraded is
+      agent-level investigation with production impact noted.
+
+  - id: adjudicator-meaning-drift
+    feed: sentinel
+    match: {any: ["GOLD DRIFT", "canon", "probe fail"]}
+    severity: P1
+    impacts: [verify, adjudication, promotion]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      sentinel.py: nightly frozen-gold drift >2% alarms; meaning health
+      gate. Investigation belongs to the extraction lead agent.
+
+  - id: watcher-health-stale
+    feed: director
+    match: {kinds: [watcher_stale]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [verify, promotion]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      01A #8: a stale sentinel feed means the WATCHER is failing (both
+      launchd jobs exit 1: PermissionError on the sentinel dir owned by
+      _lpoperator:1026, and the hourly job opens the retired pipeline.db).
+      Nobody watches the watchers — this rule does. Diagnosis is recorded
+      in the proposal; the fix is production-side and human/agent-owned.
+
+  - id: nas-backup-failure
+    feed: sentinel
+    match: {any: ["backup", "NAS", "DESTINATION UNREACHABLE"]}
+    severity: P1
+    impacts: [backups, served_export]
+    action: propose_backup_response
+    authority: "agent:m5-opencode"
+    rationale: >
+      Transport law (single-NIC NAS since 2026-10-13). Scope is backups +
+      export mirrors ONLY — extraction reads local vault and is unaffected.
+      Never propose production shutdown for a backup failure.
+
+  - id: fleet-infra-change
+    feed: fleet_changes
+    match:
+      any: []
+      exclude_service_tokens: [canon-qwen38-27b, canon-replica,
+                               dgx1_canon_replica, spark_embedder,
+                               bge-m3-embed, harness-gci]
+    severity: P2
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      Default for infra deltas without a specific rule. Service-specific
+      rules above own their tokens (no double-classification).
+
+  - id: facet-progress
+    feed: facets
+    match: {kinds: [facet_progress]}
+    severity: P3
+    impacts: [facets]
+    action: propose_handoff_status
+    authority: "agent:m5-opencode"
+    rationale: >
+      Routine progress. Produces a proposed status/handoff message for the
+      lane owner. Explicitly NOT a human escalation.
+
+  - id: facet-parked-growth
+    feed: facets
+    match: {kinds: [facet_parked_growth]}
+    severity: P2
+    impacts: [facets]
+    action: propose_park_review
+    authority: "agent:m5-opencode"
+    rationale: >
+      parked.txt growth = poison PDFs after 2 attempts. Agent-level review;
+      escalate only if growth is sustained across runs.
+
+  - id: facet-missing-growth
+    feed: facets
+    match: {kinds: [facet_missing_growth]}
+    severity: P3
+    impacts: [facets, substrate]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: Missing files retry by ledger law; watch, do not page.
+
+  - id: factory-lease-event
+    feed: factory_events
+    match: {kinds: [chunk_claimed, chunk_renewed, chunk_expired, chunk_recovered, chunk_completed]}
+    severity: P3
+    impacts: [facets]
+    action: none
+    authority: none
+    rationale: >
+      Normal Rust-controller lifecycle. Journaled for observability; no
+      message unless a dedicated rule fires (e.g. repeated expiry).
+
+  - id: factory-queue-registered
+    feed: factory_events
+    match: {kinds: [queue_registered]}
+    severity: P3
+    impacts: [facets]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: New production lane batch — status note to the lane owner.
+
+  - id: budget-spend-anomaly
+    feed: budget
+    match: {kinds: [budget_anomaly]}
+    severity: P2
+    impacts: [budget]
+    action: propose_spend_review
+    authority: sam
+    rationale: >
+      HANDOFF-m5 "Sam's calls, only": any cloud expense approval is
+      human-only. Escalation DRAFT, never an autonomous spend action.
+
+  - id: promotion-evidence-event
+    feed: facets
+    match: {any: ["PROMOTION", "promotion packet"]}
+    severity: P2
+    impacts: [promotion, release]
+    action: propose_release_nudge
+    authority: sam
+    rationale: >
+      Promotion packets await the human release owner (pin-batch pattern).
+      Director proposes a reminder draft; release execution is never automatic.
+
+  # ---- fleet health (§3) — registry diffs ----
+  - id: fleet-machine-connectivity
+    feed: fleet_health
+    match: {kinds: [machine_offline]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [fleet_infra, facets]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      L3 connectivity lost (Tailscale evidence). §3 law: connectivity is
+      never service health — verify services separately before touching any
+      workload. Machine identity from the registry (aliases reconciled).
+
+  - id: fleet-machine-online
+    feed: fleet_health
+    match: {kinds: [machine_online]}
+    severity: P3
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: Recovery note; services stay UNKNOWN until endpoint telemetry.
+
+  - id: fleet-service-down
+    feed: fleet_health
+    match: {kinds: [service_down]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [fleet_infra]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Endpoint telemetry degraded while the machine may be perfectly
+      online — exactly the conflation §3 forbids. Service-level evidence,
+      service-level response.
+
+  - id: fleet-service-recovered
+    feed: fleet_health
+    match: {kinds: [service_recovered]}
+    severity: P3
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: Recovery note.
+
+  # ---- factory continuity (§4) ----
+  - id: factory-junk-flood
+    feed: factory
+    match: {kinds: [junk_flood]}
+    dedupe_window_h: 12
+    severity: P2
+    impacts: [intake, substrate, facets]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      AppleDouble '._' contamination dead-lettering the substrate queue
+      (evidence: pipeline jobs table). Factory-side fix in progress; the
+      director monitors the count and never deletes data.
+
+  - id: factory-lease-stall
+    feed: factory
+    match: {kinds: [lease_stall]}
+    dedupe_window_h: 6
+    severity: P2
+    impacts: [facets, substrate]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Claimed chunks past lease expiry = stuck or dead workers. Rust
+      dw-soak recover requeues safely; human action only if stalls recur.
+
+  - id: factory-starvation
+    feed: factory
+    match: {kinds: [starvation_risk, queue_empty]}
+    dedupe_window_h: 6
+    severity: P1
+    impacts: [crawler, intake, substrate, facets]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      Factory continuity: ready-work coverage below the configured target
+      (docs and worker-hours reported separately; UNKNOWN values are
+      explicit). Root cause is upstream acquisition.
+
+  - id: factory-intake-anomaly
+    feed: factory
+    match: {kinds: [intake_anomaly]}
+    dedupe_window_h: 24
+    severity: P2
+    impacts: [crawler, intake]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Acquisition rate flat or negative over the observed window — crawler
+      lane, factory controller, or a manufacturer endpoint regression.
+
+  # ---- ownership (§6) ----
+  - id: ownership-conflict
+    feed: ownership
+    match: {kinds: [ownership_conflict]}
+    dedupe_window_h: 24
+    severity: P1
+    impacts: [fleet_infra, facets]
+    action: propose_investigation
+    authority: "agent:m5-opencode"
+    rationale: >
+      Two or more agents hold claim evidence for the same task ID.
+      A mailbox message is never proof of ownership; the resolution is a
+      proposed message asking the claimants to settle ownership — never an
+      autonomous reassignment.
+
+  - id: ownership-stale
+    feed: ownership
+    match: {kinds: [ownership_stale]}
+    dedupe_window_h: 48
+    severity: P2
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      Claim evidence exists but has gone quiet beyond the stale window.
+      Status check proposed; not an abandonment verdict.
+
+  - id: session-disconnected
+    feed: sessions
+    match: {kinds: [session_disconnected]}
+    dedupe_window_h: 12
+    severity: P3
+    impacts: [fleet_infra]
+    action: propose_status_note
+    authority: "agent:m5-opencode"
+    rationale: >
+      OpenCode session shows task IDs but no observable process. A
+      disconnected terminal is NOT proof of task completion (§5) — the
+      note asks; it never concludes.
+
+# ---- incident correlation (§4): deterministic symptom grouping ----
+correlations:
+  - id: factory-supply-exhaustion
+    group_rules: [factory-starvation]
+    group_key: feed
+    window_h: 24
+    suspected_cause: "extraction supply exhaustion (upstream acquisition)"
+    owner_hint: "agent:m5-opencode"
+  - id: intake-contamination
+    group_rules: [factory-junk-flood]
+    group_key: feed
+    window_h: 24
+    suspected_cause: "AppleDouble intake contamination (factory-side fix)"
+    owner_hint: "mac-mini factory"
+  - id: watcher-failure
+    group_rules: [watcher-health-stale, adjudicator-meaning-drift]
+    group_key: feed
+    window_h: 168
+    suspected_cause: "sentinel watcher failure (stale LKG is a symptom)"
+    owner_hint: "agent:m5-opencode"
+  - id: canon-availability
+    group_rules: [canon-primary-outage, canon-primary-unreachable]
+    group_key: feed
+    window_h: 6
+    suspected_cause: "adjudicator endpoint availability change"
+    owner_hint: "agent:m5-opencode"

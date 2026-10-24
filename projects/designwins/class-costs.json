@@ -1,0 +1,7 @@
+{
+  "datasheet": {"hours_per_doc": 0.02, "provenance": "bench-20261015 M5-thermal+mode CPU sample (~75s+26s/docsample-class); order-of-magnitude planning value"},
+  "errata": {"hours_per_doc": 0.01, "provenance": "bench-20261015 scaled from datasheet (short docs)"},
+  "ref_manual": {"hours_per_doc": 0.15, "provenance": "bench-20261015 scaled by page-weight (long docs)"},
+  "bom": {"hours_per_doc": 0.01, "provenance": "bench-20261015 scaled from datasheet"},
+  "application_note": {"hours_per_doc": 0.03, "provenance": "bench-20261015 scaled from datasheet"}
+}

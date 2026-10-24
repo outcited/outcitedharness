@@ -1,0 +1,84 @@
+project_id: designwins
+name: DesignWins
+description: >
+  Datasheet drill-down and elimination platform — the first proving
+  ground of the Engineering Director platform.
+objectives:
+  - {id: SUPPLY-CONTINUITY, text: keep prioritized PDF supply ahead of extraction}
+  - {id: EXTRACTION-COVERAGE, text: complete multi-facet extraction over the rescan backlog}
+  - {id: PROVENANCE-TRUTH, text: every displayed claim source-located and verified on the release-pinned cohort}
+  - {id: ENGINEER-JOURNEY, text: Sam can test a two-scenario UI on real data with honest gaps}
+success_criteria:
+  - ready-work coverage >= 24h at all times
+  - every claim resolves to quote+page+sha provenance
+# Operational doctrine — operator-directed 2026-10-20 (issue #12 audit).
+# These are ranking-relevant truths for the context compiler and the
+# product graph, not aspirations. Versioned: supersede by policy_version
+# bump, never edit silently.
+operational_doctrine:
+  provenance_first: >
+    Provenance is the fundamental product requirement. Every engineering
+    assertion must trace to its original source: exact identity, page,
+    quotation, and relevant conditions. Untraceable assertions are not
+    product.
+  normalization_prerequisite: >
+    Normalization and identity binding are prerequisites to meaningful
+    cross-manufacturer comparison. Un-normalized values must never be
+    compared, ranked, or averaged (see product-graph stage
+    'normalization').
+  frontend_acceptance_honesty: >
+    The existing frontend is NOT a fully validated end-to-end engineering
+    decision experience. Working components (API, cube, journeys) are not
+    product acceptance; acceptance is the 'product-test' stage advancing
+    on recorded evidence only.
+  energy_economics: >
+    Onsite CPU/GPU inference and extraction capacity, backed by local
+    energy economics including solar, is a strategic advantage: marginal
+    cost trends to zero. Cloud processing is a bounded residual/overflow
+    path for what local lanes cannot extract — never the default. Any
+    proposal whose default is cloud-first must justify why the local
+    deterministic + onsite lanes cannot do it first.
+  dependency_chain_truth: >
+    The full chain is: PDF acquisition -> receiver manifests -> admission
+    -> extraction -> verification -> normalization -> identity/release ->
+    store/API -> evidence wire -> frontend journeys -> engineer decision.
+    A blocker's product impact is ranked over exactly this DAG.
+# Observation scope: every registered repo is watched read-only (issues,
+# PRs, route trees as facts). This list is the ONLY place observation
+# scope grows — adding a dependency here makes it visible without code
+# edits. It does NOT expand execution/ingest authority (see
+# gh_workloop.ALLOWLISTED_REPOS) or message-delivery authorization.
+repositories:
+  - github.com/outcited/outcitedharness      # director + M5 lane
+  - github.com/outcited/designwins-v2        # M4 frontend
+  - github.com/outcited/outcited.com         # cr-core platform/facade
+  - github.com/outcited/MFGDosierfactory     # upstream PDF factory
+# Typed ownership boundary (issue #7 amendment §2; normalization
+# clarification operator-directed 2026-10-21 — responsibility typing only,
+# NOT agent reassignment). proposed lanes, NOT authenticated ownership —
+# confirmed stays false until an attributable ack exists on trusted
+# transport. Tapes is a separate project; only shared resource contention
+# appears as a cross-project dependency.
+ownership_boundary:
+  m5:
+    owns: [extraction, normalization, identity-binding-evidence-correctness,
+           source-sha-page-quote-verification, truth-funnel,
+           evidence-correctness-at-handoff]
+    confirmed: false
+  cr-core:
+    owns: [release-pinned-store, store-integration, facade, decision-api,
+           authenticated-pdf-resolver]
+    confirmed: false
+  m4:
+    owns: [fe-client, engineer-journeys, evidence-presentation]
+    confirmed: false
+  pdf-factory:
+    owns: [acquisition-to-receiver-receipts]
+    confirmed: false
+  seven:
+    owns: [blockers, cross-lane-coordination,
+           interface-contract-reconciliation, integration-acceptance,
+           escalation]
+    confirmed: false
+policy_version: '2026-10-20.3'
+human_authority: sam
