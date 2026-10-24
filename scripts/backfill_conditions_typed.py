@@ -34,7 +34,7 @@ from harness.electronics.condition_model import (  # noqa: E402
 PARSER_VERSION = "condition_model.v1.1"
 
 BURN = Path("/Volumes/M5_4TB/extract-results/burn-power-v1")
-CATALOG = Path("/Volumes/M5_4TB/extract-results/catalog.db")
+CATALOG = Path("/Users/samkim/Harnessv1/results/catalog-live.db")
 
 DDL = """
 CREATE TABLE IF NOT EXISTS conditions_typed (

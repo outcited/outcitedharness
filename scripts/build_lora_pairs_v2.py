@@ -21,7 +21,7 @@ from pathlib import Path
 import pymupdf
 
 REPO = Path(__file__).resolve().parents[1]
-CATALOG_DB = "/Volumes/M5_4TB/extract-results/catalog.db"
+CATALOG_DB = "/Users/samkim/Harnessv1/results/catalog-live.db"
 PDF_ROOTS = sorted(Path("/Volumes/M5_4TB/exports/power-datasheet-pairs").glob("*/pdf"))
 BURN_DIRS = [
     Path("/Volumes/M5_4TB/extract-results/burn-power-v1"),

@@ -116,6 +116,8 @@ def scan_and_enqueue(con):
             continue
         for dirpath, dirnames, filenames in os.walk(root):
             for fn in filenames:
+                if fn.startswith("._"):
+                    continue  # AppleDouble metadata ghosts (2026-10-22: 172,925 dead-junk)
                 if not fn.lower().endswith(".pdf"):
                     continue
                 p = os.path.join(dirpath, fn)

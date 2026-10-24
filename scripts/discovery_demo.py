@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from harness.discovery.evaluator import Atom, evaluate_design  # noqa: E402
 
-DB = "/Volumes/M5_4TB/extract-results/catalog.db"
+DB = "/Users/samkim/Harnessv1/results/catalog-live.db"
 
 ATOMS = [
     Atom(axis="vds_rating_v", value=36.0, hard=True),

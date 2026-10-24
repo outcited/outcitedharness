@@ -117,6 +117,49 @@ class QuoteVerifyTests(unittest.TestCase):
     def test_null_fields_skipped(self):
         self.assertEqual(verify_claims({"vin_min_v": {"value": None}}, DOC), [])
 
+    def test_dash_blank_min_cell_max_value_claimed_as_typ_is_wrong_cell(self):
+        doc = ("Backup Current: Min  Typ  Max\n"
+               "IBK  —  9.19  16.8  μA  VDD=3.3V")
+        v = verify_claims({"i_backup_a": {"value": 16.8, "quote": "—  9.19  16.8  μA",
+                                          "table": "Backup Current",
+                                          "column_header": "typ",
+                                          "row_header": "IBK",
+                                          "qualifier": "typical"}}, doc)
+        self.assertEqual(v[0]["reason_code"], "wrong_cell_binding")
+        self.assertEqual(v[0]["severity"], "P0")
+
+    def test_dash_blank_min_cell_max_value_claimed_as_max_passes(self):
+        doc = ("Backup Current: Min  Typ  Max\n"
+               "IBK  —  9.19  16.8  μA  VDD=3.3V")
+        v = verify_claims({"i_backup_a": {"value": 16.8, "quote": "—  9.19  16.8  μA",
+                                          "table": "Backup Current",
+                                          "column_header": "max",
+                                          "row_header": "IBK",
+                                          "qualifier": "maximum"}}, doc)
+        self.assertEqual(v[0]["severity"], "P2")
+
+    def test_dash_blank_min_cell_typ_value_claimed_as_typ_passes(self):
+        doc = ("Backup Current: Min  Typ  Max\n"
+               "IBK  —  9.19  16.8  μA  VDD=3.3V")
+        v = verify_claims({"i_backup_a": {"value": 9.19, "quote": "—  9.19  16.8  μA",
+                                          "table": "Backup Current",
+                                          "column_header": "typ",
+                                          "row_header": "IBK",
+                                          "qualifier": "typical"}}, doc)
+        self.assertEqual(v[0]["severity"], "P2")
+
+    def test_dash_row_ambiguous_role_downgraded_to_p1(self):
+        doc = ("Backup Current: Min  Typ  Max\n"
+               "IBK  —  9.19  16.8  μA  limit 16.8")
+        v = verify_claims({"i_backup_a": {"value": 16.8,
+                                          "quote": "—  9.19  16.8  μA  limit 16.8",
+                                          "table": "Backup Current",
+                                          "column_header": "typ",
+                                          "row_header": "IBK",
+                                          "qualifier": "typical"}}, doc)
+        self.assertEqual(v[0]["severity"], "P1")
+        self.assertEqual(v[0]["reason_code"], "unproven_role_binding")
+
 
 if __name__ == "__main__":
     unittest.main()
