@@ -146,6 +146,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dw-bcmp"
+version = "0.1.0"
+dependencies = [
+ "dw-decide",
+ "dw-extract",
+ "dw-types",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "dw-controller"
 version = "0.1.0"
 dependencies = [

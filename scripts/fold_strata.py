@@ -163,7 +163,11 @@ def regen_cube(root: Path) -> dict:
             except Exception:
                 continue
             vendor = row.get("vendor") or "unknown"
-            if feed.name == "parts_cr_core.jsonl":
+            if feed.name.startswith("parts_a_pinout"):
+                key = (row.get("aisle") or "mcu", "pinout-gold", vendor)
+            elif feed.name == "parts_lane.jsonl":
+                key = (row.get("aisle") or "unclassified", "deterministic-lane", vendor)
+            elif feed.name == "parts_cr_core.jsonl":
                 key = (row.get("aisle") or "unassigned", "cr-core", vendor)
             elif feed.name == "parts_family.jsonl":
                 key = ("mcu", "family-documents", vendor)

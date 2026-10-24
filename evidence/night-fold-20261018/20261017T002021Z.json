@@ -1,0 +1,144 @@
+{
+ "categories": {
+  "connector": {
+   "addressable_parts": 401,
+   "facets": {
+    "connectors": 401
+   },
+   "pillar_fields": {},
+   "records": 401
+  },
+  "mcu": {
+   "addressable_parts": 64272,
+   "facets": {
+    "aec": 4662,
+    "claude_ground_truth": 683,
+    "curves": 825,
+    "deep_specs": 318,
+    "description": 1,
+    "electrical": 256,
+    "enriched_specs": 430,
+    "fine_tune_facets": 143,
+    "mistral_compatibility": 1381,
+    "overview": 2181,
+    "parametric_specs": 1142,
+    "peripheral_features": 37,
+    "pillars": 50779,
+    "pinout": 2858,
+    "thermal": 199,
+    "vision_electrical": 266,
+    "vout_iq": 175
+   },
+   "pillar_fields": {
+    "clk_max_mhz": 7219,
+    "eeprom_kb": 1787,
+    "esd_cdm_v": 1046,
+    "esd_hbm_v": 3182,
+    "flash_kb": 6866,
+    "has_aes": 2678,
+    "has_secure_boot": 1216,
+    "has_trng": 1829,
+    "has_trustzone": 876,
+    "has_unique_id": 5064,
+    "latchup_ma": 1129,
+    "n_adc": 3397,
+    "n_can": 653,
+    "n_dma": 2144,
+    "n_ethernet": 130,
+    "n_gpio": 6573,
+    "n_i2c": 854,
+    "n_spi": 659,
+    "n_timer": 8687,
+    "n_uart": 724,
+    "n_usb": 465,
+    "package": 18570,
+    "sram_kb": 7197,
+    "supply_v": 8394,
+    "temp_range_c": 5197
+   },
+   "records": 97718
+  },
+  "power": {
+   "addressable_parts": 36636,
+   "facets": {
+    "curves": 303,
+    "description": 3179,
+    "thermal": 1080,
+    "vout_iq": 1028
+   },
+   "pillar_fields": {},
+   "records": 37899
+  },
+  "refdesign": {
+   "addressable_parts": 20386,
+   "facets": {
+    "overview": 8390
+   },
+   "pillar_fields": {},
+   "records": 35533
+  }
+ },
+ "generated_at": "20261017T002021Z",
+ "merged": {
+  "connector": {
+   "extracted_evidence": 0,
+   "staging_parts": 401
+  },
+  "mcu": {
+   "cr_core_parts": 3821,
+   "extracted_evidence": 3821,
+   "staging_parts": 64272
+  },
+  "power": {
+   "catalog_parts_with_claims": 0,
+   "extracted_evidence": 0,
+   "staging_parts": 36636
+  },
+  "refdesign": {
+   "extracted_evidence": 0,
+   "staging_parts": 20386
+  },
+  "unassigned_cr_core": {
+   "cr_core_parts": 1900,
+   "extracted_evidence": 1900,
+   "staging_parts": 0
+  }
+ },
+ "provenance": {
+  "catalog_claims_quote_sha": 0,
+  "catalog_claims_with_page": null,
+  "note": "catalog claim pages ride the claim_pages chain (99.6% located); gold rows are quote+page+sha verified; cr-core rows carry T1 source provenance but no page chain yet",
+  "pinout_gold_docs": null,
+  "pinout_gold_rows_quote_page_sha": null
+ },
+ "strata": {
+  "catalog_claims": {
+   "parts_with_claims": 0
+  },
+  "cr_core": {
+   "addressable_parts": 5718,
+   "aisles": {
+    "mcu": 3821,
+    "unassigned": 1900
+   },
+   "facets": {
+    "claude_ground_truth": 2249,
+    "deep_specs": 506,
+    "mistral_compatibility": 3821,
+    "overview": 3971,
+    "parametric_specs": 3498,
+    "peripheral_features": 45,
+    "pinout": 5473
+   },
+   "records": 5721
+  },
+  "pinout_gold": {
+   "available": false
+  }
+ },
+ "totals": {
+  "addressable": 121695,
+  "records": 171551,
+  "served_parts": 15036
+ }
+}

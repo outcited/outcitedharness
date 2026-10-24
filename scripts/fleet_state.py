@@ -19,7 +19,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path("/Volumes/M5_4TB/fleet-state")
+ROOT = Path(os.environ.get(
+    "FLEET_STATE_ROOT", "/Volumes/M5_4TB/fleet-state"))
+# 2026-10-21: the NAS tree is owned by uid 1026 (_lpoperator) and not
+# group-writable by samkim, which silently killed the hourly job from
+# 2026-10-12 (PermissionError on CHANGES.md append). FLEET_STATE_ROOT moves
+# the writable state (snapshots + CHANGES.md) to a samkim-owned directory;
+# the NAS copy stays as frozen history.
 SNAP_DIR = ROOT / "snapshots"
 CHANGES = ROOT / "CHANGES.md"
 
@@ -75,7 +81,62 @@ NODES = {
     "asus2": "samkimasus2@100.68.133.1",
     "asus4": "samkimasus4@100.100.116.82",
     "e10b": "samkim@100.81.201.24",
+    # extraction/coordination boxes (Sam: "why isn't seven telling me shit"
+    # — 2026-10-23: kloey had 1,084 OOM events in 48h and no watcher saw it,
+    # because these boxes were never probed at all)
+    "kloey": "samkim@192.168.4.68",
+    "winter": "samkim@100.91.13.94",
+    "happy": "samsonkim@100.69.201.109",
+    "seven": "samsonkim@100.89.168.75",
 }
+
+# OS-health thresholds; breach => health event line in the delta (feeds
+# Seven's classifier) + full numbers in the snapshot JSON. Alerts are
+# diff-based: a persistent condition alerts once, re-alerts on worsening.
+HEALTH_CMD = (
+    "mem_tot=$(free -m | awk '/^Mem:/{print $2}'); "
+    "mem_avail=$(free -m | awk '/^Mem:/{print $7}'); "
+    "swap_tot=$(free -m | awk '/^Swap:/{print $2}'); "
+    "swap_used=$(free -m | awk '/^Swap:/{print $3}'); "
+    "disk=$(df -P / | awk 'NR==2{gsub(/%/,\"\"); print $5}'); "
+    "load5=$(awk '{print $2}' /proc/loadavg); "
+    "cores=$(nproc); "
+    "oom=$(journalctl -k --since \"48 hours ago\" 2>/dev/null | "
+    "grep -ciE 'oom|out of memory' || echo 0); "
+    "echo \"$mem_avail $mem_tot $swap_used $swap_tot $disk $load5 $cores $oom\""
+)
+
+def node_health(host):
+    """One SSH: (ok?, health_str, alerts). None on SSH failure."""
+    try:
+        r = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8", host,
+             HEALTH_CMD],
+            capture_output=True, text=True, timeout=25)
+        if r.returncode != 0 or not r.stdout.strip():
+            return None
+        parts = r.stdout.split()
+        mem_avail, mem_tot = int(parts[0]), int(parts[1])
+        swap_used, swap_tot = int(parts[2]), int(parts[3])
+        disk, load5, cores, oom = int(parts[4]), float(parts[5]), int(parts[6]), int(parts[7])
+        alerts = []
+        # low % alone is normal on model-serving boxes (weights+cache pin
+        # most RAM); alert only when BOTH low-% and under an absolute floor.
+        if mem_tot and mem_avail / mem_tot < 0.10 and mem_avail < 8000:
+            alerts.append(f"mem_available={mem_avail}MB ({100*mem_avail//mem_tot}%)")
+        if swap_tot and swap_used / swap_tot > 0.50:
+            alerts.append(f"swap={100*swap_used//swap_tot}%")
+        if disk > 90:
+            alerts.append(f"disk={disk}%")
+        if cores and load5 > 1.5 * cores:
+            alerts.append(f"load5={load5:.1f}/{cores}c")
+        if oom > 20:
+            alerts.append(f"oom_48h={oom}")
+        h = (f"mem_avail={mem_avail}MB/{mem_tot}MB swap={swap_used}/{swap_tot}MB "
+             f"disk={disk}% load5={load5:.1f}/{cores}c oom48h={oom}")
+        return h, alerts
+    except Exception:
+        return None
 
 
 def http_get(url, timeout=8):
@@ -164,7 +225,30 @@ def probe_endpoints():
 
 
 def probe_nodes():
-    return {name: ssh_docker(host) for name, host in NODES.items()}
+    """Containers per node + OS health. Health alerts ride the delta so
+    Seven's classifier sees them (fleet-infra-change); numbers go to the
+    snapshot."""
+    out = {}
+    for name, host in NODES.items():
+        out[name] = {"services": ssh_docker(host)}
+        h = node_health(host)
+        if h is None:
+            if out[name]["services"] == ["SSH_FAIL"]:
+                out[name]["health"] = "SSH_FAIL"
+            continue
+        out[name]["health"], alerts = h
+        if alerts:
+            out[name]["health_alerts"] = alerts
+    return out
+
+
+def health_delta_lines(probe):
+    """Alert lines for the CHANGES feed, only for boxes in breach."""
+    lines = []
+    for name, d in sorted(probe.items()):
+        for a in d.get("health_alerts", []):
+            lines.append(f"{name}-health: [ok] -> [ALERT {a}]")
+    return lines
 
 
 def ssh_docker(host):
@@ -204,11 +288,20 @@ def mail(delta, stamp):
     )
     root, note = inbox_root()
     index = root.parent / "INDEX.jsonl" if root == NAS_INBOX else None
+    wrote = []
     for box in MAIL_BOXES:
-        d = root / box
-        d.mkdir(parents=True, exist_ok=True)
         name = f"{slug}_fleet-state-probe_{box}_status_fleet-change.md"
-        (d / name).write_text(body)
+        try:
+            d = root / box
+            d.mkdir(parents=True, exist_ok=True)
+            (d / name).write_text(body)
+            wrote.append(str(d / name))
+        except OSError:
+            # read-only mirror (NFS): spool locally instead of dying —
+            # the CHANGES feed already carries the event either way.
+            SPOOL.mkdir(parents=True, exist_ok=True)
+            (SPOOL / name).write_text(body)
+            wrote.append(str(SPOOL / name))
         if index is not None:
             row = {
                 "ts": stamp,
@@ -239,6 +332,12 @@ def main():
             {**latest.get("endpoints", {}), **latest.get("nodes", {})},
             {**state["endpoints"], **state["nodes"]},
         )
+        # OS-health alerts ride alongside service deltas; diff semantics
+        # unchanged (a persistent condition alerts once, re-alerts on change).
+        prev_alerts = {n for n in latest.get("health_alerts_seen", [])}
+        cur_alerts = set(health_delta_lines(state["nodes"]))
+        delta = delta + sorted(cur_alerts - prev_alerts)
+        state["health_alerts_seen"] = sorted(cur_alerts)
         if delta:
             entry = f"\n## {stamp}\n" + "\n".join(f"- {d}" for d in delta) + "\n"
             with CHANGES.open("a") as f:
@@ -247,6 +346,15 @@ def main():
             print(f"CHANGED:\n{entry}" + note)
         else:
             print(f"OK: no change ({stamp})")
+            # Heartbeat: a quiet fleet is legitimate, but downstream freshness
+            # watchers (Director fleet_changes feed) read CHANGES.md mtime.
+            # Append ONE dated line per calendar day maximum so a steady fleet
+            # never reads as a dead probe.
+            today = now.strftime("%Y-%m-%d")
+            last_lines = CHANGES.read_text().splitlines()[-5:] if CHANGES.exists() else []
+            if not any(l.startswith(f"- heartbeat {today}") for l in last_lines):
+                with CHANGES.open("a") as f:
+                    f.write(f"\n## {stamp}\n- heartbeat {today}: probe ran, no fleet changes\n")
     path = SNAP_DIR / (now.strftime("%Y%m%dT%H%M%SZ") + ".json")
     path.write_text(json.dumps(state, indent=2, sort_keys=True))
     for old in sorted(SNAP_DIR.glob("*.json"))[:-168]:

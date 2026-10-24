@@ -1,0 +1,1 @@
+{"sha": "40ac5b13f535023ef9c9af5c1ee0d67357e7d16a258d1c9fbec0de6b6bb03524", "pages": 2, "lanes_total": {"opn_decoder": 1}, "table_pages": 0, "table_ms": 0, "wall_ms": 49, "pages_rip": [{"p": 1, "lanes": [], "t": 0, "c": 941}, {"p": 2, "lanes": ["opn_decoder"], "t": 0, "c": 841, "ex": "TMS570LS02x/03x/04x Nomenclature and identification of TMS570LSx Orderable Part Number Part"}]}

@@ -21,7 +21,7 @@ BURN_DIRS = [
     Path("/Volumes/M5_4TB/extract-results/burn-power-v1"),
     Path("/Volumes/M5_4TB/extract-results/burn-vault-v1"),
 ]
-CATALOG_DB = "/Volumes/M5_4TB/extract-results/catalog.db"
+CATALOG_DB = "/Users/samkim/Harnessv1/results/catalog-live.db"
 
 
 def opn_from_filename(stem):
