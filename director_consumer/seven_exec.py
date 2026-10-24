@@ -197,14 +197,18 @@ def run_loop(con, project: str, workspace: Path, task_id: str,
                  error=str(e)[:120])
     ok, problems = verify_triage_artifact(artifact)
     step("verified", accepted=ok, problems=problems)
-    # progress event on real execution evidence
-    try:
-        ts.transition(task_id, "active", actor="seven-loop",
-                      evidence=f"session:{receipt.session_id} "
-                               f"exit={receipt.exit_code}",
-                      expect_epoch=rec.epoch)
-    except (TransitionError, FencingError) as e:
-        step("transition-error", to_state="active", error=str(e)[:120])
+    # progress event on real execution evidence (skip if already active:
+    # active -> active is not a legal transition)
+    cur = ts.get(task_id)
+    if cur is not None and cur.state != "active":
+        try:
+            ts.transition(task_id, "active", actor="seven-loop",
+                          evidence=f"session:{receipt.session_id} "
+                                   f"exit={receipt.exit_code}",
+                          expect_epoch=rec.epoch)
+        except (TransitionError, FencingError) as e:
+            step("transition-error", to_state="active",
+                 error=str(e)[:120])
     if receipt.exit_code != 0:
         try:
             ts.transition(task_id, "blocked", actor="seven-loop",

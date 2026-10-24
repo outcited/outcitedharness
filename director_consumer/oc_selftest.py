@@ -111,6 +111,31 @@ def run_selftest(con, project: str, delivery: MailboxDelivery,
             return
         raise AssertionError("illegal transition was NOT rejected")
 
+    def c_same_state_transition():
+        # active -> active must be rejected (recovery path must not
+        # re-transition an already-active task). Advances only from the
+        # direct predecessor so reruns on an existing DB stay legal.
+        ts.create("NEG-SAMESTATE", authority="selftest", evidence="seed")
+        cur = ts.get("NEG-SAMESTATE")
+        if cur.state == "unassigned":
+            ts.transition("NEG-SAMESTATE", "offered", actor="selftest",
+                          evidence="advance-to-offered", owner="seven")
+            cur = ts.get("NEG-SAMESTATE")
+        if cur.state == "offered":
+            ts.transition("NEG-SAMESTATE", "acknowledged", actor="selftest",
+                          evidence="advance-to-acknowledged")
+            cur = ts.get("NEG-SAMESTATE")
+        if cur.state == "acknowledged":
+            ts.transition("NEG-SAMESTATE", "active", actor="selftest",
+                          evidence="advance-to-active")
+        assert ts.get("NEG-SAMESTATE").state == "active"
+        try:
+            ts.transition("NEG-SAMESTATE", "active", actor="selftest",
+                          evidence="same-state")
+        except TransitionError:
+            return
+        raise AssertionError("same-state transition was NOT rejected")
+
     def c_missing_evidence():
         try:
             ts.transition("NEG-TRANSIENT", "cancelled", actor="selftest",
@@ -136,6 +161,7 @@ def run_selftest(con, project: str, delivery: MailboxDelivery,
         ("no_trusted_origin", c_no_origin),
         ("stale_epoch_transition_rejected", c_stale_epoch_transition),
         ("illegal_transition_rejected", c_illegal_transition),
+        ("same_state_transition_rejected", c_same_state_transition),
         ("evidence_mandatory", c_missing_evidence),
         ("unreachable_agent_reported_unknown", c_unreachable_agent_is_unknown),
     ]:
