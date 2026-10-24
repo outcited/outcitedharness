@@ -25,6 +25,7 @@
 #![deny(missing_docs)]
 
 pub mod alias;
+pub mod assoc;
 pub mod category;
 pub mod phrase;
 pub mod rating;
@@ -222,6 +223,56 @@ pub fn seed_from_measured_chips() -> PhraseRegistry {
             pattern: r"sleeps?\s+(?:under|below|less than)\s+([\d.]+)\s*[µμu]\s*a\b".into(),
             scale: 1e-6,
         }),
+    );
+
+    // -----------------------------------------------------------------------
+    // MCU / microcontroller category binding (KIM categories v1, 2026-10-20).
+    // "MCU" is a cohort union: microcontrollers + 8/16/32-bit variants.
+    // The binding is a Category Within check — it filters the cohort, it
+    // doesn't eliminate individual parts (that's the axes' job).
+    // -----------------------------------------------------------------------
+    registry.insert(
+        ColloquialBinding::new(
+            "mcu_category",
+            "mcu",
+            vec![AtomTemplate {
+                knife: KnifeId::Category(CategoryId::new("microcontrollers").unwrap()),
+                constraint: Constraint::Category {
+                    op: CategoryOp::Within,
+                    node: CategoryId::new("microcontrollers").unwrap(),
+                },
+                hard: true,
+                drawer: Drawer::CatalogSubcategory,
+            }],
+            0.95,
+            vec![
+                "kim_categories_v1.jsonl#microcontrollers".into(),
+                "kim_categories_v1.jsonl#8-bit-microcontrollers".into(),
+                "kim_categories_v1.jsonl#16-bit-microcontrollers".into(),
+                "kim_categories_v1.jsonl#32-bit-microcontrollers".into(),
+            ],
+            Stamp::ProvenFit,
+        )
+        .expect("sourced"),
+    );
+    registry.insert(
+        ColloquialBinding::new(
+            "microcontroller_category",
+            "microcontroller",
+            vec![AtomTemplate {
+                knife: KnifeId::Category(CategoryId::new("microcontrollers").unwrap()),
+                constraint: Constraint::Category {
+                    op: CategoryOp::Within,
+                    node: CategoryId::new("microcontrollers").unwrap(),
+                },
+                hard: true,
+                drawer: Drawer::CatalogSubcategory,
+            }],
+            0.95,
+            vec!["kim_categories_v1.jsonl#microcontrollers".into()],
+            Stamp::ProvenFit,
+        )
+        .expect("sourced"),
     );
 
     registry.insert(
