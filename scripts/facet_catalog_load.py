@@ -70,7 +70,7 @@ def row_to_claim(row, kind):
                 extractor=extractor)
 
 
-def load_lane_file(con, path, kind, dry=False):
+def load_lane_file(con, path, kind, existing, dry=False):
     n_attached = n_skipped = n_rejected = 0
     with open(path) as f:
         for line in f:
@@ -134,9 +134,10 @@ def main():
                               ("mode-*.jsonl", "mode"),
                               ("aec-*.jsonl", "aec")):
             for f in sorted(d.glob(pattern)):
-                a, s, r = load_lane_file(con, f, kind, dry=args.dry)
+                a, s, r = load_lane_file(con, f, kind, existing, dry=args.dry)
                 k = totals.setdefault(kind, [0, 0, 0])
                 k[0] += a; k[1] += s; k[2] += r
+    con.commit()
     for kind, (a, s, r) in totals.items():
         print(f"{kind}: attached={a} skipped={s} rejected={r}")
 
