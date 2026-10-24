@@ -1,0 +1,41 @@
+{
+ "side": "python",
+ "docs_completed": 1993,
+ "docs_with_claims": 47,
+ "skip_classes": {
+  "no_claims": 1946
+ },
+ "tiers": {
+  "local-v41": 47
+ },
+ "claims_total": 519,
+ "claims_per_claim_doc": 11.043,
+ "surviving_claims": 490,
+ "surviving_rate": 0.9441,
+ "supported": 490,
+ "p0": 28,
+ "provenance": {
+  "quote_pct": 100.0,
+  "page_pct": 94.49,
+  "doc_sha_pct": 100.0
+ },
+ "report": {
+  "aisle": "vault",
+  "docs": 2000,
+  "elapsed_s": 19203.4,
+  "tally": {
+   "no_claims": 1953,
+   "p0": 28,
+   "claims": 519,
+   "local-v41": 47
+  },
+  "p0_rate": 0.0539
+ },
+ "elapsed_s": 19203.4,
+ "docs_per_hour": 373.6,
+ "verified_claims_per_hour": 91.9,
+ "cost": {
+  "metered_cost_usd": 0.0,
+  "note": "no cost-meter rows (local lanes only)"
+ }
+}

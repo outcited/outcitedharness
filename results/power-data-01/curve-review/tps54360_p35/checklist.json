@@ -1,0 +1,14 @@
+{
+  "document_sha256": "c2743e51e9f180e3efd7afb2ce1ac792906576207f4e318f9b6075f3ab5c56a8",
+  "page_1based": 35,
+  "items": [
+    "axis_labels_verbatim",
+    "axis_units_and_scale",
+    "series_names_match_legend",
+    "sampled_points_on_trace",
+    "conditions_verbatim",
+    "applicability_part_family",
+    "orientation_note_resolved"
+  ],
+  "instructions": "Compare reference.json against page.png at each checklist item. Mark true when verified; add corrections as notes. Unsigned packets stay machine references \u2014 never human gold."
+}

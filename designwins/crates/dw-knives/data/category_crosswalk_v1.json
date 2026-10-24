@@ -1,0 +1,66 @@
+{
+  "schema": "harness.designwins-category-crosswalk.v1",
+  "version": "1.0.0",
+  "created": "2026-10-19",
+  "law": "describes where to look and what to measure; proves no engineering specification by itself. Uncertain mappings stay unresolved. KIM categories are demand taxonomy, never manufacturer identity nodes.",
+  "scope_note": "v1 covers the proven slice category (microcontrollers) plus candidate mappings marked status:proposed. Proposed rows are investigation directions, not claims.",
+  "categories": [
+    {
+      "kim_slug": "microcontrollers",
+      "designwins_aisles": ["mcu_family_content", "power_family_content"],
+      "document_lanes": ["pin_or_ball", "pin_semantics", "parametrics", "power_modes", "series_summary", "opn_decoder"],
+      "toc_signatures": ["Pin Description", "Pin Assignment", "Electrical Characteristics", "Low Power Modes", "Ordering Information"],
+      "comparison_axes": [
+        {
+          "axis": "SleepCurrentA",
+          "status": "wired",
+          "op": "at_most",
+          "bound_semantics": "ceiling proves satisfaction; floor proves violation across the full printed mode inventory; typical never decides",
+          "evidence_path": "burn mode-currents rows -> dw-search::mode_rows -> dw-decide",
+          "gold": "sleep_current_slice (4 tests, real rows)"
+        },
+        { "axis": "FlashKb", "status": "proposed", "evidence_path": "pillar rows exist (130K); bridge unwired" },
+        { "axis": "FreqMhz", "status": "proposed", "evidence_path": "pillar rows exist; bridge unwired" },
+        { "axis": "HasCan", "status": "proposed", "evidence_path": "phrase binding exists (ProvenFit); pillar evidence bridge unwired" },
+        { "axis": "HasWirelessBle", "status": "proposed", "evidence_path": "phrase binding exists (Blocked); evidence bridge unwired" }
+      ],
+      "rating_classes_applicable": ["rated_limit", "recommended"],
+      "typical_classes_discovery_only": true,
+      "condition_fields": ["vdd", "frequency", "ambient_temperature", "peripheral_state", "mode_variant"],
+      "coverage_by_axis": { "SleepCurrentA": "75.1% of mode-row docs (2354/3136, burn 2026-10-19)" },
+      "missing": [
+        "FlashKb/FreqMhz bridges from pillar rows",
+        "peripheral inventory axes (UART/SPI/I2C counts) not yet registry axes",
+        "package/pinout axes await pin-table lane completion"
+      ],
+      "sources": [
+        "burn-2026-10-19/mode.s0.jsonl (measured substrate)",
+        "d-ruling-2026-10-19#proof-of-satisfaction-vs-violation",
+        "dw-knives/src/registry.rs#SleepCurrentA"
+      ]
+    },
+    {
+      "kim_slug": "power_converters",
+      "designwins_aisles": ["power_family_content"],
+      "document_lanes": ["parametrics", "power_modes"],
+      "toc_signatures": ["Electrical Characteristics", "Typical Performance", "Thermal Information"],
+      "comparison_axes": [
+        { "axis": "RthjaCperw", "status": "wired", "op": "max_rating", "evidence_path": "thermal rows 39,330 (burn) in dw-normalize native schema; population_from_rows path predates bridge — thermal bridge pending" },
+        { "axis": "VoutV", "status": "proposed", "evidence_path": "power_v2 rows 5,529+11,000 lanes complete; bridge unwired" },
+        { "axis": "IqA", "status": "proposed", "evidence_path": "power_v2 iq rows exist; bridge unwired" },
+        { "axis": "EfficiencyPct", "status": "blocked", "missing": "curve-condition comparability (D-ruling: mismatched curve conditions never rank as equivalent)" }
+      ],
+      "rating_classes_applicable": ["rated_limit", "typical_discovery_only"],
+      "condition_fields": ["vin", "vout", "iout", "switching_frequency", "temperature"],
+      "coverage_by_axis": {},
+      "missing": ["vout/iq bridge from power_v2 rows", "efficiency axis blocked on condition comparability"],
+      "sources": ["burn-2026-10-19 thermal+power_v2 lanes", "PLAN.md §power scoreboard"]
+    }
+  ],
+  "cross_category_note": "An engineering intent may span categories. 'Solar-powered wireless weather monitor' binds microcontrollers + power_converters + wireless axes; the funnel must carry multiple category candidates, not force one kim_slug. The phrase registry already binds axes across categories; category collapse is forbidden (D-ruling 2026-10-19 gate 3).",
+  "identity_law": "CategoryRank categories, applications and facets never become manufacturer identity nodes. OEM-declared hierarchy and exact manufacturer identity are preserved from page-1 evidence (see mode_rows identity fields).",
+  "unresolved": [
+    { "question": "connector axes (pitch/positions/mating) — no registry axes yet", "needed": "connector_parametrics rows -> axes" },
+    { "question": "KIM slug -> aisle join key", "needed": "cr-core category export reconciliation; deferred to crosswalk v1.1" }
+  ]
+}

@@ -1,0 +1,722 @@
+{
+ "BQ2024": {
+  "hits": 2,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 32,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 32,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 3,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 4,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   }
+  ]
+ },
+ "BQ24018": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 4,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 4,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 4,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 4,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 4,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "BQ24035": {
+  "hits": 3,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 6,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 22,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   }
+  ]
+ },
+ "BQ24074": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 28,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 23,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 20,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 19,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 22,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "CTL_TLC69660": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "CTL_TLC69661-Q1": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 8,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 8,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 16,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 15,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 11,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "CTL_TPS92761-Q1": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 14,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 13,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 13,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 12,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 16,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "CTL_UC2842L": {
+  "hits": 1,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 2,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 3,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 4,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   }
+  ]
+ },
+ "CTL_UCC28634": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 8,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "LM3409HV": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 6,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "LM5033": {
+  "hits": 4,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 10,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 9,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 10,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 9,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   }
+  ]
+ },
+ "TLC69610": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 5,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 7,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "TLC69612-Q1": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 13,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 10,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 10,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 10,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 9,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "TPS51375R": {
+  "hits": 1,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 26,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 2,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 3,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   },
+   {
+    "k": 4,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   }
+  ]
+ },
+ "TPS61015": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 8,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 4,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 8,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 4,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 9,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "TPS61087": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 58,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 29,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 15,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 34,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 24,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "TPS61291": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 9,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 20,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 10,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 48,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 24,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "TPS923612": {
+  "hits": 4,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 25,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 29,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 24,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 13,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": false,
+    "n": 0,
+    "tier": null
+   }
+  ]
+ },
+ "TPS92541-Q1": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 43,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 27,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 42,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 35,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 20,
+    "tier": "local-v41"
+   }
+  ]
+ },
+ "UCC2813-3": {
+  "hits": 5,
+  "repeats": 5,
+  "outcomes": [
+   {
+    "k": 0,
+    "got_claims": true,
+    "n": 28,
+    "tier": "local-v41"
+   },
+   {
+    "k": 1,
+    "got_claims": true,
+    "n": 32,
+    "tier": "local-v41"
+   },
+   {
+    "k": 2,
+    "got_claims": true,
+    "n": 32,
+    "tier": "local-v41"
+   },
+   {
+    "k": 3,
+    "got_claims": true,
+    "n": 28,
+    "tier": "local-v41"
+   },
+   {
+    "k": 4,
+    "got_claims": true,
+    "n": 39,
+    "tier": "local-v41"
+   }
+  ]
+ }
+}

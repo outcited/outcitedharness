@@ -183,6 +183,47 @@ pub fn seed_from_measured_chips() -> PhraseRegistry {
     // (`Cortex-M4F c Cortex-M c ARM`), and `CategoryOp` refuses min/max for
     // exactly that reason (PRD-PHRASE 8.1).
     // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
+    // sleep_current_budget — the parametric slice binding (2026-10-19).
+    //
+    // Measured substrate: 2,354 of 3,136 mode-row documents (75.1%) carry
+    // sleep-family modes (burn 2026-10-19, 75 distinct spellings). The
+    // AtMost op carries the 2026-10-19 ruling: a guaranteed maximum
+    // (ceiling) proves satisfaction when under the budget; only a
+    // guaranteed minimum (floor) above it proves violation. Typical rows
+    // never decide. The threshold comes from the engineer's sentence —
+    // "sleeps under 2 µA" — so a concept without a number does not fire
+    // and lands in residue (D5: the threshold question).
+    // -----------------------------------------------------------------------
+    registry.insert(
+        ColloquialBinding::new(
+            "sleep_current_budget",
+            "sleeps under",
+            vec![AtomTemplate {
+                knife: KnifeId::Axis(Axis::SleepCurrentA),
+                constraint: Constraint::Scalar {
+                    op: Op::AtMost,
+                    value: 0.0, // replaced by the sentence's captured budget
+                    margin_pct: None,
+                },
+                hard: true,
+                drawer: Drawer::Applications,
+            }],
+            0.85,
+            vec![
+                "burn-2026-10-19/mode.s0.jsonl#sleep_modes 2354/3136 docs 75.1%".into(),
+                "d-ruling-2026-10-19#proof-of-satisfaction-vs-violation".into(),
+            ],
+            Stamp::ProvenFit,
+        )
+        .expect("sourced")
+        .with_value_capture(crate::phrase::ValueCapture {
+            // "2 µA" / "2uA" / "2 μA" (micro sign and Greek mu both match)
+            pattern: r"sleeps?\s+(?:under|below|less than)\s+([\d.]+)\s*[µμu]\s*a\b".into(),
+            scale: 1e-6,
+        }),
+    );
+
     registry.insert(
         ColloquialBinding::new(
             "core_family",

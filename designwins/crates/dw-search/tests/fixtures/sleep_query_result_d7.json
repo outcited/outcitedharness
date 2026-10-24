@@ -1,0 +1,471 @@
+{
+  "release_id": "designwins-slice-sleep-current-v1",
+  "lineage": {
+    "release_id": "designwins-slice-sleep-current-v1",
+    "parent": null,
+    "engines": [
+      "dw-knives/phrase",
+      "dw-search/mode_rows",
+      "dw-normalize"
+    ],
+    "rollback_to": null
+  },
+  "raw": "I need an MCU that sleeps under 2 µA",
+  "cohort": {
+    "members": [
+      {
+        "part_number": "STM32H747xI/G",
+        "vendor": "st"
+      },
+      {
+        "part_number": "TM4C1233H6PZ",
+        "vendor": "texas_instruments"
+      }
+    ]
+  },
+  "explain": [
+    {
+      "candidate": {
+        "part_number": "STM32H747xI/G",
+        "vendor": "st"
+      },
+      "axis": "sleep_current_a",
+      "outcome": "Pass",
+      "evidence": [
+        {
+          "sha256": "87c1fef22b49e28e6634ce6df84accc312e2c62f75afc1af233644bb7c2852af",
+          "page": 122,
+          "row_header": "Standby",
+          "column_header": "max",
+          "crop": null
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "part_number": "TM4C1233H6PZ",
+        "vendor": "texas_instruments"
+      },
+      "axis": "sleep_current_a",
+      "outcome": "Unknown",
+      "evidence": [
+        {
+          "sha256": "8a4fee15a13295068f8f63dc0ea769f5035c33235d6c279f223651c936ca1f0d",
+          "page": 1236,
+          "row_header": "Hibernate",
+          "column_header": "max",
+          "crop": null
+        },
+        {
+          "sha256": "8a4fee15a13295068f8f63dc0ea769f5035c33235d6c279f223651c936ca1f0d",
+          "page": 1236,
+          "row_header": "Hibernate",
+          "column_header": "typ",
+          "crop": null
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "part_number": "TMS320F280015x",
+        "vendor": "texas_instruments"
+      },
+      "axis": "sleep_current_a",
+      "outcome": "Fail",
+      "evidence": [
+        {
+          "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+          "page": 49,
+          "row_header": "Standby",
+          "column_header": "min",
+          "crop": null
+        },
+        {
+          "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+          "page": 49,
+          "row_header": "Idle",
+          "column_header": "min",
+          "crop": null
+        },
+        {
+          "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+          "page": 49,
+          "row_header": "Idle",
+          "column_header": "min",
+          "crop": null
+        },
+        {
+          "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+          "page": 49,
+          "row_header": "Standby",
+          "column_header": "min",
+          "crop": null
+        },
+        {
+          "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+          "page": 53,
+          "row_header": "Standby",
+          "column_header": "min",
+          "crop": null
+        }
+      ]
+    }
+  ],
+  "exclusions": [
+    {
+      "candidate": {
+        "part_number": "TMS320F280015x",
+        "vendor": "texas_instruments"
+      },
+      "axis": "sleep_current_a",
+      "ineligible": {
+        "reason": "SleepCurrentA failed at the required operating point",
+        "evidence": [
+          {
+            "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+            "page": 49,
+            "row_header": "Standby",
+            "column_header": "min",
+            "crop": null
+          },
+          {
+            "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+            "page": 49,
+            "row_header": "Idle",
+            "column_header": "min",
+            "crop": null
+          },
+          {
+            "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+            "page": 49,
+            "row_header": "Idle",
+            "column_header": "min",
+            "crop": null
+          },
+          {
+            "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+            "page": 49,
+            "row_header": "Standby",
+            "column_header": "min",
+            "crop": null
+          },
+          {
+            "sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+            "page": 53,
+            "row_header": "Standby",
+            "column_header": "min",
+            "crop": null
+          }
+        ]
+      },
+      "outcome": "Fail"
+    }
+  ],
+  "unknowns": [
+    {
+      "phrase": "i need an mcu that",
+      "why": "no knife or axis binds to \"i need an mcu that\"; the cohort cannot be narrowed by it",
+      "affected": 3
+    }
+  ],
+  "next": [
+    {
+      "axis": {
+        "axis": "temp_range_c"
+      },
+      "prompt": "What engineering requirement does \"i need an mcu that\" express? (unbound phrase)",
+      "help": "\"i need an mcu that\" is not in the axis vocabulary. Answering with a typed requirement (temperature span, ingress, interface) turns an unevaluable phrase into a constraint that can narrow the cohort.",
+      "expected_reduction_pct": 0.0,
+      "askable": true,
+      "proposed_value": null,
+      "parts_with_claims": 0,
+      "expected_fail_at_median": 0
+    }
+  ],
+  "declared": [],
+  "derived": [
+    {
+      "id": "sleep_current_budget",
+      "rationale": "\"sleeps under\" bound to 1 knife(s) at confidence 0.85 (ProvenFit)",
+      "atoms": [
+        {
+          "knife": {
+            "axis": "sleep_current_a"
+          },
+          "constraint": {
+            "scalar": {
+              "op": "at_most",
+              "value": 2e-6
+            }
+          },
+          "hard": true
+        }
+      ],
+      "state": "pending"
+    }
+  ],
+  "constraints": [
+    {
+      "knife": {
+        "axis": "sleep_current_a"
+      },
+      "constraint": {
+        "scalar": {
+          "op": "at_most",
+          "value": 2e-6
+        }
+      },
+      "hard": true
+    }
+  ],
+  "evidence": [
+    {
+      "field": "sleep_current_a/STM32H747xI/G",
+      "document_sha256": "87c1fef22b49e28e6634ce6df84accc312e2c62f75afc1af233644bb7c2852af",
+      "page": 122,
+      "row_header": "Standby",
+      "column_header": "max",
+      "quote": "Flash ON, no IWDG",
+      "page_render": {
+        "sha256": "39ca422190080f51f29061cdf5a89e65afd4c56da255af6a3226fca09495466e",
+        "href": "evidence://slice-sleep/pages/87c1fef22b49.p122.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "e1c0cb4792086cf2319b8685eb92e5b2368618eb1d3b1dfee228b9ee438be429",
+        "href": "evidence://slice-sleep/rows/87c1fef22b49.p122.r2.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          746,
+          205
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TM4C1233H6PZ",
+      "document_sha256": "8a4fee15a13295068f8f63dc0ea769f5035c33235d6c279f223651c936ca1f0d",
+      "page": 1236,
+      "row_header": "Hibernate",
+      "column_header": "max",
+      "quote": "V = 3.0 V BAT V = 0 V DD V = 0 V DDA System Clock = OFF Hibernate Module = 32.768 kHz",
+      "page_render": {
+        "sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d",
+        "href": "evidence://slice-sleep/pages/8a4fee15a132.p1236.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "7346b8b1e234270c0fbea29a5accd04aa434dd17af0b12cb0a96220895a6925b",
+        "href": "evidence://slice-sleep/rows/8a4fee15a132.p1236.r0.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          974,
+          157
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TM4C1233H6PZ",
+      "document_sha256": "8a4fee15a13295068f8f63dc0ea769f5035c33235d6c279f223651c936ca1f0d",
+      "page": 1236,
+      "row_header": "Hibernate",
+      "column_header": "typ",
+      "quote": "V = 3.0 V BAT V = 0 V DD V = 0 V DDA System Clock = OFF Hibernate Module = 32.768 kHz",
+      "page_render": {
+        "sha256": "306d1086fb75718d299ac3e8364eba7a8fcf0fe6b541f643078862a219da1c5d",
+        "href": "evidence://slice-sleep/pages/8a4fee15a132.p1236.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "7346b8b1e234270c0fbea29a5accd04aa434dd17af0b12cb0a96220895a6925b",
+        "href": "evidence://slice-sleep/rows/8a4fee15a132.p1236.r0.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          974,
+          157
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 49,
+      "row_header": "Standby",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p49.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          280
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 49,
+      "row_header": "Idle",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p49.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          280
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 49,
+      "row_header": "Idle",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p49.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          280
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 49,
+      "row_header": "Standby",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f0bd622cbd2e2b8188637174d2d265ca902159c0ec591255929d6a375bd6ee9e",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p49.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "56594e088df6541890acfd7f12432e62b056a0e8e3b6749317fb2ff6b070be67",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p49.r3.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          280
+        ]
+      },
+      "crop_sha256": null
+    },
+    {
+      "field": "sleep_current_a/TMS320F280015x",
+      "document_sha256": "31106cf7e25e40b6bbfd4c5ca69702bfdaaf15aa45eed378fdc272bee91fd75e",
+      "page": 53,
+      "row_header": "Standby",
+      "column_header": "min",
+      "quote": "- CPU is in STANDBY mode - Flash is powered down - PLL is Enabled, SYSCLK & CPUCLK are gated - X1/X2 crystal is powered down - Analog Modules are powered down - Outputs are static without DC Load - Inputs are static high or low",
+      "page_render": {
+        "sha256": "f4bd44730dd116ee8f3888362b72ffd7bfd7756724b3f71f38212e8d9fec2e76",
+        "href": "evidence://slice-sleep/pages/31106cf7e25e.p53.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "crop": {
+        "sha256": "cad78a13a2b78b47574dc9c637c463efd86111786e15c2a207300fdbfdb97a8e",
+        "href": "evidence://slice-sleep/rows/31106cf7e25e.p53.r9.png",
+        "dpi": 144,
+        "bbox": [
+          0,
+          0,
+          998,
+          420
+        ]
+      },
+      "crop_sha256": null
+    }
+  ]
+}

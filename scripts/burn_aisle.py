@@ -18,9 +18,10 @@ import urllib.request
 from collections import Counter
 from pathlib import Path
 
-sys.path.insert(0, "/Users/samkim/Harnessv1")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # RUST-CUTOVER-02: repo-relative — a checkout carries its own harness
 from harness.pipeline import store
 from harness.pipeline.quote_verify import verify_claims
+from harness.pipeline import verify_provider  # RUST-CUTOVER-02 seam (default engine: python)
 
 RESULTS = Path("/Volumes/M5_4TB/extract-results")
 ROUTES = RESULTS / "routes"
@@ -116,8 +117,20 @@ def call(endpoint, model, messages, timeout=240):
         ok, spend = _store.budget_check(_con, "burn-cloud")
         if not ok:
             raise RuntimeError("BURN_DAILY_CAP_REACHED")
-    body = {"model": model, "temperature": 0, "max_tokens": 16000,
-            "reasoning": {"effort": "low"}, "messages": messages}
+        # RUST-ACTIVATION-03 cloud catch-up: HARD dollar cap, Sam-approved
+        # $30 (2026-10-17). The 16k/effort-low combo drained the account
+        # twice; this guard sums the cost-meter ledger before every call.
+        cap_usd = float(_os.environ.get("CLOUD_DOLLAR_CAP", "30"))
+        rows = _con.execute(
+            "SELECT COALESCE(SUM(CAST(reason_code AS REAL)), 0)"
+            " FROM adjudication_ledger"
+            " WHERE judge='cost-meter' AND verdict='COST'"
+        ).fetchone()
+        spent = float(rows[0] or 0)
+        if spent >= cap_usd:
+            raise RuntimeError(f"CLOUD_DOLLAR_CAP_REACHED spent={spent:.2f} cap={cap_usd}")
+    body = {"model": model, "temperature": 0, "max_tokens": 6000,
+            "reasoning": {"enabled": False}, "messages": messages}
     if "openrouter" not in endpoint:
         body.pop("reasoning", None)
         body["max_tokens"] = 6000
@@ -230,23 +243,10 @@ def burn_doc(stem, source_path, route, con, job_meta):
                 if isinstance(f, dict) and "i" in f:
                     claims[f["i"]] = {**claims[f["i"]], **{k: v for k, v in f.items() if k != "i"}}
 
-    verdicts = []
-    for i, c in enumerate(claims):
-        if not isinstance(c, dict) or c.get("value") is None:
-            continue
-        q = c.get("quote") or ""
-        if not q:
-            verdicts.append({"i": i, "verdict": "UNSUPPORTED", "reason": "unquoted", "severity": "P0"})
-            continue
-        from harness.pipeline.quote_verify import find_quote, value_in_quote, column_position_binds
-        ok = find_quote(q, text, field=_alias_field(c.get("symbol", ""))) and value_in_quote(c.get("value"), q)
-        if ok and (c.get("column_header") or c.get("row_header")):
-            ordinal = column_position_binds(c, q, text)
-            if ordinal is False:
-                ok = False
-        verdicts.append({"i": i, "verdict": "SUPPORTED" if ok else "UNSUPPORTED",
-                         "reason": None if ok else ("wrong_cell" if not ok and c.get("column_header") else "quote_not_in_doc"),
-                         "severity": "P2" if ok else "P0"})
+    # RUST-CUTOVER-02: verification seam — python engine reproduces the
+    # previous inline loop byte-identically; engine selectable via
+    # BURN_VERIFY_ENGINE (default python; rust = dw-truth dw-verify bin)
+    verdicts = verify_provider.verdicts(claims, text)
 
     p0_idx = {v["i"] for v in verdicts if v["severity"] == "P0"}
     surviving_claims = []
@@ -264,8 +264,9 @@ def burn_doc(stem, source_path, route, con, job_meta):
 
 
 def _quick_ok(c, text):
-    from harness.pipeline.quote_verify import find_quote
-    return bool(c.get("quote")) and find_quote(c["quote"], text, field=_alias_field(c.get("symbol", "")))
+    # RUST-CUTOVER-02: verification seam (BURN_VERIFY_ENGINE=python default;
+    # byte-identical to the previous inline kernel call)
+    return verify_provider.quick_ok(c, text)
 
 
 def _alias_field(symbol):

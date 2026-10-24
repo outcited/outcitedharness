@@ -146,6 +146,11 @@ pub enum Axis {
     RgOhm,
     /// Junction-to-ambient thermal resistance (lower is better).
     RthjaCperw,
+    /// Sleep-mode supply current (lower is better). An upper-bound
+    /// *consumption* axis: a guaranteed maximum proves satisfaction, a
+    /// guaranteed minimum proves violation, and neither alone proves the
+    /// other direction.
+    SleepCurrentA,
 }
 
 /// How a **scalar** axis is compared against a claim.
@@ -158,6 +163,13 @@ pub enum Op {
     MaxRating,
     /// The claim's range must contain this.
     Covers,
+    /// Requirement: the part *consumes* at most this. Unlike
+    /// [`Op::MaxRating`], a claim above the requirement does NOT prove
+    /// violation: a guaranteed maximum (ceiling) above the requirement
+    /// merely fails to *satisfy* it — the actual draw may still be under.
+    /// Violation is proven only by a guaranteed minimum (floor) above the
+    /// requirement. Verdicts are [`Bound`]-aware (D-ruling 2026-10-19).
+    AtMost,
 }
 
 /// A node in the category graph.
@@ -609,7 +621,7 @@ pub mod questions;
 
 pub use dw_types::Verdict;
 pub use evaluate::{
-    evaluate, judge, AlwaysResolvable, CandidateFacts, Evaluation, Evidence, Provenance,
+    evaluate, judge, AlwaysResolvable, Bound, CandidateFacts, Evaluation, Evidence, Provenance,
     DEFAULT_NEAR_MISS_PCT,
 };
 pub use questions::next_questions;

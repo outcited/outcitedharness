@@ -1,0 +1,314 @@
+[
+ {
+  "case": "tps54360_p35",
+  "figure_index": 4,
+  "arm": "A_blind",
+  "latency_s": 52.6,
+  "score": {
+   "series_matched": 5,
+   "series_gt": 5,
+   "points": 50,
+   "oor": 10,
+   "name_hits": 5,
+   "rmse_norm": 0.1678,
+   "assignments": [
+    {
+     "gt_series": null,
+     "vision_name": "8Vin",
+     "name_match": true,
+     "pts": 10,
+     "oor": 2,
+     "rmse_norm": 0.11785315615846491
+    },
+    {
+     "gt_series": null,
+     "vision_name": "12Vin",
+     "name_match": true,
+     "pts": 10,
+     "oor": 2,
+     "rmse_norm": 0.1612736314513862
+    },
+    {
+     "gt_series": null,
+     "vision_name": "24Vin",
+     "name_match": true,
+     "pts": 10,
+     "oor": 2,
+     "rmse_norm": 0.13920010441862293
+    },
+    {
+     "gt_series": null,
+     "vision_name": "36Vin",
+     "name_match": true,
+     "pts": 10,
+     "oor": 2,
+     "rmse_norm": 0.09425010211570636
+    },
+    {
+     "gt_series": null,
+     "vision_name": "48Vin",
+     "name_match": true,
+     "pts": 10,
+     "oor": 2,
+     "rmse_norm": 0.3261746839005745
+    }
+   ]
+  },
+  "vision_labels": {
+   "x": "I_O - Output Current - A",
+   "y": "Efficiency - %"
+  }
+ },
+ {
+  "case": "tps54360_p35",
+  "figure_index": 4,
+  "arm": "B_envelope",
+  "latency_s": 30.4,
+  "score": {
+   "series_matched": 5,
+   "series_gt": 5,
+   "points": 60,
+   "oor": 10,
+   "name_hits": 5,
+   "rmse_norm": 0.1696,
+   "assignments": [
+    {
+     "gt_series": null,
+     "vision_name": "8Vin",
+     "name_match": true,
+     "pts": 12,
+     "oor": 2,
+     "rmse_norm": 0.1482170149883212
+    },
+    {
+     "gt_series": null,
+     "vision_name": "12Vin",
+     "name_match": true,
+     "pts": 12,
+     "oor": 2,
+     "rmse_norm": 0.11296555723494264
+    },
+    {
+     "gt_series": null,
+     "vision_name": "24Vin",
+     "name_match": true,
+     "pts": 12,
+     "oor": 2,
+     "rmse_norm": 0.10525098123255028
+    },
+    {
+     "gt_series": null,
+     "vision_name": "36Vin",
+     "name_match": true,
+     "pts": 12,
+     "oor": 2,
+     "rmse_norm": 0.0840749806862362
+    },
+    {
+     "gt_series": null,
+     "vision_name": "48Vin",
+     "name_match": true,
+     "pts": 12,
+     "oor": 2,
+     "rmse_norm": 0.39770893280075603
+    }
+   ]
+  },
+  "vision_labels": {
+   "x": "I_O - Output Current - A",
+   "y": "Efficiency - %"
+  }
+ },
+ {
+  "case": "lm5005_p25",
+  "figure_index": 0,
+  "arm": "A_blind",
+  "latency_s": 78.5,
+  "score": {
+   "series_matched": 6,
+   "series_gt": 6,
+   "points": 144,
+   "oor": 12,
+   "name_hits": 6,
+   "rmse_norm": 0.0631,
+   "assignments": [
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 12 V",
+     "name_match": true,
+     "pts": 24,
+     "oor": 2,
+     "rmse_norm": 0.014968468143223852
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 24 V",
+     "name_match": true,
+     "pts": 24,
+     "oor": 2,
+     "rmse_norm": 0.02924232535919251
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 36 V",
+     "name_match": true,
+     "pts": 24,
+     "oor": 2,
+     "rmse_norm": 0.039547900340475346
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 48 V",
+     "name_match": true,
+     "pts": 24,
+     "oor": 2,
+     "rmse_norm": 0.030069058569988667
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 60 V",
+     "name_match": true,
+     "pts": 24,
+     "oor": 2,
+     "rmse_norm": 0.02616540189877691
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 75 V",
+     "name_match": true,
+     "pts": 24,
+     "oor": 2,
+     "rmse_norm": 0.2385030814621663
+    }
+   ]
+  },
+  "vision_labels": {
+   "x": "Output Current (A)",
+   "y": "Efficiency (%)"
+  }
+ },
+ {
+  "case": "lm5005_p25",
+  "figure_index": 0,
+  "arm": "B_envelope",
+  "latency_s": 59.3,
+  "score": {
+   "series_matched": 6,
+   "series_gt": 6,
+   "points": 102,
+   "oor": 12,
+   "name_hits": 6,
+   "rmse_norm": 0.0853,
+   "assignments": [
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 12 V",
+     "name_match": true,
+     "pts": 17,
+     "oor": 2,
+     "rmse_norm": 0.016301301943007124
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 24 V",
+     "name_match": true,
+     "pts": 17,
+     "oor": 2,
+     "rmse_norm": 0.040347564257444096
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 36 V",
+     "name_match": true,
+     "pts": 17,
+     "oor": 2,
+     "rmse_norm": 0.015681766044757187
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 48 V",
+     "name_match": true,
+     "pts": 17,
+     "oor": 2,
+     "rmse_norm": 0.0256638122689369
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 60 V",
+     "name_match": true,
+     "pts": 17,
+     "oor": 2,
+     "rmse_norm": 0.05259256997784208
+    },
+    {
+     "gt_series": null,
+     "vision_name": "VIN = 75 V",
+     "name_match": true,
+     "pts": 17,
+     "oor": 2,
+     "rmse_norm": 0.3613263359572056
+    }
+   ]
+  },
+  "vision_labels": {
+   "x": "Output Current (A)",
+   "y": "Efficiency (%)"
+  }
+ },
+ {
+  "case": "vishay_sic46x_p16",
+  "figure_index": 5,
+  "arm": "A_blind",
+  "latency_s": 11.8,
+  "score": {
+   "series_matched": 1,
+   "series_gt": 1,
+   "points": 9,
+   "oor": 1,
+   "name_hits": 1,
+   "rmse_norm": 0.0263,
+   "assignments": [
+    {
+     "gt_series": null,
+     "vision_name": "Case Temperature",
+     "name_match": true,
+     "pts": 9,
+     "oor": 1,
+     "rmse_norm": 0.026300844863702932
+    }
+   ]
+  },
+  "vision_labels": {
+   "x": "Output Current (A)",
+   "y": ""
+  }
+ },
+ {
+  "case": "vishay_sic46x_p16",
+  "figure_index": 5,
+  "arm": "B_envelope",
+  "latency_s": 5.2,
+  "score": {
+   "series_matched": 1,
+   "series_gt": 1,
+   "points": 9,
+   "oor": 1,
+   "name_hits": 1,
+   "rmse_norm": 0.0185,
+   "assignments": [
+    {
+     "gt_series": null,
+     "vision_name": "Case Temperature",
+     "name_match": true,
+     "pts": 9,
+     "oor": 1,
+     "rmse_norm": 0.018461665363920007
+    }
+   ]
+  },
+  "vision_labels": {
+   "x": "Output Current (A)",
+   "y": ""
+  }
+ }
+]

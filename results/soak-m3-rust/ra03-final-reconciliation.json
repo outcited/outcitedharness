@@ -1,0 +1,716 @@
+{
+ "schema": "ra03-final-reconciliation.v1",
+ "generated_at": "2026-10-18T07:55:30Z",
+ "command": "python3 scripts/ra03_reconcile.py --out-dir results/soak-m3-rust",
+ "inputs": {
+  "cohort": {
+   "path": "/Users/samkim/Harnessv1-powerdata01/scratch/m5-soak/ra03-power-cohort.json",
+   "sha256": "52aec90294c3b6e4029f82e544e9b6a243bb450d75c875202f106a357c700cd2",
+   "pdfs": 9201,
+   "unique_stems": 9201,
+   "duplicate_stems": {}
+  },
+  "substrate_index": {
+   "path": "/Users/samkim/Harnessv1-powerdata01/scratch/m5-soak/ra03-substrates.json",
+   "sha256": "4dd8691239dadd890d5eba16a5c6a8a6d7465f4961d7ed192e12d9521c070cf6"
+  },
+  "ra03_queue": {
+   "path": "/Users/samkim/Harnessv1-powerdata01/scratch/m5-soak/ra03-queue.json",
+   "sha256": "f398a58272fc0ac034194439feffe6c4b8350c5f273c8e357cea6ad23c160888"
+  },
+  "fixup_queue": {
+   "path": "/Users/samkim/Harnessv1-powerdata01/scratch/m5-soak/fixup-queue.json",
+   "sha256": "f0cc5d221d658e991adb9d2c3755ab1467ccb0b43c2181d68e3d51df57844224"
+  },
+  "spend_db": {
+   "path": "/Users/samkim/Harnessv1-powerdata01/scratch/m5-soak/pilot-cloud.db",
+   "sha256": "60bd3b5757f9afb43316e50d99aca56c0143e4488d7d1b149dc6590a163e9d7a"
+  }
+ },
+ "identity_accounting": {
+  "input_docs": 9201,
+  "unique_identities": 9201,
+  "duplicate_stems_in_cohort": 0,
+  "double_processed_stems": [],
+  "redo_cohort_size": 8257,
+  "pending_redo_stems": 0,
+  "unresolved_stems": [],
+  "failure_evidence_retained": true,
+  "exactly_once": true
+ },
+ "outputs": {
+  "ra03_out": {
+   "rows": 8901,
+   "malformed": [],
+   "duplicate_stem_outputs": []
+  },
+  "fixup_out": {
+   "rows": 8257,
+   "malformed": [],
+   "duplicate_stem_outputs": []
+  },
+  "baseline": {
+   "rows": 9201,
+   "malformed": []
+  }
+ },
+ "chunk_accounting": {
+  "ra03": {
+   "chunks_total": 369,
+   "chunks_by_status": {
+    "completed": 346,
+    "failed": 22,
+    "leased": 1
+   },
+   "items_by_status": {
+    "completed": 8626,
+    "failed": 550,
+    "leased": 25
+   },
+   "events": {
+    "chunk_claimed": 443,
+    "chunk_completed": 346,
+    "chunk_lease_expired": 96,
+    "chunk_lease_renewed": 8995,
+    "chunk_registered": 369
+   },
+   "max_attempt": 3,
+   "failed_chunks": [
+    {
+     "chunk_id": "chunk-f398a58272fc-000550-0025-1a68f1863cd8",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000575-0025-dcd9135e6865",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000600-0025-a2a562a484b8",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000625-0025-a3a44ecf1000",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000650-0025-237850146a1b",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000675-0025-85d5e1037606",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000700-0025-be1355bdb4fa",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000725-0025-3e5a0fd95aa1",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000750-0025-96256295aba3",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000775-0025-411ca9485efb",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000800-0025-bdacdfa6613f",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000825-0025-fb434d62e7b8",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000850-0025-70caefbafb8b",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000875-0025-16e32c785400",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000900-0025-fb11590b266e",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000925-0025-1e0655348682",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000950-0025-ce3a3660a55c",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000975-0025-a9c18ffff1eb",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001000-0025-7b5ca0ca2a75",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001025-0025-fc8ce0b302e6",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001050-0025-fd29ef36af05",
+     "attempt": 3,
+     "error": "lease expired"
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001075-0025-934c6abf861d",
+     "attempt": 3,
+     "error": "lease expired"
+    }
+   ]
+  },
+  "fixup": {
+   "chunks_total": 331,
+   "chunks_by_status": {
+    "completed": 331
+   },
+   "items_by_status": {
+    "completed": 8257
+   },
+   "events": {
+    "chunk_claimed": 351,
+    "chunk_completed": 331,
+    "chunk_lease_renewed": 8500,
+    "chunk_registered": 331
+   },
+   "max_attempt": 2,
+   "failed_chunks": []
+  },
+  "ra03_files": {
+   "completed_chunks_missing_docs": [],
+   "incomplete_chunks_missing_docs": [
+    {
+     "chunk_id": "chunk-f398a58272fc-000550-0025-1a68f1863cd8",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IMBG120R116M2H",
+      "infineon-IMBG120R181M2H",
+      "infineon-IMBG120R234M2H",
+      "infineon-IMBG40R011M2H",
+      "infineon-IMBG40R015M2H",
+      "infineon-IMBG40R025M2H",
+      "infineon-IMBG40R036M2H",
+      "infineon-IMBG40R045M2H",
+      "infineon-IMBG65R007M2H",
+      "infineon-IMBG65R010M2H",
+      "infineon-IMBG65R015M2H"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000575-0025-dcd9135e6865",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IMBG75R050M2H",
+      "infineon-IMBG75R060M2H",
+      "infineon-IMCQ120R004M2H",
+      "infineon-IMCQ120R005M2H",
+      "infineon-IMCQ120R007M2H",
+      "infineon-IMCQ120R010M2H",
+      "infineon-IMCQ120R017M2H",
+      "infineon-IMCQ120R026M2H",
+      "infineon-IMCQ120R034M2H",
+      "infineon-IMCQ120R040M2H",
+      "infineon-IMCQ120R053M2H"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000600-0025-a2a562a484b8",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IMDQ75R060M2H",
+      "infineon-IMLT40R011M2H",
+      "infineon-IMLT40R015M2H",
+      "infineon-IMLT40R025M2H",
+      "infineon-IMLT40R036M2H",
+      "infineon-IMLT40R045M2H",
+      "infineon-IMLT65R015M2H",
+      "infineon-IMLT65R020M2H",
+      "infineon-IMLT65R026M2H",
+      "infineon-IMLT65R033M2H",
+      "infineon-IMLT65R040M2H"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000625-0025-a3a44ecf1000",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IMT44R025M2H",
+      "infineon-IMT65R010M2H",
+      "infineon-IMT65R015M2H",
+      "infineon-IMT65R020M2H",
+      "infineon-IMT65R026M2H",
+      "infineon-IMT65R033M2H",
+      "infineon-IMT65R040M2H",
+      "infineon-IMT65R050M2H",
+      "infineon-IMT65R060M2H",
+      "infineon-IMT65R075M2H",
+      "infineon-IMTA65R020M2H"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000650-0025-237850146a1b",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IMW65R020M2H",
+      "infineon-IMW65R026M2H",
+      "infineon-IMW65R033M2H",
+      "infineon-IMW65R040M2H",
+      "infineon-IMW65R050M2H",
+      "infineon-IMW65R060M2H",
+      "infineon-IMW65R075M2H",
+      "infineon-IMWH170R1K0M1",
+      "infineon-IMWH170R450M1",
+      "infineon-IMWH170R650M1",
+      "infineon-IMY120R018CM2H"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000675-0025-85d5e1037606",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IMZA120R017M2H",
+      "infineon-IMZA120R022M2H",
+      "infineon-IMZA120R026M2H",
+      "infineon-IMZA120R034M2H",
+      "infineon-IMZA120R040M2H",
+      "infineon-IMZA120R053M2H",
+      "infineon-IMZA120R078M2H",
+      "infineon-IMZA40R011M2H",
+      "infineon-IMZA40R015M2H",
+      "infineon-IMZA40R025M2H",
+      "infineon-IMZA40R036M2H"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000700-0025-be1355bdb4fa",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IMZA75R020M2H",
+      "infineon-IMZA75R025M2H",
+      "infineon-IMZA75R033M2H",
+      "infineon-IMZA75R040M2H",
+      "infineon-IMZA75R050M2H",
+      "infineon-IMZA75R060M2H",
+      "infineon-IMZC120R007M2H",
+      "infineon-IMZC120R012M2H",
+      "infineon-IMZC120R017M2H",
+      "infineon-IMZC120R022M2H",
+      "infineon-IMZC120R026M2H"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000725-0025-3e5a0fd95aa1",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPA050N10NM5S",
+      "infineon-IPA052N08NM5S",
+      "infineon-IPA060N06N",
+      "infineon-IPA075N15N3 G",
+      "infineon-IPA082N10NF2S",
+      "infineon-IPA083N10N5",
+      "infineon-IPA086N10N3 G",
+      "infineon-IPA50R140CP",
+      "infineon-IPA50R190CE",
+      "infineon-IPA50R280CE",
+      "infineon-IPA50R380CE"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000750-0025-96256295aba3",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPA60R160P7",
+      "infineon-IPA60R170CFD7",
+      "infineon-IPA60R180C7",
+      "infineon-IPA60R180P7",
+      "infineon-IPA60R180P7S",
+      "infineon-IPA60R190P6",
+      "infineon-IPA60R230P6",
+      "infineon-IPA60R280CFD7",
+      "infineon-IPA60R280P6",
+      "infineon-IPA60R280P7",
+      "infineon-IPA60R280P7S",
+      "infineon-IPA60R360P7",
+      "infineon-IPA60R360P7S",
+      "infineon-IPA60R380P6"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000775-0025-411ca9485efb",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPA70R360P7S",
+      "infineon-IPA70R600P7S",
+      "infineon-IPA80R1K4P7",
+      "infineon-IPA80R280P7",
+      "infineon-IPA80R360P7",
+      "infineon-IPA80R450P7",
+      "infineon-IPA80R600P7",
+      "infineon-IPA80R750P7",
+      "infineon-IPA80R900P7",
+      "infineon-IPA95R130PFD7",
+      "infineon-IPA95R1K2P7",
+      "infineon-IPA95R310PFD7",
+      "infineon-IPA95R450P7",
+      "infineon-IPA95R450PFD7"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000800-0025-bdacdfa6613f",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPB014N04NF2S",
+      "infineon-IPB014N06N",
+      "infineon-IPB014N08NM6",
+      "infineon-IPB015N06NF2S",
+      "infineon-IPB015N08N5",
+      "infineon-IPB016N06L3 G",
+      "infineon-IPB016N08NF2S",
+      "infineon-IPB017N06N3 G",
+      "infineon-IPB017N08N5",
+      "infineon-IPB017N10N5",
+      "infineon-IPB017N10N5LF",
+      "infineon-IPB018N03LF2S",
+      "infineon-IPB018N06NF2S",
+      "infineon-IPB018N10NM8"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000825-0025-fb434d62e7b8",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPB025N10N3 G",
+      "infineon-IPB026N06N",
+      "infineon-IPB026N10NF2S",
+      "infineon-IPB027N10N3 G",
+      "infineon-IPB027N10N5",
+      "infineon-IPB029N06NF2S",
+      "infineon-IPB029N15NM6",
+      "infineon-IPB030N08N3 G",
+      "infineon-IPB031N08N5",
+      "infineon-IPB033N10N5LF",
+      "infineon-IPB035N10NF2S",
+      "infineon-IPB035N12NM6",
+      "infineon-IPB036N12N3 G",
+      "infineon-IPB038N15NM6"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000850-0025-70caefbafb8b",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPB057N15NM6",
+      "infineon-IPB060N15N5",
+      "infineon-IPB068N20NM6",
+      "infineon-IPB072N15N3 G",
+      "infineon-IPB073N15N5",
+      "infineon-IPB081N06L3 G",
+      "infineon-IPB085N15NM6",
+      "infineon-IPB090N06N3 G",
+      "infineon-IPB095N20NM6",
+      "infineon-IPB100N04S4-H2",
+      "infineon-IPB100N12S3-05",
+      "infineon-IPB107N20N3 G",
+      "infineon-IPB108N15N3 G",
+      "infineon-IPB110P06LM"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000875-0025-16e32c785400",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPB175N20NM6",
+      "infineon-IPB17N25S3-100",
+      "infineon-IPB180N04S4-00",
+      "infineon-IPB180N04S4-01",
+      "infineon-IPB180N04S4-H0",
+      "infineon-IPB180N04S4L-H0",
+      "infineon-IPB180N06S4-H1",
+      "infineon-IPB180N10S4-02",
+      "infineon-IPB180P04P4-03",
+      "infineon-IPB180P04P4L-02",
+      "infineon-IPB19DP10NM",
+      "infineon-IPB200N25N3 G",
+      "infineon-IPB240N04S4-1R0",
+      "infineon-IPB320N20N3 G"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000900-0025-fb11590b266e",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPB60R070CFD7",
+      "infineon-IPB60R080P7",
+      "infineon-IPB60R099C7",
+      "infineon-IPB60R099CPA",
+      "infineon-IPB60R099P7",
+      "infineon-IPB60R105CFD7",
+      "infineon-IPB60R120P7",
+      "infineon-IPB60R160P6",
+      "infineon-IPB60R180C7",
+      "infineon-IPB60R180P7",
+      "infineon-IPB60R280P7",
+      "infineon-IPB60R360P7",
+      "infineon-IPB64N25S3-20"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000925-0025-1e0655348682",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPB65R145CFD7A",
+      "infineon-IPB65R150CFD",
+      "infineon-IPB65R190C7",
+      "infineon-IPB65R190CFD",
+      "infineon-IPB65R190CFD7A",
+      "infineon-IPB65R190CFDA",
+      "infineon-IPB65R230CFD7A",
+      "infineon-IPB65R310CFDA",
+      "infineon-IPB65R660CFDA",
+      "infineon-IPB70N04S4-06",
+      "infineon-IPB70N10S3-12",
+      "infineon-IPB70N10S3L-12",
+      "infineon-IPB720P15LM",
+      "infineon-IPB80N04S2-H4"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000950-0025-ce3a3660a55c",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPB80N08S2-07",
+      "infineon-IPB80P04P4-05",
+      "infineon-IPB80R290C3A",
+      "infineon-IPB90N04S4-02",
+      "infineon-IPB90N06S4L-04",
+      "infineon-IPB95R130PFD7",
+      "infineon-IPB95R310PFD7",
+      "infineon-IPB95R450PFD7",
+      "infineon-IPBE65R050CFD7A",
+      "infineon-IPBE65R075CFD7A",
+      "infineon-IPBE65R099CFD7A",
+      "infineon-IPBE65R115CFD7A",
+      "infineon-IPBE65R145CFD7A",
+      "infineon-IPBE65R190CFD7A"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-000975-0025-a9c18ffff1eb",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPC50N04S5-5R8",
+      "infineon-IPC50N04S5L-5R5",
+      "infineon-IPC70N04S5-4R6",
+      "infineon-IPC70N04S5L-4R2",
+      "infineon-IPD020N03LF2S",
+      "infineon-IPD023N03LF2S",
+      "infineon-IPD023N04NF2S",
+      "infineon-IPD025N06N",
+      "infineon-IPD028N06NF2S",
+      "infineon-IPD029N04NF2S",
+      "infineon-IPD030N03LF2S",
+      "infineon-IPD031N03L G",
+      "infineon-IPD031N06L3 G",
+      "infineon-IPD033N06N"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001000-0025-7b5ca0ca2a75",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPD053N06N",
+      "infineon-IPD053N08N3 G",
+      "infineon-IPD055N08NF2S",
+      "infineon-IPD060N03L G",
+      "infineon-IPD068P03L3 G",
+      "infineon-IPD079N06L3 G",
+      "infineon-IPD082N10N3 G",
+      "infineon-IPD090N03L G",
+      "infineon-IPD100N04S4-02",
+      "infineon-IPD100N04S4L-02",
+      "infineon-IPD110N12N3 G",
+      "infineon-IPD11DP10NM",
+      "infineon-IPD122N10N3 G",
+      "infineon-IPD130N10NF2S",
+      "infineon-IPD135N08N3 G"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001025-0025-fc8ce0b302e6",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPD25N06S4L-30",
+      "infineon-IPD26N06S2L-35",
+      "infineon-IPD30N03S4L-09",
+      "infineon-IPD30N03S4L-14",
+      "infineon-IPD30N06S2-23",
+      "infineon-IPD30N06S2L-13",
+      "infineon-IPD30N06S2L-23",
+      "infineon-IPD30N06S4L-23",
+      "infineon-IPD30N08S2-22",
+      "infineon-IPD30N08S2L-21",
+      "infineon-IPD30N10S3L-34",
+      "infineon-IPD30N12S3L-31",
+      "infineon-IPD320N20N3 G",
+      "infineon-IPD33CN10N G",
+      "infineon-IPD35N10S3L-26"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001050-0025-fd29ef36af05",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPD50N06S4L-08",
+      "infineon-IPD50N06S4L-12",
+      "infineon-IPD50N08S4-13",
+      "infineon-IPD50N10S3L-16",
+      "infineon-IPD50P03P4L-11",
+      "infineon-IPD50P04P4-13",
+      "infineon-IPD50P04P4L-11",
+      "infineon-IPD50R280CE",
+      "infineon-IPD50R380CE",
+      "infineon-IPD530N15N3 G",
+      "infineon-IPD5N25S3-430",
+      "infineon-IPD600N25N3 G",
+      "infineon-IPD60N10S4-12",
+      "infineon-IPD60N10S4L-12",
+      "infineon-IPD60R145CFD7"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001075-0025-934c6abf861d",
+     "status": "failed",
+     "missing_stems": [
+      "infineon-IPD60R360P7S",
+      "infineon-IPD60R360PFD7S",
+      "infineon-IPD60R380P6",
+      "infineon-IPD60R600CM8",
+      "infineon-IPD60R600P6",
+      "infineon-IPD60R600P7",
+      "infineon-IPD60R600P7S",
+      "infineon-IPD60R600PFD7S",
+      "infineon-IPD650P06NM",
+      "infineon-IPD65R190C7",
+      "infineon-IPD65R225C7",
+      "infineon-IPD65R420CFDA",
+      "infineon-IPD65R660CFDA",
+      "infineon-IPD70N03S4L-04",
+      "infineon-IPD70N10S3-12"
+     ]
+    },
+    {
+     "chunk_id": "chunk-f398a58272fc-001100-0025-aa7b3bb8aec1",
+     "status": "leased",
+     "missing_stems": [
+      "infineon-IPD80R1K4P7",
+      "infineon-IPD80R280P7",
+      "infineon-IPD80R2K0P7",
+      "infineon-IPD80R2K4P7",
+      "infineon-IPD80R2K7C3A",
+      "infineon-IPD80R360P7",
+      "infineon-IPD80R3K3P7",
+      "infineon-IPD80R450P7",
+      "infineon-IPD80R4K5P7",
+      "infineon-IPD80R600P7",
+      "infineon-IPD80R750P7",
+      "infineon-IPD80R900P7",
+      "infineon-IPD85P04P4L-06"
+     ]
+    }
+   ],
+   "chunks_with_unexpected_files": []
+  },
+  "fixup_files": {
+   "completed_chunks_missing_docs": [],
+   "incomplete_chunks_missing_docs": [],
+   "chunks_with_unexpected_files": []
+  },
+  "ra03_seal": {
+   "ok": 346,
+   "bad": 0,
+   "problems": []
+  },
+  "fixup_seal": {
+   "ok": 331,
+   "bad": 0,
+   "problems": []
+  }
+ },
+ "document_dispositions": {
+  "ra03-out|no_claims": 924,
+  "ra03-out|None": 20,
+  "fixup-out|no_claims": 4826,
+  "fixup-out|None": 3431
+ },
+ "baseline_classification": {
+  "skip_mismatch(no_claims|None)": 1234,
+  "skip_match": 4510,
+  "skip_mismatch(no_claims|error:timed out)": 6,
+  "skip_mismatch(None|no_claims)": 1474,
+  "raw_diff_both_claims": 1925,
+  "identical_raw_verdict_diff": 5,
+  "skip_mismatch(None|error:timed out)": 5,
+  "identical_raw_same_verdicts": 42
+ },
+ "claims_evidence": {
+  "surviving_docs": 3451,
+  "claims_total": 123136,
+  "quote_pct": 100.0,
+  "page_pct": 81.48,
+  "sha_pct": 100.0,
+  "claims_missing_quote": []
+ },
+ "spend": {
+  "cumulative_usd": 30.0123,
+  "rows": 5724,
+  "last_ts": 1792260647.1655219,
+  "cap_usd": 30,
+  "authorized": true,
+  "note": "read-only; no paid calls made by this reconciliation"
+ },
+ "execution_reconciliation": {
+  "fixup_chunks_all_terminal_sealed": true,
+  "ra03_failures_recorded_with_error": true,
+  "ra03_failed_chunks": 22,
+  "ra03_failed_items": 550,
+  "ra03_stale_leases": 1,
+  "stale_lease_note": "abandoned original-run lease, no live workers; its documents recovered via fixup cohort",
+  "fixup_failed_chunks": 0
+ },
+ "verdict_dimensions": {
+  "execution_complete": true,
+  "claims_valid": true,
+  "verified_evidence": true,
+  "document_complete": true
+ },
+ "verdict": "PASS"
+}

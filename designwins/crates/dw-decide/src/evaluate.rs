@@ -17,16 +17,40 @@ use std::collections::{BTreeMap, BTreeSet};
 use dw_normalize::{condition_covers, CondValue};
 use dw_types::{Ineligible, SourceRef, Verdict};
 
+use serde::{Deserialize, Serialize};
+
 use crate::{
     Atom, Axis, Candidate, CategoryId, CategoryOp, Cohort, Constraint, Exclusion, Judgement,
     KnifeId, MissingAxis, Op,
 };
+
+/// What the printed value IS, semantically — the column it was printed in.
+///
+/// The sleep-current ruling (2026-10-19): a **ceiling** (guaranteed max)
+/// above a requirement does not prove the part draws more than the
+/// requirement; only a **floor** (guaranteed min) above it proves
+/// violation. `Point` is a plain measured value.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Bound {
+    /// A plain measured point value.
+    Point,
+    /// A guaranteed maximum — the manufacturer's ceiling. Proves
+    /// satisfaction of an at-most requirement when under it; never proves
+    /// violation.
+    Ceiling,
+    /// A guaranteed minimum — the manufacturer's floor. Proves violation of
+    /// an at-most requirement when above it; never proves satisfaction.
+    Floor,
+}
 
 /// What is known about one candidate, on one axis.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Evidence {
     /// The measured magnitude, when there is one.
     pub value: Option<f64>,
+    /// The semantic bound of the printed value (see [`Bound`]).
+    pub bound: Bound,
     /// The rating class of the printed value. An `absmax` never satisfies an
     /// operating atom (`C9.2`), which is why it must be carried.
     pub rating_allows_operating: bool,
@@ -38,11 +62,32 @@ pub struct Evidence {
 }
 
 impl Evidence {
-    /// Evidence with a value and its page.
+    /// Evidence with a value and its page. Point-bounded (see [`Bound`]).
     #[must_use]
     pub fn measured(value: f64, rating_allows_operating: bool, sources: Vec<SourceRef>) -> Self {
         Self {
             value: Some(value),
+            bound: Bound::Point,
+            rating_allows_operating,
+            conditions: BTreeMap::new(),
+            sources,
+        }
+    }
+
+    /// Evidence carrying a printed **bound** — a guaranteed max (ceiling)
+    /// or guaranteed min (floor) column value. The sleep-current ruling:
+    /// ceilings prove satisfaction, floors prove violation, neither proves
+    /// both.
+    #[must_use]
+    pub fn measured_bound(
+        value: f64,
+        bound: Bound,
+        rating_allows_operating: bool,
+        sources: Vec<SourceRef>,
+    ) -> Self {
+        Self {
+            value: Some(value),
+            bound,
             rating_allows_operating,
             conditions: BTreeMap::new(),
             sources,
@@ -54,6 +99,7 @@ impl Evidence {
     pub fn unknown(sources: Vec<SourceRef>) -> Self {
         Self {
             value: None,
+            bound: Bound::Point,
             rating_allows_operating: false,
             conditions: BTreeMap::new(),
             sources,
@@ -232,6 +278,33 @@ pub fn judge(evidence: Option<&Evidence>, atom: &Atom, provenance: &dyn Provenan
                 Verdict::NearMiss
             } else {
                 Verdict::Fail
+            }
+        }
+        Op::AtMost => {
+            // The 2026-10-19 ruling, verbatim: a ceiling above the
+            // requirement fails to SATISFY (Unknown / NearMiss), it never
+            // proves violation; a floor above the requirement proves
+            // violation; a point value proves neither.
+            match ev.bound {
+                Bound::Ceiling => {
+                    if value <= inflated {
+                        Verdict::Pass
+                    } else if value <= required + band {
+                        Verdict::NearMiss
+                    } else {
+                        Verdict::Unknown
+                    }
+                }
+                Bound::Floor => {
+                    if value > required + band {
+                        Verdict::Fail
+                    } else if value > inflated {
+                        Verdict::NearMiss
+                    } else {
+                        Verdict::Unknown
+                    }
+                }
+                Bound::Point => Verdict::Unknown,
             }
         }
         Op::MaxRating => {

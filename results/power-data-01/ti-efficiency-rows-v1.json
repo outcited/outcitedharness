@@ -1,0 +1,575 @@
+{
+ "schema": "harness.m4-curve-evidence-bundle.v1",
+ "produced_by": "scripts/build_power_data_01_packets.py",
+ "task": "POWER-DATA-01 Ask 2 (m4opencode findings 15853d5 §3)",
+ "rows": [
+  {
+   "schema": "harness.m4-curve-evidence-bundle.v1",
+   "evidence_id": "curve-a5fc772e2c02fc07e4a6d25126b0e0d8baf0cb356bb3179bc90ce2995c36af5b",
+   "advisory_only": true,
+   "source": {
+    "document_sha256": "c2743e51e9f180e3efd7afb2ce1ac792906576207f4e318f9b6075f3ab5c56a8",
+    "document_revision": null,
+    "page_1based": 35,
+    "figure_index": 4,
+    "caption": "Figure 45. Efficiency vs Load Current",
+    "locator": {
+     "page_1based": 35,
+     "figure_index": 4,
+     "series_index": 0,
+     "region_bbox": null
+    },
+    "source_artifact": "c2743e51e9f180e3efd7afb2ce1ac792906576207f4e318f9b6075f3ab5c56a8.pdf",
+    "manufacturer": "texas_instruments"
+   },
+   "applicability": {
+    "family": "TPS54360",
+    "family_group": "TPS54360",
+    "part": "TPS54360",
+    "manufacturer": "texas_instruments",
+    "category": "power.dcdc",
+    "coverage_kind": "primary"
+   },
+   "phenomenon": "efficiency_vs_load",
+   "quantity": {
+    "x": {
+     "kind": "load_current",
+     "label": "Output Current (A)",
+     "unit": "A",
+     "scale": "linear"
+    },
+    "y": {
+     "kind": "efficiency",
+     "label": "Efficiency (%)",
+     "unit": "%"
+    }
+   },
+   "conditions": {
+    "keys": {
+     "vout_v": 5.0,
+     "vin_v": 48.0,
+     "f_hz": 600000.0
+    },
+    "verbatim": [
+     "VOUT = 5V, fsw = 600 kHz",
+     "48Vin"
+    ]
+   },
+   "missing_dimensions": [],
+   "supported_region": {
+    "min": 0.001187,
+    "max": 3.912098
+   },
+   "evidence_class": "typical",
+   "guarantee": false,
+   "adjudication": {
+    "state": "human_review_pending",
+    "packet_hash": null,
+    "note": "machine-verified only"
+   },
+   "binding": {
+    "method": "positional_legend",
+    "trace_source": "vector_multiseg",
+    "physics_check": null
+   },
+   "operating_point_query": {
+    "supported": true,
+    "method": "linear_interpolation_on_digitized_polyline",
+    "bounds": "strictly inside sampled support; extrapolation refused"
+   },
+   "uncertainty": {
+    "method": "vector_reference",
+    "point_error_pct": null,
+    "note": "deterministic geometry from the vector PDF; axis map gridline-anchored (residuals recorded per axis); human sign-off pending",
+    "numeric_quality": {
+     "x_fit_residual_pct_of_span": 0.053007,
+     "y_fit_residual_pct_of_span": 0.153275,
+     "retained_point_fraction": 1.0,
+     "points_outside_axis_pct": 0.0
+    }
+   },
+   "comparability": {
+    "verdict": "condition_aware",
+    "rules": "comparable only when stated conditions agree; missing never defaulted; typical never guaranteed"
+   },
+   "release_ids": {
+    "extraction": "vector-reference-v2+gridline-anchor",
+    "retrieval": "curve-retrieval-v0-experimental",
+    "bundle": "power-data-01-rows-v1"
+   },
+   "curve": {
+    "series_name": "48Vin",
+    "points": [
+     [
+      0.001187,
+      49.433594
+     ],
+     [
+      0.004292,
+      51.589818
+     ],
+     [
+      0.010507,
+      31.248127
+     ],
+     [
+      0.013277,
+      42.742888
+     ],
+     [
+      0.015693,
+      47.401015
+     ],
+     [
+      0.018799,
+      50.266097
+     ],
+     [
+      0.02363,
+      52.846394
+     ],
+     [
+      0.030183,
+      60.503894
+     ],
+     [
+      0.035024,
+      59.465302
+     ],
+     [
+      0.03952,
+      59.917733
+     ],
+     [
+      0.045729,
+      60.25307
+     ],
+     [
+      0.049875,
+      59.984231
+     ],
+     [
+      0.053674,
+      64.189885
+     ],
+     [
+      0.060923,
+      64.994332
+     ],
+     [
+      0.067132,
+      65.61441
+     ],
+     [
+      0.072662,
+      65.983017
+     ],
+     [
+      0.080607,
+      65.06152
+     ],
+     [
+      0.086128,
+      65.497315
+     ],
+     [
+      0.098219,
+      67.021609
+     ],
+     [
+      0.115141,
+      66.535907
+     ],
+     [
+      0.151739,
+      67.943797
+     ],
+     [
+      0.188688,
+      67.088841
+     ],
+     [
+      0.217005,
+      67.273123
+     ],
+     [
+      0.253259,
+      68.664377
+     ],
+     [
+      0.279856,
+      68.480095
+     ],
+     [
+      0.29781,
+      67.641731
+     ],
+     [
+      0.310924,
+      68.932526
+     ],
+     [
+      0.347529,
+      69.820753
+     ],
+     [
+      0.386545,
+      72.567964
+     ],
+     [
+      0.407956,
+      73.92528
+     ],
+     [
+      0.418309,
+      74.043063
+     ],
+     [
+      0.440417,
+      73.573307
+     ],
+     [
+      0.478046,
+      74.076313
+     ],
+     [
+      0.504643,
+      73.422964
+     ],
+     [
+      0.600289,
+      76.187457
+     ],
+     [
+      0.73047,
+      77.29328
+     ],
+     [
+      0.854081,
+      79.270695
+     ],
+     [
+      0.930054,
+      79.035817
+     ],
+     [
+      0.988063,
+      80.225464
+     ],
+     [
+      1.049874,
+      79.773033
+     ],
+     [
+      1.305737,
+      81.566143
+     ],
+     [
+      1.429709,
+      81.097055
+     ],
+     [
+      1.611679,
+      82.202879
+     ],
+     [
+      1.734956,
+      81.549508
+     ],
+     [
+      1.828542,
+      82.437067
+     ],
+     [
+      1.961129,
+      81.683238
+     ],
+     [
+      2.199737,
+      82.571486
+     ],
+     [
+      2.461809,
+      81.716487
+     ],
+     [
+      2.608929,
+      82.454392
+     ],
+     [
+      2.715956,
+      82.403818
+     ],
+     [
+      2.911409,
+      81.482298
+     ],
+     [
+      3.049868,
+      81.347879
+     ],
+     [
+      3.105122,
+      82.018575
+     ],
+     [
+      3.292628,
+      81.079752
+     ],
+     [
+      3.441802,
+      81.013232
+     ],
+     [
+      3.516725,
+      81.700563
+     ],
+     [
+      3.665543,
+      80.745105
+     ],
+     [
+      3.746001,
+      81.482298
+     ],
+     [
+      3.840614,
+      81.465663
+     ],
+     [
+      3.912098,
+      81.4158
+     ]
+    ],
+    "original_plot_reference": "Figure 45. Efficiency vs Load Current"
+   },
+   "_notes": [
+    "l_h not keyed: the figure prints no inductor value (internally compensated COT part); never defaulted",
+    "VOUT/fsw from the printed plot-level condition row; VIN from the series legend (48Vin)"
+   ]
+  },
+  {
+   "schema": "harness.m4-curve-evidence-bundle.v1",
+   "evidence_id": "curve-86b5d009ecace36f89084b4952d2cccbc83a8b687439827e4e2d2ea3c86c9684",
+   "advisory_only": true,
+   "source": {
+    "document_sha256": "7999d4c9d51f51d7643523b16770c33928404d0e1eb6447bf43c9a4b3e9b58fe",
+    "document_revision": null,
+    "page_1based": 25,
+    "figure_index": 0,
+    "caption": "Figure 7-9. Typical Efficiency vs Input Voltage and Output Current, 5V Output",
+    "locator": {
+     "page_1based": 25,
+     "figure_index": 0,
+     "series_index": 0,
+     "region_bbox": null
+    },
+    "source_artifact": "7999d4c9d51f51d7643523b16770c33928404d0e1eb6447bf43c9a4b3e9b58fe.pdf",
+    "manufacturer": "texas_instruments"
+   },
+   "applicability": {
+    "family": "LM5005",
+    "family_group": "LM5005",
+    "part": "LM5005",
+    "manufacturer": "texas_instruments",
+    "category": "power.dcdc",
+    "coverage_kind": "primary"
+   },
+   "phenomenon": "efficiency_vs_load",
+   "quantity": {
+    "x": {
+     "kind": "load_current",
+     "label": "Output Current (A)",
+     "unit": "A",
+     "scale": "linear"
+    },
+    "y": {
+     "kind": "efficiency",
+     "label": "Efficiency (%)",
+     "unit": "%"
+    }
+   },
+   "conditions": {
+    "keys": {
+     "vout_v": 5.0,
+     "vin_v": 48.0,
+     "f_hz": 300000.0,
+     "l_h": 3.3e-05
+    },
+    "verbatim": [
+     "VIN = 48 V",
+     "VOUT = 5V",
+     "FSW = 300kHz",
+     "INDUCTOR, 33 µH, ISAT 6.22A, DCR 60mΩ",
+     "LM5005 Buck Regulator Bill of Materials, VOUT = 5V, IOUT = 2.5A",
+     "Unless indicated otherwise, all waveforms are taken at VIN = 48V."
+    ]
+   },
+   "missing_dimensions": [],
+   "supported_region": {
+    "min": 0.006194,
+    "max": 2.49307
+   },
+   "evidence_class": "typical",
+   "guarantee": false,
+   "adjudication": {
+    "state": "human_review_pending",
+    "packet_hash": null,
+    "note": "machine-verified only"
+   },
+   "binding": {
+    "method": "positional_legend",
+    "trace_source": "vector_multiseg",
+    "physics_check": null
+   },
+   "operating_point_query": {
+    "supported": true,
+    "method": "linear_interpolation_on_digitized_polyline",
+    "bounds": "strictly inside sampled support; extrapolation refused"
+   },
+   "uncertainty": {
+    "method": "vector_reference",
+    "point_error_pct": null,
+    "note": "deterministic geometry from the vector PDF; axis map word-center (residuals recorded per axis); human sign-off pending",
+    "numeric_quality": {
+     "x_fit_residual_pct_of_span": 0.015078,
+     "y_fit_residual_pct_of_span": 0.01004,
+     "retained_point_fraction": 1.0,
+     "points_outside_axis_pct": 0.0
+    }
+   },
+   "comparability": {
+    "verdict": "condition_aware",
+    "rules": "comparable only when stated conditions agree; missing never defaulted; typical never guaranteed"
+   },
+   "release_ids": {
+    "extraction": "vector-reference-v2",
+    "retrieval": "curve-retrieval-v0-experimental",
+    "bundle": "power-data-01-rows-v1"
+   },
+   "curve": {
+    "series_name": "VIN = 48 V",
+    "points": [
+     [
+      0.006194,
+      21.069072
+     ],
+     [
+      0.062254,
+      28.401791
+     ],
+     [
+      0.162719,
+      49.086478
+     ],
+     [
+      0.263932,
+      58.246513
+     ],
+     [
+      0.364397,
+      65.847665
+     ],
+     [
+      0.46461,
+      68.272036
+     ],
+     [
+      0.566073,
+      70.52424
+     ],
+     [
+      0.667035,
+      72.989215
+     ],
+     [
+      0.76501,
+      75.052342
+     ],
+     [
+      0.867468,
+      76.03028
+     ],
+     [
+      0.967676,
+      76.296985
+     ],
+     [
+      1.069176,
+      76.865964
+     ],
+     [
+      1.170544,
+      77.381591
+     ],
+     [
+      1.269815,
+      77.138598
+     ],
+     [
+      1.368049,
+      77.891309
+     ],
+     [
+      1.470716,
+      77.808335
+     ],
+     [
+      1.570524,
+      78.057256
+     ],
+     [
+      1.669663,
+      78.246916
+     ],
+     [
+      1.771412,
+      78.347674
+     ],
+     [
+      1.8724,
+      78.181726
+     ],
+     [
+      1.972064,
+      77.843885
+     ],
+     [
+      2.073302,
+      77.742545
+     ],
+     [
+      2.173753,
+      78.092224
+     ],
+     [
+      2.274728,
+      77.541611
+     ],
+     [
+      2.373998,
+      77.138598
+     ],
+     [
+      2.49307,
+      77.215644
+     ]
+    ],
+    "original_plot_reference": "Figure 7-9. Typical Efficiency vs Input Voltage and Output Current, 5V Output"
+   },
+   "_notes": [
+    "f_hz and l_h keyed from the application-curve design example the figure belongs to (p18 'FSW = 300kHz'; Table 7-1 LF row 'INDUCTOR, 33 µH') — application curves, not a family-typical condition; comparability requires matching the same design example context"
+   ]
+  }
+ ],
+ "operating_point_probe": {
+  "TPS54360": {
+   "at_iout_a": 1.5,
+   "efficiency_pct": 81.524
+  },
+  "LM5005": {
+   "at_iout_a": 1.5,
+   "efficiency_pct": 77.881
+  }
+ }
+}
