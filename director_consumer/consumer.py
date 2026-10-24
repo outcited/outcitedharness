@@ -84,6 +84,7 @@ class RunReport:
     github_workloop: Optional[dict] = None
     llm: Optional[dict] = None
     delivered: int = 0
+    delivery_outcomes: list = field(default_factory=list)
     intel_investigations: int = 0
     product_graph_conflicts: int = 0
     product_graph_new: int = 0
@@ -637,14 +638,25 @@ class DirectorConsumer:
                                 "results": results})
         return results
 
-    def _deliver_authorized(self) -> int:
+    def _deliver_authorized(self) -> list:
         """F1-F5: typed delivery outcomes. Every eligible candidate gets an
-        explicit outcome. No silent zero — the caller can distinguish no
-        work from refusal from delivery."""
+        explicit, recorded outcome — no candidate disappears silently and
+        `delivered == 0` can never be mistaken for 'nothing refused'.
+
+        Outcome kinds (issue #2 receipt, 2026-10-19 review):
+          sent                      — message_id assigned, artifact written
+          skipped_already_delivered — body carries `delivered: true`
+          skipped_no_task           — trigger_key absent from TaskStore
+          skipped_no_owner          — TaskStore row has no accountable owner
+          approval_refused          — operator gate said no (reason kept)
+          transport_refused         — fail-closed refusal (reason kept)
+          transport_error           — unexpected failure (kept, not hidden)
+        """
         from .authorization import AuthorizationError, AuthRecord
         from .messaging import DeliveryDisabled
+        outcomes: list = []
         if not self.mail.policy.enabled:
-            return 0
+            return outcomes
         dmail = MailboxDelivery(
             self.state.con, self.mail.policy,
             project=self.project_name, authorizations=self.authz,
@@ -656,51 +668,83 @@ class DirectorConsumer:
             "SELECT trigger_key, filename, body, authority FROM proposals "
             "WHERE written=1 AND authority != 'none' "
             "ORDER BY created_at DESC LIMIT 20").fetchall()
-        if not candidates:
-            return 0
-        delivered = 0
+        # F5: authorization identity from the operator's policy reference,
+        # never a code constant. Absent reference fails every candidate.
+        auth_id = self._policy_auth_id()
         for row in candidates:
             tk = row["trigger_key"]
+            rec = {"trigger_key": tk, "filename": row["filename"],
+                   "outcome": "", "reason": ""}
             body = row["body"] or ""
             if "delivered: true" in body:
+                rec["outcome"] = "skipped_already_delivered"
+                outcomes.append(rec)
                 continue
             # F4: recipient from TaskStore owner, not body text
             task_row = con.execute(
                 "SELECT accountable_owner, epoch FROM tasks "
                 "WHERE task_id=?", (tk,)).fetchone()
             if task_row is None:
+                rec["outcome"] = "skipped_no_task"
+                outcomes.append(rec)
                 continue
             recipient = task_row["accountable_owner"] or ""
             if not recipient:
+                rec["outcome"] = "skipped_no_owner"
+                outcomes.append(rec)
                 continue
-            # F3: epoch from TaskStore
+            rec["recipient"] = recipient
+            # F3: epoch from TaskStore, never a constant
             epoch = task_row["epoch"]
-            # F5: resolve the actual authorization
-            auth_id = self._resolve_auth_id(recipient)
+            rec["epoch"] = epoch
+            if not auth_id:
+                rec["outcome"] = "approval_refused"
+                rec["reason"] = ("no delivery.authorization_ref in project "
+                                 "policy (fail closed)")
+                outcomes.append(rec)
+                continue
+            rec["auth_id"] = auth_id
             try:
-                rec = AuthRecord(
+                arec = AuthRecord(
                     auth_id=auth_id, project=self.project_name,
                     action="deliver", recipient=recipient,
                     task_ref=tk, objective_ref="", spend_scope="none",
                     max_spend_usd=0.0, expires_at=1792900000.0,
                     issuer="sam", payload_digest="")
-                self.authz.issue(rec)
-            except AuthorizationError:
-                continue  # fail closed, record below
+                self.authz.issue(arec)
+            except AuthorizationError as e:
+                rec["outcome"] = "approval_refused"
+                rec["reason"] = str(e)
+                outcomes.append(rec)
+                continue  # fail closed, reason recorded
             try:
                 mid = dmail.propose(
                     recipient, "task", "authorized delivery", body,
                     correlation_id=tk)
-                dmail.deliver(mid, auth_id=auth_id, assignment_epoch=epoch)
-                delivered += 1
-            except DeliveryDisabled:
-                continue  # refused — recorded by _authorize, not hidden
-            except Exception:  # noqa: BLE001
+                dmail.deliver(mid, auth_id=auth_id,
+                              assignment_epoch=epoch)
+            except DeliveryDisabled as e:
+                rec["outcome"] = "transport_refused"
+                rec["reason"] = str(e)
+                outcomes.append(rec)
+                continue  # refused — reason recorded, not hidden
+            except Exception as e:  # noqa: BLE001 — recorded, never silent
+                rec["outcome"] = "transport_error"
+                rec["reason"] = f"{type(e).__name__}: {e}"
+                outcomes.append(rec)
                 continue
-        return delivered
+            rec["outcome"] = "sent"
+            rec["message_id"] = mid
+            outcomes.append(rec)
+        return outcomes
 
-    def _resolve_auth_id(self, recipient: str) -> str:
-        return "workloop-pilot"
+    def _policy_auth_id(self) -> str:
+        """Authorization identity from the operator's policy
+        `delivery.authorization_ref` (first token). Changing the approval
+        artifact changes the policy file, not engine code."""
+        pol = getattr(self.mail, "policy", None)
+        ref = (pol.authorization_ref or "").strip() if pol else ""
+        return ref.split()[0] if ref else ""
 
     def run_once(self) -> RunReport:
         report = RunReport()
@@ -759,11 +803,27 @@ class DirectorConsumer:
         # grant→action binding); this step only fires when policy delivery
         # is enabled. Nothing is delivered without Sam's artifact.
         try:
-            report.delivered = self._deliver_authorized()
+            outcomes = self._deliver_authorized()
+            report.delivery_outcomes = outcomes
+            report.delivered = sum(
+                1 for o in outcomes if o["outcome"] == "sent")
         except Exception as e:  # noqa: BLE001 — delivery failure is visible
             report.delivered = -1
             self.state.journal_run({"mode": self.mode,
                                     "delivery_error": f"{type(e).__name__}: {e}"})
+        delivery_summary = None
+        if report.delivery_outcomes:
+            counts: dict = {}
+            for o in report.delivery_outcomes:
+                counts[o["outcome"]] = counts.get(o["outcome"], 0) + 1
+            delivery_summary = {
+                "counts": counts,
+                "refusals": [{"trigger_key": o["trigger_key"],
+                              "outcome": o["outcome"],
+                              "reason": o["reason"]}
+                             for o in report.delivery_outcomes
+                             if o["outcome"] not in
+                             ("sent", "skipped_already_delivered")]}
         self.state.journal_run({
             "mode": self.mode,
             "map_version": self.map.version,
@@ -776,6 +836,8 @@ class DirectorConsumer:
             "proposals_new": report.proposals_new,
             "healed_writes": report.healed_writes,
             "markers": report.markers,
+            "delivered": report.delivered,
+            "delivery_receipt": delivery_summary,
             "github_source_errors": (len(report.github_workloop["errors"])
                                      if report.github_workloop else None),
             "elapsed_s": round(report.finished - report.started, 3)})
