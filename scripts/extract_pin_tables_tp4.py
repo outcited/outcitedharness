@@ -40,12 +40,20 @@ TP4_URL = "http://100.116.221.82:8888/v1/chat/completions"
 SUB_URL = "https://token-plan.maas.qwencloudapi.com/compatible-mode/v1/chat/completions"
 MODEL = "deepseek-v4.1-flash"
 
-PIN_PROMPT = """You are a datasheet pin-table extraction engine. Given datasheet
-text, extract the pin/pad definition table rows for the named package. Every row
-value MUST be quoted character-for-character from the text. If the text contains
-no pin definition table for this package, return an empty array — never invent.
+PIN_PROMPT = """You are a datasheet pin/pad/ball-map extraction engine. Given datasheet
+text, extract the pin/pad definition rows AND ball-map rows for the named package.
+Two table shapes are in scope:
+  1. Pin definition tables: rows carry a pin number/designator, name, type.
+  2. Ball maps (BGA/CSP): a coordinate grid — letter rows (A, B, ... AA, AB) and
+     numbered columns, each cell holding a signal name. Emit ONE row per ball,
+     with "pin" set to the ball coordinate: row letter + column number
+     ("A1", "B3", ... "AA10" for double-letter rows on large packages).
+     Do NOT renumber balls sequentially.
+Every row value MUST be quoted character-for-character from the text. If the text
+contains no pin definition table and no ball map for this package, return an
+empty array — never invent.
 Output ONLY JSON: {"has_pin_table": true|false, "package": "<as printed>",
-"rows": [{"pin": "<designator>", "name": "<pin name>", "type": "<type or null>",
+"rows": [{"pin": "<designator or ball coordinate>", "name": "<pin or signal name>", "type": "<type or null>",
 "quote": "<the verbatim table row line>"}]}"""
 
 MAX_CHARS = 40000  # pin tables live early; cap the prompt (TP4 latency scales with it)

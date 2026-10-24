@@ -1,0 +1,77 @@
+{
+ "categories": {
+  "connector": {
+   "addressable_parts": 0,
+   "facets": {},
+   "pillar_fields": {},
+   "records": 0
+  },
+  "mcu": {
+   "addressable_parts": 0,
+   "facets": {},
+   "pillar_fields": {},
+   "records": 0
+  },
+  "power": {
+   "addressable_parts": 0,
+   "facets": {},
+   "pillar_fields": {},
+   "records": 0
+  },
+  "refdesign": {
+   "addressable_parts": 0,
+   "facets": {},
+   "pillar_fields": {},
+   "records": 0
+  }
+ },
+ "generated_at": "20261017T000356Z",
+ "merged": {
+  "connector": {
+   "extracted_evidence": 0,
+   "staging_parts": 0
+  },
+  "mcu": {
+   "cr_core_parts": 0,
+   "extracted_evidence": 0,
+   "staging_parts": 0
+  },
+  "power": {
+   "catalog_parts_with_claims": 0,
+   "extracted_evidence": 0,
+   "staging_parts": 0
+  },
+  "refdesign": {
+   "extracted_evidence": 0,
+   "staging_parts": 0
+  },
+  "unassigned_cr_core": {
+   "cr_core_parts": 0,
+   "extracted_evidence": 0,
+   "staging_parts": 0
+  }
+ },
+ "provenance": {
+  "catalog_claims_quote_sha": 0,
+  "catalog_claims_with_page": null,
+  "note": "catalog claim pages ride the claim_pages chain (99.6% located); gold rows are quote+page+sha verified; cr-core rows carry T1 source provenance but no page chain yet",
+  "pinout_gold_docs": null,
+  "pinout_gold_rows_quote_page_sha": null
+ },
+ "strata": {
+  "catalog_claims": {
+   "parts_with_claims": 0
+  },
+  "cr_core": {
+   "records": 0
+  },
+  "pinout_gold": {
+   "available": false
+  }
+ },
+ "totals": {
+  "addressable": 0,
+  "records": 0,
+  "served_parts": 0
+ }
+}

@@ -76,7 +76,12 @@ def main():
                   "l2 verdicts carry reasons per claim in the ledger"],
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(rec, indent=1, sort_keys=True))
+    # MERGE, never wholesale-overwrite: wave2_checkpoint._telemetry and other
+    # lane writers keep sibling keys in this same feed file (a wholesale write
+    # here erased the wave2_expansion state on 2026-10-21 — observed live).
+    prev = json.loads(OUT.read_text()) if OUT.exists() else {}
+    prev.update(rec)
+    OUT.write_text(json.dumps(prev, indent=1, sort_keys=True))
     print(json.dumps(rec["stages"], indent=1, sort_keys=True))
 
 

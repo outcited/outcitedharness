@@ -175,6 +175,53 @@ models:
     capabilities:
       vision: false
 
+  # Orchestrator brain — 2026-10-16. RadixArk/Qwen3.8-27B-NVFP4 on asus2
+  # (docker canon-ops-nvfp4, restart=unless-stopped). Fast ops lane:
+  # measured 24.7 tok/s pure decode (3.0x canon FP8's 8.3) via modelopt_fp4
+  # W4A4 + EAGLE/NEXTN 3/1/4 spec-decode + flashinfer, vendor-qualified
+  # runtime (qualification-criteria.json). Server-side tool-call parser:
+  # qwen3_coder (5/5 clean native tool_calls at 2.2-2.7s). NOT
+  # verdict-deterministic-grade — orchestration only, never adjudication.
+  asus2_ops_brain:
+    enabled: true
+    tier: 0
+    display_name: "ASUS2 Qwen3.8-27B-NVFP4 ops brain (orchestrator)"
+    short_name: "OPS_BRAIN"
+    provider: openai_compatible
+    base_url: http://100.68.133.1:8900/v1
+    model: qwen3.8-27b-nvfp4
+    temperature: 0
+    timeout_s: 120
+    max_tokens: 4000
+    extra_body:
+      chat_template_kwargs:
+        enable_thinking: false
+    capabilities:
+      vision: false
+
+  # Shared overflow — 2026-10-16. dgx1 (spark-e10b, historically unstable)
+  # runs the canon-replica FP8 container (:8901): adjudicator failover
+  # (verified 3/3 byte-identical verdicts vs asus4 canon, self-consistent
+  # across reruns) AND burst overflow for the ops plane (failover drill:
+  # asus2 stop -> routed here in 3.1s; asus2 recovered in 180s). NEVER a
+  # primary — always last in routing pools.
+  dgx1_overflow:
+    enabled: true
+    tier: 1
+    display_name: "DGX1 Qwen3.8-27B-FP8 replica (adjudicator backup + ops overflow)"
+    short_name: "OVERFLOW_FP8"
+    provider: openai_compatible
+    base_url: http://100.81.201.24:8901/v1
+    model: qwen3.8-27b-fp8
+    temperature: 0
+    timeout_s: 120
+    max_tokens: 4000
+    extra_body:
+      chat_template_kwargs:
+        enable_thinking: false
+    capabilities:
+      vision: false
+
   # Parked: 139B NVFP4 needs ~150GB during the Marlin repack this container
   # build requires on GB10 — OOM crash-loops on one 121GB box. Revisit when
   # NGC ships native-FP4 vLLM for GB10 or when it gets a two-Spark pair.

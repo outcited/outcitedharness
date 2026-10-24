@@ -125,7 +125,7 @@ def submit(args):
             meta[stem] = [(pn, idx, bbox) for pn, idx, bbox, _ in regions]
             for pn, idx, bbox, b64 in regions:
                 requests.append({
-                    "custom_id": f"{stem}|{pn}|{idx}",
+                    "custom_id": f"{stem[:16]}_{pn}_{idx}",
                     "method": "POST", "url": "/v1/chat/completions",
                     "body": {"model": MODEL, "temperature": 0, "max_tokens": 16000,
                              "reasoning": {"effort": "low"},
@@ -195,13 +195,16 @@ def poll(args):
             lf.with_suffix(".done").write_text(lf.read_text())
             continue
         raw = api_raw(f"/files/{out_file}/content")
+        # Build short->full stem map (custom_id uses stem[:16])
+        short_map = {s[:16]: s for s in meta}
         per_stem = {}
         for line in raw.decode().splitlines():
             if not line.strip():
                 continue
             row = json.loads(line)
             cid = row.get("custom_id", "")
-            stem, pn, idx = cid.split("|")
+            short_stem, pn, idx = cid.split("_")
+            stem = short_map.get(short_stem, short_stem)
             content = (((row.get("response") or {}).get("choices") or [{}])[0]
                        .get("message", {}) or {}).get("content") or ""
             bbox = None

@@ -1,0 +1,28 @@
+{
+  "schema": "harness.corpus-registry.v1",
+  "created": "2026-10-19",
+  "law": "content is canonical by sha256; cas filename hex = sha; paths are resolved via REGISTRY + INDEX, never hardcoded in consumers",
+  "canonical": {
+    "role": "canonical",
+    "store": "charleybasecamp (.54) /volume1/Electronicdataassets/corpus",
+    "m5_mount": "/Users/samkim/mnt/canonical-rw/corpus",
+    "mount_cmd": "mount_smbfs '//harness:PASSWORD@192.168.4.54/Electronicdataassets' /Users/samkim/mnt/canonical-rw"
+  },
+  "stores": [
+    {"name": "nas54", "role": "canonical_host", "root": "/volume1/Electronicdataassets/corpus", "via": "smb rw / nfs ro"},
+    {"name": "m5_4tb", "role": "cache", "root": "/Volumes/M5_4TB/vault/cas", "box": "m5", "note": "NFS view of m5-4tb tree; partial (13k gap vs happy)"},
+    {"name": "happy_local", "role": "cache", "root": "/home/samsonkim/corpus-vault/cas", "box": "happy", "note": "fullest known cas (121,495 blobs); legacy truncated-sha names"},
+    {"name": "happy_macmobile", "role": "cache", "root": "/mnt/macmobile/vault/cas", "box": "happy", "note": "external 466G; partial M5_4TB mirror"},
+    {"name": "yosemite_mirror", "role": "cache", "root": "Public/m5-opencode/corpus-mirror/cas", "box": "yosemiteraid5 (.44)", "note": "deliveries mirror"},
+    {"name": "winter_eda", "role": "cache", "root": "/mnt/eda/m5-4tb/vault/cas", "box": "winter", "note": "nfs ro of nas54"}
+  ],
+  "index": {
+    "path": "/volume1/Electronicdataassets/corpus/INDEX.jsonl",
+    "m5_copy": "/Users/samkim/Harnessv1/corpus/INDEX.jsonl",
+    "row_shape": {"sha": "hex", "size": "bytes", "locations": {"store": "path"}}
+  },
+  "backup": {
+    "tool": "corpus/backup_disk.sh <disk-mountpoint>",
+    "law": "plug any disk, run one command: cas + INDEX + REGISTRY land on it, verified by count"
+  }
+}

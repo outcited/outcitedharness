@@ -142,10 +142,44 @@ COLUMN_ORDER_SETS = [
 ]
 
 
+_EMPTY_CELL = {"-", "\u2013", "\u2014", "\u2015", "\u2212"}
+_NUM_RE = re.compile(r"-?\d+(?:\.\d+)?")
+
+
+def _has_empty_cell(quote: str) -> bool:
+    return any(g in _EMPTY_CELL for g in norm(quote).split())
+
+
+def _value_cell_ordinal(quote: str, val: float):
+    """Ordinal of the claimed value among row CELLS, where a cell is a
+    whitespace group containing a number or an explicit empty-cell dash
+    placeholder. Unlike counting numbers only, a row like
+    "— 9.19 16.8 μA" (min column blank) puts 16.8 at ordinal 2 (max),
+    not ordinal 1 (typ). Returns None when the value is not uniquely
+    located in exactly one cell."""
+    cells = []
+    for g in norm(quote).split():
+        if g in _EMPTY_CELL:
+            cells.append(None)
+        elif _NUM_RE.search(g):
+            cells.append(g)
+    if not any(c is None for c in cells):
+        return None
+    hits = [i for i, c in enumerate(cells)
+            if c is not None and any(abs(float(n) - val) < 1e-9
+                                     for n in _NUM_RE.findall(c))]
+    if len(hits) != 1:
+        return None
+    return hits[0]
+
+
 def column_position_binds(claim, quote, span_text):
     """Ordinal wrong-cell guard: when a header line shows an ordered column
     set (min/typ/max...) and the quote line's numbers follow the same order,
     the claimed value must sit at the claimed column's ordinal position.
+    Rows with blank (dash) cells are counted by CELL, not by number, so a
+    value lifted from the Max column of a row whose Min cell is blank can
+    never masquerade as the Typ value.
     Returns False on a provable mismatch, None when undecidable."""
     col = (claim.get("column_header") or "").lower().strip()
     if not col:
@@ -167,17 +201,23 @@ def column_position_binds(claim, quote, span_text):
     if not header_line:
         return None
     col_index = header_line.index(col_tok)
-    quote_nums = re.findall(r"-?\d+(?:\.\d+)?", norm(quote))
     try:
         val = float(claim.get("value"))
     except (TypeError, ValueError):
         return None
-    val_positions = [i for i, n in enumerate(quote_nums) if abs(float(n) - val) < 1e-9]
-    if not val_positions or len(set(val_positions)) > 1:
+    if _has_empty_cell(quote):
+        val_position = _value_cell_ordinal(quote, val)
+    else:
+        quote_nums = _NUM_RE.findall(norm(quote))
+        val_positions = [i for i, n in enumerate(quote_nums) if abs(float(n) - val) < 1e-9]
+        if not val_positions or len(set(val_positions)) > 1:
+            return None
+        val_position = val_positions[0]
+    if val_position is None:
         return None
-    if val_positions[0] == col_index:
+    if val_position == col_index:
         return True
-    if val_positions[0] < len(header_line):
+    if val_position < len(header_line):
         return False
     return None
 
@@ -275,6 +315,10 @@ def verify_claims(claims: dict, doc_text: str):
             else:
                 binding = "P1"
                 reason = "partially_bound_header"
+        if (binding == "P2" and c.get("qualifier")
+                and ordinal is None and _has_empty_cell(quote)):
+            binding = "P1"
+            reason = "unproven_role_binding"
 
         sev = "P2" if (table_ok and binding == "P2") else binding
         final_reason = reason or (None if table_ok else "table_title_unverified")

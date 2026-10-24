@@ -1,0 +1,19 @@
+[package]
+name = "dw-bcmp"
+description = "BCMP pilot: scenario atom sets through dw-decide elimination, tri-state brand projection, provenance-pinned receipts. Evaluation is 100% dw-decide; the knife declaration here is a loader-level spec pending dw-knives registry generalisation (F-03)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+dw-types = { path = "../dw-types" }
+dw-decide = { path = "../dw-decide" }
+dw-extract = { path = "../dw-extract" }
+
+[lints]
+workspace = true

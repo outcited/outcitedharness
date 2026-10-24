@@ -25,7 +25,7 @@ from harness.discovery import service
 DESIGNS_DB = os.environ.get("DESIGNS_DB",
                             "/Volumes/M5_4TB/extract-results/designs.db")
 CATALOG = os.environ.get("DISCOVERY_CATALOG",
-                         "/Volumes/M5_4TB/extract-results/catalog.db")
+                         os.environ.get("CATALOG_DB", "/Users/samkim/Harnessv1/results/catalog-live.db"))
 
 
 class Handler(BaseHTTPRequestHandler):

@@ -12,7 +12,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-DEFAULT_DB = "/Volumes/M5_4TB/extract-results/catalog.db"
+DEFAULT_DB = "/Users/samkim/Harnessv1/results/catalog-live.db"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS parts (
