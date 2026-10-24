@@ -179,6 +179,14 @@ pub const AXES: &[AxisSpec] = &[
         min_column_evidence: false,
     },
     AxisSpec {
+        axis: Axis::PinCount,
+        symbols: &["PINS", "PINCOUNT", "NOOFPINS", "PINCOUNTMAX", "PINQUANTITY"],
+        op: Op::MinRating,
+        accepts_classes: None,
+        default_near_miss_pct: 10.0,
+        min_column_evidence: true,
+    },
+    AxisSpec {
         axis: Axis::SleepCurrentA,
         // Conservative symbol set: the EC-table spellings of sleep-mode
         // supply current. Mode-name evidence ("Deep Sleep", "Stop 1") is

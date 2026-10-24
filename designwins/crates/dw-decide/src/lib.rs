@@ -151,6 +151,17 @@ pub enum Axis {
     /// guaranteed minimum proves violation, and neither alone proves the
     /// other direction.
     SleepCurrentA,
+    /// Number of pins in the package — from the verified pin table
+    /// (structural feed), or a datasheet `Pin Count` cell. Comparison is
+    /// `MinRating`: a 48-pin device satisfies a 40-pin requirement.
+    /// Added 2026-10-24 (association-ledger era: 11,707 parts now carry
+    /// verified pin tables).
+    PinCount,
+    /// The part has verified typical-characteristics curves. Modeled
+    /// `MinRating >= 1.0` (D4 lesson: a bare "has" atom can never fail),
+    /// evidenced by the structural feed's curve records — never by a
+    /// datasheet symbol. Added 2026-10-24 (6,509 parts with verified curves).
+    HasTypicalCurves,
 }
 
 /// How a **scalar** axis is compared against a claim.

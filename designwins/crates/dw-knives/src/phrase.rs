@@ -466,6 +466,16 @@ mod tests {
 
     fn registry() -> PhraseRegistry {
         let mut r = PhraseRegistry::new();
+        // N-pin colloquial (2026-10-24): package/pin-count traffic (D4 table
+        // row "package" 2.1%). Drawer: CatalogSubcategory — parametric catalog
+        // filter, classifying into the ratified set, not reopening it.
+        // Stamp::Blocked: soft atom until measured traffic evidence lands (D6).
+        r.insert(binding(
+            "n-pin",
+            r"\d{1,3}[\s-]?(?:pin|lead|ball|pad)s?",
+            vec![knife(Axis::PinCount, true, Drawer::CatalogSubcategory)],
+            Stamp::Blocked("2026-10-24 structural era: 11,707 parts with verified pin tables; measured-traffic stamp pending".into()),
+        ));
         r.insert(binding(
             "bluetooth",
             "bluetooth",
