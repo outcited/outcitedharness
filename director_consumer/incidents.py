@@ -310,6 +310,21 @@ class IncidentStore:
         self.con.commit()  # never leave an implicit txn for shared writers
         return incident_id
 
+    def repeat_status(self, incident_id: str) -> tuple[bool, str]:
+        """(is_repeat, severity) from evidence, not clocks: observe() logs
+        one incident_events row per occurrence, so count >= 2 means this
+        occurrence is a repeat on the SAME identity+rule+window incident
+        (doctrine §4: deterministic relationship, never temporal alone)."""
+        row = self.con.execute(
+            "SELECT severity FROM incidents WHERE incident_id=? "
+            "AND project=?", (incident_id, self.project)).fetchone()
+        if row is None:
+            return False, ""
+        n = self.con.execute(
+            "SELECT count(*) FROM incident_events WHERE incident_id=? "
+            "AND project=?", (incident_id, self.project)).fetchone()[0]
+        return (int(n) >= 2), str(row[0])
+
     def validate_receipt(self, incident_id: str,
                          receipt: dict) -> tuple[bool, str]:
         """A receipt is a resolvable VERIFICATION, not five nonempty

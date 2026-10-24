@@ -260,10 +260,22 @@ class DirectorConsumer:
                     continue
                 a.model_assessment = self._enrich(a)
                 assessments.append(a)
+                incident_id = None
                 try:
-                    self.incidents.observe(a)      # §4: incident grouping
+                    incident_id = self.incidents.observe(a)  # §4 grouping
                 except Exception:  # noqa: BLE001 — never break classification
                     pass
+                # §4: a repeat occurrence on the open incident is EVIDENCE
+                # (observe() appended it) — never a new status message.
+                repeat = False
+                if incident_id:
+                    try:
+                        repeat, inc_sev = self.incidents.repeat_status(
+                            incident_id)
+                        if repeat and a.severity == inc_sev:
+                            continue
+                    except Exception:  # noqa: BLE001
+                        repeat = False
                 msg = build_message(a)
                 esc = build_escalation(a, self.auth_policy)
                 for p in (msg, esc):
