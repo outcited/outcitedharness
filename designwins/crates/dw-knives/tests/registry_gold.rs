@@ -50,6 +50,7 @@ fn axis_name(a: dw_decide::Axis) -> &'static str {
         dw_decide::Axis::IsA => "is_a",
         dw_decide::Axis::RgOhm => "rg_ohm",
         dw_decide::Axis::RthjaCperw => "rthja_c_per_w",
+        dw_decide::Axis::SleepCurrentA => "sleep_current_a",
         other => panic!("registry_gold has no name for {other:?}"),
     }
 }
@@ -59,6 +60,7 @@ fn op_name(op: dw_decide::Op) -> &'static str {
         dw_decide::Op::MinRating => "min_rating",
         dw_decide::Op::MaxRating => "max_rating",
         dw_decide::Op::Covers => "covers",
+        dw_decide::Op::AtMost => "at_most",
     }
 }
 
@@ -172,6 +174,9 @@ fn additive_eight_registered() {
         ("is_a", "min_rating"),
         ("rg_ohm", "max_rating"),
         ("rthja_c_per_w", "max_rating"),
+        // 2026-10-19 slice: measured 75.1% substrate coverage (2,354/3,136
+        // mode-row docs carry sleep-family modes, burn 2026-10-19).
+        ("sleep_current_a", "at_most"),
     ];
     for (name, op) in want {
         let spec = AXES
@@ -181,5 +186,5 @@ fn additive_eight_registered() {
         assert_eq!(op_name(spec.op), *op, "op drift on {name}");
         assert!(!spec.symbols.is_empty(), "{name} carries no symbols");
     }
-    assert_eq!(AXES.len(), 13, "five ported + eight additive");
+    assert_eq!(AXES.len(), 14, "five ported + eight additive + sleep");
 }

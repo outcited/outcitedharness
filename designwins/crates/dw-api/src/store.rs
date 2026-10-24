@@ -363,6 +363,7 @@ impl DemoStore {
             &cohort,
             &facts,
             release.clone(),
+            &dw_decide::AlwaysResolvable,
         );
         answer.build
     }
@@ -421,7 +422,7 @@ impl ApiStore for DemoStore {
                 .collect(),
         );
         let facts: BTreeMap<Candidate, CandidateFacts> = BTreeMap::new();
-        dw_funnel::accept(raw, &registry, &cohort, &facts, self.release.clone()).build
+        dw_funnel::accept(raw, &registry, &cohort, &facts, self.release.clone(), &dw_decide::AlwaysResolvable).build
     }
 
     fn cube(&self) -> CoverageCube {

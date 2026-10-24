@@ -39,6 +39,8 @@ use dw_knives::{rating_class, RatingClass};
 use dw_types::ReleaseId;
 use serde::{Deserialize, Serialize};
 
+pub mod mode_rows;
+
 /// One claim row as the corpus prints it (`claims_canonical`-shaped).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ClaimRow {
@@ -177,10 +179,11 @@ pub fn search(
     registry: &dw_knives::PhraseRegistry,
     population: &Population,
     release: ReleaseId,
+    provenance: &dyn dw_decide::Provenance,
 ) -> SearchResponse {
     let cohort =
         dw_decide::Cohort::from_candidates(population.facts.keys().cloned().collect::<Vec<_>>());
-    let answer = dw_funnel::accept(sentence, registry, &cohort, &population.facts, release);
+    let answer = dw_funnel::accept(sentence, registry, &cohort, &population.facts, release, provenance);
     SearchResponse {
         residue: answer.bound.unmapped.clone(),
         build: answer.build,

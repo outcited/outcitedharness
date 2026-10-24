@@ -1,0 +1,928 @@
+warning: unused import: `AlwaysResolvable`
+  --> crates/dw-funnel/src/lib.rs:20:15
+   |
+20 |     evaluate, AlwaysResolvable, Build, Candidate, CandidateFacts, Cohort, ConfirmState, Derived,
+   |               ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `dw-funnel` (lib) generated 1 warning (run `cargo fix --lib -p dw-funnel` to apply 1 suggestion)
+warning: `dw-funnel` (lib) generated 1 warning (1 duplicate)
+warning: `dw-funnel` (lib test) generated 1 warning (1 duplicate)
+warning: unused import: `Candidate as PCandidate`
+  --> crates/dw-search/src/mode_rows.rs:18:13
+   |
+18 | use crate::{Candidate as PCandidate, Population};
+   |             ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `dw-search` (lib) generated 1 warning (run `cargo fix --lib -p dw-search` to apply 1 suggestion)
+warning: `dw-search` (lib test) generated 1 warning (1 duplicate)
+warning: unused variable: `built`
+   --> crates/dw-search/tests/sleep_current_slice.rs:207:9
+    |
+207 |     let built = population_from_mode_rows(&rows);
+    |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_built`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `dw-search` (test "sleep_current_slice") generated 1 warning (run `cargo fix --test "sleep_current_slice" -p dw-search` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/lib.rs (target/debug/deps/dw_api-4c610af38ecc04c3)
+
+running 2 tests
+test problem::tests::the_type_field_is_wire_named ... ok
+test problem::tests::every_problem_is_renderable ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/dw-serve.rs (target/debug/deps/dw_serve-b2aa1fb71f076d5b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/d7_feed_contract.rs (target/debug/deps/d7_feed_contract-0aecf5202fe957e3)
+
+running 12 tests
+test negative_control_unresolvable_evidence_fails_the_audit ... ok
+test negative_control_unreasoned_exclusion_fails_the_audit ... ok
+test percent_encoded_part_numbers_resolve ... ok
+test wrong_release_is_a_renderable_problem ... ok
+test not_found_and_method_problems_are_renderable ... ok
+test healthz_carries_release_and_lineage ... ok
+test filters_are_refused_not_ignored ... ok
+test audit_agrees_with_the_serializer ... ok
+test empty_blocks_are_still_on_the_wire ... ok
+test query_runs_the_funnel_and_pins_the_release ... ok
+test negative_control_dropping_a_feed_item_fails_the_audit ... ok
+test every_data_response_carries_the_full_feed ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/export_store.rs (target/debug/deps/export_store-5ac4b545111726ad)
+
+running 4 tests
+test claim_source_parses_both_feed_conventions ... ok
+test cube_reads_cube_json_and_picks_up_fresh_exports ... ok
+test negative_control_resolution_never_invents_a_page ... ok
+test part_walks_the_feeds_and_404s_honestly ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/dw_bridge-3832f092586619e1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_controller-b0782191d06c3fa2)
+
+running 1 test
+test tests::timestamps_format_like_python ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/dw-soak.rs (target/debug/deps/dw_soak-467c21e4b4eef12b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/controller_gold.rs (target/debug/deps/controller_gold-288cdc3098b76238)
+
+running 1 test
+test battery_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/soak_schema.rs (target/debug/deps/soak_schema-a9610c5b7e72c1b6)
+
+running 5 tests
+test unknown_queue_schema_is_still_refused ... ok
+test soak_queue_with_wrong_evidence_is_refused ... ok
+test soak_manifest_with_wrong_queue_sha_is_refused ... ok
+test structural_manifest_still_pins_its_own_key ... ok
+test soak_queue_registers_and_chunks_seal ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_coverage-e79a8b70fd9658b4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/coverage_gold.rs (target/debug/deps/coverage_gold-246a4dfc97de7d87)
+
+running 3 tests
+test negative_control_states_never_exaggerate ... ok
+test cube_is_honest_and_gaps_fire_on_triggers ... ok
+test manifest_matches_the_live_reference_gold ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_decide-86a905ec7526e596)
+
+running 20 tests
+test evaluate::tests::absmax_evidence_is_unknown_not_fail ... ok
+test evaluate::tests::covered_condition_is_comparable ... ok
+test evaluate::tests::margin_is_applied_to_the_requirement ... ok
+test evaluate::tests::adequate_rating_passes_and_eliminates_nothing ... ok
+test evaluate::tests::missing_evidence_never_eliminates ... ok
+test evaluate::tests::near_miss_is_not_fail ... ok
+test evaluate::tests::exclusions_are_clickable_open ... ok
+test evaluate::tests::uncovered_condition_is_unknown ... ok
+test evaluate::tests::evaluate_refuses_unresolvable_evidence ... ok
+test evaluate::tests::soft_atoms_never_eliminate ... ok
+test evaluate::tests::acceptance_shape_is_complete ... ok
+test evaluate::tests::unresolvable_evidence_is_unknown_not_pass ... ok
+test tests::exclusion_carries_reason_and_evidence ... ok
+test tests::cohort_dedupes_and_sorts ... ok
+test tests::only_hard_fail_eliminates ... ok
+test tests::pending_derivation_contributes_nothing ... ok
+test tests::summary_reports_the_funnel ... ok
+test tests::unknown_never_eliminates ... ok
+test tests::unknowns_are_first_class ... ok
+test tests::wire_shapes_round_trip_when_empty_blocks_are_skipped ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/question_ranking.rs (target/debug/deps/question_ranking-1c4cc763712f2926)
+
+running 3 tests
+test negative_control_ranking_follows_measured_fails_not_population_size ... ok
+test negative_control_ties_keep_registry_order ... ok
+test ranking_matches_the_live_reference_gold ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_evidence-c197399ca5af2aa0)
+
+running 8 tests
+test tests::crop_clamps_to_the_page ... ok
+test tests::png_encoding_is_deterministic ... ok
+test tests::render_size_is_144_dpi ... ok
+test tests::sha256_matches_known_vectors ... ok
+test tests::empty_bytes_are_refused ... ok
+test tests::engine_is_recorded ... ok
+test tests::store_is_content_addressed ... ok
+test tests::provenance_breaks_loudly ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_extract-ca5b9a34d116ffa6)
+
+running 23 tests
+test canonical::tests::negative_control_nonfinite_is_rejected_not_encoded ... ok
+test claims::tests::negative_control_evidenceless_semantic_claim_is_rejected ... ok
+test canonical::tests::canonical_sorts_and_compacts_like_python ... ok
+test canonical::tests::stable_id_prefix_whitelist_is_enforced ... ok
+test canonical::tests::float_repr_matches_python_notation ... ok
+test parity::tests::cutover_permitted_only_on_empty_ledger ... ok
+test parity::tests::negative_control_value_mutation_is_caught ... ok
+test parity::tests::negative_control_key_drift_is_caught ... ok
+test parity::tests::diff_wire_agrees_on_equal_structure ... ok
+test sha256::tests::fips_known_answer_vectors ... ok
+test sha256::tests::fips_vectors_reject_wrong_digest ... ok
+test corpus::tests::negative_control_digest_mutation_trips ... ok
+test corpus::tests::negative_control_duplicate_documents_trips ... ok
+test corpus::tests::valid_registry_verifies ... ok
+test claims::tests::make_claim_mints_deterministic_identity ... ok
+test queue::tests::work_queue_routes_and_self_digest ... ok
+test queue::tests::negative_control_leading_digit_field_is_prefixed ... ok
+test queue::tests::safe_component_matches_reference_rules ... ok
+test grid::tests::negative_control_acronym_plural_only ... ok
+test grid::tests::negative_control_long_label_stays_below_grid ... ok
+test grid::tests::negative_control_sentence_fragments_stay_below_grid ... ok
+test grid::tests::varies_by_part_shapes ... ok
+test grid::tests::build_grid_emits_scaffold_and_rows ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running unittests src/bin/extract-replace.rs (target/debug/deps/extract_replace-99e4b2b5a6852266)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/gold_bom.rs (target/debug/deps/gold_bom-91fbab9c40175c33)
+
+running 2 tests
+test negative_control_mutated_item_is_detected ... ok
+test bom_gold_reproduces_reference_output ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/gold_canonical.rs (target/debug/deps/gold_canonical-174a7fdc5f5ddc2e)
+
+running 3 tests
+test gold_fixture_values_match_wire_payloads ... ok
+test negative_control_payload_mutation_changes_digest ... ok
+test canonical_gold_reproduces_python_bytes_and_ids ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/gold_claims.rs (target/debug/deps/gold_claims-c537c058919eb27e)
+
+running 2 tests
+test negative_control_field_mutation_changes_claim_id ... ok
+test claims_gold_reproduces_reference_wire ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/gold_grid.rs (target/debug/deps/gold_grid-52ac0a415acb8e5c)
+
+running 2 tests
+test negative_control_mutated_row_is_detected ... ok
+test grid_gold_reproduces_reference_output ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.22s
+
+     Running tests/gold_queue.rs (target/debug/deps/gold_queue-4219d1f19f1ccc54)
+
+running 2 tests
+test negative_control_mutated_route_is_detected ... ok
+test queue_gold_reproduces_reference_output ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_funnel-161bdd7f42195a7d)
+
+running 3 tests
+test tests::acceptance_test_sentence_to_cohort ... ok
+test tests::proven_fit_narrows_and_explains ... ok
+test tests::summary_is_renderable ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_graph-fa1f57a4398e323c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/errata_gold.rs (target/debug/deps/errata_gold-23a6910d2990c497)
+
+running 2 tests
+test negative_control_nothing_inferred ... ok
+test all_five_readers_match_the_live_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/ordering_gold.rs (target/debug/deps/ordering_gold-e134fc12366f25e7)
+
+running 2 tests
+test negative_control_only_unambiguous_schemes_decode ... ok
+test battery_matches_the_live_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/topology_gold.rs (target/debug/deps/topology_gold-a720224c37a8dfa6)
+
+running 2 tests
+test negative_control_fail_closed ... ok
+test all_rows_match_the_live_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_knives-f72afc38732cf397)
+
+running 15 tests
+test category::tests::category_exclusion_needs_evidence ... ok
+test category::tests::no_category_is_unknown_not_false ... ok
+test phrase::tests::binding_requires_evidence ... ok
+test phrase::tests::blocked_contributes_nothing ... ok
+test phrase::tests::four_drawers_are_distinct ... ok
+test phrase::tests::positive_only_never_eliminates ... ok
+test phrase::tests::non_proven_fit_atoms_are_forced_soft ... ok
+test phrase::tests::stamp_is_measured_not_declared ... ok
+test phrase::d5_tests::unmapped_phrase_becomes_unknown_and_question ... ok
+test phrase::tests::compound_phrase_fires_several_bindings ... ok
+test phrase::tests::proven_fit_may_eliminate ... ok
+test phrase::tests::unmapped_phrase_is_reported ... ok
+test category::tests::nesting_is_containment_not_equality ... ok
+test category::tests::negative_control_is_is_not_within ... ok
+test category::tests::within_is_a_set_lookup ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/alias_fold_gold.rs (target/debug/deps/alias_fold_gold-202f08c196cbef7b)
+
+running 6 tests
+test t_n1_delta_glyphs_one_key ... ok
+test t_n1_word_label_folds_to_symbol ... ok
+test negative_control_unmapped_stay_unmapped ... ok
+test negative_control_quantities_never_fold ... ok
+test t_n1_named_folds_one_key_each ... ok
+test table_law_frozen_additive_one_step ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/d4_phrase_telemetry.rs (target/debug/deps/d4_phrase_telemetry-9f64e664c8800c11)
+
+running 7 tests
+test negative_control_activation_floor_discriminates ... ok
+test negative_control_denominator_must_not_double_count ... ok
+test telemetry_is_skewed ... ok
+test negative_control_coverage_floor_trips_on_an_empty_registry ... ok
+test d4_phrase_layer_over_real_traffic ... ok
+test d4_law1_no_illegal_hard_atoms_over_traffic ... ok
+test d5_residue_surfaces_over_traffic ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/rating_class_gold.rs (target/debug/deps/rating_class_gold-728cee4f1cfacc22)
+
+running 3 tests
+test class_gate_matches_the_reference ... ok
+test negative_control_class_guards ... ok
+test projection_battery_matches_the_reference ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/registry_gold.rs (target/debug/deps/registry_gold-f651e0139796ef1c)
+
+running 4 tests
+test additive_eight_registered ... ok
+test five_axes_one_to_one ... ok
+test negative_control_symbol_normalization ... ok
+test symbol_battery_matches_the_reference ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_learn-e8b24145089320f1)
+
+running 1 test
+test gate::tests::round4_negative_control ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/learn_gold.rs (target/debug/deps/learn_gold-b807b9e7fefcf07e)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_lessons-01834a06192c8778)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/dw-lessons.rs (target/debug/deps/dw_lessons-b4a0b34e2d73027a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lessons_gate.rs (target/debug/deps/lessons_gate-eb287db25bb6eef9)
+
+running 4 tests
+test the_index_carries_every_known_lesson ... ok
+test negative_control_noise_trips_nothing ... ok
+test signal_proposals_find_their_lessons ... ok
+test the_threshold_discriminates_with_margin ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_model-e8d7a3049896af87)
+
+running 2 tests
+test bundle::tests::base64_matches_reference_vectors ... ok
+test bundle::tests::pretty_writer_matches_python_indent2 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/bundle_gold.rs (target/debug/deps/bundle_gold-0be1b805420da700)
+
+running 2 tests
+test every_case_matches_the_live_reference ... ok
+test sealed_bundle_is_write_once ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/model_gold.rs (target/debug/deps/model_gold-2ec2760b866aa9bd)
+
+running 2 tests
+test prompt_uses_two_json_encodings ... ok
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_normalize-59cf7cd1e57031bd)
+
+running 30 tests
+test coverage::tests::empty_boundary_asymmetry_is_deliberate ... ok
+test coverage::tests::only_exact_and_covers_may_satisfy ... ok
+test coverage::tests::mismatch_and_partial_and_absent ... ok
+test coverage::tests::property_coverage_reflexivity ... ok
+test coverage::tests::values_agree_is_overlap_not_equality ... ok
+test rating::tests::absent_claim_is_unknown_not_fail ... ok
+test rating::tests::absmax_never_satisfies_operating ... ok
+test coverage::tests::strictly_wider_lifts_exact_to_covers ... ok
+test rating::tests::lower_is_better_direction ... ok
+test rating::tests::near_miss_is_not_fail ... ok
+test rating::tests::property_margin_is_never_silent ... ok
+test thermal::tests::kind_classifies_symbols_and_spelled_forms ... ok
+test units::tests::ampere_per_second_scales_on_denominator ... ok
+test units::tests::celsius_has_no_multiplier ... ok
+test units::tests::property_unit_round_trip ... ok
+test units::tests::voltage_scales ... ok
+test units::tests::unit_token_folds_unicode_and_whitespace ... ok
+test condition::tests::dash_rejects ... ok
+test thermal::tests::dimensionless_mention_emits_nothing ... ok
+test thermal::tests::non_thermal_unit_never_emits ... ok
+test thermal::tests::printed_value_with_thermal_unit_emits ... ok
+test rating::tests::transient_fires_inside_absmax_tables_on_symbol ... ok
+test rating::tests::unknown_is_fail_closed ... ok
+test rating::tests::continuous_vetoes_pulse_vocabulary ... ok
+test condition::tests::l7_mode_words_type ... ok
+test condition::tests::l3_bare_temp_is_unambiguous_in_kind ... ok
+test condition::tests::empty_fields_omit_from_serialisation ... ok
+test condition::tests::l1_never_invents_units ... ok
+test condition::tests::typed_condition_carries_verbatim ... ok
+test condition::tests::l2_single_letter_is_ambiguous ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/additive_kinds_gold.rs (target/debug/deps/additive_kinds_gold-0b4c1c5cd3afc106)
+
+running 3 tests
+test positive_control_new_kinds_type ... ok
+test negative_control_cross_kind_never_types ... ok
+test additive_kinds_gold_all_rows ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/claim_value_shapes_gold.rs (target/debug/deps/claim_value_shapes_gold-682187e042efb93e)
+
+running 3 tests
+test positive_control_ranges_type ... ok
+test negative_control_shapes_never_type ... ok
+test e5_value_shapes_gold_all_rows ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/compile_fail.rs (target/debug/deps/compile_fail-fbd65b68c4239b85)
+
+running 1 test
+    Checking dw-normalize-tests v0.0.0 (/Users/samkim/Harnessv1-powerdata01/designwins/target/tests/trybuild/dw-normalize)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+
+
+test [0m[1mtests/compile_fail/margin_default.rs[0m ... [0m[32mok
+[0mtest [0m[1mtests/compile_fail/parse_outcome_default.rs[0m ... [0m[32mok
+[0mtest [0m[1mtests/compile_fail/typed_condition_from_json.rs[0m ... [0m[32mok
+[0mtest [0m[1mtests/compile_fail/typed_condition_no_verbatim.rs[0m ... [0m[32mok
+[0m
+
+test laws_are_enforced_by_the_type_system ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/gold_claim_conditions.rs (target/debug/deps/gold_claim_conditions-ab72858d96e036ed)
+
+running 5 tests
+test negative_control_float_tolerance_is_not_a_blanket ... ok
+test negative_control_n4b_comparison_detects_a_mutation ... ok
+test negative_control_null_page_is_not_a_page ... ok
+test claim_provenance_has_c3_shape ... ok
+test gold_claim_conditions_10270 ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.36s
+
+     Running tests/gold_condition.rs (target/debug/deps/gold_condition-6b7cfefeee595137)
+
+running 1 test
+test gold_condition_model_167_of_167 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests/gold_condition_catalog.rs (target/debug/deps/gold_condition_catalog-68779f260d9deb43)
+
+running 2 tests
+test corpus_and_gold_agree_on_schema ... ok
+test gold_condition_typed_catalog_9551 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.74s
+
+     Running tests/gold_rating.rs (target/debug/deps/gold_rating-5d21804ab271b64b)
+
+running 2 tests
+test rating_class_vocabulary_is_closed ... ok
+test gold_rating_class_63_of_63 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_parity-5a4e387e34f25f88)
+
+running 11 tests
+test replace::tests::numeric_tolerance_is_relative_and_tight ... ok
+test replace::tests::negative_control_reference_survives_a_batch_larger_than_the_pipe_buffer ... ok
+test replace::tests::negative_control_gate_detects_divergence ... ok
+test replace::tests::canonicalize_sorts_keys ... ok
+test replace::tests::negative_control_detects_missing_and_extra_fields ... ok
+test tests::intentional_improvement_does_not_block ... ok
+test tests::a_difference_is_recorded_unexplained ... ok
+test tests::run_surfaces_merges ... ok
+test tests::cutover_blocked_by_rust_bug_or_unexplained ... ok
+test tests::summary_names_every_class ... ok
+test tests::week0_gate_ledger_runs_empty ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/dw_parity-e3647df26ecdb71a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/dw-parse.rs (target/debug/deps/dw_parse-0d4b35718703b684)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/dw-replace.rs (target/debug/deps/dw_replace-ad9e9176fd597a91)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_pdf-b46a4c14f22bf335)
+
+running 4 tests
+test tests::bezier_triples_group_into_one_cubic ... ok
+test tests::closed_four_line_box_collapses_to_outline_multiset ... ok
+test tests::drawing_segment_count ... ok
+test tests::rect_geometry ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/g7_path_segments.rs (target/debug/deps/g7_path_segments-1e51b3c5f568d5e0)
+
+running 1 test
+test g7_path_segments_match_python_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_queue-9d1097e8816f58d5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/queue_gold.rs (target/debug/deps/queue_gold-899b45ecc67cfa6f)
+
+running 6 tests
+test budget_caps_match_the_reference ... ok
+test visibility_reclaim_matches_the_reference ... ok
+test ack_dedup_and_ledger_match_the_reference ... ok
+test negative_control_queue_semantics ... ok
+test enqueue_claim_ack_matches_the_reference ... ok
+test fail_to_dead_matches_the_reference ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_recon-1fef1689bb9e8533)
+
+running 3 tests
+test sha256::tests::fips_vectors_reject_wrong_digest ... ok
+test sha256::tests::fips_known_answer_vectors ... ok
+test corpus::canonical_tests::canonical_json_sorts_keys_independently_of_map_order ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/corpus_gold.rs (target/debug/deps/corpus_gold-33470e53510283d2)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/document_scope_gold.rs (target/debug/deps/document_scope_gold-6a05abcb0622612d)
+
+running 2 tests
+test negative_control_instrument_failure_is_not_absence ... ok
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/family_census_gold.rs (target/debug/deps/family_census_gold-a6a8af033de11fb5)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.69s
+
+     Running tests/family_device_matrix_gold.rs (target/debug/deps/family_device_matrix_gold-3d1581fb24014adc)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.21s
+
+     Running tests/family_document_gold.rs (target/debug/deps/family_document_gold-5c4255362c6ea3c2)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.14s
+
+     Running tests/incremental_corpus_gold.rs (target/debug/deps/incremental_corpus_gold-d70c36b513f5e199)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/l0_gold.rs (target/debug/deps/l0_gold-589b84fc40943f8f)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/locator_gold.rs (target/debug/deps/locator_gold-0296e719a3a3a74a)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/page_evidence_gold.rs (target/debug/deps/page_evidence_gold-b9db0e1056209b00)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/page_index_gold.rs (target/debug/deps/page_index_gold-186c8c2f92b4ad64)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/regions_gold.rs (target/debug/deps/regions_gold-a7eecf2a68595130)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/table_extractors_gold.rs (target/debug/deps/table_extractors_gold-9dbe94ae10640479)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/word_columns_gold.rs (target/debug/deps/word_columns_gold-f6c6f0d2af01fbcf)
+
+running 1 test
+test every_case_matches_the_live_reference ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_release-d55547f1ed7c27b2)
+
+running 7 tests
+test tests::embedder_is_pinned_when_present ... ok
+test tests::different_inputs_are_different_releases ... ok
+test tests::engine_is_pinned ... ok
+test tests::missing_release_is_not_found ... ok
+test tests::releases_are_append_only ... ok
+test tests::publish_and_resolve ... ok
+test tests::lineage_is_walkable ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_search-370bb3d9ec00c571)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/d7_export.rs (target/debug/deps/d7_export-5b84a404671fe64d)
+
+running 1 test
+test d7_export_real_query_result ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/population_gate.rs (target/debug/deps/population_gate-4f611f20a65cce92)
+
+running 3 tests
+test negative_control_wrong_bound_needs_the_min_column ... ok
+test loader_guards_drop_exactly_their_class ... ok
+test search_runs_the_funnel_over_the_population ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/sleep_current_slice.rs (target/debug/deps/sleep_current_slice-bad380a6ff2d209c)
+
+running 4 tests
+test sentence_without_number_falls_to_residue ... ok
+test journey_sentence_to_verdicts_on_real_rows ... ok
+test tampered_provenance_yields_unknown ... ok
+test typical_value_never_proves_pass ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_truth-deb96b990574e740)
+
+running 16 tests
+test quote::tests::exact_quote_is_located ... ok
+test quote::tests::norm_folds_case_and_whitespace ... ok
+test quote::tests::fabricated_quote_is_p0 ... ok
+test quote::tests::every_p0_has_a_reason_code ... ok
+test quote::tests::tj_evidence_is_p0_on_temp_field ... ok
+test quote::tests::value_in_quote_none_vacuously_holds ... ok
+test quote::tests::token_window_edge_does_not_widen_span ... ok
+test quote::tests::unquoted_assertion_is_p0 ... ok
+test quote::tests::dash_placeholders_defeat_the_ordinal_guard ... ok
+test quote::tests::value_in_quote_numeric_tolerance ... ok
+test quote::tests::value_in_quote_hyphenated_prose_matches_reference ... ok
+test quote::tests::tj_evidence_never_satisfies_ambient ... ok
+test quote::tests::value_not_in_quote_is_p0 ... ok
+test quote::tests::supported_verdict_when_everything_binds ... ok
+test quote::tests::typ_value_claimed_as_max_is_wrong_cell ... ok
+test quote::tests::multibyte_window_edge_does_not_widen_span ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/dw-verify.rs (target/debug/deps/dw_verify-3aa88723bec2c1cd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dw_types-0e0f1e3b35c7bb9d)
+
+running 15 tests
+test tests::absmax_never_satisfies_operating ... ok
+test tests::admitted_is_the_only_promotion_path ... ok
+test tests::claim_delta_requires_provenance_and_nonempty_fields ... ok
+test tests::claim_rejects_empty_value ... ok
+test tests::claim_requires_provenance ... ok
+test tests::conflict_needs_two_sides ... ok
+test tests::claim_serialization_is_deterministic ... ok
+test tests::embeddings_from_different_weights_are_not_comparable ... ok
+test tests::event_claim_requires_provenance_and_nonempty_fields ... ok
+test tests::ineligible_requires_reason_and_evidence ... ok
+test tests::observed_distinguishes_the_three_states ... ok
+test tests::quantity_never_uses_float_eq ... ok
+test tests::sha256_rejects_bad_hex ... ok
+test tests::unknown_never_eliminates ... ok
+test tests::verbatim_rejects_empty ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/compile_fail.rs (target/debug/deps/compile_fail-8106afcdf6e46dc1)
+
+running 1 test
+    Checking dw-types-tests v0.0.0 (/Users/samkim/Harnessv1-powerdata01/designwins/target/tests/trybuild/dw-types)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+
+
+test [0m[1mtests/compile_fail/claim_delta_struct_literal.rs[0m ... [0m[32mok
+[0mtest [0m[1mtests/compile_fail/claim_struct_literal.rs[0m ... [0m[32mok
+[0mtest [0m[1mtests/compile_fail/conflict_into_validated.rs[0m ... [0m[32mok
+[0mtest [0m[1mtests/compile_fail/embedding_struct_literal.rs[0m ... [0m[32mok
+[0mtest [0m[1mtests/compile_fail/ineligible_struct_literal.rs[0m ... [0m[32mok
+[0m
+
+test laws_are_enforced_by_the_type_system ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+   Doc-tests dw_api
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_controller
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_coverage
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_decide
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_evidence
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_extract
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_funnel
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_graph
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_knives
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_learn
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_lessons
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_model
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_normalize
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_parity
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_pdf
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_queue
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_recon
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_release
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_search
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_truth
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests dw_types
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
