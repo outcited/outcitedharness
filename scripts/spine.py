@@ -1,0 +1,894 @@
+#!/usr/bin/env python3
+"""spine.py — the DesignWins normalization spine (L1-L5), 2026-10-20.
+
+One module, five stages, fleet-deployable. Laws:
+- String presence alone is not verification: L2 re-opens the source PDF,
+  checks the exact page, and re-derives the value in canonical unit space.
+- Missing/mismatched evidence -> HELD or REJECTED with recorded reason.
+- L3 canonicalization never merges distinct operating modes; every transform
+  is recorded with rule id + version; original value/unit/quote preserved.
+- L4 never infers an exact OPN from a document sha; family claims stay family.
+- L5 separates comparable / qualified / noncomparable by typed conditions;
+  every accepted axis resolves to underlying verified claims.
+
+Claim identity: sha256 of (pdf_sha, lane, field, value_raw, unit_raw,
+value_role, page_1based, verbatim) — content-addressed, replay-stable.
+"""
+from __future__ import annotations
+
+import argparse, hashlib, json, os, re, sys, time, unicodedata
+from collections import Counter, defaultdict
+from pathlib import Path
+
+CANON_VERSION = "canon-units-v1"
+MODE_CANON_VERSION = "mode-canons-v1"
+
+# ---------------------------------------------------------------- L1 identity
+
+def claim_id(row: dict) -> str:
+    key = "|".join(str(row.get(k)) for k in (
+        "pdf_sha", "lane", "field", "value_raw", "unit_raw",
+        "value_role", "page_1based", "verbatim"))
+    return hashlib.sha256(key.encode()).hexdigest()
+
+
+def row_to_claim(row: dict, lane: str, source_file: str) -> dict:
+    field = row.get("field") or row.get("metric") or row.get("mode") or row.get("grade")
+    value = row.get("value")
+    return {
+        "claim_id": None,  # filled by caller
+        "lane": lane,
+        "field": str(field) if field is not None else None,
+        "value_raw": value,
+        "unit_raw": row.get("unit"),
+        "value_role": row.get("value_role"),
+        "conditions_raw": row.get("conditions_verbatim") or row.get("condition_verbatim")
+                          or row.get("condition") or None,
+        "verbatim": row.get("verbatim") or row.get("standard_verbatim") or None,
+        "page_1based": row.get("page_1based"),
+        "pdf_sha": row.get("pdf_sha") or row.get("document_sha256"),
+        "source_path": row.get("source_path"),
+        "part_slug": row.get("part_number"),
+        "doc_class": row.get("doc_class"),
+        "source_file": source_file,
+        # Reader-v2 provenance passthrough (extraction-time binding)
+        "cells": row.get("cells"),
+        "provenance": row.get("provenance"),
+        "page_span": row.get("page_span"),
+    }
+
+# ------------------------------------------------------------- unit canonical
+
+UNIT_MAP = {
+    "µa": "uA", "μa": "uA", "ua": "uA", "na": "nA",
+    "ma": "mA", "a": "A",
+    "µa/mhz": "uA/MHz", "ua/mhz": "uA/MHz", "ma/mhz": "mA/MHz",
+    "µv": "uV", "uv": "uV", "mv": "mV", "v": "V",
+    "µw": "uW", "uw": "uW", "mw": "mW", "w": "W",
+    "khz": "kHz", "mhz": "MHz", "hz": "Hz",
+    "kb": "kB", "kbytes": "kB", "mb(mbit)": "Mbit",
+    "°c/w": "C/W", "c/w": "C/W", "°c": "degC", "c": "degC",
+    "µs": "us", "ns": "ns", "ms": "ms",
+}
+CATEGORICAL_FIELDS = ("package", "has_")   # prefix/verbatim-verified only
+# canonical engineer units per field family (L3 target space)
+FIELD_CANON_UNIT = {
+    "clk_max_mhz": "MHz", "flash_kb": "kB", "sram_kb": "kB", "eeprom_kb": "kB",
+    "supply_v": "V", "n_gpio": "count", "n_uart": "count", "n_i2c": "count",
+    "n_spi": "count", "n_can": "count", "n_usb": "count", "n_adc": "count",
+    "n_dma": "count", "n_timer": "count", "n_ethernet": "count",
+    "esd_hbm_v": "V", "esd_cdm_v": "V", "latchup_ma": "mA",
+    "temp_range_c": "degC", "RthetaJA": "C/W", "RthetaJC": "C/W",
+    "RthetaJB": "C/W", "PsiJT": "C/W", "PsiJB": "C/W", "ZthJA": "C/W",
+}
+# scale to canonical unit (multiply value by this)
+UNIT_SCALE = {
+    ("uA", "A"): 1e-6, ("mA", "A"): 1e-3, ("A", "A"): 1.0,
+    ("uV", "V"): 1e-6, ("mV", "V"): 1e-3, ("V", "V"): 1.0,
+    ("uW", "W"): 1e-6, ("mW", "W"): 1e-3, ("W", "W"): 1.0,
+    ("kHz", "Hz"): 1e3, ("MHz", "Hz"): 1e6, ("Hz", "Hz"): 1.0,
+    ("kB", "B"): 1e3,
+}
+RANGE_TABLE = {  # canonical-unit sanity windows (field -> (lo, hi))
+    "clk_max_mhz": (0.032, 10000), "flash_kb": (0.125, 131072),
+    "sram_kb": (0.03125, 65536), "eeprom_kb": (0.03125, 16384),
+    "supply_v": (0.4, 100), "n_gpio": (1, 1024), "esd_hbm_v": (50, 8000),
+    "esd_cdm_v": (50, 3000), "latchup_ma": (10, 1000),
+    "temp_range_c": (-70, 200), "RthetaJA": (0.05, 600), "RthetaJC": (0.05, 30),
+    "RthetaJB": (0.05, 600), "PsiJT": (0.01, 100), "PsiJB": (0.01, 100),
+}
+CURRENT_RANGE_A = (1e-9, 10.0)   # mode lanes, canonical A
+GRADE_VALUES = {"0", "1", "2", "3", "None"}
+
+MODE_CANON = {  # case/space-variant merges ONLY — never distinct modes
+    "run": "Run", "active": "Run", "normal": "Run",
+    "sleep": "Sleep", "standby": "Standby", "stop": "Stop",
+    "shutdown": "Shutdown", "hibernate": "Hibernate", "idle": "Idle",
+    "vbat": "VBAT", "lprun": "LPRun", "off": "Shutdown",
+    # EM0..EM3, Stop 0/1/2, LP*, vendor names: passed through unchanged
+}
+
+def canon_unit(u: str | None):
+    if not u:
+        return None
+    return UNIT_MAP.get(str(u).strip().lower(), str(u).strip())
+
+def canon_mode(m: str):
+    if m is None:
+        return None
+    s = re.sub(r"\s+", " ", str(m)).strip()
+    return MODE_CANON.get(s.lower(), s)
+
+COND_PATTERNS = {
+    "vin": r"V\s*IN[^0-9\-]{0,12}([\d.]+)\s*V",
+    "vout": r"V\s*OUT[^0-9\-]{0,12}([\d.]+)\s*V",
+    "vdd": r"V(?:DD|CC)[^0-9\-]{0,12}([\d.]+)\s*V",
+    "iout": r"I\s*OUT[^0-9\-]{0,12}([\d.]+)\s*(?:A|mA|uA|µA)",
+    "temp": r"([\-−]?\d+)\s*°?C\s*(?:<=|<|≤|to|–|-)\s*T?\s*(?:<|≤)?\s*([\-−]?\d+)\s*°?C",
+    "freq": r"([\d.]+)\s*(?:kHz|MHz)",
+}
+
+def parse_conditions(raw: str | None) -> dict:
+    if not raw:
+        return {}
+    out = {}
+    for key, pat in COND_PATTERNS.items():
+        m = re.search(pat, raw)
+        if m:
+            if key == "temp" and m.lastindex and m.lastindex >= 2:
+                out[key] = [float(m.group(1)), float(m.group(2))]
+            else:
+                out[key] = float(m.group(1))
+    return out
+
+_WS = re.compile(r"\s+")
+
+def norm_text(s: str | None) -> str:
+    if s is None:
+        return ""
+    s = unicodedata.normalize("NFKC", s)
+    s = s.replace("−", "-").replace("–", "-").replace("\u00a0", " ")
+    return _WS.sub(" ", s).strip()
+
+# ------------------------------------------------------------------- L2
+
+class PdfCache:
+    """One open per document; verifies pages against claims."""
+    def __init__(self, path_map=None, max_open=24):
+        self.cache = {}
+        self.path_map = path_map or []
+        self.max_open = max_open
+
+    def resolve(self, path):
+        for old, new in self.path_map:
+            if path.startswith(old):
+                return new + path[len(old):]
+        return path
+
+    def page_text(self, path, page_1based, expect_sha=None):
+        """Exact page only (no adjacent-page shortcut). On first open we
+        recompute the file's sha256; a mismatch breaks evidence identity."""
+        import pymupdf
+        p = self.resolve(path)
+        if p not in self.cache:
+            if len(self.cache) >= self.max_open:
+                self.cache.pop(next(iter(self.cache)))
+            if not os.path.exists(p):
+                self.cache[p] = ("missing", None, None)
+            else:
+                try:
+                    h = hashlib.sha256()
+                    with open(p, "rb") as fh:
+                        while chunk := fh.read(1 << 20):
+                            h.update(chunk)
+                    self.cache[p] = ("ok", pymupdf.open(p), h.hexdigest())
+                except Exception:
+                    self.cache[p] = ("bad", None, None)
+        st, doc, sha = self.cache[p]
+        if st != "ok":
+            return st, None, sha
+        if expect_sha and sha != expect_sha:
+            return "sha_mismatch", None, sha
+        try:
+            if not isinstance(page_1based, int) or page_1based < 1 or page_1based > doc.page_count:
+                return "no_page", None, sha
+            # EXACT cited page — adjacency is re-extraction territory, not L2
+            return "ok", {0: doc[page_1based - 1].get_text() or ""}, sha
+        except Exception:
+            return "bad", None, sha
+
+
+def verbatim_fragments(verbatim: str) -> list[str]:
+    """Extractor verbatims join table cells with ' | '. Each substantive
+    fragment must appear on the page; tiny fragments carry no signal —
+    unless the whole verbatim is tiny, then it is the evidence."""
+    v = norm_text(verbatim)
+    if not v:
+        return []
+    parts = [norm_text(x) for x in v.split(" | ")]
+    frags = [p for p in parts if len(p) >= 6]
+    return frags or ([v] if len(v) >= 2 else [])
+
+
+def check_verbatim(pages: dict, verbatim: str | None):
+    """Returns (ok, page_offset, matched, total). All fragments on ONE page
+    within ±1 of the cited page. Records the offset actually found."""
+    frags = verbatim_fragments(verbatim)
+    if not frags:
+        return False, None, 0, 0
+    for off in (0, -1, 1):
+        if off not in pages:
+            continue
+        text = norm_text(pages[off])
+        if all(f in text for f in frags):
+            return True, off, len(frags), len(frags)
+    best = max((sum(1 for f in frags if f in norm_text(pages[o]))
+                for o in pages), default=0)
+    return False, None, best, len(frags)
+
+
+def value_forms(val):
+    """Printed string forms a numeric value can legitimately take on a page."""
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        return []
+    forms = {str(val), repr(f)}
+    if f == int(f):
+        forms.add(str(int(f)))
+        forms.add(f"{int(f):,}")          # 1,234 grouping
+        forms.add(f"{int(f)} ")
+    for decimals in (1, 2, 3):
+        forms.add(f"{f:.{decimals}f}")
+    return [x for x in forms if x and x not in (".",)]
+
+
+# unit families for printed-form equivalence (memory is 1024-based — a
+# claim of 1024 kB may be PRINTED as "1 MB"; engineering meaning preserved)
+UNIT_FAMILY = {
+    "kB": [("kB", 1.0), ("MB", 1/1024), ("GB", 1/1024**2), ("B", 1024)],
+    "MB": [("MB", 1.0), ("kB", 1024), ("GB", 1/1024)],
+    "uA": [("uA", 1.0), ("mA", 1/1000), ("A", 1/1e6)],
+    "mA": [("mA", 1.0), ("uA", 1000), ("A", 1/1000)],
+    "A": [("A", 1.0), ("mA", 1000), ("uA", 1e6)],
+    "MHz": [("MHz", 1.0), ("GHz", 1/1000), ("kHz", 1000), ("Hz", 1e6)],
+    "V": [("V", 1.0), ("mV", 1000)],
+}
+# Memory fields use binary (1024) conventions per datasheet industry practice.
+MEMORY_FIELDS = {"flash_kb", "sram_kb", "eeprom_kb"}
+
+# Deterministic printed-form rules (cp-50 acceptance, 2026-10-21). Each rule
+# records its id in the check; manufacturer text and value_raw are NEVER
+# modified. Anything not covered stays HELD — never bend meaning to agree.
+_HYPHEN_TOKEN = None  # compiled lazily
+
+
+def _printed_unit_tokens(u):
+    """Word-boundary unit token patterns for a canonical unit."""
+    import re as _re
+    variants = {u.lower(), u.lower() + "s"} if u else set()
+    if u == "B":
+        variants |= {"byte", "bytes", "b"}
+    if u == "kB":
+        variants |= {"kb", "kbyte", "kbytes"}
+    if u == "MB":
+        variants |= {"mb", "mbyte", "mbytes"}
+    return _re.compile(rf"\b(?:{'|'.join(_re.escape(v) for v in variants)})\b") if variants else None
+
+
+def value_in_evidence_family(val, unit_raw, page_text_norm, field=None):
+    """Deterministic source-preserving printed-form verification.
+
+    Rules (id recorded on match):
+      mem-1024-{unit}   memory fields: kB family at 1024, incl. 'B/bytes'
+      si-1000-{unit}    non-memory: SI family at 1000 (uA..A, V, MHz)
+      int-comma         integer grouping '1,024'
+      hyphen-join       '4352-bytes' tokenization (hyphen == space)
+      k-prefix-exact    '2K Bytes' ONLY when K*1024 equals the value exactly
+    Ambiguous forms (K prefix that doesn't factor exactly, unknown units,
+    decimal/binary conflict) return (False, None) -> HELD upstream."""
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        return None
+    unit_c = canon_unit(unit_raw)
+    is_mem = field in MEMORY_FIELDS if field else (unit_c in ("kB", "MB"))
+    base = 1024 if (is_mem and unit_c in ("kB", "MB", "GB")) else 1000
+    import re as _re
+    fam = UNIT_FAMILY.get(unit_c, [])
+    candidates = ([(unit_c, f, "base")] if unit_c else []) + \
+                 [(u, f * k, f"family-{base}") for u, k in fam]
+    for u, v, how in candidates:
+        for form in value_forms(v):
+            if form in page_text_norm:
+                pat = _printed_unit_tokens(u)
+                if pat is None or pat.search(page_text_norm.lower()):
+                    return True, f"{form} {u} [rule:{'mem-1024' if base==1024 else 'si-1000'}-{u or how}]"
+    # integer comma grouping
+    if f == int(f) and f"{int(f):,}" in page_text_norm:
+        return True, f"{int(f):,} [rule:int-comma]"
+    # hyphen-joined tokens: '4352-bytes' == '4352 bytes'
+    for u, v, how in candidates:
+        for form in value_forms(v):
+            if u:
+                pat = _printed_unit_tokens(u)
+                if pat and _re.search(rf"{_re.escape(form)}[-–—]({_re.escape(u.lower())}|bytes|byte)",
+                                      page_text_norm.lower()):
+                    return True, f"{form}-{u} [rule:hyphen-join]"
+    # K-prefix exact binary factor ('2K Bytes' when value == 2*1024)
+    if unit_c in ("kB", "B") and f == int(f):
+        import math
+        n = int(f)
+        for kprefix in ("K", "k"):
+            if n % 1024 == 0:
+                m = n // 1024
+                if _re.search(rf"\b{m}\s*{kprefix}\s*(?:bytes|Bytes|BYTE|byte|B)\b", page_text_norm):
+                    return True, f"{m}K [rule:k-prefix-exact-1024]"
+            break
+    return False, None
+
+
+def value_in_evidence(val, unit_raw, page_text_norm):
+    """The asserted value (and its printed unit, when one exists) must appear
+    on the cited page. String presence of the verbatim alone is NOT enough."""
+    forms = value_forms(val)
+    if not forms:
+        return None  # non-numeric: verbatim check is the evidence check
+    val_ok = any(f in page_text_norm for f in forms)
+    unit_ok = True
+    u = unit_raw
+    if u:
+        u_variants = {str(u).strip()}
+        for a, b in (("µ", "μ"), ("μ", "µ"), ("µ", "u"), ("°", "")):
+            u_variants.update(x.replace(a, b) for x in list(u_variants))
+        low = page_text_norm.lower()
+        unit_ok = any(v.lower() in low for v in u_variants)
+    return val_ok and unit_ok
+
+
+def l2_verify_claim(c: dict, cache: PdfCache) -> dict:
+    reasons = []
+    checks = {}
+    field = c.get("field")
+    categorical = (isinstance(field, str) and
+                   (field.startswith(CATEGORICAL_FIELDS)))
+    # 0) Reader-v2 per-cell provenance: every cell verified on ITS OWN page.
+    #    Mandatory-law: no evidence sha on the claim => rejected regardless
+    #    of any other field; malformed cells => held (never accepted).
+    cells = c.get("cells")
+    if cells is not None:
+        if not c.get("pdf_sha"):
+            return {"claim_id": c["claim_id"], "verdict": "rejected",
+                    "reasons": ["no_evidence_sha"], "checks": {"sha_mandatory": False}}
+        if not isinstance(cells, list) or not all(
+                isinstance(x, dict) and isinstance(x.get("page_1based"), int)
+                and isinstance(x.get("text"), str) for x in cells):
+            return {"claim_id": c["claim_id"], "verdict": "held",
+                    "reasons": ["malformed_cells"], "checks": {"cells": False}}
+        if c.get("provenance") in ("synthetic", "partial-synthetic"):
+            checks["cells"] = False
+            reasons.append("synthetic_fragments_present")
+        if c.get("provenance") == "ambiguous":
+            checks["cells"] = False
+            reasons.append("ambiguous_page_attribution")
+        cell_ok = not reasons
+        for cell in cells:
+            st, pages, actual_sha = cache.page_text(
+                c["source_path"], cell["page_1based"], expect_sha=c.get("pdf_sha"))
+            if st != "ok":
+                checks["cells"] = False
+                reasons.append(f"cell_source_{st}")
+                cell_ok = False
+                break
+            if norm_text(cell["text"]) not in norm_text(pages.get(0, "")):
+                checks["cells"] = False
+                reasons.append("cell_not_on_cited_page")
+                cell_ok = False
+                break
+        if cell_ok:
+            checks["cells"] = True
+            vcell = next((x for x in cells if x.get("role") == "value"), None)
+            if vcell is None:
+                # no value cell: the value may be printed in a family unit
+                # (1024 kB as "1 MB") — verify on the row's page, else hold
+                anchor = cells[0]
+                st2, pages2, _ = cache.page_text(
+                    c["source_path"], anchor["page_1based"], expect_sha=c.get("pdf_sha"))
+                fam = (value_in_evidence_family(c.get("value_raw"), c.get("unit_raw"),
+                                                norm_text(pages2.get(0, "")), field=c.get("field"))
+                       if st2 == "ok" else (False, None))
+                checks["value_in_evidence"] = bool(fam and fam[0])
+                checks["value_matched_form"] = fam[1] if fam else None
+                if not checks["value_in_evidence"]:
+                    reasons.append("no_value_cell_and_no_family_form")
+            else:
+                st2, pages2, _ = cache.page_text(
+                    c["source_path"], vcell["page_1based"], expect_sha=c.get("pdf_sha"))
+                page_norm = norm_text(pages2.get(0, ""))
+                fam = value_in_evidence_family(c.get("value_raw"), c.get("unit_raw"),
+                                               page_norm, field=c.get("field"))
+                checks["value_in_evidence"] = bool(fam and fam[0])
+                checks["value_matched_form"] = fam[1] if fam else None
+                if not checks["value_in_evidence"]:
+                    reasons.append("value_not_in_evidence")
+            # unit/range checks shared with the classic path below
+            unit_c = canon_unit(c.get("unit_raw"))
+            try:
+                f = float(c.get("value_raw"))
+                ok_parse = True
+            except (TypeError, ValueError):
+                f, ok_parse = None, False
+            checks["value_parse"] = ok_parse
+            if not ok_parse and c.get("value_raw") is not None:
+                reasons.append("value_unparseable")
+            if f is not None and c.get("lane") != "mode" and not categorical:
+                window = RANGE_TABLE.get(field)
+                checks["unit"] = True
+                checks["range"] = bool(window and window[0] <= f <= window[1]) if window else True
+                if window and not checks["range"]:
+                    reasons.append("value_out_of_range")
+            elif f is not None and c.get("lane") == "mode":
+                scale = {"nA": 1e-9, "uA": 1e-6, "mA": 1e-3, "A": 1.0}.get(unit_c)
+                checks["unit"] = scale is not None
+                checks["range"] = scale is not None and 1e-9 <= abs(f) * scale <= 10
+                if not checks["unit"]:
+                    reasons.append("unknown_current_unit")
+                elif not checks["range"]:
+                    reasons.append("current_out_of_range")
+            return {"claim_id": c["claim_id"],
+                    "verdict": "verified" if not reasons else "held",
+                    "reasons": reasons, "checks": checks,
+                    "evidence_mode": "per-cell-v2"}
+    # 1) source exists AND its actual sha256 matches the claim's evidence sha.
+    #    Mandatory: a claim without an evidence sha can never be accepted.
+    if not c.get("pdf_sha"):
+        return {"claim_id": c["claim_id"], "verdict": "rejected",
+                "reasons": ["no_evidence_sha"], "checks": {"sha_mandatory": False}}
+    st, pages, actual_sha = cache.page_text(c["source_path"], c["page_1based"],
+                                            expect_sha=c.get("pdf_sha"))
+    checks["source"] = st == "ok"
+    checks["sha256_recomputed"] = actual_sha
+    if st != "ok":
+        return {"claim_id": c["claim_id"], "verdict": "rejected",
+                "reasons": [f"source_{st}"], "checks": checks}
+    # 2) verbatim fragments on the EXACT cited page
+    ok, off, matched, total = check_verbatim(pages, c.get("verbatim"))
+    checks["verbatim_on_page"] = ok
+    checks["page_offset"] = off
+    checks["fragments"] = f"{matched}/{total}"
+    if not ok:
+        reasons.append("verbatim_not_on_cited_page")
+    # 3) asserted value + unit appear in the cited page evidence
+    page_norm = norm_text(pages.get(0, ""))
+    vie = value_in_evidence(c.get("value_raw"), c.get("unit_raw"), page_norm)
+    checks["value_in_evidence"] = vie
+    if vie is False:
+        reasons.append("value_not_in_evidence")
+    # 3) value/unit/range (categorical fields: verbatim-only)
+    unit_c = canon_unit(c.get("unit_raw"))
+    val = c.get("value_raw")
+    if val is None:
+        checks["value_parse"] = False
+        reasons.append("no_value")
+    elif categorical:
+        checks["value_parse"] = isinstance(val, (bool, str)) or _is_num(val)
+        checks["unit"] = True
+        checks["range"] = True
+        if not checks["value_parse"]:
+            reasons.append("value_unparseable")
+    else:
+        try:
+            f = float(val)
+            checks["value_parse"] = True
+        except (TypeError, ValueError):
+            f = None
+            checks["value_parse"] = False
+            reasons.append("value_unparseable")
+        if f is not None:
+            if c["lane"] == "mode":
+                lo, hi = CURRENT_RANGE_A
+                scale = {"nA": 1e-9, "uA": 1e-6, "mA": 1e-3, "A": 1.0}.get(unit_c)
+                if scale is None:
+                    if unit_c in ("uA/MHz", "mA/MHz"):
+                        checks["unit"] = False
+                        reasons.append("per_mhz_needs_condition_split")
+                    else:
+                        reasons.append("unknown_current_unit")
+                        checks["unit"] = False
+                else:
+                    checks["unit"] = True
+                    checks["range"] = lo <= abs(f) * scale <= hi
+                    if not checks["range"]:
+                        reasons.append("current_out_of_range")
+            elif c["lane"] == "aec":
+                checks["unit"] = True
+                checks["range"] = str(val) in GRADE_VALUES
+                if not checks["range"]:
+                    reasons.append("aec_grade_invalid")
+            else:
+                window = RANGE_TABLE.get(field)
+                if window and unit_c:
+                    checks["unit"] = True
+                    checks["range"] = window[0] <= f <= window[1]
+                    if not checks["range"]:
+                        reasons.append("value_out_of_range")
+                else:
+                    checks["unit"] = field in FIELD_CANON_UNIT
+                    checks["range"] = True
+                    if not checks["unit"]:
+                        reasons.append("unknown_field_unit")
+    verdict = "verified" if not reasons else "held"
+    return {"claim_id": c["claim_id"], "verdict": verdict,
+            "reasons": reasons, "checks": checks}
+
+
+def _is_num(v):
+    try:
+        float(v)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+# ------------------------------------------------------------------- L3
+
+def l3_normalize_claim(v: dict, claim: dict) -> dict:
+    out = dict(v)
+    field = claim.get("field")
+    unit_c = canon_unit(claim.get("unit_raw"))
+    val = claim.get("value_raw")
+    out["unit_canon"] = unit_c
+    out["value_canon"] = val
+    out["transform"] = None
+    try:
+        f = float(val)
+    except (TypeError, ValueError):
+        f = None
+    if f is not None:
+        # currents to base A; frequencies stay in field-canonical units
+        if claim["lane"] == "mode" and unit_c in ("uA", "mA", "A"):
+            scale = {"uA": 1e-6, "mA": 1e-3, "A": 1.0}[unit_c]
+            out["value_canon"] = round(f * scale, 12)
+            out["unit_canon"] = "A"
+            out["transform"] = f"{unit_c}->A*{scale} ({CANON_VERSION})"
+        else:
+            out["transform"] = f"identity ({CANON_VERSION})"
+    if claim["lane"] == "mode":
+        out["mode_canon"] = canon_mode(field)
+        out["mode_canon_version"] = MODE_CANON_VERSION
+    out["conditions_typed"] = parse_conditions(claim.get("conditions_raw"))
+    out["value_role"] = claim.get("value_role")
+    return out
+
+# ------------------------------------------------------------------- L4
+
+def identity_tier(slug: str | None, catalog: set, alias_index: dict | None = None) -> dict:
+    if not slug:
+        return {"tier": "unresolved", "opn": None, "rule": "no_slug"}
+    s = slug.strip()
+    if s in catalog:
+        return {"tier": "exact_opn", "opn": s, "rule": "catalog_exact"}
+    alias = re.sub(r"[^A-Z0-9]", "", s.upper())
+    hit = None
+    if alias_index is not None:
+        hit = alias_index.get(alias)
+    else:
+        for cat in catalog:
+            if re.sub(r"[^A-Z0-9]", "", cat.upper()) == alias:
+                hit = cat
+                break
+    if hit:
+        return {"tier": "exact_opn", "opn": hit, "rule": "canonical_alias"}
+    if re.search(r"[#*]|\bfamily\b|\bseries\b", s.lower()):
+        return {"tier": "family", "opn": None, "rule": "family_marker"}
+    return {"tier": "document_slug", "opn": None,
+            "rule": "doc_slug_not_opn"}
+
+# ------------------------------------------------------------------- L5
+
+CONDITIONED_LANES = {"mode", "thermal"}   # empty conditions never imply comparability here
+
+
+def axis_status(a: dict, b: dict, lane: str) -> tuple[str, str | None]:
+    """(comparable|qualified|noncomparable, qualification or None).
+    Release law: exact identity both sides, compatible roles, and for
+    conditioned lanes EXPLICIT matching conditions — absence is never
+    permission."""
+    if a.get("tier") != "exact_opn" or b.get("tier") != "exact_opn":
+        return "noncomparable", "identity not proven exact on both sides"
+    ra, rb = a.get("value_role"), b.get("value_role")
+    if ra != rb:
+        return "qualified", f"role mismatch ({ra} vs {rb})"
+    if a.get("unit_canon") != b.get("unit_canon"):
+        return "noncomparable", f"units differ ({a.get('unit_canon')} vs {b.get('unit_canon')})"
+    ca, cb = a.get("conditions_typed") or {}, b.get("conditions_typed") or {}
+    if lane == "mode":
+        if a.get("mode_canon") != b.get("mode_canon"):
+            return "noncomparable", f"modes differ ({a.get('mode_canon')} vs {b.get('mode_canon')})"
+        if not ca or not cb:
+            return "qualified", "operating conditions unspecified on at least one side"
+        for k in ("vin", "vdd", "iout", "temp", "freq"):
+            if k in ca and k in cb and ca[k] != cb[k]:
+                return "qualified", f"{k.upper()} differs ({ca[k]} vs {cb[k]})"
+            if (k in ca) != (k in cb):
+                return "qualified", f"{k.upper()} specified on only one side"
+        return "comparable", None
+    if lane == "thermal":
+        cond_a = norm_text(a.get("conditions_raw"))
+        cond_b = norm_text(b.get("conditions_raw"))
+        if not cond_a or not cond_b:
+            return "qualified", "package/board condition unspecified on at least one side"
+        if cond_a != cond_b:
+            return "qualified", f"package/condition differs ('{cond_a[:40]}' vs '{cond_b[:40]}')"
+        return "comparable", None
+    # pillars / aec: unconditioned printed specs; {} is inherent, not missing
+    return "comparable", None
+
+# ------------------------------------------------------------------ CLIs
+
+def cmd_l1(args):
+    out = Path(args.out)
+    seen, n_dup = {}, 0
+    total = 0
+    sources = []
+    for spec in args.inputs:
+        lane, path = spec.split("=", 1)
+        sources.append(path)
+        for line in open(path):
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            if row.get("verdict") not in (None, "printed_row"):
+                continue
+            c = row_to_claim(row, lane, os.path.basename(path))
+            c["source_batch"] = os.path.basename(os.path.dirname(path)) or "unknown"
+            cid = claim_id(c)
+            c["claim_id"] = cid
+            total += 1
+            if cid in seen:
+                n_dup += 1
+                continue
+            seen[cid] = c
+    rows = list(seen.values())
+    with out.open("w") as fh:
+        for c in rows:
+            fh.write(json.dumps(c, sort_keys=True) + "\n")
+    print(json.dumps({"input_rows": total, "unique_claims": len(rows),
+                      "duplicates": n_dup, "sources": sources}, indent=1))
+
+
+def cmd_l2(args):
+    qpath = Path(args.queue)
+    claims = [json.loads(l) for l in qpath.open() if l.strip()]
+    idx, n = args.shard.split("/")
+    idx, n = int(idx), int(n)
+    claims = [c for c in claims if int(c["claim_id"][:8], 16) % n == idx]
+    path_map = []
+    for m in args.map or []:
+        old, _, new = m.partition("=")
+        path_map.append((old, new))
+    cache = PdfCache(path_map)
+    led = Path(args.out_dir) / "l2-ledger.jsonl"
+    done = set()
+    if led.exists():
+        for line in led.open():
+            try:
+                r = json.loads(line)
+                if r.get("claim_id") and r.get("verdict") in ("verified",):
+                    done.add(r["claim_id"])
+            except json.JSONDecodeError:
+                pass
+    todo = [c for c in claims if c["claim_id"] not in done]
+    t0 = time.time()
+    verdicts = Counter()
+    with led.open("a") as fh:
+        for i, c in enumerate(todo):
+            v = l2_verify_claim(c, cache)
+            v["pdf_sha"] = c.get("pdf_sha")
+            fh.write(json.dumps(v, sort_keys=True) + "\n")
+            verdicts[v["verdict"]] += 1
+            if (i + 1) % 200 == 0:
+                fh.flush()
+                print(f"{i+1}/{len(todo)} {dict(verdicts)} {time.time()-t0:.0f}s", flush=True)
+    print(json.dumps({"shard": args.shard, "population": len(claims),
+                      "processed": len(todo), "verdicts": dict(verdicts),
+                      "claims_per_sec": round(len(todo) / max(time.time() - t0, 0.1), 1),
+                      "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, indent=1))
+
+
+import os as _os
+
+# Portability: env override first (SPINE_BLOCKLIST), then ./ACCEPTANCE-BLOCKLIST.json
+# beside the run, then the canonical m5 receipts path. Missing file with the env
+# var SET is a hard error (fail closed); missing file without it means "no
+# blocklist declared for this environment" and downstream consumers MUST pass
+# --blocklist explicitly — documented contract in PR #20.
+DEFAULT_BLOCKLIST = Path(_os.environ.get(
+    "SPINE_BLOCKLIST",
+    "/Users/samkim/lane-out/spine/reader2/wave2-receipts/ACCEPTANCE-BLOCKLIST.json"))
+
+
+def load_blocklist(path=None):
+    p = Path(path) if path else DEFAULT_BLOCKLIST
+    if _os.environ.get("SPINE_BLOCKLIST") and not p.exists():
+        raise FileNotFoundError(
+            "SPINE_BLOCKLIST is set but the blocklist is missing — failing closed")
+    if p.exists():
+        try:
+            bl = json.loads(p.read_text())
+            if not isinstance(bl, dict) or not isinstance(bl.get("batches", []), list):
+                return {"*"}  # malformed => fail closed on everything
+            return set(bl["batches"])
+        except json.JSONDecodeError:
+            return {"*"}  # corrupt => fail closed on everything
+    return set()
+
+
+def blocked(row, bl):
+    return bool(bl) and (row.get("source_batch") in bl or "*" in bl)
+
+
+def cmd_l3(args):
+    bl = load_blocklist(getattr(args, "blocklist", None))
+    claims = {json.loads(l)["claim_id"]: json.loads(l)
+              for l in open(args.claims) if l.strip()}
+    led = Path(args.out_dir) / "l3-normalized.jsonl"
+    counts = Counter()
+    with led.open("w") as fh:
+        for line in open(args.l2):
+            r = json.loads(line)
+            if r.get("verdict") != "verified":
+                continue
+            c = claims.get(r["claim_id"])
+            if not c:
+                counts["missing_claim"] += 1
+                continue
+            if blocked(c, bl):
+                counts["blocked_by_blocklist"] += 1
+                continue
+            nrow = l3_normalize_claim(r, c)
+            nrow.update({k: c[k] for k in ("field", "part_slug", "lane",
+                                           "conditions_raw", "verbatim",
+                                           "page_1based", "pdf_sha", "source_path")})
+            fh.write(json.dumps(nrow, sort_keys=True) + "\n")
+            counts["normalized"] += 1
+    print(json.dumps({"normalized": counts["normalized"], "skipped": dict(counts)}, indent=1))
+
+
+def cmd_l4(args):
+    bl = load_blocklist(getattr(args, "blocklist", None))
+    catalog = set()
+    for f in args.catalog:
+        for line in open(f):
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            pn = r.get("part_number") if isinstance(r, dict) else r
+            if pn:
+                catalog.add(pn)
+    # manifest join: sha -> source_url -> slug (same derivation as fleet waves)
+    sha_slug = {}
+    for mf in sorted(Path(args.manifests).glob("*.jsonl")):
+        for line in mf.open():
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            sha = r.get("sha256")
+            url = r.get("source_url") or ""
+            if sha and sha not in sha_slug and url:
+                stem = url.rstrip("/").rsplit("/", 1)[-1]
+                stem = re.sub(r"\.(pdf|PDF)$", "", stem)
+                host = re.match(r"https?://(?:www\.)?([^./]+)", url)
+                pre = host.group(1) + "-" if host else ""
+                slug = re.sub(r"[^a-z0-9]+", "-", (pre + stem).lower()).strip("-")[:96]
+                if slug:
+                    sha_slug[sha] = slug
+    # precomputed alias index (O(1) per claim — the naive loop was O(catalog))
+    alias_index = {}
+    for c in catalog:
+        a = re.sub(r"[^A-Z0-9]", "", c.upper())
+        if a and a not in alias_index:
+            alias_index[a] = c
+    out = Path(args.out_dir) / "l4-bound.jsonl"
+    counts = Counter()
+    joined = 0
+    with out.open("w") as fh:
+        for line in open(args.l3):
+            r = json.loads(line)
+            if not r.get("part_slug"):
+                r["part_slug"] = sha_slug.get(r.get("pdf_sha"))
+                if r.get("part_slug"):
+                    joined += 1
+                    r["slug_source"] = "manifest_join"
+            t = identity_tier(r.get("part_slug"), catalog)
+            r.update(t)
+            # identity anchor law: the VERIFIED CONTENT sha is the document
+            # identity; manifest URL stems are retrieval hints, never identity
+            r["identity_anchor"] = {
+                "document_sha256": r.get("pdf_sha"),
+                "sha_verified_by": "L2-recompute" if r.get("verdict") == "verified" else "unverified",
+                "part_slug_is": "url_derived_hint" if r.get("slug_source") == "manifest_join" else "as-provided",
+                "note": "slug never substitutes for content sha; exact_opn requires catalog match on the hint",
+            }
+            fh.write(json.dumps(r, sort_keys=True) + "\n")
+            counts[t["tier"]] += 1
+    print(json.dumps({"catalog_size": len(catalog),
+                      "manifest_index": len(sha_slug),
+                      "slugs_joined_at_l4": joined, "tiers": dict(counts)}, indent=1))
+
+
+def cmd_l5(args):
+    bl = load_blocklist(getattr(args, "blocklist", None))
+    rows = [json.loads(l) for l in open(args.l4) if l.strip()]
+    rows = [r for r in rows if not blocked(r, bl)]
+    by_part = defaultdict(list)
+    for r in rows:
+        key = r.get("opn") or r.get("part_slug")
+        if key:
+            by_part[key].append(r)
+
+    def part_rows(p):
+        return by_part.get(p) or by_part.get(p.upper()) or []
+
+    a_rows, b_rows = part_rows(args.a), part_rows(args.b)
+    result = {"a": args.a, "b": args.b,
+              "a_claims": len(a_rows), "b_claims": len(b_rows), "axes": []}
+    fields_a = defaultdict(list)
+    for r in a_rows:
+        fields_a[(r["lane"], r.get("mode_canon") or r["field"])].append(r)
+    fields_b = defaultdict(list)
+    for r in b_rows:
+        fields_b[(r["lane"], r.get("mode_canon") or r["field"])].append(r)
+    for key in sorted(set(fields_a) & set(fields_b)):
+        lane = key[0]
+        ra = sorted(fields_a[key], key=lambda r: (r.get("value_role") != "typ", r.get("value_canon") or 0))
+        rb = sorted(fields_b[key], key=lambda r: (r.get("value_role") != "typ", r.get("value_canon") or 0))
+        status, qual = axis_status(ra[0], rb[0], lane)
+        result["axes"].append({
+            "lane": lane, "field": key[1], "status": status, "qualification": qual,
+            "a": {"value": ra[0].get("value_canon"), "unit": ra[0].get("unit_canon"),
+                  "role": ra[0].get("value_role"), "identity": ra[0].get("tier"),
+                  "conditions": ra[0].get("conditions_typed"),
+                  "evidence": {"verbatim": ra[0].get("verbatim"),
+                               "page": ra[0].get("page_1based"), "sha": ra[0].get("pdf_sha")}},
+            "b": {"value": rb[0].get("value_canon"), "unit": rb[0].get("unit_canon"),
+                  "role": rb[0].get("value_role"), "identity": rb[0].get("tier"),
+                  "conditions": rb[0].get("conditions_typed"),
+                  "evidence": {"verbatim": rb[0].get("verbatim"),
+                               "page": rb[0].get("page_1based"), "sha": rb[0].get("pdf_sha")}},
+        })
+    counts = Counter(a["status"] for a in result["axes"])
+    result["axis_counts"] = dict(counts)
+    Path(args.out).write_text(json.dumps(result, indent=1, sort_keys=True))
+    print(json.dumps({"axes": len(result["axes"]), "counts": dict(counts)}, indent=1))
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("l1"); p.add_argument("--inputs", nargs="+", required=True,
+                                             help="lane=/path/file.jsonl ...")
+    p.add_argument("--out", required=True); p.set_defaults(fn=cmd_l1)
+    p = sub.add_parser("l2"); p.add_argument("--queue", required=True)
+    p.add_argument("--out-dir", required=True); p.add_argument("--shard", default="0/1")
+    p.add_argument("--map", action="append"); p.set_defaults(fn=cmd_l2)
+    p = sub.add_parser("l3"); p.add_argument("--claims", required=True)
+    p.add_argument("--l2", required=True); p.add_argument("--out-dir", required=True)
+    p.add_argument("--blocklist", default=None); p.set_defaults(fn=cmd_l3)
+    p = sub.add_parser("l4"); p.add_argument("--l3", required=True)
+    p.add_argument("--catalog", nargs="+", required=True)
+    p.add_argument("--manifests", default="/Users/samkim/lane-out/fold-bank-20261020/manifests")
+    p.add_argument("--out-dir", required=True)
+    p.add_argument("--blocklist", default=None); p.set_defaults(fn=cmd_l4)
+    p = sub.add_parser("l5"); p.add_argument("--l4", required=True)
+    p.add_argument("--a", required=True); p.add_argument("--b", required=True)
+    p.add_argument("--out", required=True)
+    p.add_argument("--blocklist", default=None); p.set_defaults(fn=cmd_l5)
+    args = ap.parse_args()
+    sys.exit(args.fn(args) or 0)
+
+
+if __name__ == "__main__":
+    main()
