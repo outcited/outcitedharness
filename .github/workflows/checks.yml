@@ -49,8 +49,8 @@ jobs:
           # the same file still run. Each MUST correspond to a bead.
           #   director-suite (8): day-1 item #2 triage  -> bead TBD
           #   discovery lifecycle: sqlite path on CI
-          #   electronics (10): PR #46 rename fix (drops out when merged)
-          #   fleet_state: PR #44 (drops out when merged)
+          # Burned down 2026-10-25: electronics (PR #46) + fleet_state (PR #44)
+          # landed, so their entries were removed — the gate now runs them.
           KNOWN_DESELECT=(
             "tests/test_director_01a.py::test_backfill_suppression"
             "tests/test_director_01b.py::test_consumer_level_idempotency_after_truncation"
@@ -61,17 +61,6 @@ jobs:
             "tests/test_director_consumer.py::test_model_assessment_never_fact"
             "tests/test_director_consumer.py::test_sam_reserved_generates_escalation_draft_only"
             "tests/test_discovery_api.py::test_design_lifecycle"
-            "tests/test_electronics_admission.py::test_complete_train_package_is_admitted_to_cr_bundle"
-            "tests/test_electronics_claims.py::test_claim_bundle_is_hash_bound_and_immutable"
-            "tests/test_electronics_embeddings.py::test_embedding_sidecar_is_binary_hash_bound"
-            "tests/test_electronics_frontier_batch.py::test_batch_bundle_enforces_cost_cap_and_strips_private_metadata"
-            "tests/test_electronics_frontier_batch.py::test_frontier_candidate_accepts_grounded_local_output"
-            "tests/test_electronics_frontier_batch.py::test_parametric_teacher_prompt_rejects_nonvalues"
-            "tests/test_electronics_frontier_batch.py::test_reconciliation_still_requires_claim_verification"
-            "tests/test_electronics_frontier_batch.py::test_submit_resume_blocks_ambiguous_attempt_without_resubmitting"
-            "tests/test_electronics_frontier_batch.py::test_submit_resume_reuses_receipt_without_second_network_call"
-            "tests/test_electronics_training_dataset_builder.py::test_builder_seals_portable_lineage_split_sft_and_dpo"
-            "tests/test_fleet_state.py::test_probe_nodes_covers_asus4"
           )
 
           # Environment: sandbox-isolation tests that cannot run on GitHub-hosted
