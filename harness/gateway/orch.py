@@ -855,7 +855,7 @@ async def _emit_apply(
         state,
         budget_tokens=_coder_context_tokens(cfg),
     )
-    calls = await plan_actions(
+    planned = await plan_actions(
         foreman,
         intent,
         "",
@@ -865,6 +865,12 @@ async def _emit_apply(
         working_set=compiled.text,
         prefer_replacements=prefer_replacements,
     )
+    if planned.failed:
+        log.warning("action planning FAILED: %s", planned.reason)
+        state.phase = "blocked"
+        state.blocked_reason = f"action planning FAILED: {planned.reason}"
+        return _terminal(svc, task_id, state)
+    calls = planned.rows
     if not calls:
         state.phase = "blocked"
         state.blocked_reason = (
@@ -1702,7 +1708,7 @@ async def run_orch(
             accepted.append(report.frontier_text.strip())
         if accepted:
             _foreman_key, foreman = picked
-            calls = await plan_actions(
+            planned = await plan_actions(
                 foreman,
                 intent,
                 thread,
@@ -1710,8 +1716,10 @@ async def run_orch(
                 catalog,
                 list(tools or []),
             )
-            if calls:
-                return OrchResult(tool_calls=calls)
+            if planned.failed:
+                log.warning("action planning FAILED: %s", planned.reason)
+            if planned.rows:
+                return OrchResult(tool_calls=planned.rows)
     return _with_loop(OrchResult(text=text), state)
 
 

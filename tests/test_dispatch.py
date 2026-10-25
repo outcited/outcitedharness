@@ -280,8 +280,9 @@ async def test_plan_actions_prefers_provider_native_tool_calls(monkeypatch):
         {"write_to_file": ("path", "content"), "run_commands": ("commands",)},
         tools,
     )
-    assert calls[0]["function"]["name"] == "write_to_file"
-    assert "src/app.py" in calls[0]["function"]["arguments"]
+    assert calls.status == "OK"
+    assert calls.rows[0]["function"]["name"] == "write_to_file"
+    assert "src/app.py" in calls.rows[0]["function"]["arguments"]
     assert seen["extra"]["tool_choice"] == "required"
     assert len(seen["extra"]["tools"]) == 1
     assert seen["max_tokens"] == 6000
@@ -340,7 +341,8 @@ async def test_repair_action_planning_exposes_only_exact_replacement(monkeypatch
     assert [tool["function"]["name"] for tool in seen["tools"]] == [
         "replace_in_file"
     ]
-    assert calls[0]["function"]["name"] == "replace_in_file"
+    assert calls.status == "OK"
+    assert calls.rows[0]["function"]["name"] == "replace_in_file"
 
 
 def test_change_job_strips_prose_invariants():
@@ -2019,3 +2021,48 @@ def test_dispatch_cli_help():
     assert result.exit_code == 0
     assert "packets" in result.stdout
 
+
+
+@pytest.mark.asyncio
+async def test_plan_actions_fails_closed_on_unparseable_plan(monkeypatch):
+    from harness.dispatch import plan_actions
+
+    async def garbage(_model, _messages, extra=None, max_tokens=None):
+        return ChatResult(provider="test", model="test", text='{"mode": "act", "calls": [')
+
+    monkeypatch.setattr("harness.dispatch._chat", garbage)
+    result = await plan_actions(
+        _model("m5_qwen"),
+        "implement",
+        "",
+        "exact implementation",
+        {"write_to_file": ("path", "content")},
+        [],
+    )
+    assert result.status == "FAILED"
+    assert result.reason.startswith("unparseable_json")
+    assert result.rows == []
+
+
+@pytest.mark.asyncio
+async def test_plan_actions_mode_not_act_is_empty_not_failed(monkeypatch):
+    from harness.dispatch import plan_actions
+
+    async def refuse(_model, _messages, extra=None, max_tokens=None):
+        return ChatResult(
+            provider="test",
+            model="test",
+            text='{"mode": "answer", "calls": []}',
+        )
+
+    monkeypatch.setattr("harness.dispatch._chat", refuse)
+    result = await plan_actions(
+        _model("m5_qwen"),
+        "implement",
+        "",
+        "exact implementation",
+        {"write_to_file": ("path", "content")},
+        [],
+    )
+    assert result.status == "EMPTY"
+    assert result.rows == []

@@ -8,6 +8,7 @@ import pytest
 
 from harness.config import AppConfig, ModelConfig, Settings
 from harness.dispatch import AcceptSpec, DispatchReport, Packet, Shot
+from harness.model_result import ok
 from harness.orch_loop import (
     MAX_CYCLES,
     LoopState,
@@ -327,8 +328,8 @@ def _patch_loop(monkeypatch, report: DispatchReport | None = None, captured: dic
         captured["planned"] = True
         queued = captured.get("planned_calls")
         if isinstance(queued, list) and queued:
-            return queued.pop(0)
-        return _edit_call()
+            return ok(queued.pop(0))
+        return ok(_edit_call())
 
     packet_commands = [
         command
@@ -690,7 +691,7 @@ async def test_checkpoint_baseline_precedes_apply_and_repair_extends_it(
         return payload
 
     async def plan(*_a, **_k):
-        return actions.pop(0)
+        return ok(actions.pop(0))
 
     contract = SimpleNamespace(
         repo_root=str(workspace),
@@ -1657,7 +1658,7 @@ async def test_critic_rejected_output_cannot_drive_apply(tmp_path: Path, monkeyp
         return _report(qa_pass=True)
 
     async def no_edit(*_a, **_k):
-        return []
+        return ok([])
 
     monkeypatch.setattr("harness.gateway.orch.pick_foreman", pick)
     monkeypatch.setattr("harness.gateway.orch.run_dispatch", dispatch)

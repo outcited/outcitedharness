@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from harness.config import AppConfig, ModelConfig
+from harness.model_result import ModelResult, failed, ok
 from harness.optimize import (
     SENIOR_KEY,
     _chat,
@@ -940,8 +941,13 @@ async def plan_actions(
     working_set: str = "",
     *,
     prefer_replacements: bool = False,
-) -> list[dict[str, Any]]:
-    """Convert an accepted local solution into up to five client edit calls."""
+) -> ModelResult:
+    """Convert an accepted local solution into up to five client edit calls.
+
+    Returns a fail-closed ModelResult: FAILED means the planner did not produce
+    a trustworthy plan (unparseable output / no bindable calls). Callers must
+    treat that as a refusal, not as "the model found nothing to do".
+    """
     available = {
         name: list(props)
         for name, props in catalog.items()
@@ -1005,27 +1011,58 @@ async def plan_actions(
             )
         bound = bind_action_calls(rows, allowed_catalog, limit=ACTION_MAX_CALLS)
         if bound:
-            return bound
+            return ok(bound, attempts=1, model=foreman.key)
     result = await _chat(
         foreman,
         messages,
         max_tokens=6000,
     )
-    match = re.search(r"\{.*\}", result.text or "", flags=re.S)
+    text = result.text or ""
+    match = re.search(r"\{.*\}", text, flags=re.S)
     if not match:
-        return []
+        reason = (
+            "unparseable_json: unterminated object"
+            if "{" in text
+            else "no_json_object"
+        )
+        return failed(
+            reason,
+            attempts=1,
+            raw_excerpt=text[:500],
+            model=foreman.key,
+        )
     try:
         data = json.loads(match.group(0))
-    except json.JSONDecodeError:
-        return []
-    if not isinstance(data, dict) or str(data.get("mode") or "").lower() != "act":
-        return []
+    except json.JSONDecodeError as exc:
+        return failed(
+            f"unparseable_json: {exc.msg} at char {exc.pos}",
+            attempts=1,
+            raw_excerpt=match.group(0)[:500],
+            model=foreman.key,
+        )
+    if not isinstance(data, dict):
+        return failed(
+            f"not_an_object: {type(data).__name__}",
+            attempts=1,
+            raw_excerpt=match.group(0)[:500],
+            model=foreman.key,
+        )
+    if str(data.get("mode") or "").lower() != "act":
+        return ok([], attempts=1, model=foreman.key)
     raw = data.get("calls") if isinstance(data.get("calls"), list) else []
-    return bind_action_calls(
+    bound = bind_action_calls(
         [row for row in raw if isinstance(row, dict)],
         allowed_catalog,
         limit=ACTION_MAX_CALLS,
     )
+    if not bound and raw:
+        return failed(
+            "no_bindable_calls",
+            attempts=1,
+            raw_excerpt=match.group(0)[:500],
+            model=foreman.key,
+        )
+    return ok(bound, attempts=1, model=foreman.key)
 
 
 async def pick_foreman(cfg: AppConfig) -> tuple[str, ModelConfig] | None:
