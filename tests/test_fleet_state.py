@@ -193,9 +193,27 @@ def test_probe_endpoints_covers_every_endpoint_with_a_non_empty_result(monkeypat
 
 def test_probe_nodes_covers_asus4(monkeypatch) -> None:
     monkeypatch.setattr(fleet_state, "ssh_docker", lambda host: [host.split("@")[0]])
+    monkeypatch.setattr(fleet_state, "node_health", lambda host: None)
     state = fleet_state.probe_nodes()
     assert set(state) == set(fleet_state.NODES)
-    assert state["asus4"] == ["samkimasus4"]
+    # probe_nodes() returns a per-node dict, not a bare container list: the
+    # health/health_alerts keys are read by health_delta_lines() and written
+    # into the snapshot (scripts/fleet_state.py:227,245,326). The bare-list
+    # expectation predates that shape.
+    assert state["asus4"]["services"] == ["samkimasus4"]
+
+
+def test_probe_nodes_carries_health_and_alerts_for_the_delta_feed(monkeypatch) -> None:
+    monkeypatch.setattr(fleet_state, "ssh_docker", lambda host: ["canon-qwen38-27b"])
+    monkeypatch.setattr(
+        fleet_state, "node_health",
+        lambda host: ("mem_avail=1000MB/64000MB", ["mem_available=1000MB (1%)"]))
+    state = fleet_state.probe_nodes()
+    assert state["asus4"]["services"] == ["canon-qwen38-27b"]
+    assert state["asus4"]["health"] == "mem_avail=1000MB/64000MB"
+    assert state["asus4"]["health_alerts"] == ["mem_available=1000MB (1%)"]
+    assert "asus4-health: [ok] -> [ALERT mem_available=1000MB (1%)]" in (
+        fleet_state.health_delta_lines(state))
 
 
 def test_ssh_docker_distinguishes_failure_from_idle(monkeypatch) -> None:

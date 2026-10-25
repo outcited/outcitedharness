@@ -17,3 +17,16 @@ results/
 .DS_Store
 scratch/
 scripts/soak_model_shim_cloud.py
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
+
+# Gas City
+.beads/*
+!.beads/identity.toml
+.gc/
+.opencode/
