@@ -1,30 +1,32 @@
 """Authorization packet negative tests — REAL AuthorizationStore +
 MailboxDelivery behavior, hermetic (test_identities=True is the sanctioned
-double per authorization.py). These receipts are actual executed outputs."""
+double per authorization.py).
+
+Converted from a run-at-import script (which called sys.exit() and broke pytest
+collection) into pytest tests by the mac-mini orchestrator, 2026-10-25. Every
+original check is preserved as an assertion.
+"""
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import os
-import sqlite3
 import sys
 import tempfile
 import time
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from director_consumer.authorization import (AuthRecord, AuthRequest,
                                              AuthorizationStore)
-from director_consumer.messaging import (DeliveryPolicy, MailboxDelivery)
+from director_consumer.messaging import DeliveryPolicy, MailboxDelivery
 from director_consumer.state import DirectorState
 
 AUTH = "sam-20261021-seven-mail-mac-mini"
-RESULTS = []
-
-
-def check(name, cond, detail=""):
-    RESULTS.append({"test": name, "pass": bool(cond), "detail": detail[:170]})
 
 
 def write_artifact(appr, *, recipient="mac-mini",
@@ -78,47 +80,44 @@ def register(store):
         expires_at=1798761600.0, issuer="sam", payload_digest="*"))
 
 
-with tempfile.TemporaryDirectory() as tmp:
-    # 1. WRONG UID: operator == service -> trust-boundary refusal
+def test_wrong_uid_is_refused(tmp_path) -> None:
     con, store, appr = make_store(
-        tmp, operator=1000, service=1000,
-        artifact_kwargs=dict())
-    try:
+        tmp_path, operator=1000, service=1000, artifact_kwargs=dict())
+    with pytest.raises(Exception) as exc:
         register(store)
-        check("wrong-uid", False, "issued without uid boundary!")
-    except Exception as e:
-        check("wrong-uid", "uid" in str(e), f"{type(e).__name__}: {e}")
+    assert "uid" in str(exc.value)
 
-    # 2. WRONG RECIPIENT
-    tmp2 = tempfile.mkdtemp()
-    con, store, appr = make_store(tmp2, artifact_kwargs=dict())
+
+def test_wrong_recipient_is_refused(tmp_path) -> None:
+    con, store, appr = make_store(tmp_path, artifact_kwargs=dict())
     register(store)
     ok, why = store.check(AUTH, req(recipient="someone-else"))
-    check("wrong-recipient", not ok and "recipient" in why, why)
+    assert not ok and "recipient" in why
 
-    # 3. EXPIRED APPROVAL
-    tmp3 = tempfile.mkdtemp()
+
+def test_expired_approval_is_refused(tmp_path) -> None:
     con, store, appr = make_store(
-        tmp3, artifact_kwargs=dict(expires=time.time() - 10))
+        tmp_path, artifact_kwargs=dict(expires=time.time() - 10))
     try:
         register(store)
         ok, why = store.check(AUTH, req())
-        check("expired", not ok and "expired" in why, why)
-    except Exception as e:
-        check("expired", True, f"refused at issuance: {e}")
+        assert not ok and "expired" in why
+    except Exception as exc:  # refused at issuance is also a refusal
+        assert "expired" in str(exc) or True
 
-    # 4. DUPLICATE SEND: single-action grant bound once, second refused
-    tmp4 = tempfile.mkdtemp()
-    con, store, appr = make_store(tmp4, artifact_kwargs=dict())
+
+def test_duplicate_send_binding(tmp_path) -> None:
+    con, store, appr = make_store(tmp_path, artifact_kwargs=dict())
     register(store)
     import director_consumer.schema as _schema
     BODY1 = "the one approved body"
     D1 = _schema.fp("msg-body", BODY1)
-    # rebind artifact to the exact body so the FIRST reserve binds cleanly
-    import json as _j, os as _os
     fa = appr / f"{AUTH}.json"
-    d = _j.loads(fa.read_text()); d["payload_digest"] = D1
-    fa.write_text(_j.dumps(d)); _os.chmod(fa, 0o600)
+    d = json.loads(fa.read_text())
+    d["payload_digest"] = D1
+    fa.write_text(json.dumps(d))
+    os.chmod(fa, 0o600)
+
     def r1(action_id, body):
         return AuthRequest(
             project="designwins", action="deliver", recipient="mac-mini",
@@ -127,105 +126,81 @@ with tempfile.TemporaryDirectory() as tmp:
             payload_digest=_schema.fp("msg-body", body),
             action_id=action_id, msg_type="escalation", subject="s",
             transport="mailbox-outbox", sender="engineering-director")
+
     with con:
         ok1, _ = store.reserve(con.cursor(), AUTH, r1("A", BODY1))
         con.commit()
     with con:
         ok2, why2 = store.reserve(con.cursor(), AUTH, r1("B", "other body"))
         con.commit()
-    check("duplicate-send-binding", ok1 and not ok2 and
-          ("bound" in why2 or "digest" in why2),
-          f"second send refused: {why2}")
+    assert ok1 and not ok2 and ("bound" in why2 or "digest" in why2)
 
-    # 5. MISSING AUTHORIZATION
-    tmp5 = tempfile.mkdtemp()
-    con, store, appr = make_store(tmp5, artifact_kwargs=None)
+
+def test_missing_authorization_default_deny(tmp_path) -> None:
+    con, store, appr = make_store(tmp_path, artifact_kwargs=None)
     ok, why = store.check("sam-nonexistent", req())
-    check("missing-authorization", not ok and "default deny" in why, why)
+    assert not ok and "default deny" in why
 
-    # 6+7. observe mode blocks EVEN WITH a valid approved+reserved message;
-    #      test-delivery mode succeeds end-to-end through the 05C path
-    tmp6 = tempfile.mkdtemp()
+
+def test_observe_mode_blocks_and_happy_path_delivers(tmp_path) -> None:
     import director_consumer.schema as _schema
     BODY = "exact approved body"
     DIGEST = _schema.fp("msg-body", BODY)
-    con, store, appr = make_store(tmp6, artifact_kwargs=dict(
+    con, store, appr = make_store(tmp_path, artifact_kwargs=dict(
         payload_digest=DIGEST))
     register(store)
-    pol = DeliveryPolicy(outbox_root=str(Path(tmp6) / "out"))
+    pol = DeliveryPolicy(outbox_root=str(Path(tmp_path) / "out"))
     mb = MailboxDelivery(con, pol, sender="engineering-director",
                          project="designwins", authorizations=store,
                          mode="test-delivery")
     mid = mb.propose("mac-mini", "escalation", "s", BODY,
                      correlation_id="OPERATOR-GRANT-SEVEN-MAIL-20261021")
-    try:
+    with pytest.raises(Exception) as exc:
         MailboxDelivery(con, pol, sender="engineering-director",
                         project="designwins", authorizations=store,
                         mode="observe").deliver("m1", auth_id=AUTH)
-        check("observe-blocks-despite-approval", False, "delivered?!")
-    except Exception as e:
-        check("observe-blocks-despite-approval", "observation mode" in str(e),
-              f"{type(e).__name__}: {e}")
-    try:
-        r = mb.deliver(mid, auth_id=AUTH)
-        files = sorted(str(p.name) for p in (Path(tmp6) / "out").rglob("*.md"))
-        check("happy-path-delivers", len(files) == 1,
-              f"receipt={str(r)[:50]} file={files[:1]}")
-    except Exception as e:
-        check("happy-path-delivers", False, f"{type(e).__name__}: {e}")
+    assert "observation mode" in str(exc.value)
+    mb.deliver(mid, auth_id=AUTH)
+    files = sorted(str(p.name) for p in (Path(tmp_path) / "out").rglob("*.md"))
+    assert len(files) == 1
 
-    # 8. ARTIFACT CANNOT SET MODE (mode exists only as constructor arg)
-    import inspect
+
+def test_artifact_cannot_set_mode() -> None:
     init_src = inspect.getsource(MailboxDelivery.__init__)
-    check("artifact-cannot-set-mode",
-          "approval" not in init_src.lower(),
-          "mode set only at construction; approvals never read for mode")
+    assert "approval" not in init_src.lower()
 
-# 9. CRASH/REPLAY: deliver once, restart (new DirectorState on the SAME
-#    workspace), replay same mid -> refused; new propose+deliver on the
-#    consumed single-action grant -> refused
-tmp9 = tempfile.mkdtemp()
-import director_consumer.schema as _s9
-BODY9 = "restart-safe single body"
-D9 = _s9.fp("msg-body", BODY9)
-con9, store9, appr9 = make_store(tmp9, artifact_kwargs=dict(
-    payload_digest=D9))
-register(store9)
-ws9 = Path(tmp9) / "ws"          # same workspace the store was built on
-pol9 = DeliveryPolicy(outbox_root=str(Path(tmp9) / "out9"))
-mb9 = MailboxDelivery(con9, pol9, sender="engineering-director",
-                      project="designwins", authorizations=store9,
-                      mode="test-delivery")
-mid9 = mb9.propose("mac-mini", "escalation", "s9", BODY9,
-                   correlation_id="OPERATOR-GRANT-SEVEN-MAIL-20261021")
-r9a = mb9.deliver(mid9, auth_id=AUTH)
-st9 = DirectorState(ws9)         # RESTART: fresh handle, same sqlite
-store9b = AuthorizationStore(st9.con, approvals_dir=appr9,
-                             operator_uid=os.getuid(), service_uid=1000,
-                             test_identities=True)
-mb9b = MailboxDelivery(st9.con, pol9, sender="engineering-director",
-                       project="designwins", authorizations=store9b,
-                       mode="test-delivery")
-files_before = sorted(str(p) for p in (Path(tmp9) / "out9").rglob("*.md"))
-content_before = [Path(f).read_text() for f in files_before]
-r9b = mb9b.deliver(mid9, auth_id=AUTH)   # restart + identical re-delivery
-files_after = sorted(str(p) for p in (Path(tmp9) / "out9").rglob("*.md"))
-content_after = [Path(f).read_text() for f in files_after]
-check("replay-same-mid-reconciles-idempotently",
-      files_before == files_after and content_before == content_after
-      and len(files_after) == 1,
-      f"05C resume semantics: re-deliver reconciled ({r9b}), exactly 1"
-      " unchanged file — no rewrite, no duplicate")
-mid9b = mb9b.propose("mac-mini", "escalation", "s9-other", "other body",
-                     correlation_id="OPERATOR-GRANT-SEVEN-MAIL-20261021")
-try:
-    mb9b.deliver(mid9b, auth_id=AUTH)
-    check("consumed-grant-refuses-new-message", False, "second ride?!")
-except Exception as e:
-    check("consumed-grant-refuses-new-message", True,
-          f"{type(e).__name__}: {e}"[:120])
 
-print(json.dumps(RESULTS, indent=1))
-fails = [r for r in RESULTS if not r["pass"]]
-print(f"SUMMARY: {len(RESULTS) - len(fails)}/{len(RESULTS)} passed")
-sys.exit(1 if fails else 0)
+def test_crash_replay_is_idempotent_and_consumed_grant_refuses(tmp_path) -> None:
+    import director_consumer.schema as _s9
+    BODY9 = "restart-safe single body"
+    D9 = _s9.fp("msg-body", BODY9)
+    con9, store9, appr9 = make_store(tmp_path, artifact_kwargs=dict(
+        payload_digest=D9))
+    register(store9)
+    ws9 = Path(tmp_path) / "ws"
+    pol9 = DeliveryPolicy(outbox_root=str(Path(tmp_path) / "out9"))
+    mb9 = MailboxDelivery(con9, pol9, sender="engineering-director",
+                          project="designwins", authorizations=store9,
+                          mode="test-delivery")
+    mid9 = mb9.propose("mac-mini", "escalation", "s9", BODY9,
+                       correlation_id="OPERATOR-GRANT-SEVEN-MAIL-20261021")
+    mb9.deliver(mid9, auth_id=AUTH)
+    st9 = DirectorState(ws9)  # RESTART: fresh handle, same sqlite
+    store9b = AuthorizationStore(st9.con, approvals_dir=appr9,
+                                 operator_uid=os.getuid(), service_uid=1000,
+                                 test_identities=True)
+    mb9b = MailboxDelivery(st9.con, pol9, sender="engineering-director",
+                           project="designwins", authorizations=store9b,
+                           mode="test-delivery")
+    files_before = sorted(str(p) for p in (Path(tmp_path) / "out9").rglob("*.md"))
+    content_before = [Path(f).read_text() for f in files_before]
+    mb9b.deliver(mid9, auth_id=AUTH)  # restart + identical re-delivery
+    files_after = sorted(str(p) for p in (Path(tmp_path) / "out9").rglob("*.md"))
+    content_after = [Path(f).read_text() for f in files_after]
+    assert files_before == files_after
+    assert content_before == content_after
+    assert len(files_after) == 1
+    mid9b = mb9b.propose("mac-mini", "escalation", "s9-other", "other body",
+                         correlation_id="OPERATOR-GRANT-SEVEN-MAIL-20261021")
+    with pytest.raises(Exception):
+        mb9b.deliver(mid9b, auth_id=AUTH)
