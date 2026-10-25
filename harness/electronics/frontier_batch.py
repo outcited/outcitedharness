@@ -527,8 +527,8 @@ def prepare_batch_bundle(
         )
         for path in (candidate_path, requests_path):
             os.chmod(path, 0o444)
-        os.chmod(temporary, 0o555)
         os.rename(temporary, output)
+        os.chmod(output, 0o555)
         return manifest
     except BaseException:
         try:

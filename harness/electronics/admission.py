@@ -415,8 +415,8 @@ def build_admission_bundle(
             manifest_path,
         ):
             os.chmod(path, 0o444)
-        os.chmod(temporary, 0o555)
         os.rename(temporary, output)
+        os.chmod(output, 0o555)
         return manifest
     except BaseException:
         try:

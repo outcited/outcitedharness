@@ -539,8 +539,8 @@ def seal_training_handoff(
             os.fsync(handle.fileno())
         for path in temporary.iterdir():
             os.chmod(path, 0o444)
-        os.chmod(temporary, 0o555)
         os.rename(temporary, output)
+        os.chmod(output, 0o555)
     except BaseException:
         try:
             os.chmod(temporary, 0o755)
