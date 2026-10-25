@@ -33,6 +33,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,vision]"
+      - name: install sandbox deps (Linux replay verification)
+        # harness/shadow/replay.py needs an isolation backend; on Linux that is
+        # bubblewrap (bwrap). Without it, 6 replay/curriculum tests fail on CI
+        # while passing on macOS (sandbox-exec). Install rather than deselect.
+        run: sudo apt-get update && sudo apt-get install -y bubblewrap
       - name: pytest (baseline-aware)
         shell: bash
         run: |
