@@ -68,6 +68,15 @@ _CONTRAST = re.compile(
     re.I,
 )
 
+# Negation right before a family token: named, but not asserted about this part
+# ("do not use MSP430", "not MSP430", "no MSP430 required"). Deliberately narrow
+# so a legitimate "MSP430, not MSP432" (family first) is unaffected.
+_NEGATION = re.compile(
+    r"\b(?:do\s+not\s+use|don'?t\s+use|not|no|without|instead\s+of|"
+    r"unlike|exclude|excluding|other\s+than)\s*$",
+    re.I,
+)
+
 _CORE_BITS = re.compile(r"\b(8|16|32)[\s\-‑–]?bit\b", re.I)
 _DEVICE_WORD = re.compile(
     r"\b(?:MCUs?|microcontrollers?|microprocessors?|CPUs?|cores?|processors?|SoCs?|RISC)\b",
@@ -181,9 +190,13 @@ def core_family_rows(
             for pattern_name, pattern in _FAMILY_PATTERNS:
                 first_by_family: dict[str, re.Match[str]] = {}
                 for match in pattern.finditer(line):
-                    if pattern_name == "cortex-m" and _CONTRAST.search(
-                        line[max(0, match.start() - 48) : match.start()]
-                    ):
+                    # Contrast/competitor prose applies to EVERY family, not
+                    # just Cortex ("faster than MSP430", "versus PIC").
+                    if _CONTRAST.search(line[max(0, match.start() - 48) : match.start()]):
+                        continue
+                    # Negation: "do not use MSP430", "not MSP430" — the family
+                    # is named but not asserted about this part.
+                    if _NEGATION.search(line[max(0, match.start() - 24) : match.start()]):
                         continue
                     family = _normalized_family(pattern_name, match)
                     first_by_family.setdefault(family, match)

@@ -209,3 +209,21 @@ def test_scan_pdf_emits_sha_page_and_verbatim(tmp_path):
     assert family["page_1based"] == 1
     assert family["pdf_sha"] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert "Cortex-M7" in family["verbatim"]
+
+
+def test_negation_and_contrast_apply_to_all_families():
+    # hw-tyj: the Cortex-only contrast guard missed non-Cortex families.
+    rows = core_family_rows(
+        _pages(
+            "do not use MSP430 here",
+            "the MSP432 is not MSP430",
+            "faster than MSP430",
+            "versus PIC16",
+        )
+    )
+    assert rows == []
+
+
+def test_genuine_non_cortex_mentions_still_emit():
+    assert _families(core_family_rows(_pages("MSP430FR600x microcontroller"))) == {"msp430"}
+    assert _families(core_family_rows(_pages("PIC16F877A 8-bit microcontroller"))) == {"pic"}
