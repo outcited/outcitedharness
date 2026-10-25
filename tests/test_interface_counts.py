@@ -145,3 +145,23 @@ def test_verify_proposal_rejects_verbatim_not_on_page() -> None:
                 "page_1based": 9}
     out = ic.verify_proposal(proposal, pages)
     assert out.get("status") != "verified"
+
+def test_worded_quantities_count(capsys=None):
+    # hw-tpk: "dual CAN" was under-counted as 1.
+    for text, field, value in [
+        ("dual CAN", "n_can", 2.0),
+        ("dual-channel CAN", "n_can", 2.0),
+        ("two CAN interfaces", "n_can", 2.0),
+        ("triple USART", "n_uart", 3.0),
+        ("quad SPI", "n_spi", 4.0),
+    ]:
+        rows = _by_field(ic.interface_counts_from_text(text))
+        assert rows[field]["value"] == value, text
+        assert rows[field]["count_basis"] == "printed_count", text
+
+
+def test_worded_quantifier_does_not_reach_a_distant_protocol():
+    # "dual-core MCU with CAN" is ONE CAN, not two.
+    rows = _by_field(ic.interface_counts_from_text("dual-core MCU with CAN"))
+    assert rows["n_can"]["count_basis"] == "singular_presence"
+    assert rows["n_can"]["value"] == 1.0

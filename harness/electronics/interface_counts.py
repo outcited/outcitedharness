@@ -166,7 +166,40 @@ def _explicit_hits(text: str, proto: str) -> list[tuple[int, int, int]]:
             ):
                 continue
             hits.append((value, match.start(), match.end()))
+    hits.extend(_worded_hits(text, proto))
     return hits
+
+
+# Spelled quantities immediately before a protocol token: "dual CAN",
+# "two CAN interfaces", "triple USART". Closed set; nothing inferred.
+_WORDED = {
+    "dual": 2, "two": 2,
+    "triple": 3, "three": 3,
+    "quad": 4, "four": 4,
+}
+_WORDED_RE = re.compile(
+    r"\b(dual|two|triple|three|quad|four)((?:[- ]channel)?)(?:\s+)(?=[A-Za-z])",
+    re.I,
+)
+
+
+def _worded_hits(text: str, proto: str) -> list[tuple[int, int, int]]:
+    """Spelled quantities that directly quantify this protocol token."""
+    out: list[tuple[int, int, int]] = []
+    proto_re = re.compile(rf"\b(?:{proto})s?\b", re.I)
+    for m in _WORDED_RE.finditer(text):
+        value = _WORDED.get(m.group(1).lower())
+        if value is None or value not in _PLAUSIBLE:
+            continue
+        window = text[m.end() : m.end() + 24]
+        proto_match = proto_re.search(window)
+        # The quantifier must reach the protocol within the window, so
+        # "dual-core MCU with CAN" does not count as two CANs.
+        if not proto_match:
+            continue
+        end = m.end() + proto_match.end()
+        out.append((value, m.start(), end))
+    return out
 
 
 _CLAUSE_BREAK = re.compile(
