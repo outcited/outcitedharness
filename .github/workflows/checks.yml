@@ -94,3 +94,5 @@ jobs:
           done
 
           python -m pytest -q "${DESELECT[@]}" 2>&1 | tee pytest.out
+# Triggers a CI run so the "checks" status becomes selectable in the
+# protect-main ruleset (GitHub only offers checks it has seen recently).
