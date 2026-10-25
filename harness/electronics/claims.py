@@ -227,8 +227,8 @@ def seal_claim_bundle(
             os.fsync(handle.fileno())
         for path in (claims_path, manifest_path):
             os.chmod(path, 0o444)
-        os.chmod(temporary, 0o555)
         os.rename(temporary, output)
+        os.chmod(output, 0o555)
         directory_descriptor = os.open(output.parent, os.O_RDONLY)
         try:
             os.fsync(directory_descriptor)
