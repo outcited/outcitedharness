@@ -1,13 +1,18 @@
 name: checks
 
-# Required check on `main` (branch protection). The harness is a Python
-# extraction pipeline; CI must not need secrets or the M5 PDF volume.
+# Required check on `main` (branch protection). Python extraction pipeline;
+# CI uses no secrets and does not need the M5 PDF volume.
 #
-# Baseline note (2026-10-25): the full suite has a known set of environment-
-# dependent tests (they read /Volumes/M5_4TB/... which only exists on the M5)
-# and a small set of known failures tracked as beads. CI runs the suite and
-# FAILS on any failure that is not in the explicit known-failures list below,
-# so a NEW regression is red while the honest baseline is green.
+# Baseline-aware gate (2026-10-25): the full suite has known environment-
+# dependent tests (they read /Volumes/M5_4TB/... which exists only on the M5)
+# and a small set of known defects tracked as beads. We DESELECT THOSE EXACT
+# NODE IDS so every other test still runs and any NEW failure is red.
+#
+# The list is intentionally narrow (node ids, not whole files) so tests sharing
+# a file with a known failure are still executed. As fixes land (PR #44, #46)
+# those node ids simply stop being selected — and `bd`-tracked debt shrinks.
+#
+# To burn down: fix a defect, delete its line here in the same PR.
 
 on:
   pull_request:
@@ -32,27 +37,52 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          # Known-failing / environment-dependent tests as of 2026-10-25.
-          # Each entry must have a bead or a documented reason. Keep this list
-          # shrinking — a fix removes its line.
-          KNOWN_FAILURES=(
-            # --- environment: require the M5 PDF volume (/Volumes/M5_4TB/...) ---
+
+          # Environment: require the M5 PDF volume (/Volumes/M5_4TB/...). Whole
+          # files — every test in them needs the vault.
+          ENV_DESELECT=(
             "tests/test_crop_verify.py"
             "tests/test_region_detect.py"
-            # --- known defects tracked as beads ---
-            "tests/test_director_01a.py"
-            "tests/test_director_01b.py"
-            "tests/test_director_02.py"
-            "tests/test_director_03.py"
-            "tests/test_director_consumer.py"
-            "tests/test_discovery_api.py"
           )
+
+          # Known defects tracked as beads. Exact node ids so sibling tests in
+          # the same file still run. Each MUST correspond to a bead.
+          #   director-suite (8): day-1 item #2 triage  -> bead TBD
+          #   discovery lifecycle: sqlite path on CI
+          #   electronics (10): PR #46 rename fix (drops out when merged)
+          #   fleet_state: PR #44 (drops out when merged)
+          KNOWN_DESELECT=(
+            "tests/test_director_01a.py::test_backfill_suppression"
+            "tests/test_director_01b.py::test_consumer_level_idempotency_after_truncation"
+            "tests/test_director_02.py::test_fleet_events_flow_through_rules"
+            "tests/test_director_02.py::test_llm_total_outage_with_policy_ingestion_continues"
+            "tests/test_director_02.py::test_service_down_machine_online_distinction"
+            "tests/test_director_03.py::test_total_model_outage_including_subscription"
+            "tests/test_director_consumer.py::test_model_assessment_never_fact"
+            "tests/test_director_consumer.py::test_sam_reserved_generates_escalation_draft_only"
+            "tests/test_discovery_api.py::test_design_lifecycle"
+            "tests/test_electronics_admission.py::test_complete_train_package_is_admitted_to_cr_bundle"
+            "tests/test_electronics_claims.py::test_claim_bundle_is_hash_bound_and_immutable"
+            "tests/test_electronics_embeddings.py::test_embedding_sidecar_is_binary_hash_bound"
+            "tests/test_electronics_frontier_batch.py::test_batch_bundle_enforces_cost_cap_and_strips_private_metadata"
+            "tests/test_electronics_frontier_batch.py::test_frontier_candidate_accepts_grounded_local_output"
+            "tests/test_electronics_frontier_batch.py::test_parametric_teacher_prompt_rejects_nonvalues"
+            "tests/test_electronics_frontier_batch.py::test_reconciliation_still_requires_claim_verification"
+            "tests/test_electronics_frontier_batch.py::test_submit_resume_blocks_ambiguous_attempt_without_resubmitting"
+            "tests/test_electronics_frontier_batch.py::test_submit_resume_reuses_receipt_without_second_network_call"
+            "tests/test_electronics_training_dataset_builder.py::test_builder_seals_portable_lineage_split_sft_and_dpo"
+            "tests/test_fleet_state.py::test_probe_nodes_covers_asus4"
+          )
+
           DESELECT=()
-          for t in "${KNOWN_FAILURES[@]}"; do
-            if [ -f "$t" ]; then DESELECT+=(--deselect "$t"); fi
+          for t in "${ENV_DESELECT[@]}"; do
+            [ -f "$t" ] || { echo "::error::env-deselect entry not found: $t"; exit 1; }
+            DESELECT+=(--deselect "$t")
           done
+          for t in "${KNOWN_DESELECT[@]}"; do
+            test_file="${t%%::*}"
+            [ -f "$test_file" ] || { echo "::error::known-deselect entry not found: $test_file"; exit 1; }
+            DESELECT+=(--deselect "$t")
+          done
+
           python -m pytest -q "${DESELECT[@]}" 2>&1 | tee pytest.out
-          # Also assert the deselected files still exist (so this list rots loudly).
-          for t in "${KNOWN_FAILURES[@]}"; do
-            [ -f "$t" ] || { echo "::error::known-failure entry not found: $t (remove it)"; exit 1; }
-          done
