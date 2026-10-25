@@ -8,11 +8,16 @@ symbols beyond 0.5%.
 """
 
 import json
-import re
 import sys
 import time
 import urllib.request
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from harness.model_result import FAILED, failed, parse_json_array  # noqa: E402
 
 STUDENT = "http://100.68.133.1:8950/v1/chat/completions"
 MODEL = "power-tables-student-v1"
@@ -51,20 +56,14 @@ def call_student(text, part, timeout=240):
     req = urllib.request.Request(STUDENT, data=body,
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
-        c = json.loads(r.read())["choices"][0]["message"]["content"] or ""
-    m = re.search(r"\[.*\]", c, re.DOTALL)
-    if m:
-        try:
-            return json.loads(m.group(0))
-        except json.JSONDecodeError:
-            frag = m.group(0)
-            cut = frag.rfind("}")
-            if cut > 0:
-                try:
-                    return json.loads(frag[: cut + 1] + "]")
-                except json.JSONDecodeError:
-                    return []
-    return []
+        payload = json.loads(r.read())
+    choice = payload["choices"][0]
+    return parse_json_array(
+        choice["message"]["content"],
+        attempts=1,
+        finish_reason=choice.get("finish_reason"),
+        model=MODEL,
+    )
 
 
 def score(want_rows, got_rows):
@@ -98,20 +97,22 @@ def main(limit=150):
         i, r = i_r
         part = r["instruction"].split("Part: ")[1].split("\n")[0] if "Part: " in r["instruction"] else "?"
         text = r["input"].split("Datasheet pages:\n")[-1]
-        want = json.loads(r["output"])
         try:
-            got = call_student(text, part, timeout=600)
+            return i, call_student(text, part, timeout=600)
         except Exception as e:
-            return i, 0, 0, len(want), str(e)[:60]
-        tp, fp, fn = score(want, got)
-        return i, tp, fp, fn, None
+            return i, failed(f"request_error: {str(e)[:60]}", attempts=1, model=MODEL)
 
+    failed_docs = []
     with concurrent.futures.ThreadPoolExecutor(10) as ex:
-        for i, tp, fp, fn, err in ex.map(run_one, enumerate(rows)):
-            tot_tp += tp; tot_fp += fp; tot_fn += fn
+        for i, res in ex.map(run_one, enumerate(rows)):
             done += 1
-            if err:
-                print(f"[{i}] error {err}", flush=True)
+            if res.status == FAILED:
+                failed_docs.append({"index": i, **res.as_receipt()})
+                print(f"[{i}] FAILED {res.reason}", flush=True)
+            else:
+                want = json.loads(rows[i]["output"])
+                tp, fp, fn = score(want, res.rows)
+                tot_tp += tp; tot_fp += fp; tot_fn += fn
             if done % 10 == 0:
                 p = tot_tp / max(1, tot_tp + tot_fp)
                 r_ = tot_tp / max(1, tot_tp + tot_fn)
@@ -121,9 +122,13 @@ def main(limit=150):
     f1 = 2 * precision * recall / max(1e-9, precision + recall)
     report = {
         "student": MODEL, "docs": len(rows),
+        "scored_docs": len(rows) - len(failed_docs),
         "fields_matched": tot_tp, "fields_wrong_or_extra": tot_fp, "fields_missed": tot_fn,
         "precision": round(precision, 4), "recall": round(recall, 4), "f1": round(f1, 4),
-        "pass": f1 >= 0.90 and precision >= 0.95,
+        "failed_docs": len(failed_docs), "failed": failed_docs[:20],
+        # A failed model call is a refusal/needs-retry, not a zero score: the
+        # gate cannot PASS while any document failed to produce a result.
+        "pass": f1 >= 0.90 and precision >= 0.95 and not failed_docs,
     }
     Path("results/lora-v1-pairs/gate-report.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))

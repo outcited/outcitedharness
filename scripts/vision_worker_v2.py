@@ -10,7 +10,6 @@ the pipeline DB.
 
 import base64
 import json
-import re
 import sys
 import time
 import urllib.request
@@ -19,6 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, "/Users/samkim/Harnessv1")
 
+from harness.model_result import FAILED, failed, parse_json_array
 from harness.pipeline import store
 from harness.pipeline.region_detect import render_regions
 
@@ -80,29 +80,22 @@ def v41_image(b64_png, timeout=300):
             ]}],
         }).encode()
     for attempt in range(2):
+        attempts = attempt + 1
         req = urllib.request.Request(endpoint, data=body, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
-                c = json.loads(r.read())["choices"][0]["message"]["content"] or ""
-            break
+                payload = json.loads(r.read())
+            choice = payload["choices"][0]
+            return parse_json_array(
+                choice["message"]["content"],
+                attempts=attempts,
+                finish_reason=choice.get("finish_reason"),
+                model=model,
+            )
         except Exception as e:
             last_err = e
             continue
-    else:
-        return [{"error": f"vision_timeout: {str(last_err)[:60]}"}]
-    m = re.search(r"\[.*\]", c, re.DOTALL)
-    if not m:
-        return []
-    try:
-        return json.loads(m.group(0))
-    except json.JSONDecodeError:
-        cut = m.group(0).rfind("}")
-        if cut > 0:
-            try:
-                return json.loads(m.group(0)[: cut + 1] + "]")
-            except json.JSONDecodeError:
-                return []
-        return []
+    return failed(f"vision_timeout: {str(last_err)[:60]}", attempts=2, model=model)
 
 
 def resolve_path(stem, con):
@@ -161,19 +154,25 @@ def process(route, con):
     from harness.pipeline.crop_verify import verify_tables
     regions_used = 0
     results = []
+    failures = []
     for pn, region_list in sorted(rendered.items()):
         for r, png in region_list:
             if regions_used >= MAX_REGIONS_PER_DOC:
                 break
             regions_used += 1
-            tables = v41_image(base64.b64encode(png).decode())
+            vision = v41_image(base64.b64encode(png).decode())
             region_result = {
                 "page": pn,
                 "region_bbox": [round(x, 1) for x in r["bbox"]],
                 "region_source": r["source"],
                 "dpi": DPI,
-                "tables": tables,
+                "tables": vision.rows,
+                "vision_status": vision.status,
+                "vision_reason": vision.reason,
+                "vision_attempts": vision.attempts,
             }
+            if vision.status == FAILED:
+                failures.append({"page": pn, **vision.as_receipt()})
             try:
                 region_result["crop_verdicts"] = verify_tables(pdf, pn, region_result)
             except Exception as e:
@@ -188,10 +187,12 @@ def process(route, con):
         "pages_processed": list(rendered.keys()),
         "provenance": {"model": MODEL, "dpi": DPI, "mode": "crop-don't-page",
                        "renderer": "pymupdf+region_detect"},
+        "extraction_status": "FAILED" if failures else "OK",
+        "vision_failures": failures,
         "page_regions": results,
     }
     (OUT / f"{stem}.json").write_text(json.dumps(rec, ensure_ascii=False))
-    return regions_used, None
+    return regions_used, (f"vision_failed:{len(failures)}" if failures else None)
 
 
 def main():

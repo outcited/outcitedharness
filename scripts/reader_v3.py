@@ -14,6 +14,12 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import pymupdf
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from harness.model_result import FAILED, failed, parse_json_array  # noqa: E402
+
 BASE = os.environ.get("READER_V3_BASE", "https://token-plan.maas.qwencloudapi.com/compatible-mode/v1")
 MODEL = os.environ.get("READER_V3_MODEL", "deepseek-v4.1-flash")
 
@@ -54,17 +60,19 @@ def extract_page(text, page_num, key):
         try:
             with urllib.request.urlopen(req, timeout=180) as r:
                 res = json.loads(r.read())
-            content = res["choices"][0]["message"].get("content") or ""
-            s, e = content.find("["), content.rfind("]")
-            if s >= 0 and e > s:
-                import json as _j
-                rows = _j.loads(content[s:e+1])
-                return rows if isinstance(rows, list) else []
-            return []
-        except Exception:
+            choice = res["choices"][0]
+            content = choice["message"].get("content")
+            return parse_json_array(
+                content,
+                attempts=attempt,
+                finish_reason=choice.get("finish_reason"),
+                model=MODEL,
+            )
+        except Exception as e:
+            last_err = e
             if attempt == 2:
-                return []
-    return []
+                return failed(f"request_error: {str(last_err)[:60]}", attempts=2, model=MODEL)
+    return failed("request_error: unknown", attempts=2, model=MODEL)
 
 def main():
     ap = argparse.ArgumentParser()
@@ -97,6 +105,7 @@ def main():
     t0 = time.time()
     total = 0
     n = 0
+    failed_batches = 0
     for d in todo:
         src = d["source_path"]
         try:
@@ -130,18 +139,29 @@ def main():
                 batches.append(combined)
         doc.close()
         claims = []
+        failures = []
         if batches:
             with ThreadPoolExecutor(max_workers=args.workers) as ex:
-                for rows in ex.map(lambda c: extract_page(c, 1, key), batches):
-                    for r in (rows if isinstance(rows, list) else []):
+                for res in ex.map(lambda c: extract_page(c, 1, key), batches):
+                    if res.status == FAILED:
+                        failures.append(res.as_receipt())
+                        continue
+                    for r in res.rows:
                         if isinstance(r, dict) and r.get("field") and r.get("value") is not None:
                             r["source_path"] = src
                             claims.append(r)
         for c in claims:
             out.write(json.dumps(c, sort_keys=True) + "\n")
             total += 1
-        led.write(json.dumps({"source_path": src,
-            "status": "extracted" if claims else "no_specs"}) + "\n")
+        if failures and not claims:
+            status = "model_failed"
+        elif failures:
+            status = "partial_model_failed"
+        else:
+            status = "extracted" if claims else "no_specs"
+        failed_batches += len(failures)
+        led.write(json.dumps({"source_path": src, "status": status,
+            "model_failures": failures}) + "\n")
         n += 1
         if n % 10 == 0:
             out.flush()
@@ -150,6 +170,7 @@ def main():
     out.close()
     led.close()
     print(json.dumps({"docs": n, "claims": total,
+        "model_failed_batches": failed_batches,
         "wall_s": round(time.time() - t0, 1)}), flush=True)
 
 if __name__ == "__main__":
