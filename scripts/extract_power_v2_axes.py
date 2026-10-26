@@ -30,6 +30,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from harness.electronics.power_axes_v2 import (  # noqa: E402
+    bounded_axis_rows,
     collapse_rows,
     front_vout_rows,
     iq_rows,
@@ -102,7 +103,8 @@ def _scan(item: dict, pdf_root: str) -> dict:
         finally:
             doc.close()
         sha = hashlib.sha256(data).hexdigest() if data is not None else ""
-        rows = vout_rows(facts) + iq_rows(facts) + front_vout_rows(front)
+        rows = (vout_rows(facts) + iq_rows(facts) + front_vout_rows(front)
+                + bounded_axis_rows(facts))
         winner = collapse_rows(rows)
         out = list(winner.values())
         return {"rows": out, "error": None, "found": sorted(winner), "sha": sha}

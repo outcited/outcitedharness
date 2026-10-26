@@ -240,8 +240,189 @@ def collapse_rows(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     return {key: pair[1] for key, pair in best.items()}
 
 
+# ---------------------------------------------------------------------------
+# Bounded decision-critical axes (E3 selection journey) — vin / iout / fsw /
+# vds / rds. Same law: specified-operation rows only; the Absolute Maximum
+# Ratings table NEVER fills an axis; protection thresholds, dropout,
+# leakage, load/operating currents and gate charge are rejected.
+# ---------------------------------------------------------------------------
+
+_VIN_VOCAB = re.compile(
+    r"input\s+voltage(?:\s+range)?|\bVIN\b|supply\s+voltage(?:\s+range)?|"
+    r"operating\s+(?:input\s+)?voltage\s+range|voltage\s+range\s+in",
+    re.I,
+)
+_VIN_REJECT = re.compile(
+    r"\bUVLO\b|undervoltage\s+lock|\bOVP\b|\bUVP\b|threshold|rising|falling|"
+    r"hysteresis|dropout|overvoltage|undervoltage|absolute|"
+    r"logic|enable|shutdown|\bEN\b|leakage|start-?up\s+current",
+    re.I,
+)
+_IOUT_VOCAB = re.compile(
+    r"output\s+current|load\s+current|continuous\s+output|"
+    r"\bIOUT\b|\bILOAD\b|max(?:imum)?\s+output\s+current|current\s+rating",
+    re.I,
+)
+_IOUT_REJECT = re.compile(
+    r"quiescent|\bIQ\b|leakage|shutdown|short[- ]?circuit|current\s+limit|"
+    r"inrush|reverse|sink|source|limit|threshold|hiccup|fold",
+    re.I,
+)
+_FSW_VOCAB = re.compile(
+    r"switching\s+frequency|\bFSW\b|oscillator\s+frequency|\bFOSC\b|"
+    r"frequency\s+range", re.I
+)
+_FSW_REJECT = re.compile(
+    r"sync|external|clock|jitter|synchroniz|spread|crossover|bandwidth", re.I
+)
+_VDS_VOCAB = re.compile(
+    r"drain[- ](?:to[- ])?source\s+(?:breakdown\s+)?voltage|\bVDSS?\b|"
+    r"drain[- ]source\s+voltage", re.I
+)
+_VDS_REJECT = re.compile(
+    r"on[- ]?(?:state\s+)?resistance|rds|threshold|gate|current|clamp|"
+    r"leakage|absolute", re.I
+)
+_RDS_VOCAB = re.compile(
+    r"drain[- ](?:to[- ])?source\s+on[- ]?(?:state\s+)?resistance|"
+    r"on[- ]?resistance|\bRDS\(?ON\)?\b", re.I
+)
+_RDS_REJECT = re.compile(
+    r"breakdown|threshold|gate|voltage|charge|capacitance|absolute|gate\s+", re.I
+)
+
+
+def _to_mohm(value: float, unit: str | None) -> float | None:
+    u = _norm_unit(unit)
+    if u in ("mohm", "mω", "mohm", "mΩ".lower()):
+        return float(value)
+    if u in ("ohm", "ω"):
+        return float(value) * 1000.0
+    return None
+
+
+def _to_khz(value: float, unit: str | None) -> float | None:
+    u = _norm_unit(unit)
+    if u in ("khz",):
+        return float(value)
+    if u in ("mhz",):
+        return float(value) * 1000.0
+    if u in ("hz",):
+        return float(value) / 1000.0
+    return None
+
+
+_AXIS_SPECS: tuple[tuple[str, re.Pattern, re.Pattern, str], ...] = (
+    ("vin", _VIN_VOCAB, _VIN_REJECT, "V"),
+    ("iout", _IOUT_VOCAB, _IOUT_REJECT, "A"),
+    ("fsw", _FSW_VOCAB, _FSW_REJECT, "kHz"),
+    ("vds", _VDS_VOCAB, _VDS_REJECT, "V"),
+    ("rds", _RDS_VOCAB, _RDS_REJECT, "mOhm"),
+)
+
+
+def _axis_row(field: str, value: float, role: str, unit: str,
+              fact: Mapping[str, Any], verbatim: str, unit_as_printed: Any) -> dict:
+    return {
+        "schema": POWER_AXES_SCHEMA,
+        "field": field,
+        "value": value,
+        "value_role": role,
+        "unit": unit,
+        "unit_as_printed": unit_as_printed,
+        "page_1based": fact.get("page"),
+        "verbatim": verbatim,
+        "condition_verbatim": fact.get("condition_verbatim"),
+        "table_kind": fact.get("table_kind"),
+        "method": "deterministic_power_axes_v2_v1",
+    }
+
+
+def _range_low_high(fact: Mapping[str, Any]) -> tuple[float, float] | None:
+    value = fact.get("value")
+    if isinstance(value, list) and len(value) == 2 and all(
+        isinstance(v, (int, float)) for v in value
+    ):
+        return float(value[0]), float(value[1])
+    low, high = fact.get("min"), fact.get("max")
+    if isinstance(low, (int, float)) and isinstance(high, (int, float)):
+        return float(low), float(high)
+    return None
+
+
+def bounded_axis_rows(facts: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Fill the bounded decision-critical axes: vin_min_v/vin_max_v, iout_max_a,
+    fsw_max_khz, vds_v, rds_on_mohm. Specified-operation rows only; absmax never
+    fills; protection/threshold/leakage/load look-alikes are rejected. A value
+    whose printed unit is incompatible with the axis is dropped (fail-closed).
+    Field names match the vout_min_v/vout_max_v convention so collapse_rows and
+    the wave contract treat each axis independently.
+    """
+
+    rows: list[dict[str, Any]] = []
+    for fact in facts:
+        if _ABS_MAX_TITLE.search(str(fact.get("table_title") or "")) or (
+            fact.get("table_kind") == "absmax"
+        ):
+            continue
+        label = f"{fact.get('symbol') or ''} {fact.get('parameter') or ''}"
+        verbatim = str(fact.get("verbatim") or "")[:220]
+        unit = fact.get("unit")
+        for field, vocab, reject, out_unit in _AXIS_SPECS:
+            if not vocab.search(label) or reject.search(label):
+                continue
+            # range axes (vin, vds) may print min/max or a range cell
+            rng = _range_low_high(fact) if field in ("vin", "vds") else None
+            if rng is not None:
+                if _norm_unit(unit) != "v":
+                    break
+                if field == "vin":
+                    rows.append(_axis_row("vin_min_v", rng[0], "range", "V",
+                                          fact, verbatim, unit))
+                    rows.append(_axis_row("vin_max_v", rng[1], "range", "V",
+                                          fact, verbatim, unit))
+                else:  # vds: the rating is the max of the printed range
+                    rows.append(_axis_row("vds_v", max(rng), "rating", "V",
+                                          fact, verbatim, unit))
+                break
+            single = fact.get("value") if isinstance(fact.get("value"), (int, float)) \
+                else fact.get("typ")
+            if not isinstance(single, (int, float)):
+                single = fact.get("max") if isinstance(fact.get("max"), (int, float)) \
+                    else fact.get("min")
+            if not isinstance(single, (int, float)):
+                continue
+            single = float(single)
+            if field == "iout":
+                amps = _to_amps(single, unit)
+                if amps is None:
+                    continue
+                rows.append(_axis_row("iout_max_a", amps, "max", "A",
+                                      fact, verbatim, unit))
+            elif field == "fsw":
+                khz = _to_khz(single, unit)
+                if khz is None:
+                    continue
+                rows.append(_axis_row("fsw_max_khz", khz, "max", "kHz",
+                                      fact, verbatim, unit))
+            elif field == "rds":
+                m = _to_mohm(single, unit)
+                if m is None:
+                    continue
+                rows.append(_axis_row("rds_on_mohm", m, "max", "mOhm",
+                                      fact, verbatim, unit))
+            elif field == "vds":
+                if _norm_unit(unit) != "v":
+                    continue
+                rows.append(_axis_row("vds_v", single, "rating", "V",
+                                      fact, verbatim, unit))
+            break
+    return rows
+
+
 __all__ = [
     "POWER_AXES_SCHEMA",
+    "bounded_axis_rows",
     "collapse_rows",
     "front_vout_rows",
     "iq_rows",
