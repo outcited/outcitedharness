@@ -1,5 +1,5 @@
 {
-  "ts": "2026-10-27T22:52:34Z",
+  "ts": "2026-10-27T23:02:37Z",
   "interval_min": 10,
   "max_freshness_min": 15,
   "supervisor_ok": true,
@@ -7,6 +7,6 @@
     "designwins-orchestrator",
     "designwins-staging"
   ],
-  "stable_digest": "0ba093e367baf98e",
+  "stable_digest": "fc80568e15619b59",
   "alerts_total": 3
 }
