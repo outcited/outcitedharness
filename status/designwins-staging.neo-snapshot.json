@@ -1,0 +1,151 @@
+{
+  "schema": "dw.neo-status.v1",
+  "city": {
+    "running": 0,
+    "suspended": false,
+    "uptime_sec": 219754,
+    "version": "1.5.1",
+    "agents": {
+      "total": 3,
+      "running": 0,
+      "suspended": 0,
+      "quarantined": 0
+    },
+    "work": {
+      "in_progress": 0,
+      "ready": 0,
+      "open": 18
+    },
+    "partial": true,
+    "partial_errors": [
+      "city work ready: reading complete ready projection from cache: bead cache unavailable",
+      "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
+    ]
+  },
+  "captured_at": "2026-10-27T17:02:31Z",
+  "source": "gas-city-supervisor",
+  "supervisor": {
+    "status": "ok",
+    "version": "1.5.1",
+    "build_id": "unknown",
+    "uptime_sec": 252595,
+    "cities_total": 2,
+    "cities_running": 2,
+    "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
+    "startup": {
+      "ready": true,
+      "phase": "running",
+      "phases_completed": [
+        "loading_config",
+        "starting_bead_store",
+        "resolving_formulas",
+        "adopting_sessions",
+        "starting_agents"
+      ]
+    }
+  },
+  "agents": [
+    {
+      "name": "bd.dog-1",
+      "running": false,
+      "suspended": false,
+      "scale": "scaled (min=0, max=2)"
+    },
+    {
+      "name": "bd.dog-2",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    },
+    {
+      "name": "core.control-dispatcher",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    }
+  ],
+  "sessions": [],
+  "pending_interactions": [],
+  "event_index": null,
+  "beads_total_reported": 18,
+  "findings": [
+    {
+      "id": "ds-gb1",
+      "title": "DW-NEO-DEMO-01 \u2014 ISOLATED DEMO bead proves NEO idempotent ingestion (staging)",
+      "status": "open",
+      "issue_type": "task",
+      "priority": 2,
+      "created_at": "2026-10-27T16:54:58Z",
+      "updated_at": "2026-10-27T16:54:58Z",
+      "description": "source: https://github.com/outcited/outcitedharness/issues/1\nfinding: DW-NEO-DEMO-01 (digest 4b66305a24a74d4a)\nimpact: none \u2014 demo of the NEO->Gas City handoff path into the staging test queue; no production effect\n\nexpected: exactly one bead labeled neo-finding:DW-NEO-DEMO-01 exists in designwins-staging; resubmission returns duplicate\n\nreproduction:\n  1. bridge/handoff.py submit with deterministic Idempotency-Key\n  2. independent GET read-back of the returned bead id\n  3. event-seq receipt captured from city event log\n\nregression (must pass): tests/test_bridge.py::TestHandoffLaws::test_accepted_produces_receipt_with_readback\nregression (must fail pre-fix): tests/test_bridge.py::TestHandoffLaws::test_proposal_finding_never_dispatched",
+      "labels": [
+        "gh:outcitedharness",
+        "neo",
+        "neo-finding:DW-NEO-DEMO-01",
+        "severity:info"
+      ],
+      "metadata": {
+        "neo-authorization-state": "authorized",
+        "neo-digest": "4b66305a24a74d4a00404ab2b7466c5eaf7c14e927121e39777c3c68d15c5163",
+        "neo-finding-id": "DW-NEO-DEMO-01",
+        "neo-task-id": "DW-NEO-DEMO-01 \u2014 neo gas city integration demo"
+      },
+      "is_blocked": false
+    }
+  ],
+  "blocked": [],
+  "duplicates": [],
+  "last_event_seq": 37577,
+  "recent_events": [
+    {
+      "seq": 37567,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 37566,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 37565,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 37564,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 37563,
+      "type": "order.completed",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 37562,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 37561,
+      "type": "order.fired",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 37560,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 37559,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 37558,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    }
+  ]
+}
