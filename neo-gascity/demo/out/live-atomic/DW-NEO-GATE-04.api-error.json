@@ -1,0 +1,19 @@
+{
+  "schema": "dw.gascity-acceptance.v1",
+  "finding_id": "DW-NEO-GATE-04",
+  "task_id": "DW-NEO-GATE-04 \u2014 atomic consumption live check",
+  "finding_digest": "243fd5544b3712ba209731bab927d07c484c44c65f416e3c5138e99fda1d6bfe",
+  "city": "designwins-staging",
+  "authorization_ref": "/Users/samkim/designwins-neo-gascity/demo/trust-staging/live-atomic.json",
+  "artifact_digest": "a0942372bf2b17d74a04757baa79e1d5ba51c717cab5bd122975ab71a2e61235",
+  "idempotency_key": "neo-b3d70abeb04e0d431ca72f13d7456fe3d6a562ce",
+  "at": "2026-10-27T18:31:43Z",
+  "state": "api-error",
+  "stage": null,
+  "attempts": 1,
+  "environment": "staging",
+  "error": {
+    "status": 409,
+    "code": "idempotency-in-flight"
+  }
+}

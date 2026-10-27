@@ -1,0 +1,6 @@
+{
+  "comment": "Registered trust roots for the NEO<->Gas City ingest bridge. Staging fixtures live in this repo. The PRODUCTION root is NOT configured here: operators set GC_INGEST_TRUST_PROD (absolute path) in the bridge service environment only — a directory owned by a non-service uid, mode 0750, unreachable to agent identities. Placement, ownership chain, permissions, symlinks, and the complete approval JSON Schema are all verified at load time (bridge/handoff.py).",
+  "roots": [
+    {"path": "demo/trust-staging", "environment": "staging"}
+  ]
+}

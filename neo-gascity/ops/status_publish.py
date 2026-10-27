@@ -120,18 +120,29 @@ def publish(base_url: str) -> dict:
         "cities": {c: {"alerts": [a["rule"] for a in alerts_all[c]]} for c in CITIES},
         "stable_digest": stable_digest[:16]}, indent=2) + "\n")
 
+    # FRESHNESS heartbeat: committed EVERY successful run (P3) — the 10-minute
+    # launchd cadence is the publisher's liveness signal, independent of
+    # engineering state. History entries stay gated on real state change.
+    (status_dir / "FRESHNESS.json").write_text(json.dumps({
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "interval_min": 10, "max_freshness_min": NS.STALE_SNAPSHOT_MIN,
+        "supervisor_ok": True, "cities": list(CITIES),
+        "stable_digest": stable_digest[:16],
+        "alerts_total": sum(len(a) for a in alerts_all.values())}, indent=2) + "\n")
+
     changed = _digest_changed(repo, status_dir, stable_digest)
-    heartbeat = _heartbeat_due(status_dir / "history")
-    if changed or heartbeat:
+    history_entry = changed or _heartbeat_due(status_dir / "history")
+    if history_entry:
         (status_dir / "history" / f"{stamp}.json").write_text((status_dir / "LATEST.json").read_text())
-        git(["git", "add", "status"], repo)
-        git(["git", "-c", "user.name=neo-publisher",
-             "-c", "user.email=neo@designwins",
-             "commit", "-m",
-             f"neo status {stamp} alerts={sum(len(a) for a in alerts_all.values())} "
-             f"({'change' if changed else 'heartbeat'})"], repo)
-        sh(["git", "push", REMOTE, STATUS_BRANCH], repo)
-    return {"changed": changed, "heartbeat": heartbeat, "stable_digest": stable_digest[:16],
+    git(["git", "add", "status"], repo)
+    git(["git", "-c", "user.name=neo-publisher",
+         "-c", "user.email=neo@designwins",
+         "commit", "-m",
+         f"neo {'state-change' if history_entry else 'freshness'} {stamp} "
+         f"alerts={sum(len(a) for a in alerts_all.values())}"], repo)
+    sh(["git", "push", REMOTE, STATUS_BRANCH], repo)
+    return {"changed": changed, "history_entry": history_entry,
+            "stable_digest": stable_digest[:16],
             "alerts": {c: [a["rule"] for a in v] for c, v in alerts_all.items()}}
 
 
@@ -187,7 +198,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base-url", default="http://127.0.0.1:8373")
     args = ap.parse_args()
-    out = publish(args.base_url)
+    try:
+        out = publish(args.base_url)
+    except Exception as e:  # fail visibly: never exit 0 on a broken cycle
+        print(f"PUBLISH FAILED: {e}", file=sys.stderr)
+        return 1
     print(json.dumps(out))
     return 0
 

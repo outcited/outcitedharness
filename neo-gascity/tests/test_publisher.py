@@ -101,5 +101,60 @@ class TestPublisherSanitizeIntegration(unittest.TestCase):
         self.assertNotIn("SECRET", json.dumps(snap))
 
 
+class TestFreshnessHeartbeat(unittest.TestCase):
+    """P3 — freshness committed every run; history only on change."""
+
+    def test_freshness_logic(self):
+        # decision rule: history when changed, no history yet, or heartbeat
+        # due; FRESHNESS is written every run regardless
+        from pathlib import Path
+        import tempfile, time
+        with tempfile.TemporaryDirectory() as tmp:
+            sd = Path(tmp) / "status"
+            (sd / "history").mkdir(parents=True)
+            # no history at all -> first entry due
+            self.assertTrue(sp._heartbeat_due(sd / "history"))
+            now = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+            (sd / "history" / f"{now}.json").write_text("{}")
+            # fresh entry exists, state unchanged -> no new history entry;
+            # freshness digest file is still (re)written every run
+            self.assertFalse(sp._heartbeat_due(sd / "history"))
+            self.assertTrue(sp._digest_changed(None, sd, "d1"))    # first run
+            self.assertFalse(sp._digest_changed(None, sd, "d1"))   # unchanged
+            self.assertTrue(sp._digest_changed(None, sd, "d2"))     # real change
+
+    def test_main_fails_visibly_on_publish_error(self):
+        from unittest import mock
+        with mock.patch.object(sp, "publish", side_effect=RuntimeError("tunnel down")):
+            rc = sp.main.__wrapped__ if hasattr(sp.main, "__wrapped__") else None
+        # call main with patched publish and argparse args
+        import contextlib, io
+        argv = sys.argv
+        sys.argv = ["status_publish.py"]
+        try:
+            with mock.patch.object(sp, "publish", side_effect=RuntimeError("tunnel down")):
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err):
+                    code = sp.main()
+        finally:
+            sys.argv = argv
+        self.assertEqual(code, 1)
+        self.assertIn("tunnel down", err.getvalue())
+
+    def test_freshness_file_fields(self):
+        # NEO must detect staleness from GitHub alone: ts + interval + max age
+        import time as _t
+        ts = _t.strftime("%Y-%m-%dT%H:%M:%SZ", _t.gmtime())
+        from bridge import neo_status as NS
+        snap = {"captured_at": ts, "city": {"work": {}}, "agents": [],
+                "findings": [], "pending_interactions": []}
+        rules = [a["rule"] for a in NS.evaluate(snap)]
+        self.assertNotIn("snapshot-stale", rules)
+        old = _t.strftime("%Y-%m-%dT%H:%M:%SZ", _t.gmtime(_t.time() - 40 * 60))
+        snap["captured_at"] = old
+        rules = [a["rule"] for a in NS.evaluate(snap)]
+        self.assertIn("snapshot-stale", rules)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

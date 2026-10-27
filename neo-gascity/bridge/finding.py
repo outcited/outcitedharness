@@ -106,7 +106,7 @@ def to_bead_payload(finding: dict[str, Any]) -> dict[str, Any]:
         "labels": bead_labels(finding),
         "metadata": {
             "neo-finding-id": finding["finding_id"],
-            "neo-task-id": finding["task_id"],
+            "neo-task-id": task_id_slug(finding),
             "neo-authorization-state": finding["authorization_state"],
             "neo-digest": digest(finding),
         },

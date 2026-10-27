@@ -113,6 +113,11 @@ def main() -> int:
     args = ap.parse_args()
 
     finding = json.loads(Path(args.finding).read_text())
+    import time as _t
+    _suffix = _t.strftime("%H%M%S")
+    finding = dict(finding,
+                   finding_id=f"DW-NEO-E2E-{_suffix}",
+                   task_id=f"DW-NEO-E2E-{_suffix} — fresh acceptance run")
     out = ROOT / "demo" / "out"
     client = GasCityClient(args.base_url)
     print(f"acceptance e2e @ {args.base_url} city={args.city} "

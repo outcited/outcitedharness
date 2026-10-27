@@ -1,31 +1,37 @@
 """Authorized, idempotent finding -> Gas City handoff with acceptance receipts.
 
-Review #6448553783 fail-closed gates, enforced here:
+Review #6449336556 gates, enforced here:
 
-  AUTHENTICITY — an `issuer` string proves nothing. Trust comes from PLACEMENT:
-  an artifact is trusted only if it lives inside a registered trust root
-  (production: a Sam-controlled, non-group/world-writable directory;
-  staging: the repo's fixture directory), the root and file are not
-  group/world-writable, and every schema field validates. Environment
-  separation: staging artifacts (issuer staging-fixture) can only target
-  staging cities; production artifacts (issuer sam) only production cities.
-  A GitHub comment/finding/TaskStore state is never an authorization source.
+  PROVENANCE (P0) — trust is an ownership chain, not a string:
+  * an artifact is honored only inside a registered trust root declared in
+    bridge/trust.json (staging) or the GC_INGEST_TRUST_PROD root (production);
+  * PRODUCTION roots: every ancestor directory is owned by root or the root's
+    owner, none is group/world-writable, the root's owner uid MUST differ
+    from this process's uid (bridge/agents run as the service user and can
+    therefore neither create nor modify approvals), the artifact is a
+    regular file owned by the root's owner, and no path component is a
+    symlink;
+  * STAGING roots: root + artifact owned by the invoking uid (fixtures),
+    not group/world-writable, no symlinks;
+  * the COMPLETE JSON Schema is applied via bridge.schema (const/enum/
+    required/additionalProperties/pattern/allOf/if-then) — not a field list;
+  * issuer/placement/mode each remain necessary but none is sufficient.
 
-  SINGLE USE — every accepted ingest appends to a durable, replay-safe
-  approval ledger (jsonl, append + lock). Replay of the same approval with
-  the same finding returns the prior receipt (no POST). Reuse for a
-  DIFFERENT finding refuses (approval-reused).
+  ATOMIC SINGLE USE (P2) — lookup, reservation and consumption happen inside
+  one flock: concurrent submissions serialize; the first appends a `reserve`
+  (the consumption), later same-finding attempts `resume` (same deterministic
+  idempotency key -> native Gas City dedup -> at most one bead), completed
+  attempts replay the prior receipt with no POST, and any attempt for a
+  DIFFERENT finding under the same artifact refuses (approval-reused).
+  Crashes between POST and receipt persistence leave the reserve: re-use by
+  another finding is impossible; retry of the same finding resumes safely.
 
-  PROOF-GATED ACCEPTANCE — `accepted` requires: bead id + independent
-  read-back whose labels/metadata match the finding identity and digest,
-  plus a matching bead.created event (payload.bead.id == bead id, label
-  neo-finding:<id> present). Without event proof the receipt is explicitly
-  weaker (`accepted-persisted`). Without read-back proof: `unverified` —
-  never `accepted`.
-
-  STAGES — a receipt proves BEAD_ACCEPTED (or BEAD_ACCEPTED_PERSISTED_ONLY)
-  only. AGENT_RUNNING / WORK_VERIFIED are derived downstream (neo_status)
-  from live bead state + verification receipts, never asserted here.
+  PROOF (P1) — read-back requires non-empty persisted metadata with the
+  EXACT finding id, task slug and sha256 digest; event proof requires an
+  independently correlated bead.created whose payload bead id matches AND
+  whose labels carry neo-finding:<id> (subject-only matches are NOT proof).
+  Without event proof: explicitly weaker BEAD_ACCEPTED_PERSISTED_ONLY.
+  Without read-back proof: `unverified`, never accepted.
 """
 from __future__ import annotations
 
@@ -35,22 +41,24 @@ import json
 import os
 import stat
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from . import finding as F
+from . import schema as SC
 from .gascity_client import ApiError, GasCityClient, now_iso
 
-REQUIRED_APPROVAL_FIELDS = ("schema", "environment", "project", "action",
-                            "recipient", "task_ref", "issuer",
-                            "authorization_ref", "expires_at", "max_actions",
-                            "spend_scope", "max_spend_usd", "payload_digest")
-APPROVAL_SCHEMA = "dw.approval.gascity-ingest.v1"
+APPROVAL_SCHEMA_NAME = "dw.approval.gascity-ingest.v1.json"
+FINDING_SCHEMA_NAME = "dw.finding.v1.json"
 MAX_ATTEMPTS = 3
 EVENT_SCAN_LIMIT = 200
 
 STAGE_ACCEPTED = "BEAD_ACCEPTED"
 STAGE_PERSISTED_ONLY = "BEAD_ACCEPTED_PERSISTED_ONLY"
+
+TRUST_CONFIG = Path(__file__).resolve().parent.parent / "bridge" / "trust.json"
+PROD_ROOT_ENV = "GC_INGEST_TRUST_PROD"
 
 
 class Refusal(Exception):
@@ -62,73 +70,142 @@ class Refusal(Exception):
         super().__init__(f"{reason}: {detail}")
 
 
-# ---- trust roots ---------------------------------------------------------
+# ---- trust configuration ---------------------------------------------------
 
-def _group_or_world_writable(path: Path) -> bool:
-    m = path.stat().st_mode
-    return bool(m & (stat.S_IWGRP | stat.S_IWOTH))
+def load_trust_config() -> dict:
+    """Registered trust roots. Production roots may also arrive via env
+    (operator-set, not agent-writable): a single absolute path."""
+    cfg = {"roots": []}
+    if TRUST_CONFIG.exists():
+        raw = json.loads(TRUST_CONFIG.read_text())
+        cfg["roots"] = raw.get("roots", [])
+    prod = os.environ.get(PROD_ROOT_ENV)
+    if prod:
+        cfg["roots"].append({"path": prod, "environment": "production"})
+    return cfg
 
 
-def load_approval(path: Path, trust_roots: list[Path]) -> dict[str, Any]:
-    """Load an approval ONLY from a registered, Sam/operator-controlled root.
+def _ancestors(path: Path) -> list[Path]:
+    out, cur = [], path.resolve()
+    while cur != cur.parent:
+        out.append(cur)
+        cur = cur.parent
+    out.append(cur)
+    return list(reversed(out))  # /, /Users, ..., root
 
-    Refusals: untrusted-path (outside every root), untrusted-trust-dir
-    (root or artifact group/world-writable — forgeable placement),
-    invalid-approval (unparseable / missing fields / wrong schema).
-    """
-    p = Path(path).resolve()
-    roots = [Path(r).resolve() for r in trust_roots]
-    if not any(r in p.parents or r == p.parent for r in roots):
-        raise Refusal("untrusted-path",
-                      f"{p} is not inside any registered trust root")
-    root = next(r for r in roots if r in p.parents or r == p.parent)
-    if _group_or_world_writable(root):
+
+def _has_symlink_component(root: Path, artifact: Path) -> bool:
+    """True if any component from root down to the artifact is a symlink."""
+    cur = root.resolve()
+    for part in artifact.resolve().relative_to(cur).parts:
+        cur = cur / part
+        if cur.is_symlink():
+            return True
+    return artifact.is_symlink() and not artifact.samefile(root)
+
+
+def _check_root_chain(root: Path, environment: str) -> None:
+    """Ownership + permission verification of the trust chain."""
+    euid = os.geteuid()
+    root = root.resolve()
+    if not root.is_dir():
+        raise Refusal("untrusted-trust-dir", f"trust root {root} is not a directory")
+    st = root.stat()
+    if st.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
         raise Refusal("untrusted-trust-dir", f"trust root {root} is group/world-writable")
-    if not p.is_file():
-        raise Refusal("invalid-approval", f"artifact not found: {p}")
-    if _group_or_world_writable(p):
-        raise Refusal("invalid-approval", f"artifact is group/world-writable: {p}")
+    owner = st.st_uid
+    if environment == "production":
+        # full ancestor chain: owned by root or the trust-root owner, never
+        # group/world-writable, and the root owner MUST differ from the
+        # bridge/agent service user (euid) — agents cannot write approvals
+        if owner == euid:
+            raise Refusal("untrusted-trust-dir",
+                          f"production root {root} is owned by the invoking uid {euid}; "
+                          "approvals must live where service identities cannot write")
+        for anc in _ancestors(root)[1:]:
+            ast = anc.stat()
+            if ast.st_uid not in (0, owner):
+                raise Refusal("untrusted-trust-dir",
+                              f"ancestor {anc} owned by uid {ast.st_uid}, not {owner}/root")
+            if ast.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+                raise Refusal("untrusted-trust-dir",
+                              f"ancestor {anc} is group/world-writable")
+    else:  # staging fixtures are created and owned by the invoking uid
+        if owner != euid:
+            raise Refusal("untrusted-trust-dir",
+                          f"staging root {root} owned by uid {owner} != invoking {euid}")
+
+
+def load_approval(path: Path, trust_roots: list[Path] | None = None) -> dict[str, Any]:
+    """Load an approval ONLY from a verified trust root, fully schema-checked."""
+    p = Path(path)
+    # symlink detection FIRST, on the original path (a symlink pointing into
+    # the trust root from outside, or aliasing within it, is an untrusted path)
+    if p.is_symlink():
+        raise Refusal("untrusted-path", f"{p} is a symlink")
     try:
-        a = json.loads(p.read_text())
+        rp = p.resolve(strict=True)
+    except (FileNotFoundError, RuntimeError) as e:
+        raise Refusal("invalid-approval", f"unresolvable artifact {p}: {e}") from None
+    roots = trust_roots or [Path(r["path"]) for r in load_trust_config()["roots"]]
+    matched_env = None
+    root_obj = None
+    cfg = load_trust_config()
+    for r in [Path(x["path"]) for x in cfg["roots"]] + list(roots):
+        rr = Path(r).resolve()
+        if rr == rp.parent or rr in rp.parents:
+            matched_env = next((x["environment"] for x in cfg["roots"]
+                                if Path(x["path"]).resolve() == rr), None)
+            if matched_env is None:
+                matched_env = "production" if "staging" not in rr.name else "staging"
+            root_obj = rr
+            break
+    if root_obj is None:
+        raise Refusal("untrusted-path", f"{p} is not inside any registered trust root")
+
+    _check_root_chain(root_obj, matched_env)
+
+    lst = p.lstat()
+    if not stat.S_ISREG(lst.st_mode):
+        raise Refusal("invalid-approval", "artifact is not a regular file")
+    if _has_symlink_component(root_obj, rp):
+        raise Refusal("untrusted-path", "symlink in trust path — refusing")
+    if lst.st_uid != root_obj.stat().st_uid:
+        raise Refusal("untrusted-trust-dir",
+                      f"artifact owner uid {lst.st_uid} != trust root owner "
+                      f"{root_obj.stat().st_uid}")
+    if lst.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        raise Refusal("invalid-approval", "artifact is group/world-writable")
+
+    try:
+        a = json.loads(rp.read_text())
     except json.JSONDecodeError as e:
         raise Refusal("invalid-approval", f"unparseable: {e}") from None
-    missing = [k for k in REQUIRED_APPROVAL_FIELDS if k not in a]
-    if missing:
-        raise Refusal("invalid-approval", f"missing fields: {missing}")
-    if a.get("schema") != APPROVAL_SCHEMA:
-        raise Refusal("invalid-approval", f"schema must be {APPROVAL_SCHEMA}")
-    a["_artifact_path"] = str(p)
-    a["_artifact_digest"] = hashlib.sha256(
-        json.dumps({k: a[k] for k in REQUIRED_APPROVAL_FIELDS},
-                   sort_keys=True, separators=(",", ":")).encode()
-    ).hexdigest()
+
+    # COMPLETE schema enforcement (bridge.schema applies every keyword)
+    errors = SC.validate(a, APPROVAL_SCHEMA_NAME)
+    if errors:
+        raise Refusal("invalid-approval", "schema violations: " + "; ".join(errors[:6]))
+
+    a["_artifact_path"] = str(rp)
+    a["_environment"] = a["environment"]
+    a["_artifact_digest"] = hashlib.sha256(json.dumps(
+        {k: a[k] for k in sorted(a) if not k.startswith("_")},
+        sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     return a
 
 
 def check_authorization(finding: dict, approval: dict, city: str) -> None:
-    """Every dw.approval.gascity-ingest.v1 law. All refusals are pre-API."""
+    """Semantic laws the schema cannot express (cross-field binding)."""
     env = approval["environment"]
-    # environment / issuer separation
     if env == "production":
-        if approval["issuer"] != "sam":
-            raise Refusal("unauthorized-issuer",
-                          f"production requires issuer=sam, got {approval['issuer']!r}")
         if "staging" in city:
             raise Refusal("environment-mismatch",
                           f"production artifact cannot target staging city {city}")
-    elif env == "staging":
-        if approval["issuer"] != "staging-fixture":
-            raise Refusal("unauthorized-issuer",
-                          f"staging requires issuer=staging-fixture, got {approval['issuer']!r}")
+    else:
         if "staging" not in city:
             raise Refusal("environment-mismatch",
                           f"staging artifact cannot target production city {city}")
-    else:
-        raise Refusal("invalid-approval", f"environment={env!r}")
-    if approval["project"] != "designwins":
-        raise Refusal("unauthorized-project", f"project={approval['project']!r}")
-    if approval["action"] != "gascity-ingest":
-        raise Refusal("unauthorized-action", f"action={approval['action']!r}")
     if approval["recipient"] != city:
         raise Refusal("unauthorized-recipient",
                       f"recipient={approval['recipient']!r} != city={city}")
@@ -137,62 +214,110 @@ def check_authorization(finding: dict, approval: dict, city: str) -> None:
                       f"task_ref={approval['task_ref']!r} != task_id={finding['task_id']!r}")
     if int(approval.get("expires_at", 0)) < time.time():
         raise Refusal("approval-expired", str(approval.get("expires_at")))
-    if approval["max_actions"] != 1:
-        raise Refusal("invalid-approval",
-                      f"max_actions must be exactly 1, got {approval['max_actions']!r}")
-    if approval["spend_scope"] != "none" or approval["max_spend_usd"] != 0:
-        raise Refusal("spend-not-authorized",
-                      f"spend_scope={approval['spend_scope']!r} max_spend_usd={approval['max_spend_usd']!r}")
-    # digest is MANDATORY and must cover this exact finding body
-    d = approval.get("payload_digest")
-    if not isinstance(d, str) or len(d) != 64:
-        raise Refusal("invalid-approval", "payload_digest missing or malformed")
-    if d != F.digest(finding):
+    if approval["payload_digest"] != F.digest(finding):
         raise Refusal("digest-mismatch", "artifact digest does not cover this finding body")
     if finding["authorization_state"] != "authorized":
         raise Refusal("finding-not-authorized",
                       f"finding authorization_state={finding['authorization_state']!r}")
 
 
-# ---- single-use ledger ----------------------------------------------------
+# ---- atomic single-use ledger ----------------------------------------------
 
-def _ledger_path(receipts_dir: Path) -> Path:
-    return Path(receipts_dir) / "approval-ledger.jsonl"
+LEDGER = "approval-ledger.jsonl"
 
 
-def ledger_lookup(receipts_dir: Path, artifact_digest: str) -> list[dict]:
-    lp = _ledger_path(receipts_dir)
+def _ledger_file(receipts_dir: Path) -> Path:
+    return Path(receipts_dir) / LEDGER
+
+
+@contextmanager
+def _ledger_lock(receipts_dir: Path):
+    receipts_dir = Path(receipts_dir)
+    receipts_dir.mkdir(parents=True, exist_ok=True)
+    lf = open(receipts_dir / "approval-ledger.lock", "a+")
+    try:
+        fcntl.flock(lf, fcntl.LOCK_EX)
+        yield lf
+    finally:
+        fcntl.flock(lf, fcntl.LOCK_UN)
+        lf.close()
+
+
+def _read_ledger(receipts_dir: Path) -> list[dict]:
+    lp = _ledger_file(receipts_dir)
     if not lp.exists():
         return []
     out = []
     for line in lp.read_text().splitlines():
         if line.strip():
-            e = json.loads(line)
-            if e.get("artifact_digest") == artifact_digest:
-                out.append(e)
+            try:
+                out.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue  # torn tail line from a crash mid-append
     return out
 
 
-def ledger_append(receipts_dir: Path, entry: dict) -> None:
-    """Append-only + whole-file lock: replay-safe across processes/restarts."""
-    receipts_dir = Path(receipts_dir)
-    receipts_dir.mkdir(parents=True, exist_ok=True)
-    lock = receipts_dir / "approval-ledger.lock"
-    with open(lock, "a+") as lf:
-        fcntl.flock(lf, fcntl.LOCK_EX)
-        try:
-            with open(_ledger_path(receipts_dir), "a") as lp:
-                lp.write(json.dumps(entry, sort_keys=True) + "\n")
-                lp.flush()
-                os.fsync(lp.fileno())
-        finally:
-            fcntl.flock(lf, fcntl.LOCK_UN)
+def _append_locked(receipts_dir: Path, entry: dict) -> None:
+    with open(_ledger_file(receipts_dir), "a") as lp:
+        lp.write(json.dumps(entry, sort_keys=True) + "\n")
+        lp.flush()
+        os.fsync(lp.fileno())
 
 
-# ---- verification helpers --------------------------------------------------
+def consume_approval(receipts_dir: Path, approval: dict, finding: dict,
+                     idempotency_key: str) -> tuple[str, dict | None]:
+    """ATOMIC consumption. Returns ('first'|'resume'|'replay', prior_entry).
+
+    Must be called with the artifact already validated. All ledger reads and
+    writes happen under one exclusive lock, so concurrent processes serialize
+    and at most one `reserve` is ever written per artifact+finding.
+    """
+    ad, fd = approval["_artifact_digest"], F.digest(finding)
+    with _ledger_lock(receipts_dir):
+        entries = _read_ledger(receipts_dir)
+        mine = [e for e in entries if e.get("artifact_digest") == ad]
+        if any(e.get("finding_digest") != fd for e in mine):
+            raise Refusal("approval-reused",
+                          "artifact already consumed by a different finding")
+        done = [e for e in mine if e.get("kind") == "complete"]
+        if done:
+            return "replay", done[-1]
+        reserved = [e for e in mine if e.get("kind") == "reserve"]
+        if reserved:
+            return "resume", reserved[-1]
+        _append_locked(receipts_dir, {
+            "kind": "reserve", "artifact_digest": ad,
+            "finding_id": finding["finding_id"], "finding_digest": fd,
+            "idempotency_key": idempotency_key, "at": now_iso()})
+        return "first", None
+
+
+def complete_approval(receipts_dir: Path, approval: dict, finding: dict,
+                      result: dict) -> None:
+    with _ledger_lock(receipts_dir):
+        ad, fd = approval["_artifact_digest"], F.digest(finding)
+        existing = [e for e in _read_ledger(receipts_dir)
+                    if e.get("artifact_digest") == ad and e.get("kind") == "complete"
+                    and e.get("finding_digest") == fd]
+        if existing:
+            return  # already durably completed (concurrent submission race)
+        _append_locked(receipts_dir, {
+            "kind": "complete", "artifact_digest": approval["_artifact_digest"],
+            "finding_id": finding["finding_id"], "finding_digest": F.digest(finding),
+            "bead_id": result.get("bead_id"), "state": result.get("state"),
+            "stage": result.get("stage"),
+            "idempotency_key": result.get("idempotency_key"),
+            "receipt_path": result.get("receipt_path"), "at": now_iso()})
+
+
+# ---- verification (strict, review finding 2) --------------------------------
 
 def verify_readback(bead: dict | None, finding: dict) -> tuple[bool, str]:
-    """Independent read-back must match finding identity + digest."""
+    """Read-back must prove the EXACT persisted finding identity and digest.
+
+    Empty/absent metadata fails. Each of finding id, task slug, digest must
+    match exactly.
+    """
     if not bead or not bead.get("id"):
         return False, "bead missing from read-back"
     labels = [str(l) for l in (bead.get("labels") or [])]
@@ -200,22 +325,30 @@ def verify_readback(bead: dict | None, finding: dict) -> tuple[bool, str]:
     if want_label not in labels:
         return False, f"label {want_label} absent from persisted bead"
     meta = bead.get("metadata") or {}
-    if meta:
-        got = meta.get("neo-digest")
-        if got and got != F.digest(finding):
-            return False, "persisted metadata digest != finding digest"
-        if not got:
-            return False, "persisted metadata lacks neo-digest"
-    title_slug = F.task_id_slug(finding)
-    if title_slug not in (bead.get("title") or ""):
+    if not isinstance(meta, dict) or not meta:
+        return False, "persisted bead metadata is empty/absent — cannot verify identity"
+    if meta.get("neo-finding-id") != finding["finding_id"]:
+        return False, (f"persisted neo-finding-id {meta.get('neo-finding-id')!r} != "
+                       f"{finding['finding_id']!r}")
+    slug = F.task_id_slug(finding)
+    if str(meta.get("neo-task-id", "")).strip() != slug:
+        return False, f"persisted neo-task-id {meta.get('neo-task-id')!r} != {slug!r}"
+    if meta.get("neo-digest") != F.digest(finding):
+        return False, "persisted neo-digest != finding digest"
+    if slug not in (bead.get("title") or ""):
         return False, "persisted title does not carry the task id"
-    return True, "labels+digest+title verified"
+    return True, "labels+metadata(finding-id/task-id/digest)+title verified"
 
 
 def find_create_proof(client: GasCityClient, city: str, bead_id: str,
                       finding: dict) -> dict | None:
-    """Matching bead.created event: payload.bead.id == bead_id AND
-    neo-finding label present on the event's bead snapshot."""
+    """Independently correlated creation event, or None.
+
+    Full proof requires ALL of: event payload bead id == bead_id AND
+    neo-finding:<id> label present in the event's own bead snapshot AND
+    (when the event carries metadata) its digest matches. A subject-only
+    match is NOT proof.
+    """
     try:
         ev = client.events(city, limit=EVENT_SCAN_LIMIT)
     except ApiError:
@@ -225,16 +358,24 @@ def find_create_proof(client: GasCityClient, city: str, bead_id: str,
         if e.get("type") != "bead.created":
             continue
         payload_bead = (e.get("payload") or {}).get("bead") or {}
-        if payload_bead.get("id") == bead_id or e.get("subject") == bead_id:
-            ev_labels = [str(l) for l in (payload_bead.get("labels") or [])]
-            if want_label in ev_labels or e.get("subject") == bead_id:
-                return {"seq": e.get("seq"), "ts": e.get("ts"),
-                        "subject": e.get("subject"),
-                        "label_match": want_label in ev_labels}
+        if payload_bead.get("id") != bead_id:
+            continue  # subject-only matches deliberately skipped
+        ev_labels = [str(l) for l in (payload_bead.get("labels") or [])]
+        if want_label not in ev_labels:
+            continue
+        meta = payload_bead.get("metadata") or {}
+        digest_match = None
+        if meta:
+            digest_match = meta.get("neo-digest") == F.digest(finding)
+            if not digest_match:
+                continue
+        return {"seq": e.get("seq"), "ts": e.get("ts"),
+                "subject": e.get("subject"),
+                "label_match": True, "digest_match": digest_match}
     return None
 
 
-# ---- submit ---------------------------------------------------------------
+# ---- submit -----------------------------------------------------------------
 
 def existing_bead(client: GasCityClient, city: str, finding: dict) -> dict | None:
     body, _ = client.beads(city, label=f"{F.NEO_LABEL_PREFIX}{finding['finding_id']}")
@@ -244,10 +385,7 @@ def existing_bead(client: GasCityClient, city: str, finding: dict) -> dict | Non
 
 def submit(finding: dict, approval_path: Path, city: str,
            client: GasCityClient, receipts_dir: Path,
-           trust_roots: list[Path]) -> dict[str, Any]:
-    """Full handoff. States: refused | duplicate | accepted | accepted-persisted
-    | unverified | api-error. Only accepted*/duplicate imply Gas City durably
-    holds the work; `accepted` additionally proves the creation event."""
+           trust_roots: list[Path] | None = None) -> dict[str, Any]:
     receipts_dir = Path(receipts_dir)
     receipt: dict[str, Any] = {
         "schema": "dw.gascity-acceptance.v1",
@@ -267,7 +405,7 @@ def submit(finding: dict, approval_path: Path, city: str,
         approval = load_approval(approval_path, trust_roots)
         receipt["authorization_ref"] = approval["_artifact_path"]
         receipt["artifact_digest"] = approval["_artifact_digest"]
-        receipt["environment"] = approval["environment"]
+        receipt["environment"] = approval["_environment"]
         check_authorization(finding, approval, city)
     except Refusal as r:
         receipt["refusal"] = {"reason": r.reason, "detail": r.detail}
@@ -275,23 +413,22 @@ def submit(finding: dict, approval_path: Path, city: str,
 
     receipt["idempotency_key"] = F.idempotency_key(finding, approval["_artifact_digest"])
 
-    # single-use ledger: replay returns the prior outcome; different finding refuses
-    prior = ledger_lookup(receipts_dir, approval["_artifact_digest"])
-    if prior:
-        same = [e for e in prior if e.get("finding_digest") == receipt["finding_digest"]]
-        if same:
-            e = same[-1]
-            receipt.update(state="duplicate", stage=e.get("stage"),
-                           bead_id=e.get("bead_id"),
-                           duplicate_source="approval-ledger",
-                           prior_receipt=e.get("receipt_path"))
-            return _write(receipt, receipts_dir)
-        receipt["refusal"] = {"reason": "approval-reused",
-                              "detail": "artifact already consumed by a different finding"}
-        receipt["state"] = "refused"
+    # ATOMIC single-use consumption (raises approval-reused when burned)
+    try:
+        mode, prior = consume_approval(receipts_dir, approval, finding,
+                                       receipt["idempotency_key"])
+    except Refusal as r:
+        receipt["refusal"] = {"reason": r.reason, "detail": r.detail}
+        return _write(receipt, receipts_dir)
+    if mode == "replay":
+        receipt.update(state="duplicate", stage=prior.get("stage"),
+                       bead_id=prior.get("bead_id"),
+                       duplicate_source="approval-ledger",
+                       prior_receipt=prior.get("receipt_path"))
         return _write(receipt, receipts_dir)
 
-    # dedup pre-check — already-present bead is returned, never resubmitted
+    # dedup pre-check — an existing bead is returned, never resubmitted
+    # (also the crash-recovery path when a reserve exists but no complete)
     try:
         pre = existing_bead(client, city, finding)
     except ApiError as e:
@@ -299,12 +436,22 @@ def submit(finding: dict, approval_path: Path, city: str,
             return _api_error(receipt, receipts_dir, e)
         pre = None
     if pre:
+        ok, why = verify_readback(pre, finding)
+        if not ok:
+            # a look-alike bead that fails identity verification must never
+            # read as "duplicate/accepted" — fail closed
+            receipt.update(state="unverified", bead_id=pre.get("id"),
+                           duplicate_source="label-check",
+                           verification_failure=why)
+            return _write(receipt, receipts_dir)
         receipt.update(state="duplicate", bead_id=pre.get("id"),
                        duplicate_source="label-check",
-                       readback=_readback(client, city, pre.get("id")))
+                       stage=STAGE_ACCEPTED,
+                       readback=_rb_view(pre))
+        if mode == "resume":
+            complete_approval(receipts_dir, approval, finding, receipt)
         return _write(receipt, receipts_dir)
 
-    # idempotent create, bounded retries on network/5xx only
     payload = F.to_bead_payload(finding)
     last_err: ApiError | None = None
     for attempt in range(1, MAX_ATTEMPTS + 1):
@@ -312,7 +459,6 @@ def submit(finding: dict, approval_path: Path, city: str,
         try:
             body, _index = client.create_bead(city, payload, receipt["idempotency_key"])
             bead_id = body.get("id")
-            # PROOF 1 — independent read-back with identity + digest match
             try:
                 rb = client.bead(city, bead_id) if bead_id else None
             except ApiError as e:
@@ -325,27 +471,16 @@ def submit(finding: dict, approval_path: Path, city: str,
                                verification_failure=why)
                 return _write(receipt, receipts_dir)
             receipt["readback"] = _rb_view(rb)
-            # PROOF 2 — matching creation event (else explicitly weaker state)
             proof = find_create_proof(client, city, bead_id, finding)
             if proof:
                 receipt.update(state="accepted", stage=STAGE_ACCEPTED,
                                bead_id=bead_id, event_proof=proof)
             else:
                 receipt.update(state="accepted-persisted", stage=STAGE_PERSISTED_ONLY,
-                               bead_id=bead_id,
-                               event_proof=None,
-                               note="read-back verified; creation event not "
-                                    "found in scan window — persisted-only proof")
-            ledger_append(receipts_dir, {
-                "artifact_digest": approval["_artifact_digest"],
-                "finding_id": receipt["finding_id"],
-                "finding_digest": receipt["finding_digest"],
-                "bead_id": bead_id, "stage": receipt["stage"],
-                "state": receipt["state"],
-                "idempotency_key": receipt["idempotency_key"],
-                "at": receipt["at"],
-                "receipt_path": str(receipts_dir / f"{receipt['finding_id']}.{receipt['state']}.json"),
-            })
+                               bead_id=bead_id, event_proof=None,
+                               note="read-back verified; correlated creation event "
+                                    "not found in scan window — persisted-only proof")
+            complete_approval(receipts_dir, approval, finding, receipt)
             return _write(receipt, receipts_dir)
         except ApiError as e:
             last_err = e

@@ -26,11 +26,11 @@ TRUST = ROOT / "demo" / "trust-staging"
 OUT = ROOT / "demo" / "out"
 
 
-def gate_finding(fid="DW-NEO-GATE-02", summary="gate demo full proof"):
+def gate_finding(fid="DW-NEO-GATE-03", summary="gate demo full proof v2"):
     return {
         "schema": "dw.finding.v1",
         "finding_id": fid,
-        "task_id": f"{fid} — gate demo full proof",
+        "task_id": f"{fid} — gate demo full proof v2",
         "source_url": "https://github.com/outcited/outcitedharness/pull/52",
         "repository": "outcited/outcitedharness",
         "severity": "info",
@@ -48,8 +48,8 @@ def gate_finding(fid="DW-NEO-GATE-02", summary="gate demo full proof"):
 
 def write_fixture(finding: dict) -> Path:
     TRUST.mkdir(mode=0o700, exist_ok=True)
-    art = TRUST / "sam-stagingfixture-gate02.json"
-    a = json.loads((TRUST / "sam-stagingfixture-gate02.template.json").read_text())
+    art = TRUST / "sam-stagingfixture-gate03.json"
+    a = json.loads((TRUST / "sam-stagingfixture-gate03.template.json").read_text())
     a["payload_digest"] = F.digest(finding)
     art.write_text(json.dumps(a, indent=2) + "\n")
     art.chmod(0o600)
@@ -70,50 +70,52 @@ def run(base_url: str) -> int:
     # 1 forged approval refused (issuer string alone proves nothing)
     f2 = gate_finding()
     forged = TRUST / "forged.json"
-    forged.write_text(json.dumps({**json.loads((TRUST / "sam-stagingfixture-gate02.template.json").read_text()),
+    forged.write_text(json.dumps({**json.loads((TRUST / "sam-stagingfixture-gate03.template.json").read_text()),
                                   "payload_digest": F.digest(f2), "issuer": "sam"}))
     forged.chmod(0o600)
-    r = H.submit(f2, forged, CITY, client, OUT / "gate", [TRUST])
-    check(1, r["state"] == "refused" and r["refusal"]["reason"] == "unauthorized-issuer",
+    r = H.submit(f2, forged, CITY, client, OUT / "gate3", [TRUST])
+    check(1, r["state"] == "refused" and r["refusal"]["reason"] in
+          ("unauthorized-issuer", "invalid-approval"),
           f"{r['state']}/{r.get('refusal',{}).get('reason')}")
 
     # 2 missing digest refused
     nodig = TRUST / "nodigest.json"
     nodig.write_text(json.dumps({k: v for k, v in json.loads(
-        (TRUST / "sam-stagingfixture-gate02.template.json").read_text()).items()
+        (TRUST / "sam-stagingfixture-gate03.template.json").read_text()).items()
         if k != "payload_digest"} | {"payload_digest": None}))
     nodig.chmod(0o600)
-    r = H.submit(f2, nodig, CITY, client, OUT / "gate", [TRUST])
+    r = H.submit(f2, nodig, CITY, client, OUT / "gate3", [TRUST])
     check(2, r["state"] == "refused" and r["refusal"]["reason"] == "invalid-approval",
           f"{r['state']}/{r.get('refusal',{}).get('reason')}")
 
     # 3 wrong city + wrong project refused
     wrongcity = TRUST / "wrongcity.json"
-    a = json.loads((TRUST / "sam-stagingfixture-gate02.template.json").read_text())
+    a = json.loads((TRUST / "sam-stagingfixture-gate03.template.json").read_text())
     a.update(payload_digest=F.digest(f2), recipient="designwins-orchestrator")
     wrongcity.write_text(json.dumps(a)); wrongcity.chmod(0o600)
-    r = H.submit(f2, wrongcity, CITY, client, OUT / "gate", [TRUST])
+    r = H.submit(f2, wrongcity, CITY, client, OUT / "gate3", [TRUST])
     ok_city = r["state"] == "refused" and r["refusal"]["reason"] in (
-        "unauthorized-recipient", "environment-mismatch")
+        "unauthorized-recipient", "environment-mismatch", "invalid-approval")
     wrongproj = TRUST / "wrongproj.json"
     a.update(recipient=CITY, project="not-designwins")
     wrongproj.write_text(json.dumps(a)); wrongproj.chmod(0o600)
-    r2 = H.submit(f2, wrongproj, CITY, client, OUT / "gate", [TRUST])
-    ok_proj = r2["state"] == "refused" and r2["refusal"]["reason"] == "unauthorized-project"
+    r2 = H.submit(f2, wrongproj, CITY, client, OUT / "gate3", [TRUST])
+    ok_proj = r2["state"] == "refused" and r2["refusal"]["reason"] in (
+        "unauthorized-project", "invalid-approval")
     check(3, ok_city and ok_proj,
           f"city={r.get('refusal',{}).get('reason')} project={r2.get('refusal',{}).get('reason')}")
 
     # untrusted path (outside trust root) refused — placement is the trust
     stray = ROOT / "demo" / "stray-artifact.json"
-    stray.write_text((TRUST / "sam-stagingfixture-gate02.template.json").read_text().replace(
+    stray.write_text((TRUST / "sam-stagingfixture-gate03.template.json").read_text().replace(
         "FILLED_BY_GATE_SCRIPT", F.digest(f2)))
-    r = H.submit(f2, stray, CITY, client, OUT / "gate", [TRUST])
+    r = H.submit(f2, stray, CITY, client, OUT / "gate3", [TRUST])
     check("3b", r["state"] == "refused" and r["refusal"]["reason"] == "untrusted-path",
           f"{r['state']}/{r.get('refusal',{}).get('reason')}")
 
     # 4 valid staging-fixture authorization accepted (fresh finding => event proof)
     art = write_fixture(f2)
-    r4 = H.submit(f2, art, CITY, client, OUT / "gate", [TRUST])
+    r4 = H.submit(f2, art, CITY, client, OUT / "gate3", [TRUST])
     check(4, r4["state"] == "accepted" and r4["stage"] == "BEAD_ACCEPTED",
           f"state={r4['state']} stage={r4.get('stage')} bead={r4.get('bead_id')} "
           f"event_seq={r4.get('event_proof',{}).get('seq')}")
@@ -128,7 +130,7 @@ def run(base_url: str) -> int:
           f"readback={why} receipt={Path(r4['receipt_path']).name}")
 
     # 6 resubmission creates zero duplicate beads (ledger replay, no POST)
-    r6 = H.submit(f2, art, CITY, client, OUT / "gate", [TRUST])
+    r6 = H.submit(f2, art, CITY, client, OUT / "gate3", [TRUST])
     findings_after = [b.get("id") for b in client.beads(CITY, limit=200)[0].get("items", [])
                       if any(str(l).startswith("neo-finding:") for l in (b.get("labels") or []))]
     new = set(findings_after) - set(findings_before)
@@ -138,14 +140,14 @@ def run(base_url: str) -> int:
 
     # 7 missing acceptance evidence fails closed: ledger wiped => label dedup
     #    still refuses a second create (restart-safe negative)
-    fresh_dir = OUT / "gate-restart"
+    fresh_dir = OUT / "gate3-restart"
     r7 = H.submit(f2, art, CITY, client, fresh_dir, [TRUST])
     check(7, r7["state"] == "duplicate" and r7["duplicate_source"] == "label-check",
           f"{r7['state']}/{r7.get('duplicate_source')} (no new POST; offline "
           f"read-back failures covered by unit tests test_failed_readback_never_accepted)")
 
     # 8 restart/replay preserves state (ledger replay across "restart")
-    r8 = H.submit(f2, art, CITY, client, OUT / "gate", [TRUST])
+    r8 = H.submit(f2, art, CITY, client, OUT / "gate3", [TRUST])
     check(8, r8["state"] == "duplicate" and r8["duplicate_source"] == "approval-ledger",
           f"{r8['state']}/{r8.get('duplicate_source')}")
 

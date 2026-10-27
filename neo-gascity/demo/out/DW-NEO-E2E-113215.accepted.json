@@ -1,0 +1,40 @@
+{
+  "schema": "dw.gascity-acceptance.v1",
+  "finding_id": "DW-NEO-E2E-113215",
+  "task_id": "DW-NEO-E2E-113215 \u2014 fresh acceptance run",
+  "finding_digest": "029241bc32d343140fdc7a146e049aa02c23587d11a64b8a4602d582aaacd741",
+  "city": "designwins-staging",
+  "authorization_ref": "/Users/samkim/designwins-neo-gascity/demo/trust-staging/sam-stagingfixture-e2e.json",
+  "artifact_digest": "886a69e9ea16f021843422b5519fc778d36321aa63a3079d16e0ada5b51e2cbf",
+  "idempotency_key": "neo-7c828e1a4a580f3ff8555f7bebf0f9316944ded7",
+  "at": "2026-10-27T18:32:15Z",
+  "state": "accepted",
+  "stage": "BEAD_ACCEPTED",
+  "attempts": 1,
+  "environment": "staging",
+  "readback": {
+    "id": "ds-8ha",
+    "status": "open",
+    "title": "DW-NEO-E2E-113215 \u2014 ISOLATED DEMO bead proves NEO idempotent ingestion (staging)",
+    "labels": [
+      "gh:outcitedharness",
+      "neo",
+      "neo-finding:DW-NEO-E2E-113215",
+      "severity:info"
+    ],
+    "metadata": {
+      "neo-authorization-state": "authorized",
+      "neo-digest": "029241bc32d343140fdc7a146e049aa02c23587d11a64b8a4602d582aaacd741",
+      "neo-finding-id": "DW-NEO-E2E-113215",
+      "neo-task-id": "DW-NEO-E2E-113215"
+    }
+  },
+  "bead_id": "ds-8ha",
+  "event_proof": {
+    "seq": 38531,
+    "ts": "2026-10-27T11:32:15.30243-07:00",
+    "subject": "ds-8ha",
+    "label_match": true,
+    "digest_match": true
+  }
+}
