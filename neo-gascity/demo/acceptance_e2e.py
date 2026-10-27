@@ -31,6 +31,24 @@ from bridge import finding as F, handoff as H          # noqa: E402
 from bridge.gascity_client import GasCityClient        # noqa: E402
 
 CITY_DEFAULT = "designwins-staging"   # production requires --city + artifact naming it
+TRUST = Path(__file__).resolve().parent / "trust-staging"
+
+
+def _ensure_staging_fixture(finding: dict) -> Path:
+    import json
+    TRUST.mkdir(mode=0o700, exist_ok=True)
+    art = TRUST / "sam-stagingfixture-e2e.json"
+    art.write_text(json.dumps({
+        "schema": "dw.approval.gascity-ingest.v1", "environment": "staging",
+        "project": "designwins", "action": "gascity-ingest",
+        "recipient": CITY_DEFAULT, "task_ref": finding["task_id"],
+        "issuer": "staging-fixture",
+        "authorization_ref": "e2e acceptance fixture (staging-only, not production approval)",
+        "expires_at": int(time.time()) + 7200, "max_actions": 1,
+        "spend_scope": "none", "max_spend_usd": 0,
+        "payload_digest": F.digest(finding)}, indent=2))
+    art.chmod(0o600)
+    return art
 
 
 def leg1(finding: dict) -> str:
@@ -40,11 +58,12 @@ def leg1(finding: dict) -> str:
     return F.digest(finding)
 
 
-def leg2(finding: dict, approval: Path, city: str, client: GasCityClient, out: Path) -> dict:
-    r = H.submit(finding, approval, city, client, out)
-    assert r["state"] in ("accepted", "duplicate"), r
-    assert r["readback"] and r["readback"]["id"] == r["bead_id"]
-    print(f"L2 PASS  bead {r['bead_id']} state={r['state']} "
+def leg2(finding: dict, city: str, client: GasCityClient, out: Path) -> dict:
+    art = _ensure_staging_fixture(finding)
+    r = H.submit(finding, art, city, client, out, [TRUST])
+    assert r["state"] in ("accepted", "accepted-persisted", "duplicate"), r
+    assert r.get("readback") and r["readback"]["id"] == r["bead_id"]
+    print(f"L2 PASS  bead {r['bead_id']} state={r['state']} stage={r.get('stage')} "
           f"receipt={Path(r['receipt_path']).name}")
     return r
 
@@ -89,20 +108,18 @@ def main() -> int:
     ap.add_argument("--base-url", default="http://127.0.0.1:8373")
     ap.add_argument("--city", default=CITY_DEFAULT)
     ap.add_argument("--finding", default=str(ROOT / "demo/DW-NEO-DEMO-01.finding.json"))
-    ap.add_argument("--approval", default=str(ROOT / "demo/out/DW-NEO-DEMO-01.approval.json"))
     ap.add_argument("--live-dispatch", action="store_true")
     ap.add_argument("--dispatch-approval", default="")
     args = ap.parse_args()
 
     finding = json.loads(Path(args.finding).read_text())
-    approval = Path(args.approval)
     out = ROOT / "demo" / "out"
     client = GasCityClient(args.base_url)
     print(f"acceptance e2e @ {args.base_url} city={args.city} "
           f"live-dispatch={args.live_dispatch}")
     t0 = time.time()
     leg1(finding)
-    receipt = leg2(finding, approval, args.city, client, out)
+    receipt = leg2(finding, args.city, client, out)
     leg3_gated(finding, args.city, args)
     leg4_gated(finding, args)
     leg5(finding, args.city, client, receipt)

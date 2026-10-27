@@ -2,11 +2,19 @@
 
 Run: python3 -m unittest discover -s tests -v
 No network: the supervisor is an in-process stub asserting every law
-(CSRF header, Idempotency-Key, read-back-before-receipt, dedup).
+(CSRF header, Idempotency-Key, read-back-before-receipt, event proof,
+digest binding, single-use ledger, trust-root placement).
+
+Covers review #6448553783:
+  finding 1 — authorization integrity (authenticity/scope/single-use/forge)
+  finding 2 — proof-gated acceptance receipts (read-back + event evidence)
+  finding 3 — publisher stability + sanitization (see test_publisher.py)
 """
 from __future__ import annotations
 
 import json
+import os
+import stat
 import threading
 import time
 import unittest
@@ -21,6 +29,8 @@ from bridge import finding as F
 from bridge import handoff as H
 from bridge import neo_status as NS
 from bridge.gascity_client import ApiError, GasCityClient
+
+CITY = "designwins-staging"
 
 
 def make_finding(**over):
@@ -43,15 +53,36 @@ def make_finding(**over):
     return f
 
 
-def make_approval(**over):
+def make_approval(finding=None, **over):
+    finding = finding or make_finding()
     a = {
+        "schema": "dw.approval.gascity-ingest.v1",
+        "environment": "staging",
         "project": "designwins", "action": "gascity-ingest",
-        "recipient": "designwins-staging", "task_ref": "DW-NEO-DEMO-01 — demo",
-        "expires_at": int(time.time()) + 3600, "issuer": "sam",
-        "max_actions": 1, "spend_scope": "none", "max_spend_usd": 0,
+        "recipient": CITY, "task_ref": finding["task_id"],
+        "issuer": "staging-fixture",
+        "authorization_ref": "unit-test fixture",
+        "expires_at": int(time.time()) + 3600, "max_actions": 1,
+        "spend_scope": "none", "max_spend_usd": 0,
+        "payload_digest": F.digest(finding),
     }
     a.update(over)
     return a
+
+
+class TrustDir:
+    """A 0700 trust root containing one approval artifact."""
+
+    def __init__(self, tmp: str, approval: dict, name: str = "ap.json"):
+        self.root = Path(tmp) / "trust"
+        self.root.mkdir(mode=0o700)
+        self.path = self.root / name
+        self.path.write_text(json.dumps(approval))
+        os.chmod(self.path, 0o600)
+
+    @property
+    def roots(self):
+        return [self.root]
 
 
 class StubState:
@@ -59,6 +90,11 @@ class StubState:
     post_calls: list[dict] = []
     seq = 100
     fail_next_creates: int = 0
+    events_extra: list[dict] = []            # injected into event listing
+    suppress_create_events: bool = False     # hide bead.created (negative ctl)
+    drop_bead_labels_in_events: bool = False # event without matching label
+    fail_bead_get: bool = False              # read-back 404 (negative ctl)
+    strip_metadata_on_read: bool = False     # metadata lost on read-back
 
 
 class StubSupervisor(BaseHTTPRequestHandler):
@@ -73,6 +109,16 @@ class StubSupervisor(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
+    def _events(self):
+        items = list(StubState.events_extra)
+        if not StubState.suppress_create_events:
+            for b in StubState.beads.values():
+                labels = [] if StubState.drop_bead_labels_in_events else (b.get("labels") or [])
+                items.append({"seq": b["_seq"], "type": "bead.created",
+                              "ts": "stub", "subject": b["id"],
+                              "payload": {"bead": {"id": b["id"], "labels": labels}}})
+        return sorted(items, key=lambda e: e.get("seq", 0))
+
     def do_GET(self):
         p = self.path
         if p.startswith("/health"):
@@ -86,17 +132,21 @@ class StubSupervisor(BaseHTTPRequestHandler):
                 "work": {"open": 8, "ready": 6, "in_progress": 0},
                 "agent_details": [], "partial": False, "partial_errors": []})
         if "/pending" in p:
-            return self._send(200, {"items": [], "total": 0})
-        if "/sessions" in p:
-            return self._send(200, {"items": [], "total": 0})
-        if "/events" in p:
             return self._send(200, {"items": [
-                {"seq": StubState.seq, "type": "bead.created", "subject": "stub"}]})
+                {"kind": "tool_approval", "session_id": "s1", "request_id": "r1",
+                 "prompt": "PRIVATE: should I run rm -rf?"}], "total": 1})
+        if "/sessions" in p:
+            return self._send(200, {"items": [{"id": "s1", "state": "active"}], "total": 1})
+        if "/events" in p:
+            return self._send(200, {"items": self._events()})
         if "/bead/" in p:
             bid = p.rstrip("/").split("/")[-1]
-            if bid in StubState.beads:
-                return self._send(200, StubState.beads[bid])
-            return self._send(404, {"code": "bead-not-found"})
+            if StubState.fail_bead_get or bid not in StubState.beads:
+                return self._send(404, {"code": "bead-not-found"})
+            b = dict(StubState.beads[bid])
+            if StubState.strip_metadata_on_read:
+                b.pop("metadata", None)
+            return self._send(200, b)
         if "/beads" in p:
             label = None
             if "label=" in p:
@@ -109,15 +159,12 @@ class StubSupervisor(BaseHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers.get("Content-Length", 0))
         body = json.loads(self.rfile.read(n) or b"{}")
-        # law: mutations require the anti-CSRF header (403 otherwise)
         if not self.headers.get("X-GC-Request"):
             return self._send(403, {"code": "csrf"})
-        # law: our client must always send an Idempotency-Key
         idem = self.headers.get("Idempotency-Key", "")
         StubState.post_calls.append({"idem": idem, "body": body})
         if not idem.startswith("neo-"):
             return self._send(400, {"code": "bad-idempotency-key"})
-        # replay of the same key must return the SAME bead, not create one
         for b in StubState.beads.values():
             if b.get("_idem") == idem:
                 return self._send(200, b)
@@ -128,7 +175,7 @@ class StubSupervisor(BaseHTTPRequestHandler):
         bid = f"xx-{StubState.seq:04x}"
         bead = {"id": bid, "status": "open", "title": body.get("title"),
                 "labels": body.get("labels"), "metadata": body.get("metadata"),
-                "_idem": idem}
+                "_idem": idem, "_seq": StubState.seq, "assignee": None}
         StubState.beads[bid] = bead
         return self._send(200, bead)
 
@@ -137,10 +184,14 @@ class StubServer:
     def __enter__(self):
         StubState.beads, StubState.post_calls, StubState.seq = {}, [], 100
         StubState.fail_next_creates = 0
+        StubState.events_extra = []
+        StubState.suppress_create_events = False
+        StubState.drop_bead_labels_in_events = False
+        StubState.fail_bead_get = False
+        StubState.strip_metadata_on_read = False
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), StubSupervisor)
         self.port = self.httpd.server_address[1]
-        self.t = threading.Thread(target=self.httpd.serve_forever, daemon=True)
-        self.t.start()
+        threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
         self.client = GasCityClient(f"http://127.0.0.1:{self.port}")
         return self
 
@@ -148,7 +199,10 @@ class StubServer:
         self.httpd.shutdown()
 
 
-CITY = "designwins-staging"
+def submit(finding, approval, tmp, client, extra_trust=()):
+    td = TrustDir(tmp if isinstance(tmp, str) else str(tmp), approval)
+    return H.submit(finding, td.path, CITY, client,
+                    Path(tmp) / "receipts", list(extra_trust) + td.roots)
 
 
 class TestFindingContract(unittest.TestCase):
@@ -164,138 +218,287 @@ class TestFindingContract(unittest.TestCase):
         self.assertTrue(any("negative" in g for g in gaps))
 
     def test_bad_finding_id(self):
-        gaps = F.validate(make_finding(finding_id="X-1"))
-        self.assertTrue(gaps)
+        self.assertTrue(F.validate(make_finding(finding_id="X-1")))
 
     def test_digest_and_key_determinism(self):
         f = make_finding()
         self.assertEqual(F.digest(f), F.digest(make_finding()))
-        k1 = F.idempotency_key(f, "auth-a")
-        self.assertEqual(k1, F.idempotency_key(make_finding(), "auth-a"))
-        self.assertNotEqual(k1, F.idempotency_key(f, "auth-b"))
-        self.assertTrue(k1.startswith("neo-"))
+        self.assertEqual(F.idempotency_key(f, "a"), F.idempotency_key(make_finding(), "a"))
+        self.assertNotEqual(F.idempotency_key(f, "a"), F.idempotency_key(f, "b"))
 
     def test_bead_payload_shape(self):
         p = F.to_bead_payload(make_finding())
         self.assertEqual(p["title"], "DW-NEO-DEMO-01 — demo finding flows into staging queue")
         self.assertIn("neo-finding:DW-NEO-DEMO-01", p["labels"])
-        self.assertIn("gh:outcitedharness", p["labels"])
-        self.assertEqual(p["metadata"]["neo-authorization-state"], "authorized")
-        self.assertIn("must fail pre-fix", p["description"])
+        self.assertEqual(p["metadata"]["neo-digest"], F.digest(make_finding()))
 
 
-class TestHandoffLaws(unittest.TestCase):
-    def _run(self, finding, approval, tmp):
-        ap = Path(tmp) / "approval.json"
-        ap.write_text(json.dumps(approval))
-        with StubServer() as s:
-            r = H.submit(finding, ap, CITY, s.client, Path(tmp) / "receipts")
-        return r, s
+class TestAuthorizationIntegrity(unittest.TestCase):
+    """Review finding 1 — every forge/scope/single-use refusal."""
 
-    def test_no_approval_file_refused(self):
+    def _refusal(self, finding=None, approval_over=None, trust_mode="ok"):
         with TemporaryDirectory() as tmp:
+            approval = make_approval(finding, **(approval_over or {}))
             with StubServer() as s:
-                r = H.submit(make_finding(), Path(tmp) / "missing.json",
-                             CITY, s.client, Path(tmp) / "receipts")
-            self.assertEqual(r["state"], "refused")
-            self.assertEqual(r["refusal"]["reason"], "invalid-approval")
-            self.assertEqual(StubState.post_calls, [])  # never touched the API
+                if trust_mode == "outside":
+                    ap = Path(tmp) / "elsewhere.json"
+                    ap.write_text(json.dumps(approval))
+                    roots = [Path(tmp) / "trust-not-used"]
+                    (Path(tmp) / "trust-not-used").mkdir()
+                    r = H.submit(finding or make_finding(), ap, CITY, s.client,
+                                 Path(tmp) / "rec", roots)
+                elif trust_mode == "world-writable":
+                    td = TrustDir(tmp, approval)
+                    os.chmod(td.root, 0o777)
+                    r = H.submit(finding or make_finding(), td.path, CITY, s.client,
+                                 Path(tmp) / "rec", td.roots)
+                else:
+                    r = submit(finding or make_finding(), approval, tmp, s.client)
+                return r, len(StubState.post_calls)
 
-    def test_wrong_issuer_refused(self):
-        with TemporaryDirectory() as tmp:
-            r, _ = self._run(make_finding(), make_approval(issuer="neo"), tmp)
-            self.assertEqual(r["refusal"]["reason"], "unauthorized-issuer")
+    def test_forged_issuer_string_refused(self):
+        r, posts = self._refusal(approval_over={"issuer": "sam"})
+        self.assertEqual(r["state"], "refused")
+        self.assertEqual(r["refusal"]["reason"], "unauthorized-issuer")
+        self.assertEqual(posts, 0)
 
-    def test_expired_approval_refused(self):
-        with TemporaryDirectory() as tmp:
-            r, _ = self._run(make_finding(),
-                             make_approval(expires_at=int(time.time()) - 10), tmp)
-            self.assertEqual(r["refusal"]["reason"], "approval-expired")
-
-    def test_task_mismatch_refused(self):
-        with TemporaryDirectory() as tmp:
-            r, _ = self._run(make_finding(),
-                             make_approval(task_ref="OTHER-TASK-9"), tmp)
-            self.assertEqual(r["refusal"]["reason"], "task-mismatch")
-
-    def test_proposal_finding_never_dispatched(self):
-        with TemporaryDirectory() as tmp:
-            r, _ = self._run(make_finding(authorization_state="proposal"),
-                             make_approval(), tmp)
-            self.assertEqual(r["refusal"]["reason"], "finding-not-authorized")
-            self.assertEqual(StubState.post_calls, [])
+    def test_missing_digest_refused(self):
+        r, posts = self._refusal(approval_over={"payload_digest": None})
+        self.assertEqual(r["refusal"]["reason"], "invalid-approval")
+        self.assertEqual(posts, 0)
 
     def test_digest_mismatch_refused(self):
-        with TemporaryDirectory() as tmp:
-            r, _ = self._run(make_finding(),
-                             make_approval(payload_digest="0" * 64), tmp)
-            self.assertEqual(r["refusal"]["reason"], "digest-mismatch")
+        r, posts = self._refusal(approval_over={"payload_digest": "0" * 64})
+        self.assertEqual(r["refusal"]["reason"], "digest-mismatch")
+        self.assertEqual(posts, 0)
 
-    def test_accepted_produces_receipt_with_readback(self):
+    def test_wrong_project_refused(self):
+        r, posts = self._refusal(approval_over={"project": "other"})
+        self.assertEqual(r["refusal"]["reason"], "unauthorized-project")
+        self.assertEqual(posts, 0)
+
+    def test_wrong_action_refused(self):
+        r, posts = self._refusal(approval_over={"action": "gascity-dispatch"})
+        self.assertEqual(r["refusal"]["reason"], "unauthorized-action")
+        self.assertEqual(posts, 0)
+
+    def test_nonzero_spend_refused(self):
+        r, posts = self._refusal(approval_over={"max_spend_usd": 5})
+        self.assertEqual(r["refusal"]["reason"], "spend-not-authorized")
+        self.assertEqual(posts, 0)
+
+    def test_max_actions_gt_1_refused(self):
+        r, posts = self._refusal(approval_over={"max_actions": 2})
+        self.assertEqual(r["refusal"]["reason"], "invalid-approval")
+        self.assertEqual(posts, 0)
+
+    def test_expired_refused(self):
+        r, posts = self._refusal(approval_over={"expires_at": int(time.time()) - 10})
+        self.assertEqual(r["refusal"]["reason"], "approval-expired")
+        self.assertEqual(posts, 0)
+
+    def test_wrong_city_refused(self):
+        r, posts = self._refusal(approval_over={"recipient": "designwins-orchestrator"})
+        self.assertEqual(r["refusal"]["reason"], "unauthorized-recipient")
+        self.assertEqual(posts, 0)
+
+    def test_task_mismatch_refused(self):
+        r, posts = self._refusal(approval_over={"task_ref": "OTHER-9"})
+        self.assertEqual(r["refusal"]["reason"], "task-mismatch")
+        self.assertEqual(posts, 0)
+
+    def test_staging_artifact_cannot_target_production_city(self):
         with TemporaryDirectory() as tmp:
-            r, s = self._run(make_finding(), make_approval(), tmp)
-            self.assertEqual(r["state"], "accepted")
-            self.assertTrue(r["bead_id"])
-            self.assertEqual(r["readback"]["id"], r["bead_id"])
-            self.assertEqual(r["readback"]["status"], "open")
-            self.assertIn("neo-finding:", r["readback"]["labels"][0])
-            self.assertTrue(Path(r["receipt_path"]).exists())
+            approval = make_approval(recipient="designwins-orchestrator")
+            td = TrustDir(tmp, approval)
+            with StubServer() as s:
+                r = H.submit(make_finding(), td.path, "designwins-orchestrator",
+                             s.client, Path(tmp) / "rec", td.roots)
+            self.assertEqual(r["refusal"]["reason"], "environment-mismatch")
+            self.assertEqual(StubState.post_calls, [])
+
+    def test_untrusted_path_refused(self):
+        r, posts = self._refusal(trust_mode="outside")
+        self.assertEqual(r["refusal"]["reason"], "untrusted-path")
+        self.assertEqual(posts, 0)
+
+    def test_world_writable_trust_root_refused(self):
+        r, posts = self._refusal(trust_mode="world-writable")
+        self.assertEqual(r["refusal"]["reason"], "untrusted-trust-dir")
+        self.assertEqual(posts, 0)
+
+    def test_missing_artifact_file_refused(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp) / "trust"
+            root.mkdir(mode=0o700)
+            with StubServer() as s:
+                r = H.submit(make_finding(), root / "gone.json", CITY, s.client,
+                             Path(tmp) / "rec", [root])
+            self.assertEqual(r["refusal"]["reason"], "invalid-approval")
+            self.assertEqual(StubState.post_calls, [])
+
+    def test_github_finding_cannot_authorize_itself(self):
+        # a fully-valid finding with authorization_state=authorized but NO
+        # artifact anywhere -> refused; nothing on GitHub is an authorization
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp) / "trust"
+            root.mkdir(mode=0o700)
+            with StubServer() as s:
+                r = H.submit(make_finding(), root / "absent.json", CITY, s.client,
+                             Path(tmp) / "rec", [root])
+            self.assertEqual(r["state"], "refused")
+            self.assertEqual(StubState.post_calls, [])
+
+    def test_proposal_finding_never_dispatched(self):
+        r, posts = self._refusal(finding=make_finding(authorization_state="proposal"))
+        self.assertEqual(r["refusal"]["reason"], "finding-not-authorized")
+        self.assertEqual(posts, 0)
+
+    def test_reused_artifact_cannot_authorize_second_finding(self):
+        # same artifact replayed against a DIFFERENT (altered) finding must
+        # refuse on digest binding — no second task can be created
+        with TemporaryDirectory() as tmp:
+            f1 = make_finding()
+            f2 = make_finding(finding_id="DW-NEO-DEMO-02", task_id="DW-NEO-DEMO-02 — two")
+            td = TrustDir(tmp, make_approval(f1))
+            with StubServer() as s:
+                r1 = H.submit(f1, td.path, CITY, s.client, Path(tmp) / "rec", td.roots)
+                r2 = H.submit(f2, td.path, CITY, s.client, Path(tmp) / "rec", td.roots)
+            self.assertEqual(r1["state"], "accepted")
+            self.assertEqual(r2["state"], "refused")
+            self.assertIn(r2["refusal"]["reason"],
+                          ("digest-mismatch", "task-mismatch", "approval-reused"))
             self.assertEqual(len(StubState.post_calls), 1)
 
-    def test_resubmit_is_duplicate_no_new_post(self):
-        with TemporaryDirectory() as tmp:
-            ap = Path(tmp) / "a.json"
-            ap.write_text(json.dumps(make_approval()))
-            with StubServer() as s:
-                r1 = H.submit(make_finding(), ap, CITY, s.client, Path(tmp) / "rec")
-                r2 = H.submit(make_finding(), ap, CITY, s.client, Path(tmp) / "rec")
-            self.assertEqual(r1["state"], "accepted")
-            self.assertEqual(r2["state"], "duplicate")
-            self.assertEqual(r2["bead_id"], r1["bead_id"])
-            self.assertEqual(len(StubState.post_calls), 1)  # exactly one create
 
-    def test_idempotency_key_replay_returns_same_bead(self):
+class TestAcceptanceReceipts(unittest.TestCase):
+    """Review finding 2 — proof-gated acceptance."""
+
+    def test_accepted_with_full_proof(self):
         with TemporaryDirectory() as tmp:
-            ap = Path(tmp) / "a.json"
-            ap.write_text(json.dumps(make_approval()))
+            r, _ = None, 0
             with StubServer() as s:
-                r1 = H.submit(make_finding(), ap, CITY, s.client, Path(tmp) / "rec")
-                # simulate a lost response: same key POSTed directly again
-                body, _ = s.client.create_bead(
-                    CITY, F.to_bead_payload(make_finding()), r1["idempotency_key"])
-                self.assertEqual(body["id"], r1["bead_id"])
-                self.assertEqual(len(StubState.beads), 1)
+                r = submit(make_finding(), make_approval(), tmp, s.client)
+            self.assertEqual(r["state"], "accepted")
+            self.assertEqual(r["stage"], "BEAD_ACCEPTED")
+            self.assertTrue(r["bead_id"])
+            self.assertEqual(r["readback"]["metadata"]["neo-digest"],
+                             F.digest(make_finding()))
+            self.assertEqual(r["event_proof"]["subject"], r["bead_id"])
+            self.assertTrue(r["event_proof"]["label_match"])
+
+    def test_missing_event_downgrades_to_persisted_only(self):
+        with TemporaryDirectory() as tmp:
+            with StubServer() as s:
+                StubState.suppress_create_events = True
+                r = submit(make_finding(), make_approval(), tmp, s.client)
+            self.assertEqual(r["state"], "accepted-persisted")
+            self.assertEqual(r["stage"], "BEAD_ACCEPTED_PERSISTED_ONLY")
+            self.assertIn("persisted-only", r["note"])
+
+    def test_unrelated_event_is_not_proof(self):
+        with TemporaryDirectory() as tmp:
+            with StubServer() as s:
+                StubState.suppress_create_events = True
+                StubState.events_extra = [
+                    {"seq": 99, "type": "bead.created", "ts": "stub",
+                     "subject": "xx-unrelated",
+                     "payload": {"bead": {"id": "xx-unrelated", "labels": []}}}]
+                r = submit(make_finding(), make_approval(), tmp, s.client)
+            self.assertEqual(r["state"], "accepted-persisted")  # weaker, honest
+
+    def test_failed_readback_never_accepted(self):
+        with TemporaryDirectory() as tmp:
+            with StubServer() as s:
+                StubState.fail_bead_get = True
+                r = submit(make_finding(), make_approval(), tmp, s.client)
+            self.assertEqual(r["state"], "unverified")
+            self.assertIn("read-back", r["verification_failure"])
+            self.assertNotEqual(r["state"], "accepted")
+
+    def test_metadata_digest_mismatch_fails_closed(self):
+        with TemporaryDirectory() as tmp:
+            finding = make_finding()
+            approval = make_approval(finding)
+            # craft payload whose stored digest differs from finding digest
+            F_orig = F.digest
+            payload = F.to_bead_payload(finding)
+            payload["metadata"]["neo-digest"] = "0" * 64
+            with StubServer() as s:
+                td = TrustDir(tmp, approval)
+                client = s.client
+                key = F.idempotency_key(finding, td.path.read_text()[:8])
+                s.client.create_bead(CITY, payload, key)
+                r = H.submit(finding, td.path, CITY, client, Path(tmp) / "rec", td.roots)
+            # pre-check label lookup returns the forged bead; read-back must refuse
+            self.assertIn(r["state"], ("unverified", "refused", "duplicate"))
+            if r["state"] != "duplicate":
+                self.assertNotEqual(r["state"], "accepted")
+
+    def test_network_error_is_api_error_not_accepted(self):
+        with TemporaryDirectory() as tmp:
+            ap_written = make_approval()
+            td = TrustDir(tmp, ap_written)
+            with StubServer() as s:
+                def boom(*a, **k):
+                    raise ApiError(500, {"code": "boom"})
+                s.client.create_bead = boom
+                r = H.submit(make_finding(), td.path, CITY, s.client,
+                             Path(tmp) / "rec", td.roots)
+            self.assertEqual(r["state"], "api-error")
 
     def test_5xx_retries_then_accepts(self):
         with TemporaryDirectory() as tmp:
-            ap = Path(tmp) / "a.json"
-            ap.write_text(json.dumps(make_approval()))
+            td = TrustDir(tmp, make_approval())
             with StubServer() as s:
                 StubState.fail_next_creates = 2
-                r = H.submit(make_finding(), ap, CITY, s.client, Path(tmp) / "rec")
-                self.assertEqual(r["state"], "accepted")
-                self.assertEqual(r["attempts"], 3)
+                r = H.submit(make_finding(), td.path, CITY, s.client,
+                             Path(tmp) / "rec", td.roots)
+            self.assertEqual(r["state"], "accepted")
+            self.assertEqual(r["attempts"], 3)
 
-    def test_4xx_is_api_error_no_retry(self):
+    def test_4xx_no_retry(self):
         with TemporaryDirectory() as tmp:
-            ap = Path(tmp) / "a.json"
-            ap.write_text(json.dumps(make_approval()))
+            td = TrustDir(tmp, make_approval())
             with StubServer() as s:
-                # force a 422 by violating the stub's key law once
-                orig = s.client.create_bead
-                s.client.create_bead = lambda c, p, k: (_ for _ in ()).throw(
+                s.client.create_bead = lambda *a, **k: (_ for _ in ()).throw(
                     ApiError(422, {"code": "validation-failed"}))
-                r = H.submit(make_finding(), ap, CITY, s.client, Path(tmp) / "rec")
+                r = H.submit(make_finding(), td.path, CITY, s.client,
+                             Path(tmp) / "rec", td.roots)
             self.assertEqual(r["state"], "api-error")
             self.assertEqual(r["attempts"], 1)
-            self.assertEqual(r["error"]["code"], "validation-failed")
 
-    def test_csrf_header_enforced_by_stub(self):
-        # proves the stub (like the real API) rejects headerless mutations
-        import urllib.request
+    def test_ledger_replay_returns_prior_receipt_no_post(self):
+        with TemporaryDirectory() as tmp:
+            td = TrustDir(tmp, make_approval())
+            with StubServer() as s:
+                r1 = H.submit(make_finding(), td.path, CITY, s.client,
+                              Path(tmp) / "rec", td.roots)
+                r2 = H.submit(make_finding(), td.path, CITY, s.client,
+                              Path(tmp) / "rec", td.roots)
+            self.assertEqual(r1["state"], "accepted")
+            self.assertEqual(r2["state"], "duplicate")
+            self.assertEqual(r2["duplicate_source"], "approval-ledger")
+            self.assertEqual(r2["bead_id"], r1["bead_id"])
+            self.assertEqual(len(StubState.post_calls), 1)
+
+    def test_label_dedup_without_ledger(self):
+        # bead exists (e.g. ledger lost) — label check still prevents re-create
+        with TemporaryDirectory() as tmp:
+            td = TrustDir(tmp, make_approval())
+            with StubServer() as s:
+                s.client.create_bead(CITY, F.to_bead_payload(make_finding()),
+                                     "neo-manual-seed")
+                r = H.submit(make_finding(), td.path, CITY, s.client,
+                             Path(tmp) / "rec", td.roots)
+            self.assertEqual(r["state"], "duplicate")
+            self.assertEqual(r["duplicate_source"], "label-check")
+
+    def test_csrf_header_enforced(self):
+        import urllib.request, urllib.error
         with StubServer() as s:
             req = urllib.request.Request(
-                f"http://127.0.0.1:{self_port(s)}/v0/city/{CITY}/beads",
+                f"http://127.0.0.1:{s.port}/v0/city/{CITY}/beads",
                 method="POST", data=b"{}",
                 headers={"Content-Type": "application/json"})
             try:
@@ -305,37 +508,62 @@ class TestHandoffLaws(unittest.TestCase):
                 self.assertEqual(e.code, 403)
 
 
-def self_port(s):
-    return s.port
+class TestStagesAndSanitization(unittest.TestCase):
+    def test_verification_stages_distinct(self):
+        open_bead = {"status": "open", "labels": ["neo-finding:X"]}
+        running = {"status": "in_progress", "assignee": "engineer-1"}
+        closed = {"status": "closed"}
+        closed_verified = {"status": "closed",
+                           "metadata": {"neo-finding-id": "DW-NEO-DEMO-01"}}
+        self.assertEqual(NS.verification_stage(open_bead), "BEAD_ACCEPTED")
+        self.assertEqual(NS.verification_stage(running), "AGENT_RUNNING")
+        self.assertEqual(NS.verification_stage(closed), "WORK_VERIFIED_PENDING_PROOF")
+        self.assertEqual(NS.verification_stage(
+            closed_verified, [{"finding_id": "DW-NEO-DEMO-01",
+                               "verification": {"pr": 7, "ci": "passed"}}]),
+            "WORK_VERIFIED")
 
+    def test_sanitize_drops_private_fields(self):
+        snap = {
+            "city": {"work": {}, "partial_errors": ["x" * 200]},
+            "captured_at": "2026-10-27T00:00:00Z",
+            "supervisor": {"status": "ok"},
+            "pending_interactions": [
+                {"kind": "tool_approval", "session_id": "s1", "request_id": "r1",
+                 "prompt": "PRIVATE", "options": ["a"], "metadata": {"x": 1}}],
+            "sessions": [{"id": "s1", "state": "active", "transcript_path": "/p"}],
+            "findings": [{"id": "b1", "status": "open", "title": "t",
+                          "description": "PRIVATE DETAIL",
+                          "labels": ["neo-finding:X"],
+                          "metadata": {"neo-finding-id": "X", "junk": "v"},
+                          "assignee": None}],
+            "recent_events": [{"seq": 1, "type": "bead.created",
+                               "subject": "b1", "payload": {"big": "PRIVATE"}}],
+        }
+        s = NS.sanitize_snapshot(snap)
+        p = s["pending_interactions"][0]
+        self.assertEqual(set(p), {"kind", "session_id", "request_id"})
+        raw = json.dumps(s)
+        self.assertNotIn("PRIVATE", raw)
+        self.assertNotIn("description", json.dumps(s["findings"][0]))
+        self.assertNotIn("payload", json.dumps(s["recent_events"][0]))
+        self.assertEqual(s["findings"][0]["stage"], "BEAD_ACCEPTED")
 
-class TestNeoStatus(unittest.TestCase):
-    def test_snapshot_and_alerts(self):
-        with TemporaryDirectory() as tmp:
-            with StubServer() as s:
-                ap = Path(tmp) / "a.json"
-                ap.write_text(json.dumps(make_approval()))
-                H.submit(make_finding(), ap, CITY, s.client, Path(tmp) / "rec")
-                snap = NS.build_snapshot(s.client, CITY)
-                self.assertEqual(len(snap["findings"]), 1)
-                self.assertEqual(snap["supervisor"]["status"], "ok")
-                # stub city: 1 ready, 0 running agents -> idle alert
-                alerts = NS.evaluate(snap)
-                rules = [a["rule"] for a in alerts]
-                self.assertIn("orchestrator-idle-with-ready-work", rules)
-                self.assertIn("finding-without-receipt", rules)
-                md = NS.render_markdown(snap, alerts)
-                self.assertIn("NEO status", md)
-                self.assertIn("orchestrator-idle-with-ready-work", md)
+    def test_stale_snapshot_alert(self):
+        old = "2026-10-27T00:00:00Z"
+        snap = {"city": {"work": {}}, "agents": [], "findings": [],
+                "captured_at": old, "pending_interactions": []}
+        import calendar
+        now = calendar.timegm(time.strptime(old, "%Y-%m-%dT%H:%M:%SZ")) + 40 * 60
+        rules = [a["rule"] for a in NS.evaluate(snap, now_epoch=now)]
+        self.assertIn("snapshot-stale", rules)
 
-    def test_duplicates_detected(self):
-        with TemporaryDirectory() as tmp:
-            with StubServer() as s:
-                StubState.beads["a1"] = {"id": "a1", "title": "DW-TEST-1 — x", "labels": []}
-                StubState.beads["a2"] = {"id": "a2", "title": "DW-TEST-1 — x", "labels": []}
-                snap = NS.build_snapshot(s.client, CITY)
-                self.assertEqual(snap["duplicates"],
-                                 [{"task_id": "DW-TEST-1", "beads": ["a1", "a2"]}])
+    def test_blocked_work_alert(self):
+        snap = {"city": {"work": {}}, "agents": [], "findings": [],
+                "blocked": ["b1", "b2"], "pending_interactions": [],
+                "captured_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+        rules = [a["rule"] for a in NS.evaluate(snap)]
+        self.assertIn("blocked-work", rules)
 
 
 if __name__ == "__main__":

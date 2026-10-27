@@ -1,0 +1,39 @@
+{
+  "schema": "dw.gascity-acceptance.v1",
+  "finding_id": "DW-NEO-GATE-02",
+  "task_id": "DW-NEO-GATE-02 \u2014 gate demo full proof",
+  "finding_digest": "0e661d3f6ff3179a61c2439bded13e0c28bf33d7a1b5efeda427208a8a034566",
+  "city": "designwins-staging",
+  "authorization_ref": "/Users/samkim/designwins-neo-gascity/demo/trust-staging/sam-stagingfixture-gate02.json",
+  "artifact_digest": "295544aa0e76769974d9258bde9e1b4c257a2db1a05e62f8e55466a8ca87d83b",
+  "idempotency_key": "neo-2711ae74d184d968c14619f6d00febf0efdf2b40",
+  "at": "2026-10-27T17:32:22Z",
+  "state": "accepted",
+  "stage": "BEAD_ACCEPTED",
+  "attempts": 1,
+  "environment": "staging",
+  "readback": {
+    "id": "ds-0iu",
+    "status": "open",
+    "title": "DW-NEO-GATE-02 \u2014 gate demo full proof",
+    "labels": [
+      "gh:outcitedharness",
+      "neo",
+      "neo-finding:DW-NEO-GATE-02",
+      "severity:info"
+    ],
+    "metadata": {
+      "neo-authorization-state": "authorized",
+      "neo-digest": "0e661d3f6ff3179a61c2439bded13e0c28bf33d7a1b5efeda427208a8a034566",
+      "neo-finding-id": "DW-NEO-GATE-02",
+      "neo-task-id": "DW-NEO-GATE-02 \u2014 gate demo full proof"
+    }
+  },
+  "bead_id": "ds-0iu",
+  "event_proof": {
+    "seq": 37902,
+    "ts": "2026-10-27T10:32:22.363723-07:00",
+    "subject": "ds-0iu",
+    "label_match": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "dw.approval.gascity-ingest.v1",
+  "environment": "staging",
+  "project": "designwins",
+  "action": "gascity-ingest",
+  "recipient": "designwins-staging",
+  "task_ref": "DW-NEO-GATE-02 \u2014 gate demo full proof",
+  "issuer": "staging-fixture",
+  "authorization_ref": "NEO<->Gas City gate brief 2026-10-27 P3 item 4 (staging-only fixture, NOT production approval)",
+  "expires_at": 1795200000,
+  "max_actions": 1,
+  "spend_scope": "none",
+  "max_spend_usd": 0,
+  "payload_digest": "0e661d3f6ff3179a61c2439bded13e0c28bf33d7a1b5efeda427208a8a034566"
+}

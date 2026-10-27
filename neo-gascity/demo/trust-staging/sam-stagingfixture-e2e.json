@@ -1,0 +1,15 @@
+{
+  "schema": "dw.approval.gascity-ingest.v1",
+  "environment": "staging",
+  "project": "designwins",
+  "action": "gascity-ingest",
+  "recipient": "designwins-staging",
+  "task_ref": "DW-NEO-DEMO-01 \u2014 neo gas city integration demo",
+  "issuer": "staging-fixture",
+  "authorization_ref": "e2e acceptance fixture (staging-only, not production approval)",
+  "expires_at": 1793129681,
+  "max_actions": 1,
+  "spend_scope": "none",
+  "max_spend_usd": 0,
+  "payload_digest": "4b66305a24a74d4a00404ab2b7466c5eaf7c14e927121e39777c3c68d15c5163"
+}

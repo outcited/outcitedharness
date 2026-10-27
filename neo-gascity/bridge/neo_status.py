@@ -6,7 +6,9 @@ access to any assistant's private state.
 """
 from __future__ import annotations
 
+import calendar
 import json
+import time
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -58,6 +60,89 @@ def build_snapshot(client: GasCityClient, city: str) -> dict[str, Any]:
     return snap
 
 
+# ---- verification stages (distinguished from acceptance, review finding 2) --
+
+STAGE_BEAD_ACCEPTED = "BEAD_ACCEPTED"
+STAGE_AGENT_RUNNING = "AGENT_RUNNING"
+STAGE_WORK_VERIFIED = "WORK_VERIFIED"
+STAGE_WORK_VERIFIED_PENDING_PROOF = "WORK_VERIFIED_PENDING_PROOF"
+
+
+def verification_stage(bead: dict, receipts: list[dict] | None = None) -> str:
+    """Derive the loop stage from live bead state + published receipts.
+
+    BEAD_ACCEPTED      — bead exists (open, unassigned)
+    AGENT_RUNNING      — in_progress or assigned to a live agent
+    WORK_VERIFIED      — closed AND a receipt carries verification (pr+ci)
+    WORK_VERIFIED_PENDING_PROOF — closed but no verification receipt seen
+    """
+    status = (bead.get("status") or "").lower()
+    assignee = bead.get("assignee")
+    fid_meta = (bead.get("metadata") or {}).get("neo-finding-id", "")
+    if status == "closed":
+        for r in receipts or []:
+            if r.get("finding_id") == (fid_meta or _finding_id_from_labels(bead)):
+                v = r.get("verification") or {}
+                if v.get("pr") and v.get("ci") == "passed":
+                    return STAGE_WORK_VERIFIED
+        return STAGE_WORK_VERIFIED_PENDING_PROOF
+    if status == "in_progress" or assignee:
+        return STAGE_AGENT_RUNNING
+    return STAGE_BEAD_ACCEPTED
+
+
+def _finding_id_from_labels(bead: dict) -> str:
+    for l in bead.get("labels") or []:
+        s = str(l)
+        if s.startswith(F.NEO_LABEL_PREFIX):
+            return s[len(F.NEO_LABEL_PREFIX):]
+    return ""
+
+
+# ---- publication sanitization (review finding 3) ----------------------------
+
+SANITIZE_PENDING_KEYS = ("kind", "session_id", "request_id")
+SANITIZE_EVENT_KEYS = ("seq", "type", "subject")
+
+
+def sanitize_snapshot(snap: dict) -> dict:
+    """Allowlist fields before anything leaves the host for GitHub.
+
+    Dropped: pending-interaction prompts/options/metadata (agent questions can
+    quote private content), bead descriptions, event payloads, long error
+    strings (truncated), session detail.
+    """
+    s = json.loads(json.dumps(snap))  # deep copy
+    s["pending_interactions"] = [
+        {k: p.get(k) for k in SANITIZE_PENDING_KEYS if p.get(k) is not None}
+        for p in s.get("pending_interactions") or []
+    ]
+    s["sessions"] = [
+        {k: x.get(k) for k in ("id", "state")}
+        for x in s.get("sessions") or []
+    ]
+    s["findings"] = [
+        {
+            "id": b.get("id"), "status": b.get("status"),
+            "title": (b.get("title") or "")[:80],
+            "labels": b.get("labels"),
+            "assignee": b.get("assignee"),
+            "metadata": {k: (b.get("metadata") or {}).get(k)
+                         for k in ("neo-finding-id", "neo-authorization-state")},
+            "stage": verification_stage(b),
+        }
+        for b in s.get("findings") or []
+    ]
+    s["recent_events"] = [
+        {k: e.get(k) for k in SANITIZE_EVENT_KEYS}
+        for e in s.get("recent_events") or []
+    ]
+    city = s.get("city")
+    if isinstance(city, dict):
+        city["partial_errors"] = [str(e)[:120] for e in (city.get("partial_errors") or [])]
+    return s
+
+
 def _blocked(b: dict) -> bool:
     return bool(b.get("blocked_by")) or "blocked" in (b.get("status") or "")
 
@@ -77,7 +162,11 @@ def _duplicates(items: list[dict]) -> list[dict]:
 
 # ---- Phase 4: continuity rules over a snapshot (pure, testable) --------
 
-def evaluate(snap: dict[str, Any], now_epoch: int | None = None) -> list[dict]:
+STALE_SNAPSHOT_MIN = 15
+
+
+def evaluate(snap: dict[str, Any], now_epoch: int | None = None,
+             receipts: list[dict] | None = None) -> list[dict]:
     alerts: list[dict] = []
     city = snap.get("city") or {}
     work = city.get("work") or {}
@@ -96,14 +185,40 @@ def evaluate(snap: dict[str, Any], now_epoch: int | None = None) -> list[dict]:
         alerts.append({"rule": "city-status-partial", "errors": city.get("partial_errors")})
     if snap.get("duplicates"):
         alerts.append({"rule": "duplicate-findings", "items": snap["duplicates"]})
+    if snap.get("blocked"):
+        alerts.append({"rule": "blocked-work", "count": len(snap["blocked"])})
     for f in snap.get("findings") or []:
-        if not _has_receipt(f):
+        if not _has_receipt(f, receipts):
             alerts.append({"rule": "finding-without-receipt",
                            "bead": f.get("id"), "title": (f.get("title") or "")[:60]})
+    stale_min = _snapshot_age_minutes(snap.get("captured_at"), now_epoch)
+    if stale_min is not None and stale_min > STALE_SNAPSHOT_MIN:
+        alerts.append({"rule": "snapshot-stale", "age_minutes": stale_min})
     return alerts
 
 
-def _has_receipt(bead: dict) -> bool:
+def _snapshot_age_minutes(captured_at: str | None,
+                          now_epoch: int | None) -> int | None:
+    if not captured_at:
+        return None
+    try:
+        import calendar
+        t = calendar.timegm(time.strptime(captured_at, "%Y-%m-%dT%H:%M:%SZ"))
+    except ValueError:
+        return None
+    now = now_epoch if now_epoch is not None else time.time()
+    return max(0, int((now - t) / 60))
+
+
+def _has_receipt(bead: dict, receipts: list[dict] | None = None) -> bool:
+    """A finding is receipted when a persisted acceptance receipt names it
+    (state accepted/accepted-persisted) or the bead itself carries one."""
+    if receipts:
+        fid = _finding_id_from_labels(bead)
+        for r in receipts:
+            if r.get("finding_id") == fid and r.get("state") in ("accepted", "accepted-persisted"):
+                return True
+        return False
     meta = bead.get("metadata") or {}
     return bool(meta.get("neo-accepted-receipt"))
 

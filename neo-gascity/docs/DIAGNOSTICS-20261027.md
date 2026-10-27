@@ -43,19 +43,36 @@ the proxied path, or the proxy lifecycle (`--stop-epoch` on the city proxy)
 left it talking to a retiring proxy. In-process timeouts ⇒ cache never
 proven ⇒ every cache-only read declines ⇒ partial status.
 
-## Recommended remediation (NONE EXECUTED — requires Sam's approval)
+## Recommended remediation (P4 — smallest safe change; NONE EXECUTED, approval gate)
 
-1. Preferred: supervisor restart during a quiet window (`gc supervisor` on
-   the mini). Work survives in beads; sessions are adopted on restart
-   (documented orchestrator behavior). Expected effect: cache rebuilds,
-   ready projection returns, engineer pools scale to ready work.
-   ⚠️ This IS an orchestration change — approval gate.
-2. Alternative: check gc release notes > 1.5.1 for proxied-BdStore fixes
-   and upgrade if a fix shipped (bigger change; needs its own gate).
-3. Observation-only canary first: `gc status` inside the city dir on the
-   mini (read-only) to see if the CLI view (non-proxied) already shows
-   ready=21 — if yes, confirms the supervisor-only scope of the fault.
-4. After fix: NEO's `city-status-partial` alert should clear; if engineers
-   still don't scale, next hypothesis is agent-scope/label matching between
-   ready beads and engineer pools (checked only after the cache fault is
-   gone, to avoid two variables).
+**Preferred: single supervisor restart in a quiet window.** `gc supervisor`
+serves BOTH cities from one process — restart affects production
+`designwins-orchestrator` too, which is why it is explicitly approval-gated.
+
+- Pre-flight (read-only): capture `GET /v0/city/{c}/status` for both cities +
+  `gc -C city status` on the mini (non-proxied view) as the baseline.
+- Execute (operator, on the mini): stop and re-run the supervisor the way it
+  is hosted today (PID 40699; `gc supervisor run`), e.g.
+  `pkill -f 'gc supervisor run'` then relaunch under the same mechanism it
+  was started with (tmux/launchd — confirm with `ps -o ppid= -p <pid>` first).
+- Verify (read-only, ≤5 min):
+  1. `GET /health` → status ok, cities_running=2;
+  2. `GET /v0/city/designwins-orchestrator/status` → `partial:false`,
+     empty `partial_errors`, ready projection ≈ 21 (vs `bd ready` ground truth);
+  3. `GET .../beads?status=ready` returns items (not 0/0);
+  4. within ~2 ticks: engineer pool reports running sessions > 0 with ready
+     work still present;
+  5. sessions from before the restart show `adopted` (not respawned) — no
+     lost session identity; `do-wisp-lah661` dog session continues.
+- Rollback: another supervisor restart is itself the rollback for a bad
+  restart (stateless process over durable stores). If gc 1.5.1 proves
+  defective on restart, downgrade path: `brew install
+  gascity@1.5.0`-style pin is NOT assumed available — instead keep 1.5.1 and
+  file upstream; the store layer (bd/dolt) is independent and untouched.
+- Why safe: work lives in Dolt-backed beads (survives), event log is
+  append-only (`.gc/events.jsonl`), sessions are adopted on supervisor
+  restart (documented orchestrator behavior, api.md "adopting_sessions").
+- If a restart does NOT clear it: upgrade gc (>1.5.1) checking release notes
+  for proxied-BdStore/cache fixes — separate, larger gate.
+- After remediation: NEO's `city-status-partial` alert is the automatic
+  canary (should clear within one publisher cycle).

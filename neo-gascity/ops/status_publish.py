@@ -1,18 +1,20 @@
 """NEO status publisher — snapshots to the shared GitHub status branch.
 
-Mechanism (docs/NEO-GITHUB-MECHANISM.md): every run builds read-only snapshots
-of both Gas City cities through the M5 SSH tunnel, evaluates continuity
-alerts, and commits them to the `neo/status` branch of outcited/outcitedharness.
-NEO (ChatGPT) reads that branch through its existing GitHub connection — it
-needs NO direct M5 access.
+Review #6448553783 fixes:
+  * change detection compares a STABLE digest file (content minus volatile
+    fields), never captured_at — identical state produces no history churn;
+  * every published field passes bridge.neo_status.sanitize_snapshot
+    (allowlist) — prompts, descriptions and event payloads never leave host;
+  * the dedicated checkout is guarded: a marker file + toplevel check must
+    both match before any reset/push; it can never point at user worktrees.
 
-Commit policy: snapshot files are always refreshed; a history entry is added
-only when content changes, or as an hourly heartbeat. Nothing is written to
-Gas City; main is never touched.
+Commit policy: history entry (and push) only when the stable digest changes
+or as an hourly heartbeat. Files are always refreshed locally; GitHub readers
+detect staleness via status/LATEST.json captured_at (and consumers raise
+snapshot-stale past 15 min).
 
-Manual seed (once, to prove the mechanism):
-  python3 neo-gascity/ops/status_publish.py --once
-launchd activation (NOT active yet): see ops/install-m5.sh
+Manual run:  python3 ops/status_publish.py --base-url http://127.0.0.1:8373
+Activation (NOT active): see ops/install-m5.sh
 """
 from __future__ import annotations
 
@@ -27,14 +29,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from bridge import neo_status as NS          # noqa: E402
-from bridge.gascity_client import GasCityClient  # noqa: E402
+from bridge import neo_status as NS               # noqa: E402
+from bridge.gascity_client import GasCityClient   # noqa:E402
 
 CITIES = ("designwins-orchestrator", "designwins-staging")
 STATUS_BRANCH = "neo/status"
 REMOTE = "origin"
 REPO_URL = "https://github.com/outcited/outcitedharness.git"
 WORKTREE = Path.home() / "designwins-neo-gascity" / "status-repo"
+MARKER = ".neo-status-checkout"
 
 
 def sh(cmd: list[str], cwd: Path | None = None) -> str:
@@ -44,17 +47,35 @@ def sh(cmd: list[str], cwd: Path | None = None) -> str:
     return r.stdout.strip()
 
 
+def _guarded(fn):
+    """Refuse destructive ops outside the dedicated, marked checkout."""
+    def wrap(cmd, cwd=None):
+        if cwd is not None and any(k in cmd[:4] for k in ("reset", "checkout", "clean")):
+            top = Path(sh(["git", "rev-parse", "--show-toplevel"], cwd=cwd))
+            if top.resolve() != WORKTREE.resolve() or not (top / MARKER).exists():
+                raise RuntimeError(f"refused: {top} is not the marked status checkout")
+        return fn(cmd, cwd)
+    return wrap
+
+
+git = _guarded(sh)
+
+
 def ensure_worktree() -> Path:
-    if (WORKTREE / ".git").exists():
-        sh(["git", "fetch", REMOTE], WORKTREE)
+    if (WORKTREE / ".git").exists() and (WORKTREE / MARKER).exists():
+        git(["git", "fetch", REMOTE], WORKTREE)
         if _remote_branch_exists():
-            sh(["git", "checkout", STATUS_BRANCH], WORKTREE)
-            sh(["git", "reset", "--hard", f"{REMOTE}/{STATUS_BRANCH}"], WORKTREE)
+            git(["git", "checkout", STATUS_BRANCH], WORKTREE)
+            git(["git", "reset", "--hard", f"{REMOTE}/{STATUS_BRANCH}"], WORKTREE)
         else:
-            sh(["git", "checkout", "-B", STATUS_BRANCH, f"{REMOTE}/main"], WORKTREE)
+            git(["git", "checkout", "-B", STATUS_BRANCH, f"{REMOTE}/main"], WORKTREE)
         return WORKTREE
+    if (WORKTREE / ".git").exists():
+        raise RuntimeError(f"{WORKTREE} exists without {MARKER} — refusing; "
+                           "move it aside and let the publisher clone fresh")
     WORKTREE.parent.mkdir(parents=True, exist_ok=True)
     sh(["git", "clone", REPO_URL, str(WORKTREE)])
+    (WORKTREE / MARKER).write_text("dedicated neo/status publisher checkout\n")
     return ensure_worktree()
 
 
@@ -68,19 +89,22 @@ def publish(base_url: str) -> dict:
     client = GasCityClient(base_url)
     repo = ensure_worktree()
     status_dir = repo / "status"
-    status_dir.mkdir(exist_ok=True)
-    (status_dir / "history").mkdir(exist_ok=True)
+    (status_dir / "history").mkdir(parents=True, exist_ok=True)
 
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     alerts_all: dict[str, list] = {}
-    content_digest = ""
+    stable = ""
+    receipts = _load_receipts()
     for city in CITIES:
-        snap = NS.build_snapshot(client, city)
-        alerts = NS.evaluate(snap)
+        raw = NS.build_snapshot(client, city)
+        alerts = NS.evaluate(raw, receipts=receipts)
         alerts_all[city] = alerts
+        snap = NS.sanitize_snapshot(raw)          # allowlist BEFORE publishing
         (status_dir / f"{city}.neo-snapshot.json").write_text(json.dumps(snap, indent=2) + "\n")
         (status_dir / f"{city}.neo-snapshot.md").write_text(NS.render_markdown(snap, alerts))
-        content_digest += hashlib.sha256(json.dumps(_stable(snap), sort_keys=True).encode()).hexdigest()
+        stable += hashlib.sha256(json.dumps(_stable(snap), sort_keys=True).encode()).hexdigest()
+    stable_digest = hashlib.sha256(stable.encode()).hexdigest()
+
     (status_dir / "ALERTS.md").write_text(
         "# NEO continuity alerts\n\n"
         + "\n".join(
@@ -90,69 +114,73 @@ def publish(base_url: str) -> dict:
             for city, alerts in alerts_all.items())
         + "\n"
     )
-    (status_dir / "LATEST.json").write_text(json.dumps(
-        {"captured_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-         "cities": {c: {"alerts": [a["rule"] for a in alerts_all[c]]} for c in CITIES},
-         "content_digest": hashlib.sha256(content_digest.encode()).hexdigest()[:16]},
-        indent=2) + "\n")
+    (status_dir / "LATEST.json").write_text(json.dumps({
+        "captured_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "max_freshness_min": NS.STALE_SNAPSHOT_MIN,
+        "cities": {c: {"alerts": [a["rule"] for a in alerts_all[c]]} for c in CITIES},
+        "stable_digest": stable_digest[:16]}, indent=2) + "\n")
 
-    # commit policy: history entry on change or hourly heartbeat
-    last = _last_history_entry(status_dir / "history")
-    changed = _snapshot_changed(repo, status_dir)
-    heartbeat = not last or (time.time() - last[1]) > 55 * 60
+    changed = _digest_changed(repo, status_dir, stable_digest)
+    heartbeat = _heartbeat_due(status_dir / "history")
     if changed or heartbeat:
-        (status_dir / "history" / f"{stamp}.json").write_text(
-            (status_dir / "LATEST.json").read_text())
-        sh(["git", "add", "status"], repo)
-        sh(["git", "-c", "user.name=neo-publisher",
-            "-c", "user.email=neo@designwins",
-            "commit", "-m",
-            f"neo status {stamp} alerts="
-            f"{sum(len(a) for a in alerts_all.values())} "
-            f"({'change' if changed else 'heartbeat'})"], repo)
-        sh(["git", "push", "-u", REMOTE, STATUS_BRANCH], repo)
-    return {"changed": changed, "heartbeat": heartbeat,
+        (status_dir / "history" / f"{stamp}.json").write_text((status_dir / "LATEST.json").read_text())
+        git(["git", "add", "status"], repo)
+        git(["git", "-c", "user.name=neo-publisher",
+             "-c", "user.email=neo@designwins",
+             "commit", "-m",
+             f"neo status {stamp} alerts={sum(len(a) for a in alerts_all.values())} "
+             f"({'change' if changed else 'heartbeat'})"], repo)
+        sh(["git", "push", REMOTE, STATUS_BRANCH], repo)
+    return {"changed": changed, "heartbeat": heartbeat, "stable_digest": stable_digest[:16],
             "alerts": {c: [a["rule"] for a in v] for c, v in alerts_all.items()}}
 
 
-def _stable(snap: dict) -> dict:
-    """Snapshot minus monotonically-changing fields, for change detection.
+def _load_receipts() -> list[dict]:
+    """Persisted acceptance receipts visible to this host (receipts/, demo)."""
+    out: list[dict] = []
+    for pattern in (ROOT / "receipts" / "*.accepted*.json",
+                    ROOT / "demo" / "out" / "**" / "*.accepted*.json"):
+        for p in ROOT.glob(str(pattern.relative_to(ROOT))):
+            try:
+                out.append(json.loads(p.read_text()))
+            except json.JSONDecodeError:
+                continue
+    return out
 
-    uptime counters and capture timestamps advance every run; everything else
-    (counts, agents, beads, alerts, event seq) is a real state change.
-    """
-    s = json.loads(json.dumps(snap))  # deep copy
+
+def _stable(snap: dict) -> dict:
+    """Sanitized snapshot minus monotonically-changing fields."""
+    s = json.loads(json.dumps(snap))
     s.pop("captured_at", None)
-    sup = s.get("supervisor") or {}
-    sup.pop("uptime_sec", None)
-    city = s.get("city") or {}
-    city.pop("uptime_sec", None)
-    # activity-only movement (orders fire continuously) is readable in the
-    # snapshot files but does not create history entries — only state and
-    # alert changes do
-    s.pop("recent_events", None)
+    if isinstance(s.get("supervisor"), dict):
+        s["supervisor"].pop("uptime_sec", None)
+    if isinstance(s.get("city"), dict):
+        s["city"].pop("uptime_sec", None)
+    s.pop("recent_events", None)      # activity is readable, not state
     s.pop("last_event_seq", None)
+    s.pop("event_index", None)        # event cursor moves with activity
     return s
 
 
-def _snapshot_changed(repo: Path, status_dir: Path) -> bool:
-    try:
-        sh(["git", "diff", "--quiet", "HEAD", "--", "status/LATEST.json"], repo)
-        return False
-    except RuntimeError:
-        return True
+def _digest_changed(repo: Path, status_dir: Path, new_digest: str) -> bool:
+    """Compare ONLY the stable digest — never captured_at (review finding 3)."""
+    digest_file = status_dir / ".stable-digest"
+    prev = digest_file.read_text().strip() if digest_file.exists() else ""
+    digest_file.write_text(new_digest + "\n")
+    return prev != new_digest
 
 
-def _last_history_entry(hist: Path):
-    entries = sorted(hist.glob("*.json"))
+def _heartbeat_due(history_dir: Path) -> bool:
+    """True when the last history entry is older than 55 minutes (UTC-safe)."""
+    import calendar
+    entries = sorted(Path(history_dir).glob("*.json"))
     if not entries:
-        return None
-    name = entries[-1].stem
+        return True
     try:
-        t = time.mktime(time.strptime(name, "%Y%m%dT%H%M%SZ"))
+        t = calendar.timegm(time.strptime(entries[-1].stem, "%Y%m%dT%H%M%SZ"))
     except ValueError:
-        return None
-    return name, t
+        return True
+    return (time.time() - t) > 55 * 60
 
 
 def main() -> int:

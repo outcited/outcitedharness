@@ -70,12 +70,10 @@ reassigns, merges, or deploys.
 
 ## Known gaps (next)
 
-- ~~gh token on the mini invalid~~ **FIXED by Sam 2026-10-27** (device-flow login,
-  beargallbladder, ADMIN on outcitedharness) — PR/CI receipt leg unblocked.
+- `gh` token on the mini is invalid → PR/CI receipt leg (Phase 5 #6) blocked
+  until `gh auth login` (Sam).
 - Production dispatch path (`gc sling`) intentionally NOT automated — recommend
   it stay human-initiated until Sam approves otherwise.
 - Supervisor POST does not return `X-GC-Index` (receipt relies on event-log seq).
 - `dw-finding.v1` issue-body convention needs one live GitHub issue on
   `outcited/outcitedharness` to be ratified (PR pending Sam's go).
-- E2E L3 in staging requires adding a rig+agent to the staging city (config
-  change, needs approval) OR manual sling in production (dispatch artifact).
