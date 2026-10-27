@@ -1,0 +1,28 @@
+{
+  "schema": "dw.gascity-acceptance.v1",
+  "finding_id": "DW-NEO-DEMO-01",
+  "task_id": "DW-NEO-DEMO-01 \u2014 neo gas city integration demo",
+  "city": "designwins-staging",
+  "authorization_ref": "/Users/samkim/designwins-neo-gascity/demo/out/DW-NEO-DEMO-01.approval.json",
+  "idempotency_key": "neo-d6dc656b92162471ff50626ba26587a052fade93",
+  "at": "2026-10-27T16:54:58Z",
+  "state": "accepted",
+  "attempts": 1,
+  "bead_id": "ds-gb1",
+  "create_index": null,
+  "readback": {
+    "id": "ds-gb1",
+    "status": "open",
+    "title": "DW-NEO-DEMO-01 \u2014 ISOLATED DEMO bead proves NEO idempotent ingestion (staging)",
+    "labels": [
+      "gh:outcitedharness",
+      "neo",
+      "neo-finding:DW-NEO-DEMO-01",
+      "severity:info"
+    ]
+  },
+  "events": {
+    "observed_total": 10,
+    "last_bead_created_seq": 37493
+  }
+}

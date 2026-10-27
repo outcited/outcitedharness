@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://outcited.github.io/schemas/dw.approval.gascity-ingest.v1.json",
+  "title": "Gas City ingest authorization (Sam-authored approval artifact)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "project", "action", "recipient", "task_ref", "issuer",
+               "authorization_ref", "expires_at", "max_actions", "spend_scope",
+               "max_spend_usd", "payload_digest"],
+  "properties": {
+    "schema": {"const": "dw.approval.gascity-ingest.v1"},
+    "project": {"const": "designwins"},
+    "action": {"const": "gascity-ingest",
+      "description": "Authorizes ONE bead creation in ONE city. Never authorizes sling/dispatch/merge/deploy."},
+    "recipient": {"type": "string",
+      "description": "Exact Gas City name the ingest targets (e.g. designwins-staging). Mismatch refuses."},
+    "task_ref": {"type": "string",
+      "description": "Must equal the target finding's task_id. One artifact per task."},
+    "issuer": {"const": "sam",
+      "description": "Only the human owner. Artifacts from any other issuer are refused."},
+    "authorization_ref": {"type": "string", "minLength": 1,
+      "description": "Human-traceable reference (directive, conversation, decision entry) explaining this grant."},
+    "expires_at": {"type": "integer",
+      "description": "Unix epoch seconds; expired artifacts refuse."},
+    "max_actions": {"const": 1,
+      "description": "Exactly one ingest per artifact. A second use must fail digest/budget audit."},
+    "spend_scope": {"const": "none"},
+    "max_spend_usd": {"const": 0},
+    "payload_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$",
+      "description": "sha256 of the canonical finding body it authorizes. Binds artifact to exact content."}
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "schema": "dw.neo-status.v1",
+  "city": {
+    "running": 1,
+    "suspended": false,
+    "uptime_sec": 249952,
+    "version": "1.5.1",
+    "agents": {
+      "total": 9,
+      "running": 1,
+      "suspended": 0,
+      "quarantined": 0
+    },
+    "work": {
+      "in_progress": 1,
+      "ready": 21,
+      "open": 28
+    },
+    "partial": true,
+    "partial_errors": [
+      "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
+      "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
+    ]
+  },
+  "captured_at": "2026-10-27T16:54:58Z",
+  "source": "gas-city-supervisor",
+  "supervisor": {
+    "status": "ok",
+    "version": "1.5.1",
+    "build_id": "unknown",
+    "uptime_sec": 252142,
+    "cities_total": 2,
+    "cities_running": 2,
+    "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
+    "startup": {
+      "ready": true,
+      "phase": "running",
+      "phases_completed": [
+        "loading_config",
+        "starting_bead_store",
+        "resolving_formulas",
+        "adopting_sessions",
+        "starting_agents"
+      ]
+    }
+  },
+  "agents": [
+    {
+      "name": "bd.dog-1",
+      "running": true,
+      "suspended": false,
+      "scale": "scaled (min=0, max=2)"
+    },
+    {
+      "name": "bd.dog-2",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    },
+    {
+      "name": "core.control-dispatcher",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    },
+    {
+      "name": "pilot-rig/core.control-dispatcher",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    },
+    {
+      "name": "harness/core.control-dispatcher",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    },
+    {
+      "name": "engineer-1",
+      "running": false,
+      "suspended": false,
+      "scale": "scaled (min=0, max=2)"
+    },
+    {
+      "name": "engineer-2",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    },
+    {
+      "name": "harness/harness-engineer-1",
+      "running": false,
+      "suspended": false,
+      "scale": "scaled (min=0, max=2)"
+    },
+    {
+      "name": "harness/harness-engineer-2",
+      "running": false,
+      "suspended": false,
+      "scale": ""
+    }
+  ],
+  "sessions": [
+    {
+      "id": "do-wisp-lah661",
+      "state": "active"
+    }
+  ],
+  "pending_interactions": [],
+  "event_index": null,
+  "beads_total_reported": 29,
+  "findings": [],
+  "blocked": [],
+  "duplicates": [
+    {
+      "task_id": "PIN-TABLES-VISION-01",
+      "beads": [
+        "hw-b5l",
+        "do-y5b"
+      ]
+    },
+    {
+      "task_id": "CURVES-WINTER-01",
+      "beads": [
+        "hw-wfn",
+        "do-77q"
+      ]
+    },
+    {
+      "task_id": "PACKAGE-TEMP-AXES-01",
+      "beads": [
+        "hw-37d",
+        "do-b6p"
+      ]
+    }
+  ],
+  "last_event_seq": 58029,
+  "recent_events": [
+    {
+      "seq": 58019,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 58018,
+      "type": "order.fired",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 58017,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 58016,
+      "type": "bead.created",
+      "subject": "do-wisp-5ktxhb"
+    },
+    {
+      "seq": 58015,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 58014,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 58013,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 58012,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 58011,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 58010,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    }
+  ]
+}

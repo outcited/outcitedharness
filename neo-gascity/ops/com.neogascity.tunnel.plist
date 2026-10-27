@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- NEO<->Gas City tunnel keepalive — PREPARED, NOT LOADED (install-m5.sh loads it) -->
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>com.neogascity.tunnel</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/ssh</string>
+        <string>-N</string><string>-L</string><string>8373:127.0.0.1:8372</string>
+        <string>-o</string><string>ServerAliveInterval=30</string>
+        <string>-o</string><string>ServerAliveCountMax=4</string>
+        <string>-o</string><string>ExitOnForwardFailure=yes</string>
+        <string>-o</string><string>BatchMode=yes</string>
+        <string>samsonkim@100.80.101.116</string>
+    </array>
+    <key>RunAtLoad</key><true/>
+    <key>KeepAlive</key><true/>
+    <key>ThrottleInterval</key><integer>15</integer>
+    <key>StandardErrorPath</key><string>/tmp/neogascity-tunnel.err</string>
+</dict>
+</plist>
