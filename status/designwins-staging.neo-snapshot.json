@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 1046,
+    "uptime_sec": 1649,
     "version": "1.5.1",
     "agents": {
       "total": 3,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 0,
-      "open": 23
+      "open": 22
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T19:51:42Z",
+  "captured_at": "2026-10-27T20:01:45Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 1651,
+    "uptime_sec": 2253,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -157,57 +157,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 39373,
+  "last_event_seq": 39471,
   "recent_events": [
     {
-      "seq": 39363,
+      "seq": 39461,
+      "type": "order.fired",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 39460,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 39362,
+      "seq": 39459,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 39458,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 39457,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 39456,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 39455,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 39454,
       "type": "order.fired",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 39361,
+      "seq": 39453,
       "type": "order.completed",
-      "subject": "dolt-remotes-patrol"
+      "subject": "spawn-storm-detect"
     },
     {
-      "seq": 39360,
-      "type": "order.fired",
-      "subject": "dolt-remotes-patrol"
-    },
-    {
-      "seq": 39359,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 39358,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 39357,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 39356,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 39355,
+      "seq": 39452,
       "type": "order.completed",
       "subject": "dolt-health"
-    },
-    {
-      "seq": 39354,
-      "type": "order.completed",
-      "subject": "mol-dog-doctor"
     }
   ]
 }
