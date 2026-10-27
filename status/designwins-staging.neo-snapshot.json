@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 220241,
+    "uptime_sec": 220249,
     "version": "1.5.1",
     "agents": {
       "total": 3,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T17:03:13Z",
+  "captured_at": "2026-10-27T17:03:32Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 252637,
+    "uptime_sec": 252656,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
@@ -95,8 +95,33 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 37584,
+  "last_event_seq": 37589,
   "recent_events": [
+    {
+      "seq": 37579,
+      "type": "order.fired",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 37578,
+      "type": "order.completed",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 37577,
+      "type": "order.fired",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 37576,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 37575,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
     {
       "seq": 37574,
       "type": "order.completed",
@@ -121,31 +146,6 @@
       "seq": 37570,
       "type": "order.fired",
       "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 37569,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 37568,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 37567,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 37566,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 37565,
-      "type": "order.fired",
-      "subject": "beads-health"
     }
   ]
 }
