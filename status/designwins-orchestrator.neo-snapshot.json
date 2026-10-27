@@ -3,7 +3,7 @@
   "city": {
     "running": 1,
     "suspended": false,
-    "uptime_sec": 252679,
+    "uptime_sec": 256199,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 1,
       "ready": 21,
-      "open": 28
+      "open": 30
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T18:33:01Z",
+  "captured_at": "2026-10-27T18:33:06Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 258025,
+    "uptime_sec": 258031,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
@@ -108,7 +108,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 31,
+  "beads_total_reported": 29,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,8 +134,23 @@
       ]
     }
   ],
-  "last_event_seq": 60294,
+  "last_event_seq": 60297,
   "recent_events": [
+    {
+      "seq": 60287,
+      "type": "bead.updated",
+      "subject": "do-wisp-dj0qfl"
+    },
+    {
+      "seq": 60286,
+      "type": "bead.updated",
+      "subject": "do-wisp-pvj4mr"
+    },
+    {
+      "seq": 60285,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
     {
       "seq": 60284,
       "type": "order.completed",
@@ -170,21 +185,6 @@
       "seq": 60278,
       "type": "session.drain_acked_with_assigned_work",
       "subject": "bd.dog"
-    },
-    {
-      "seq": 60277,
-      "type": "session.stopped",
-      "subject": "bd.dog"
-    },
-    {
-      "seq": 60276,
-      "type": "bead.updated",
-      "subject": "do-wisp-lah661"
-    },
-    {
-      "seq": 60275,
-      "type": "order.fired",
-      "subject": "reaper"
     }
   ]
 }
