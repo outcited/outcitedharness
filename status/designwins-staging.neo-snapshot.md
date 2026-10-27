@@ -1,14 +1,16 @@
-# NEO status — {'running': 0, 'suspended': False, 'uptime_sec': 2855, 'version': '1.5.1', 'agents': {'total': 3, 'running': 0, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 0, 'ready': 0, 'open': 22}, 'partial': True, 'partial_errors': ['city work ready: reading complete ready projection from cache: bead cache unavailable', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-27T20:21:51Z
-- supervisor: ok v1.5.1 uptime 0h
-- city running=0 suspended=False agents={'total': 3, 'running': 0, 'suspended': 0, 'quarantined': 0} work={'in_progress': 0, 'ready': 0, 'open': 22}
-- sessions: 1 active; pending human interactions: 0
+# NEO status — {'running': 1, 'suspended': False, 'uptime_sec': 3491, 'version': '1.5.1', 'agents': {'total': 5, 'running': 1, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 1, 'ready': 23, 'open': 27}, 'partial': True, 'partial_errors': ['store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-27T20:31:53Z
+- supervisor: ok v1.5.1 uptime 1h
+- city running=1 suspended=False agents={'total': 5, 'running': 1, 'suspended': 0, 'quarantined': 0} work={'in_progress': 1, 'ready': 23, 'open': 27}
+- sessions: 2 active; pending human interactions: 0
 - NEO findings tracked: 5; duplicate groups: 0
-- event index: None last_seq=39702
+- event index: None last_seq=39891
 
 ## Agents
 - idle bd.dog-1 scaled (min=0, max=2)
 - idle bd.dog-2 
-- idle core.control-dispatcher 
+- RUN core.control-dispatcher 
+- idle neo-fixture-1 scaled (min=0, max=2)
+- idle neo-fixture-2 
 
 ## Continuity alerts
-- **city-status-partial** {"errors": ["city work ready: reading complete ready projection from cache: bead cache unavailable", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
+- **city-status-partial** {"errors": ["store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
