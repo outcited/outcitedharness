@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 2251,
+    "uptime_sec": 2855,
     "version": "1.5.1",
     "agents": {
       "total": 3,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T20:11:48Z",
+  "captured_at": "2026-10-27T20:21:51Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 2856,
+    "uptime_sec": 3459,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -64,10 +64,15 @@
       "scale": ""
     }
   ],
-  "sessions": [],
+  "sessions": [
+    {
+      "id": "ds-wisp-9awl47",
+      "state": "active"
+    }
+  ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 22,
+  "beads_total_reported": 28,
   "findings": [
     {
       "id": "ds-8ha",
@@ -157,56 +162,56 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 39575,
+  "last_event_seq": 39702,
   "recent_events": [
     {
-      "seq": 39565,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 39564,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 39563,
+      "seq": 39692,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 39562,
+      "seq": 39691,
       "type": "order.fired",
       "subject": "spawn-storm-detect"
     },
     {
-      "seq": 39561,
-      "type": "order.completed",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 39560,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 39559,
+      "seq": 39690,
       "type": "order.completed",
       "subject": "orphan-sweep"
     },
     {
-      "seq": 39558,
+      "seq": 39689,
       "type": "order.completed",
-      "subject": "beads-health"
+      "subject": "nudge-mail-sweep"
     },
     {
-      "seq": 39557,
+      "seq": 39688,
+      "type": "order.fired",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 39687,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 39686,
+      "type": "order.fired",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 39685,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 39556,
-      "type": "order.fired",
+      "seq": 39684,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 39683,
+      "type": "order.completed",
       "subject": "beads-health"
     }
   ]
