@@ -1,0 +1,23 @@
+{
+  "schema": "dw.finding.v1",
+  "finding_id": "DW-NEO-DEMO-01",
+  "task_id": "DW-NEO-DEMO-01 — neo gas city integration demo",
+  "source_url": "https://github.com/outcited/outcitedharness/issues/1",
+  "repository": "outcited/outcitedharness",
+  "severity": "info",
+  "summary": "ISOLATED DEMO bead proves NEO idempotent ingestion (staging)",
+  "engineering_impact": "none — demo of the NEO->Gas City handoff path into the staging test queue; no production effect",
+  "detail": "Created by the NEO<->Gas City Phase 4 isolated test, 2026-10-27. Authorization: task brief 'isolated development and tests'. Safe to close at any time.",
+  "reproduction": [
+    "bridge/handoff.py submit with deterministic Idempotency-Key",
+    "independent GET read-back of the returned bead id",
+    "event-seq receipt captured from city event log"
+  ],
+  "expected_behavior": "exactly one bead labeled neo-finding:DW-NEO-DEMO-01 exists in designwins-staging; resubmission returns duplicate",
+  "regression_tests": {
+    "positive": ["tests/test_bridge.py::TestHandoffLaws::test_accepted_produces_receipt_with_readback"],
+    "negative": ["tests/test_bridge.py::TestHandoffLaws::test_proposal_finding_never_dispatched"]
+  },
+  "authorization_state": "authorized",
+  "owner": "neo-bridge"
+}

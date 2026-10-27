@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://outcited.github.io/schemas/dw.approval.gascity-ingest.v1.json",
+  "title": "Gas City ingest authorization (Sam-controlled artifact, single use)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "environment", "project", "action", "recipient",
+               "task_ref", "issuer", "authorization_ref", "expires_at",
+               "max_actions", "spend_scope", "max_spend_usd", "payload_digest"],
+  "properties": {
+    "schema": {"const": "dw.approval.gascity-ingest.v1"},
+    "environment": {"enum": ["production", "staging"],
+      "description": "staging artifacts authorize staging cities ONLY and are issued by the staging-fixture authority; production artifacts authorize production cities ONLY and are issued by sam."},
+    "project": {"const": "designwins"},
+    "action": {"const": "gascity-ingest",
+      "description": "Authorizes ONE bead creation in ONE city. Never authorizes sling/dispatch/merge/deploy."},
+    "recipient": {"type": "string",
+      "description": "Exact Gas City name the ingest targets. Mismatch refuses."},
+    "task_ref": {"type": "string",
+      "description": "Must equal the target finding's task_id. One artifact per task."},
+    "issuer": {"type": "string",
+      "description": "Must be 'sam' when environment=production, 'staging-fixture' when environment=staging. Any other issuer refuses."},
+    "authorization_ref": {"type": "string", "minLength": 1,
+      "description": "Human-traceable reference explaining this grant."},
+    "expires_at": {"type": "integer",
+      "description": "Unix epoch seconds; expired artifacts refuse."},
+    "max_actions": {"const": 1,
+      "description": "Exactly one ingest per artifact. Single use is enforced by a durable replay-safe ledger; reuse for a different finding refuses."},
+    "spend_scope": {"const": "none"},
+    "max_spend_usd": {"const": 0},
+    "payload_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$",
+      "description": "REQUIRED: sha256 of the canonical finding body. Binds the artifact to exact content; omission or mismatch refuses."}
+  },
+  "allOf": [
+    {"if": {"properties": {"environment": {"const": "production"}}},
+     "then": {"properties": {"issuer": {"const": "sam"}}}},
+    {"if": {"properties": {"environment": {"const": "staging"}}},
+     "then": {"properties": {
+       "issuer": {"const": "staging-fixture"},
+       "recipient": {"pattern": "staging"}}}}
+  ]
+}
