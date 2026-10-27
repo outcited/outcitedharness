@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- NEO status publisher — PREPARED, NOT LOADED. Requires the tunnel first. -->
+<!-- NEO<->Gas City publisher — PREPARED, NOT LOADED. Path is templated:
+     __NEO_GC_ROOT__ is replaced with the checkout root by install-m5.sh. -->
 <plist version="1.0">
 <dict>
     <key>Label</key><string>com.neogascity.publisher</string>
     <key>ProgramArguments</key>
     <array>
         <string>/usr/bin/python3</string>
-        <string>/Users/samkim/designwins-neo-gascity/ops/status_publish.py</string>
+        <string>__NEO_GC_ROOT__/neo-gascity/ops/status_publish.py</string>
         <string>--base-url</string><string>http://127.0.0.1:8373</string>
     </array>
     <key>StartInterval</key><integer>600</integer>
