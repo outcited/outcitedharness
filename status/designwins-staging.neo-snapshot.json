@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 226719,
+    "uptime_sec": 227342,
     "version": "1.5.1",
     "agents": {
       "total": 3,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 0,
-      "open": 23
+      "open": 22
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T19:01:26Z",
+  "captured_at": "2026-10-27T19:11:29Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 259730,
+    "uptime_sec": 260334,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
@@ -157,57 +157,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 38842,
+  "last_event_seq": 38942,
   "recent_events": [
     {
-      "seq": 38832,
+      "seq": 38932,
+      "type": "order.fired",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 38931,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 38930,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 38929,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 38928,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 38831,
+      "seq": 38927,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 38830,
+      "seq": 38926,
       "type": "order.completed",
-      "subject": "mol-dog-doctor"
+      "subject": "orphan-sweep"
     },
     {
-      "seq": 38829,
-      "type": "order.fired",
-      "subject": "mol-dog-doctor"
-    },
-    {
-      "seq": 38828,
-      "type": "order.completed",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 38827,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 38826,
+      "seq": 38925,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 38825,
+      "seq": 38924,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 38824,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 38823,
+      "seq": 38923,
       "type": "order.fired",
-      "subject": "spawn-storm-detect"
+      "subject": "orphan-sweep"
     }
   ]
 }
