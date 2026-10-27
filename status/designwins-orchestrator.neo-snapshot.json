@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 4661,
+    "uptime_sec": 5264,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T20:51:59Z",
+  "captured_at": "2026-10-27T21:02:01Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 5267,
+    "uptime_sec": 5870,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -129,57 +129,57 @@
       ]
     }
   ],
-  "last_event_seq": 62254,
+  "last_event_seq": 62350,
   "recent_events": [
     {
-      "seq": 62244,
+      "seq": 62340,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 62339,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 62338,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 62337,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 62336,
+      "type": "order.completed",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 62335,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 62334,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 62243,
+      "seq": 62333,
       "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "subject": "orphan-sweep"
     },
     {
-      "seq": 62242,
+      "seq": 62332,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 62241,
-      "type": "order.completed",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 62240,
+      "seq": 62331,
       "type": "order.fired",
       "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 62239,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 62238,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 62237,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 62236,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 62235,
-      "type": "order.fired",
-      "subject": "beads-health"
     }
   ]
 }
