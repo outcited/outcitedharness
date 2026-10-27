@@ -1,37 +1,38 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 1,
+    "running": 0,
     "suspended": false,
-    "uptime_sec": 257162,
+    "uptime_sec": 257251,
     "version": "1.5.1",
     "agents": {
       "total": 9,
-      "running": 1,
+      "running": 0,
       "suspended": 0,
       "quarantined": 0
     },
     "work": {
       "in_progress": 1,
       "ready": 21,
-      "open": 28
+      "open": 33
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T18:50:32Z",
+  "captured_at": "2026-10-27T18:51:03Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 259077,
+    "uptime_sec": 259108,
     "cities_total": 2,
     "cities_running": 2,
-    "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
+    "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
     "startup": {
       "ready": true,
       "phase": "running",
@@ -47,7 +48,7 @@
   "agents": [
     {
       "name": "bd.dog-1",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": "scaled (min=0, max=2)"
     },
@@ -103,7 +104,7 @@
   "sessions": [
     {
       "id": "do-wisp-lah661",
-      "state": "creating"
+      "state": "active"
     }
   ],
   "pending_interactions": [],
@@ -134,57 +135,57 @@
       ]
     }
   ],
-  "last_event_seq": 60681,
+  "last_event_seq": 60692,
   "recent_events": [
     {
-      "seq": 60671,
-      "type": "order.completed",
-      "subject": "dolt-remotes-patrol"
-    },
-    {
-      "seq": 60670,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 60669,
-      "type": "order.fired",
-      "subject": "dolt-remotes-patrol"
-    },
-    {
-      "seq": 60668,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 60667,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 60666,
-      "type": "order.fired",
-      "subject": "jsonl-export"
-    },
-    {
-      "seq": 60665,
-      "type": "worker.operation",
-      "subject": "do-wisp-lah661"
-    },
-    {
-      "seq": 60664,
+      "seq": 60682,
       "type": "bead.updated",
       "subject": "do-wisp-lah661"
     },
     {
-      "seq": 60663,
+      "seq": 60681,
       "type": "order.completed",
-      "subject": "gate-sweep"
+      "subject": "order-tracking-sweep"
     },
     {
-      "seq": 60662,
+      "seq": 60680,
+      "type": "worker.operation",
+      "subject": "do-wisp-lah661"
+    },
+    {
+      "seq": 60679,
+      "type": "bead.updated",
+      "subject": "do-wisp-lah661"
+    },
+    {
+      "seq": 60678,
+      "type": "bead.updated",
+      "subject": "do-wisp-lah661"
+    },
+    {
+      "seq": 60677,
+      "type": "bead.updated",
+      "subject": "do-wisp-lah661"
+    },
+    {
+      "seq": 60676,
+      "type": "bead.updated",
+      "subject": "do-wisp-lah661"
+    },
+    {
+      "seq": 60675,
       "type": "order.completed",
-      "subject": "beads-health"
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 60674,
+      "type": "session.drain_acked_with_assigned_work",
+      "subject": "bd.dog"
+    },
+    {
+      "seq": 60673,
+      "type": "session.stopped",
+      "subject": "bd.dog"
     }
   ]
 }
