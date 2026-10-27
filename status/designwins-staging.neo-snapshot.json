@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 222096,
+    "uptime_sec": 225540,
     "version": "1.5.1",
     "agents": {
       "total": 3,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 0,
-      "open": 19
+      "open": 20
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T17:34:16Z",
+  "captured_at": "2026-10-27T18:33:01Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 254500,
+    "uptime_sec": 258025,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
@@ -67,8 +67,59 @@
   "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 19,
+  "beads_total_reported": 22,
   "findings": [
+    {
+      "id": "ds-8ha",
+      "status": "open",
+      "title": "DW-NEO-E2E-113215 \u2014 ISOLATED DEMO bead proves NEO idempotent ingestion (staging)",
+      "labels": [
+        "gh:outcitedharness",
+        "neo",
+        "neo-finding:DW-NEO-E2E-113215",
+        "severity:info"
+      ],
+      "assignee": null,
+      "metadata": {
+        "neo-finding-id": "DW-NEO-E2E-113215",
+        "neo-authorization-state": "authorized"
+      },
+      "stage": "BEAD_ACCEPTED"
+    },
+    {
+      "id": "ds-6mp",
+      "status": "open",
+      "title": "DW-NEO-GATE-04 \u2014 atomic single-use live check (staging)",
+      "labels": [
+        "gh:outcitedharness",
+        "neo",
+        "neo-finding:DW-NEO-GATE-04",
+        "severity:info"
+      ],
+      "assignee": null,
+      "metadata": {
+        "neo-finding-id": "DW-NEO-GATE-04",
+        "neo-authorization-state": "authorized"
+      },
+      "stage": "BEAD_ACCEPTED"
+    },
+    {
+      "id": "ds-k22",
+      "status": "open",
+      "title": "DW-NEO-GATE-03 \u2014 gate demo full proof v2",
+      "labels": [
+        "gh:outcitedharness",
+        "neo",
+        "neo-finding:DW-NEO-GATE-03",
+        "severity:info"
+      ],
+      "assignee": null,
+      "metadata": {
+        "neo-finding-id": "DW-NEO-GATE-03",
+        "neo-authorization-state": "authorized"
+      },
+      "stage": "BEAD_ACCEPTED"
+    },
     {
       "id": "ds-0iu",
       "status": "open",
@@ -106,57 +157,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 37923,
+  "last_event_seq": 38542,
   "recent_events": [
     {
-      "seq": 37913,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 37912,
+      "seq": 38532,
       "type": "order.fired",
-      "subject": "gate-sweep"
+      "subject": "order-tracking-sweep"
     },
     {
-      "seq": 37911,
-      "type": "order.completed",
-      "subject": "dolt-health"
+      "seq": 38531,
+      "type": "bead.created",
+      "subject": "ds-8ha"
     },
     {
-      "seq": 37910,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 37909,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 37908,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 37907,
-      "type": "bead.updated",
-      "subject": "ds-0iu"
-    },
-    {
-      "seq": 37906,
+      "seq": 38530,
       "type": "order.completed",
       "subject": "notify-on-human-gate-creation"
     },
     {
-      "seq": 37905,
+      "seq": 38529,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 38528,
+      "type": "order.fired",
+      "subject": "notify-on-human-gate-creation"
+    },
+    {
+      "seq": 38527,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 38526,
+      "type": "bead.created",
+      "subject": "ds-6mp"
+    },
+    {
+      "seq": 38525,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 37904,
+      "seq": 38524,
       "type": "order.fired",
-      "subject": "notify-on-human-gate-creation"
+      "subject": "beads-health"
+    },
+    {
+      "seq": 38523,
+      "type": "order.completed",
+      "subject": "spawn-storm-detect"
     }
   ]
 }

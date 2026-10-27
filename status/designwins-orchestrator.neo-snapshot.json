@@ -3,7 +3,7 @@
   "city": {
     "running": 1,
     "suspended": false,
-    "uptime_sec": 252657,
+    "uptime_sec": 252679,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T17:34:16Z",
+  "captured_at": "2026-10-27T18:33:01Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 254500,
+    "uptime_sec": 258025,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
@@ -108,7 +108,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 29,
+  "beads_total_reported": 31,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 58940,
+  "last_event_seq": 60294,
   "recent_events": [
     {
-      "seq": 58930,
+      "seq": 60284,
       "type": "order.completed",
-      "subject": "nudge-on-route"
+      "subject": "reaper"
     },
     {
-      "seq": 58929,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
+      "seq": 60283,
+      "type": "worker.operation",
+      "subject": "do-wisp-lah661"
     },
     {
-      "seq": 58928,
-      "type": "bead.closed",
-      "subject": "do-wisp-vl9iis"
-    },
-    {
-      "seq": 58927,
-      "type": "bead.closed",
-      "subject": "do-wisp-su57lg"
-    },
-    {
-      "seq": 58926,
-      "type": "bead.closed",
-      "subject": "do-wisp-ildsgm"
-    },
-    {
-      "seq": 58925,
+      "seq": 60282,
       "type": "bead.updated",
       "subject": "do-wisp-lah661"
     },
     {
-      "seq": 58924,
+      "seq": 60281,
       "type": "bead.updated",
       "subject": "do-wisp-lah661"
     },
     {
-      "seq": 58923,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
+      "seq": 60280,
+      "type": "bead.updated",
+      "subject": "do-wisp-lah661"
     },
     {
-      "seq": 58922,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
+      "seq": 60279,
+      "type": "bead.updated",
+      "subject": "do-wisp-lah661"
     },
     {
-      "seq": 58921,
+      "seq": 60278,
+      "type": "session.drain_acked_with_assigned_work",
+      "subject": "bd.dog"
+    },
+    {
+      "seq": 60277,
+      "type": "session.stopped",
+      "subject": "bd.dog"
+    },
+    {
+      "seq": 60276,
+      "type": "bead.updated",
+      "subject": "do-wisp-lah661"
+    },
+    {
+      "seq": 60275,
       "type": "order.fired",
-      "subject": "jsonl-export"
+      "subject": "reaper"
     }
   ]
 }

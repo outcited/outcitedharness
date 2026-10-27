@@ -1,0 +1,12 @@
+{
+  "ts": "2026-10-27T18:33:01Z",
+  "interval_min": 10,
+  "max_freshness_min": 15,
+  "supervisor_ok": true,
+  "cities": [
+    "designwins-orchestrator",
+    "designwins-staging"
+  ],
+  "stable_digest": "f912b300a795443d",
+  "alerts_total": 3
+}
