@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 220269,
+    "uptime_sec": 221997,
     "version": "1.5.1",
     "agents": {
       "total": 3,
@@ -14,23 +14,21 @@
     "work": {
       "in_progress": 0,
       "ready": 0,
-      "open": 18
+      "open": 19
     },
     "partial": true,
     "partial_errors": [
-      "sessions: loading session snapshot timed out after 1s",
       "city work ready: reading complete ready projection from cache: bead cache unavailable",
-      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T17:03:37Z",
+  "captured_at": "2026-10-27T17:32:51Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 252662,
+    "uptime_sec": 254416,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
@@ -69,85 +67,96 @@
   "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 18,
+  "beads_total_reported": 19,
   "findings": [
     {
-      "id": "ds-gb1",
-      "title": "DW-NEO-DEMO-01 \u2014 ISOLATED DEMO bead proves NEO idempotent ingestion (staging)",
+      "id": "ds-0iu",
       "status": "open",
-      "issue_type": "task",
-      "priority": 2,
-      "created_at": "2026-10-27T16:54:58Z",
-      "updated_at": "2026-10-27T16:54:58Z",
-      "description": "source: https://github.com/outcited/outcitedharness/issues/1\nfinding: DW-NEO-DEMO-01 (digest 4b66305a24a74d4a)\nimpact: none \u2014 demo of the NEO->Gas City handoff path into the staging test queue; no production effect\n\nexpected: exactly one bead labeled neo-finding:DW-NEO-DEMO-01 exists in designwins-staging; resubmission returns duplicate\n\nreproduction:\n  1. bridge/handoff.py submit with deterministic Idempotency-Key\n  2. independent GET read-back of the returned bead id\n  3. event-seq receipt captured from city event log\n\nregression (must pass): tests/test_bridge.py::TestHandoffLaws::test_accepted_produces_receipt_with_readback\nregression (must fail pre-fix): tests/test_bridge.py::TestHandoffLaws::test_proposal_finding_never_dispatched",
+      "title": "DW-NEO-GATE-02 \u2014 gate demo full proof",
+      "labels": [
+        "gh:outcitedharness",
+        "neo",
+        "neo-finding:DW-NEO-GATE-02",
+        "severity:info"
+      ],
+      "assignee": null,
+      "metadata": {
+        "neo-finding-id": "DW-NEO-GATE-02",
+        "neo-authorization-state": "authorized"
+      },
+      "stage": "BEAD_ACCEPTED"
+    },
+    {
+      "id": "ds-gb1",
+      "status": "open",
+      "title": "DW-NEO-DEMO-01 \u2014 ISOLATED DEMO bead proves NEO idempotent ingestion (staging)",
       "labels": [
         "gh:outcitedharness",
         "neo",
         "neo-finding:DW-NEO-DEMO-01",
         "severity:info"
       ],
+      "assignee": null,
       "metadata": {
-        "neo-authorization-state": "authorized",
-        "neo-digest": "4b66305a24a74d4a00404ab2b7466c5eaf7c14e927121e39777c3c68d15c5163",
         "neo-finding-id": "DW-NEO-DEMO-01",
-        "neo-task-id": "DW-NEO-DEMO-01 \u2014 neo gas city integration demo"
+        "neo-authorization-state": "authorized"
       },
-      "is_blocked": false
+      "stage": "BEAD_ACCEPTED"
     }
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 37589,
+  "last_event_seq": 37907,
   "recent_events": [
     {
-      "seq": 37579,
+      "seq": 37897,
       "type": "order.fired",
-      "subject": "orphan-sweep"
+      "subject": "dolt-health"
     },
     {
-      "seq": 37578,
+      "seq": 37896,
       "type": "order.completed",
-      "subject": "nudge-mail-sweep"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 37577,
+      "seq": 37895,
       "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 37576,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 37575,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 37574,
-      "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 37573,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
+      "seq": 37894,
+      "type": "order.fired",
+      "subject": "gate-sweep"
     },
     {
-      "seq": 37572,
+      "seq": 37893,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 37892,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 37891,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 37571,
+      "seq": 37890,
+      "type": "order.completed",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 37889,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 37570,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "seq": 37888,
+      "type": "order.completed",
+      "subject": "gate-sweep"
     }
   ]
 }
