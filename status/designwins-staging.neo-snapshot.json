@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 220207,
+    "uptime_sec": 220213,
     "version": "1.5.1",
     "agents": {
       "total": 3,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-27T17:02:37Z",
+  "captured_at": "2026-10-27T17:03:04Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 252602,
+    "uptime_sec": 252629,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
@@ -95,8 +95,38 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 37578,
+  "last_event_seq": 37584,
   "recent_events": [
+    {
+      "seq": 37574,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 37573,
+      "type": "order.completed",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 37572,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 37571,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 37570,
+      "type": "order.fired",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 37569,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
     {
       "seq": 37568,
       "type": "order.fired",
@@ -116,36 +146,6 @@
       "seq": 37565,
       "type": "order.fired",
       "subject": "beads-health"
-    },
-    {
-      "seq": 37564,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 37563,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 37562,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 37561,
-      "type": "order.fired",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 37560,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 37559,
-      "type": "order.fired",
-      "subject": "dolt-health"
     }
   ]
 }
