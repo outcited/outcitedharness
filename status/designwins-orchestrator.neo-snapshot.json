@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 66175,
+    "uptime_sec": 66777,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 22,
-      "open": 28
+      "open": 27
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T13:57:12Z",
+  "captured_at": "2026-10-28T14:07:15Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 66780,
+    "uptime_sec": 67384,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 76403,
+  "last_event_seq": 76583,
   "recent_events": [
     {
-      "seq": 76393,
+      "seq": 76573,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 76392,
+      "seq": 76572,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 76391,
-      "type": "bead.closed",
-      "subject": "do-wisp-auzoc0"
-    },
-    {
-      "seq": 76390,
-      "type": "bead.closed",
-      "subject": "do-wisp-agb1a1"
-    },
-    {
-      "seq": 76389,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 76388,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 76387,
+      "seq": 76571,
       "type": "order.completed",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 76386,
+      "seq": 76570,
       "type": "order.fired",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 76385,
+      "seq": 76569,
       "type": "order.completed",
-      "subject": "jsonl-export"
+      "subject": "spawn-storm-detect"
     },
     {
-      "seq": 76384,
+      "seq": 76568,
       "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 76567,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 76566,
+      "type": "order.fired",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 76565,
+      "type": "order.fired",
       "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 76564,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
     }
   ]
 }
