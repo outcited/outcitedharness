@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 29379,
+    "uptime_sec": 29982,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T03:43:56Z",
+  "captured_at": "2026-10-28T03:53:59Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 29985,
+    "uptime_sec": 30588,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -138,57 +138,57 @@
       ]
     }
   ],
-  "last_event_seq": 67061,
+  "last_event_seq": 67164,
   "recent_events": [
     {
-      "seq": 67051,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 67050,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 67049,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 67048,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 67047,
-      "type": "order.completed",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 67046,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 67045,
+      "seq": 67154,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 67044,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
+      "seq": 67153,
+      "type": "order.fired",
+      "subject": "dolt-remotes-patrol"
     },
     {
-      "seq": 67043,
+      "seq": 67152,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 67042,
+      "seq": 67151,
       "type": "order.fired",
       "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 67150,
+      "type": "order.fired",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 67149,
+      "type": "order.completed",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 67148,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 67147,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 67146,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 67145,
+      "type": "order.completed",
+      "subject": "beads-health"
     }
   ]
 }
