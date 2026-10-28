@@ -1,9 +1,9 @@
-# NEO status — {'running': 2, 'suspended': False, 'uptime_sec': 98212, 'version': '1.5.1', 'agents': {'total': 5, 'running': 2, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 2, 'ready': 22, 'open': 28}, 'partial': True, 'partial_errors': ['store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-28T22:51:06Z
+# NEO status — {'running': 2, 'suspended': False, 'uptime_sec': 98814, 'version': '1.5.1', 'agents': {'total': 5, 'running': 2, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 2, 'ready': 22, 'open': 28}, 'partial': True, 'partial_errors': ['store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-28T23:01:09Z
 - supervisor: ok v1.5.1 uptime 27h
 - city running=2 suspended=False agents={'total': 5, 'running': 2, 'suspended': 0, 'quarantined': 0} work={'in_progress': 2, 'ready': 22, 'open': 28}
 - sessions: 2 active; pending human interactions: 0
 - NEO findings tracked: 5; duplicate groups: 0
-- event index: None last_seq=70353
+- event index: None last_seq=70547
 
 ## Agents
 - idle bd.dog-1 scaled (min=0, max=2)
