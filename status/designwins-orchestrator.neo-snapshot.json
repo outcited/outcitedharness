@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 35698,
+    "uptime_sec": 36020,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 2,
       "ready": 22,
-      "open": 32
+      "open": 30
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T05:24:35Z",
+  "captured_at": "2026-10-28T05:34:38Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 36023,
+    "uptime_sec": 36626,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -138,57 +138,57 @@
       ]
     }
   ],
-  "last_event_seq": 68339,
+  "last_event_seq": 68493,
   "recent_events": [
     {
-      "seq": 68329,
+      "seq": 68483,
+      "type": "order.fired",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 68482,
       "type": "order.completed",
-      "subject": "gate-sweep"
+      "subject": "mol-dog-doctor"
     },
     {
-      "seq": 68328,
-      "type": "order.fired",
-      "subject": "gate-sweep"
+      "seq": 68481,
+      "type": "order.completed",
+      "subject": "dolt-health"
     },
     {
-      "seq": 68327,
+      "seq": 68480,
       "type": "order.fired",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 68479,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 68478,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 68477,
+      "type": "order.completed",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 68476,
+      "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 68326,
+      "seq": 68475,
       "type": "order.completed",
-      "subject": "order-tracking-sweep"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 68325,
-      "type": "worker.operation",
-      "subject": "engineer-do-wisp-cwmvik"
-    },
-    {
-      "seq": 68324,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 68323,
+      "seq": 68474,
       "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 68322,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 68321,
-      "type": "worker.operation",
-      "subject": "engineer-do-wisp-cwmvik"
-    },
-    {
-      "seq": 68320,
-      "type": "worker.operation",
-      "subject": "engineer-do-wisp-cwmvik"
+      "subject": "nudge-mail-sweep"
     }
   ]
 }
