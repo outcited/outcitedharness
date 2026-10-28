@@ -1,0 +1,676 @@
+{
+ "schema": "designwins.truth-funnel.served-path-proof.v1",
+ "observation": {
+  "now": "2026-10-28T20:12:57+00:00",
+  "host": "m5max-ai"
+ },
+ "inputs": {
+  "export_compare_ready_sha256": "ae2c2cd4de498c35561b00e111113875d20742807b2c5a5fd454da9eb15b3c31",
+  "export_fold_manifest_sha256": "d28910405c0f0d95830a8b351f9c29b2121726c8056bcba4a95a101fa5810f4f",
+  "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+  "fe_bundle_sha256": "231ac51e68f3dc75387c9a05b26004a6bfd917ca5441290dbc5df7468b052f9b",
+  "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+  "parts_catalog_present": true,
+  "deployments_records": 0,
+  "deployed_sha": null
+ },
+ "cohort": {
+  "selection": "doc_sha_overlap",
+  "size": 10,
+  "byte_exact_intersection": 0,
+  "shortfall": true,
+  "shortfall_reason": "byte-exact row intersection between export compare_ready.jsonl and FE compare_ready_spine.jsonl is below floor (0 < 10); export and FE bundle are different release lineages (no shared rows at any projection)."
+ },
+ "link_counts": {
+  "verified_source": 1,
+  "identity_joined": 0,
+  "folded": 10,
+  "bundled": 10,
+  "authorized": 0,
+  "deployed": 0,
+  "clickable": 0
+ },
+ "link_distributions": {
+  "source": {
+   "VERIFIED": 1,
+   "FAILED": 9
+  },
+  "identity": {
+   "UNKNOWN": 1,
+   "SOURCE_MISSING": 9
+  },
+  "fold": {
+   "VERIFIED": 10
+  },
+  "bundle": {
+   "VERIFIED": 10
+  },
+  "authorized": {
+   "UNKNOWN": 10
+  },
+  "deployed": {
+   "UNKNOWN": 10
+  },
+  "resolve": {
+   "MISSING": 10
+  }
+ },
+ "claims": [
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "aca52b11b376011abea1bd1d27c2c21af177e2c17bd88ecc95047d9a7a12cb82",
+   "claim": {
+    "opn": "lm3410",
+    "axis": "n_dma",
+    "value": "680.0",
+    "unit": "channels",
+    "page": 5,
+    "doc_sha256": "0311b7eeee2c8ced3c485db95017ba17b8eea5528ae32f43768229e96fe80e50"
+   },
+   "identity": {
+    "opn": "lm3410",
+    "manufacturer": "unknown",
+    "in_catalog": true,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "UNKNOWN"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": true,
+    "tool": "pymupdf",
+    "diag": null,
+    "doc_alias": "nas://vault/cas/03/0311b7eeee2c8ced3c485db95017ba17b8eea5528ae32f43768229e96fe80e50.pdf",
+    "class": "VERIFIED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "884d22cc761a260b176235fad09c441f3c6c6a9ea0d1b73f398be81f3f817efe",
+   "claim": {
+    "opn": "infineon-imbg40r036m2h-datasheet",
+    "axis": "rtheta_ja_c_per_w",
+    "value": "40.0",
+    "unit": "C/W",
+    "page": 4,
+    "doc_sha256": "04b6b469d0f44a1f17516366914a015363607d8cf319963df452082ac011ffda"
+   },
+   "identity": {
+    "opn": "infineon-imbg40r036m2h-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 3,
+     "quote_tokens_present_in_page_raw": 3,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/04/04b6b469d0f44a1f17516366914a015363607d8cf319963df452082ac011ffda.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "f865c9993acffacefa285cd0c8b5a00d189b3eae97e042feba1d9176e7d5fb74",
+   "claim": {
+    "opn": "infineon-ipp019n08nf2s-datasheet",
+    "axis": "rtheta_ja_c_per_w",
+    "value": "40.0",
+    "unit": "C/W",
+    "page": 3,
+    "doc_sha256": "331ad589e3c3f39ff984a75d825a3bf796232e141d9f21ed9f9328614e23fa4f"
+   },
+   "identity": {
+    "opn": "infineon-ipp019n08nf2s-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 11,
+     "quote_tokens_present_in_page_raw": 11,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/33/331ad589e3c3f39ff984a75d825a3bf796232e141d9f21ed9f9328614e23fa4f.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "f0a693ee9a3f2f0bbe447a8a38794e048dcfdbaee9b403287f68d9f253550722",
+   "claim": {
+    "opn": "infineon-irfp260n-datasheet",
+    "axis": "rtheta_jc_c_per_w",
+    "value": "0.5",
+    "unit": "C/W",
+    "page": 1,
+    "doc_sha256": "e5d7669eba2f8e6c4267a6dfd5de58f3ec3bfcbea19306815dcf287c88b57d75"
+   },
+   "identity": {
+    "opn": "infineon-irfp260n-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 5,
+     "quote_tokens_present_in_page_raw": 5,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/e5/e5d7669eba2f8e6c4267a6dfd5de58f3ec3bfcbea19306815dcf287c88b57d75.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "b5314911a48ba5b94e07b348185c22225569d0c303044da6922faad48eea892f",
+   "claim": {
+    "opn": "infineon-ipp030n10nf2s-datasheet",
+    "axis": "rtheta_jc_c_per_w",
+    "value": "0.6",
+    "unit": "C/W",
+    "page": 3,
+    "doc_sha256": "167f6855d8962251185af4c817844f9d741b3424631a4ea369757f3fd4714c2b"
+   },
+   "identity": {
+    "opn": "infineon-ipp030n10nf2s-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 21,
+     "quote_tokens_present_in_page_raw": 21,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/16/167f6855d8962251185af4c817844f9d741b3424631a4ea369757f3fd4714c2b.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "66a27889c452a82717c5df96680ebe3c558c3e05cf393dcc4e7d2c54b472ea2d",
+   "claim": {
+    "opn": "infineon-ipa65r045c7-datasheet",
+    "axis": "rtheta_jc_c_per_w",
+    "value": "3.6",
+    "unit": "C/W",
+    "page": 4,
+    "doc_sha256": "8855af05ab566224fd0b55030080c050f33b0f5520589def0833d5aa7d58e27a"
+   },
+   "identity": {
+    "opn": "infineon-ipa65r045c7-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 3,
+     "quote_tokens_present_in_page_raw": 3,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/88/8855af05ab566224fd0b55030080c050f33b0f5520589def0833d5aa7d58e27a.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "2e02e2dc024ca49c81abd6adc12a2abab15f013b9095b9b7771c053573178136",
+   "claim": {
+    "opn": "infineon-irfp260m-datasheet",
+    "axis": "rtheta_jc_c_per_w",
+    "value": "0.5",
+    "unit": "C/W",
+    "page": 1,
+    "doc_sha256": "3788199cad1f16aac58076e77d652cfc09556ee17bd9490c64d98bb9000a2ff8"
+   },
+   "identity": {
+    "opn": "infineon-irfp260m-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 5,
+     "quote_tokens_present_in_page_raw": 5,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/37/3788199cad1f16aac58076e77d652cfc09556ee17bd9490c64d98bb9000a2ff8.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "a5764ca261c31adfd8724fd51cce3b860ee535073dfc5431a8589e58e7128a4e",
+   "claim": {
+    "opn": "infineon-bsc093n15ns5sc-datasheet",
+    "axis": "rtheta_ja_c_per_w",
+    "value": "50.0",
+    "unit": "C/W",
+    "page": 3,
+    "doc_sha256": "b642cb34553f0e76fe879cc22df393c4e850427165dac9cca709b1f1b918b39e"
+   },
+   "identity": {
+    "opn": "infineon-bsc093n15ns5sc-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 21,
+     "quote_tokens_present_in_page_raw": 21,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/b6/b642cb34553f0e76fe879cc22df393c4e850427165dac9cca709b1f1b918b39e.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "bc5272eaabafa35d2151d89cf65cffe06817170292c5e2ca3b76c829b0b6a99e",
+   "claim": {
+    "opn": "infineon-imbf170r650m1-datasheet",
+    "axis": "rtheta_ja_c_per_w",
+    "value": "62.0",
+    "unit": "C/W",
+    "page": 3,
+    "doc_sha256": "cdd3228d4881cbff95b932f0a8ac5e4902f1178d37b7b7a5dc2bec7309fdeea0"
+   },
+   "identity": {
+    "opn": "infineon-imbf170r650m1-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 7,
+     "quote_tokens_present_in_page_raw": 7,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/cd/cdd3228d4881cbff95b932f0a8ac5e4902f1178d37b7b7a5dc2bec7309fdeea0.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  },
+  {
+   "selection": "doc_sha_overlap",
+   "fe_row_sha256": "43a824504d53352136b18235713e7f2fd933df0277d126fb20be59b1b5acf08d",
+   "claim": {
+    "opn": "infineon-ipd029n04nf2s-datasheet",
+    "axis": "rtheta_ja_c_per_w",
+    "value": "50.0",
+    "unit": "C/W",
+    "page": 4,
+    "doc_sha256": "4824e505bbf079c1cc287442495b5858997469b00bee3bee4cbfacf3e518b3f8"
+   },
+   "identity": {
+    "opn": "infineon-ipd029n04nf2s-datasheet",
+    "manufacturer": "UNKNOWN",
+    "in_catalog": false,
+    "export_opn": null,
+    "join": "UNKNOWN",
+    "class": "SOURCE_MISSING"
+   },
+   "source": {
+    "doc_state": "present",
+    "quote_ok": false,
+    "tool": "pdftotext,pymupdf",
+    "diag": {
+     "quote_tokens_total": 3,
+     "quote_tokens_present_in_page_raw": 3,
+     "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+    },
+    "doc_alias": "nas://vault/cas/48/4824e505bbf079c1cc287442495b5858997469b00bee3bee4cbfacf3e518b3f8.pdf",
+    "class": "FAILED"
+   },
+   "fold": {
+    "fold": "strata->served",
+    "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "doc_sha_in_export": true,
+    "class": "VERIFIED"
+   },
+   "bundle": {
+    "byte_exact": true,
+    "present_by_value": true,
+    "class": "VERIFIED"
+   },
+   "authorized": {
+    "approval_record": false,
+    "class": "UNKNOWN",
+    "note": "a manifest is not an approval"
+   },
+   "deployed": {
+    "deployed_sha": null,
+    "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+    "state": "unknown",
+    "class": "UNKNOWN"
+   },
+   "resolve": {
+    "artifact_bound": false,
+    "artifact_href": null,
+    "probe": "gated",
+    "state": "missing",
+    "class": "MISSING"
+   }
+  }
+ ]
+}
