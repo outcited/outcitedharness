@@ -1,13 +1,13 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 0,
+    "running": 2,
     "suspended": false,
-    "uptime_sec": 78911,
+    "uptime_sec": 79513,
     "version": "1.5.1",
     "agents": {
       "total": 9,
-      "running": 0,
+      "running": 2,
       "suspended": 0,
       "quarantined": 0
     },
@@ -18,18 +18,17 @@
     },
     "partial": true,
     "partial_errors": [
-      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T17:29:27Z",
+  "captured_at": "2026-10-28T17:39:30Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 79516,
+    "uptime_sec": 80119,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -72,7 +71,7 @@
     },
     {
       "name": "harness/core.control-dispatcher",
-      "running": false,
+      "running": true,
       "suspended": false,
       "scale": ""
     },
@@ -96,7 +95,7 @@
     },
     {
       "name": "harness/harness-engineer-2",
-      "running": false,
+      "running": true,
       "suspended": false,
       "scale": ""
     }
@@ -143,57 +142,57 @@
       ]
     }
   ],
-  "last_event_seq": 80482,
+  "last_event_seq": 80670,
   "recent_events": [
     {
-      "seq": 80472,
+      "seq": 80660,
+      "type": "order.completed",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 80659,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 80471,
+      "seq": 80658,
+      "type": "order.fired",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 80657,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 80470,
+      "seq": 80656,
+      "type": "bead.closed",
+      "subject": "do-wisp-kybsey"
+    },
+    {
+      "seq": 80655,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 80469,
-      "type": "bead.updated",
-      "subject": "do-wisp-5p0o09"
-    },
-    {
-      "seq": 80468,
+      "seq": 80654,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 80467,
+      "seq": 80653,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 80466,
+      "seq": 80652,
       "type": "order.completed",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 80465,
+      "seq": 80651,
       "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 80464,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 80463,
-      "type": "order.fired",
-      "subject": "dolt-health"
+      "subject": "order-tracking-sweep"
     }
   ]
 }
