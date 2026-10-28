@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 63156,
+    "uptime_sec": 63759,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T13:06:53Z",
+  "captured_at": "2026-10-28T13:16:56Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 63762,
+    "uptime_sec": 64365,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 75461,
+  "last_event_seq": 75646,
   "recent_events": [
     {
-      "seq": 75451,
-      "type": "bead.updated",
-      "subject": "do-wisp-flgcfu"
-    },
-    {
-      "seq": 75450,
+      "seq": 75636,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 75449,
+      "seq": 75635,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 75448,
+      "seq": 75634,
       "type": "order.completed",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 75447,
+      "seq": 75633,
       "type": "order.fired",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 75446,
+      "seq": 75632,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 75445,
+      "seq": 75631,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 75444,
-      "type": "order.fired",
+      "seq": 75630,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 75629,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 75628,
+      "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 75443,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 75442,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
+      "seq": 75627,
+      "type": "order.completed",
+      "subject": "beads-health"
     }
   ]
 }
