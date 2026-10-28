@@ -1,0 +1,14 @@
+{
+  "_comment": "Template for the LOCAL-ONLY path-alias map consumed by scripts/alias_evidence_paths.py. Copy to scripts/evidence_path_aliases.local.json (gitignored) and fill in the real mount paths. Each entry is a [source-prefix, public-alias] pair; order matters (longest/most-specific prefix first). NEVER commit real NAS/mount names — only the alias keys documented here belong in git.",
+  "aliases": [
+    ["<nas-mount-root>/m5-4tb", "nas://m5-4tb"],
+    ["<local-mnt>/charleybasecamp-smb/m5-4tb", "nas://m5-4tb"],
+    ["<alt-nas-mount-root>", "nas://m5-4tb"],
+    ["<store-mount>/api-store-export", "store://api-store-export"],
+    ["<store-mount>", "store://m5-opencode"],
+    ["<home>/Harnessv1/results", "local://Harnessv1/results"],
+    ["<home>/lane-out", "local://lane-out"],
+    ["<home>", "local://home"],
+    ["<other-volume>", "nas://biggeybigs"]
+  ]
+}

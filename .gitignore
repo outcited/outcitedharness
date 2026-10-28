@@ -19,3 +19,8 @@ scratch/
 scripts/soak_model_shim_cloud.py
 # Local-only raw evidence (unaliased paths); committed copies are aliased.
 evidence/*/raw/
+# Local-only private mount-path alias map (public-artifact hygiene); the
+# committed template documents key names only.
+scripts/evidence_path_aliases.local.json
+# Local-only alias-verification scratch (public-artifact hygiene).
+.local-verify/
