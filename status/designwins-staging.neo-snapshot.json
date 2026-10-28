@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 22750,
+    "uptime_sec": 23353,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,13 +21,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T01:53:26Z",
+  "captured_at": "2026-10-28T02:03:29Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 23354,
+    "uptime_sec": 23957,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 46157,
+  "last_event_seq": 46359,
   "recent_events": [
     {
-      "seq": 46147,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 46146,
-      "type": "execution.step_stalled",
-      "subject": "ds-0e5"
-    },
-    {
-      "seq": 46145,
+      "seq": 46349,
       "type": "bead.updated",
       "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 46144,
+      "seq": 46348,
       "type": "bead.updated",
       "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 46143,
+      "seq": 46347,
       "type": "order.completed",
-      "subject": "spawn-storm-detect"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 46142,
+      "seq": 46346,
       "type": "order.fired",
-      "subject": "spawn-storm-detect"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 46141,
-      "type": "order.completed",
-      "subject": "gate-sweep"
+      "seq": 46345,
+      "type": "session.woke",
+      "subject": "neo-fixture-1"
     },
     {
-      "seq": 46140,
-      "type": "order.fired",
-      "subject": "gate-sweep"
+      "seq": 46344,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 46139,
-      "type": "bead.closed",
-      "subject": "ds-wisp-4fukuh"
+      "seq": 46343,
+      "type": "worker.operation",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 46138,
-      "type": "order.completed",
-      "subject": "orphan-sweep"
+      "seq": 46342,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 46341,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 46340,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     }
   ]
 }
