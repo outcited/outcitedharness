@@ -194,6 +194,22 @@ pub const AXES: &[AxisSpec] = &[
         // evidence, and the only thing that can PROVE violation.
         min_column_evidence: true,
     },
+    // ---- additive, discovered-then-curated (PACKAGE-TEMP-AXES-01, hw-37d:
+    // an ambient/operating temperature span is a range quantity exactly like
+    // `TstgRangeC`, so it carries the same `Covers` op and Min-column policy.
+    // The axis was already in `dw_decide::Axis` (used by the "outdoor"
+    // phrase binding) but had no registry spec; PRD-PHRASE measured 72.1%
+    // substrate. Symbols are the printed row vocabulary; word labels
+    // ("Operating temperature range") fold through the alias table. No
+    // extraction: existing claims on these symbols become typed facts.
+    AxisSpec {
+        axis: Axis::TempRangeC,
+        symbols: &["TA", "TOPR", "TAMB", "TOPRANGE", "TEMPRANGE"],
+        op: Op::Covers,
+        accepts_classes: None,
+        default_near_miss_pct: 10.0,
+        min_column_evidence: false,
+    },
 ];
 
 /// `_norm_symbol` from the reference: strip whitespace and underscores,

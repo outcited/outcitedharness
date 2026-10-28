@@ -42,6 +42,7 @@ fn axis_name(a: dw_decide::Axis) -> &'static str {
         dw_decide::Axis::RdsOnOhm => "rds_on_ohm",
         dw_decide::Axis::TjMaxC => "tj_max_c",
         dw_decide::Axis::TstgRangeC => "tstg_range_c",
+        dw_decide::Axis::TempRangeC => "temp_range_c",
         dw_decide::Axis::VgsRatingV => "vgs_rating_v",
         dw_decide::Axis::VgsThV => "vgs_th_v",
         dw_decide::Axis::VsdV => "vsd_v",
@@ -177,6 +178,10 @@ fn additive_eight_registered() {
         // 2026-10-19 slice: measured 75.1% substrate coverage (2,354/3,136
         // mode-row docs carry sleep-family modes, burn 2026-10-19).
         ("sleep_current_a", "at_most"),
+        // PACKAGE-TEMP-AXES-01 (hw-37d): ambient/operating temperature span,
+        // same range contract as tstg_range_c. axis already existed; registry
+        // spec added so existing claims type as facts.
+        ("temp_range_c", "covers"),
     ];
     for (name, op) in want {
         let spec = AXES
@@ -186,5 +191,29 @@ fn additive_eight_registered() {
         assert_eq!(op_name(spec.op), *op, "op drift on {name}");
         assert!(!spec.symbols.is_empty(), "{name} carries no symbols");
     }
-    assert_eq!(AXES.len(), 14, "five ported + eight additive + sleep");
+    assert_eq!(
+        AXES.len(),
+        15,
+        "five ported + eight additive + sleep + temp"
+    );
+}
+
+/// PACKAGE-TEMP-AXES-01 (hw-37d): `temp_range_c` is registered and answerable
+/// from printed temperature-range symbols, and the range Min-column policy
+/// matches `tstg_range_c` (a range floor is never a rating magnitude).
+#[test]
+fn temp_range_c_registered() {
+    use dw_knives::axis_for_symbol;
+    assert_eq!(axis_for_symbol("TOPR"), Some(dw_decide::Axis::TempRangeC));
+    assert_eq!(axis_for_symbol("t amb"), Some(dw_decide::Axis::TempRangeC));
+    assert_eq!(axis_for_symbol("Topr"), Some(dw_decide::Axis::TempRangeC));
+    let spec = AXES
+        .iter()
+        .find(|s| s.axis == dw_decide::Axis::TempRangeC)
+        .expect("temp_range_c registered");
+    assert_eq!(op_name(spec.op), "covers");
+    assert!(
+        !spec.min_column_evidence,
+        "a temperature span's Min column is the range floor, not a rating"
+    );
 }
