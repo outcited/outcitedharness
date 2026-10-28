@@ -15,6 +15,27 @@
 //! underscores, uppercase, strip parentheses and commas. `RDS(ON)MAX`,
 //! `rds(on)max`, and `RDS_ON_MAX` are one symbol. A tokenizer that keeps the
 //! parentheses fails the gate on the first real corpus row.
+//!
+//! ## Unresolved dependencies — M4 `do-9id` (DW-M4-CONTRACT-GAPS-01)
+//!
+//! Two measured knives are deliberately **not** registered here; neither can
+//! be expressed as an [`AxisSpec`] without inventing contract law, and both
+//! are owned by M4 `do-9id`:
+//!
+//! - **`package`** is *nominal*, not scalar (`parts.package` is `TEXT`;
+//!   `dw-extract` carries `package: Option<String>` / `EntityGrain::Package`).
+//!   Every `AxisSpec.op` is a scalar comparison and claims are parsed as
+//!   `f64`, so PRD-PHRASE §8.1 law — *"Category is not Axis"* — holds. It
+//!   needs **multi-dimension category facts** (`CandidateFacts` carries a
+//!   single category dimension today).
+//! - **`temp_range_c`** is *range-valued* (`-40 → +85`). The scalar `Evidence`
+//!   shape cannot carry both bounds honestly, so a superficial `Op::Covers`
+//!   entry would be a lie. It needs the **range-valued `Evidence` extension**
+//!   (and the F-03 registry generalisation for MCU axes).
+//!
+//! Until those land, both are parked with a reason in `dw-bcmp`'s
+//! `KNIFE_SPEC.parked_axes` — never silently dropped, never best-guessed —
+//! and `dw-bcmp/tests/knife_spec_contract.rs` pins that parking.
 
 use std::collections::BTreeMap;
 
