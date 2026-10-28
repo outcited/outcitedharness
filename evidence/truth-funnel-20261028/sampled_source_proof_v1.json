@@ -1,0 +1,935 @@
+{
+ "schema": "designwins.truth-funnel.source-proof.v1",
+ "observation": {
+  "now": "2026-10-28T18:08:41+00:00",
+  "host": "m5max-ai"
+ },
+ "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+ "denominators": {
+  "power_sampled": 10,
+  "mcu_sampled": 10,
+  "total_sampled": 20
+ },
+ "classification_counts": {
+  "VERIFIED": 0,
+  "HELD": 13,
+  "FAILED": 1,
+  "STAGED_ONLY": 0,
+  "SOURCE_MISSING": 6,
+  "UNKNOWN": 0
+ },
+ "claims": [
+  {
+   "lane": "POWER",
+   "claim_id": "5e491fedaf02b7d6120b950a83156fcdc8d23ab5dfb5bdc3555bde6c233adecc",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "VDS Drain to Source Voltage",
+    "value": 40,
+    "unit": "V",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "5a81e58ac243c0f9974102d7a17909688ac361956a4bb0896c921c0477595c48",
+    "page": 1,
+    "quote": "VDS\nDrain to Source Voltage\n40\nV"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/datasheet-tail-20261007/blobs/5a/81/5a81e58ac243c0f9974102d7a17909688ac361956a4bb0896c921c0477595c48.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/5a/5a81e58ac243c0f9974102d7a17909688ac361956a4bb0896c921c0477595c48.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "vds drain to source voltage 40 v"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "6a84c690e0b61cad42599bb0ce53544205c747a2a3ad79851354c489ac660826",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "VPR Input-to-output test voltage per DIN V VDE V 0884-10 (Method b1)",
+    "value": 1061,
+    "unit": "VPK",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "7542176b542f2b1e953f1d79dd126fa2764760faa7749e55173c0f28c1531d3d",
+    "page": 17,
+    "quote": "Method b1, 100% production test,\nVPR = VIORM x 1.875, t = 1 s,\n1061\nVPK"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/datasheet-tail-20261007/blobs/75/42/7542176b542f2b1e953f1d79dd126fa2764760faa7749e55173c0f28c1531d3d.pdf",
+   "source": {
+    "doc_state": "absent",
+    "doc_present_in_vault": false,
+    "doc_alias": "nas://vault/cas/75/7542176b542f2b1e953f1d79dd126fa2764760faa7749e55173c0f28c1531d3d.pdf"
+   },
+   "verification": {
+    "status": "UNKNOWN",
+    "tool": null,
+    "reason": "source doc not in vault CAS"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "SOURCE_MISSING"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "97d0b7aeec822e2099667eb590f95e7875fcb6d34a14a0d7e8a314ead2f0c143",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "tPZL, tPLZ Propagation Delay @ CL=10pF, VCC=3.0 to 3.6, 25C",
+    "value": 8.7,
+    "unit": "ns",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "557562822614bec57d5e56451f5915592b8be50b838fb03e040de55d0dba4a62",
+    "page": 5,
+    "quote": "3.0 to 3.6\n\u2212\n2.9\n8.7\n\u2212\n9.0"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/datasheet-tail-20261007/blobs/55/75/557562822614bec57d5e56451f5915592b8be50b838fb03e040de55d0dba4a62.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/55/557562822614bec57d5e56451f5915592b8be50b838fb03e040de55d0dba4a62.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "3.0 to 3.6 \u2212 2.9 8.7 \u2212 9.0"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "66d30235e39d1ddb44e7b83a80287f75d60bcf12106c8ce31a43a329191691bd",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "VDD_HV_ADC1",
+    "value": "VDD_HV_A + 0.1",
+    "unit": "V",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "939a35231b61d5347900d3018e6a2b4b9cb39d79e0e2e60345e34b2fdefc8689",
+    "page": 56,
+    "quote": "VDD_HV_ADC1 (7) S R Voltage on VDD_HV_ADC1 with respect to ground (VSS_HV) \u2014 4.5 5.5 V Voltage drop(2) 3.0 5.5 Relative to VDD_HV_A (6) VDD_HV_A 0.1 VDD_HV_A + 0.1"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/datasheet-tail-20261007/blobs/93/9a/939a35231b61d5347900d3018e6a2b4b9cb39d79e0e2e60345e34b2fdefc8689.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/93/939a35231b61d5347900d3018e6a2b4b9cb39d79e0e2e60345e34b2fdefc8689.pdf"
+   },
+   "verification": {
+    "status": "FAIL",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [],
+    "quote_normalized": "vdd_hv_adc1 (7) s r voltage on vdd_hv_adc1 with respect to ground (vss_hv) \u2014 4.5 5.5 v voltage drop(2) 3.0 5.5 relative to vdd_hv_a (6) vdd_hv_a 0.1 vdd_hv_a + 0.1"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "FAILED"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "9d21caac2abed3bdaf90991a08bc0cf3ad684a73c82f616cb48df5fbae76f758",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "Connector Type",
+    "value": "Type A",
+    "unit": null,
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "8938fb84c480ffb03e09ecc31ecabb1287ffdddc5a82d296def402196b3910fe",
+    "page": 3,
+    "quote": "Type A"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/datasheet-tail-20261007/blobs/89/38/8938fb84c480ffb03e09ecc31ecabb1287ffdddc5a82d296def402196b3910fe.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/89/8938fb84c480ffb03e09ecc31ecabb1287ffdddc5a82d296def402196b3910fe.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "type a"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "8816ea57470e17a026650bdc937bd04778824a072cca0e1a99413b046245fab0",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "Drain-source reverse voltage VSD, ISD = 20 A, VGS = 0 V, Tvj = 25 \u00b0C",
+    "value": 3.7,
+    "unit": "V",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "d44f2098f8553487759dc3ea969981d641da6d2d1ace3ce50ad07a4676fd9c59",
+    "page": 6,
+    "quote": "3.7"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/datasheet-tail-20261007/blobs/d4/4f/d44f2098f8553487759dc3ea969981d641da6d2d1ace3ce50ad07a4676fd9c59.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/d4/d44f2098f8553487759dc3ea969981d641da6d2d1ace3ce50ad07a4676fd9c59.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "3.7"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "422069d2ae48e552b1896ba4c0b874809c2d6146de3ebca35edf594fff5a7e5f",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "Pull-High Drive ON Resistance, VPVCC \u2013 VPGND = 5 V, ILG = 2 mA (source)",
+    "value": 1.0,
+    "unit": "\u03a9",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "fb9d92704cc03377ac8910d97af522678dd9e6003ce4087b8ac6ba9a1bd2091b",
+    "page": 9,
+    "quote": "Pull-High Drive ON Resistance VPVCC \u2013 VPGND = 5 V, ILG = 2 mA (source) RDRV_LH \u2212 1.0 \u2212"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/datasheet-tail-20261007/blobs/fb/9d/fb9d92704cc03377ac8910d97af522678dd9e6003ce4087b8ac6ba9a1bd2091b.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/fb/fb9d92704cc03377ac8910d97af522678dd9e6003ce4087b8ac6ba9a1bd2091b.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pymupdf"
+    ],
+    "quote_normalized": "pull-high drive on resistance vpvcc \u2013 vpgnd = 5 v, ilg = 2 ma (source) rdrv_lh \u2212 1.0 \u2212",
+    "note": "extractor reading-order differs; matched on pymupdf"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "dcc9b191d4727b566bd67001b780b4c78a4bafb42896d04d9c924cebf816873b",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "R12 resistance",
+    "value": 2.2,
+    "unit": "k\u03a9",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "de58231ce88a0ef4b36a40e8d55d86962f125835933c30821de86e548cf23607",
+    "page": 1,
+    "quote": "2.2k"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/refdesigns-eval-20261007/blobs/de/58/de58231ce88a0ef4b36a40e8d55d86962f125835933c30821de86e548cf23607.pdf",
+   "source": {
+    "doc_state": "absent",
+    "doc_present_in_vault": false,
+    "doc_alias": "nas://vault/cas/de/de58231ce88a0ef4b36a40e8d55d86962f125835933c30821de86e548cf23607.pdf"
+   },
+   "verification": {
+    "status": "UNKNOWN",
+    "tool": null,
+    "reason": "source doc not in vault CAS"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "SOURCE_MISSING"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "b6c2edb97e3536338d14630b2b3916a93a2ffc954bf239918f2a0f37c007cd40",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "LBL1 quantity",
+    "value": 10000,
+    "unit": "per roll",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "8a09f8082ea09dd962c7c0bd1a8e2a8711e11ab2fb628c54bd9f1e6a53a81e0f",
+    "page": 10,
+    "quote": "10,000 per roll"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/unassigned-l0-20261007/blobs/8a/09/8a09f8082ea09dd962c7c0bd1a8e2a8711e11ab2fb628c54bd9f1e6a53a81e0f.pdf",
+   "source": {
+    "doc_state": "absent",
+    "doc_present_in_vault": false,
+    "doc_alias": "nas://vault/cas/8a/8a09f8082ea09dd962c7c0bd1a8e2a8711e11ab2fb628c54bd9f1e6a53a81e0f.pdf"
+   },
+   "verification": {
+    "status": "UNKNOWN",
+    "tool": null,
+    "reason": "source doc not in vault CAS"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "SOURCE_MISSING"
+  },
+  {
+   "lane": "POWER",
+   "claim_id": "c01dc146681c4b5fad1bfc1b72c08c40f1ccc4649ee1be176f7bb72da3625931",
+   "identity": {
+    "part": "UNKNOWN",
+    "field": "R24 resistance",
+    "value": 47.5,
+    "unit": "ohm",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "f99b5eb9a68e86fcaef44e123e56c391491ec168481a8c0b3f7c073427c8b145",
+    "page": 2,
+    "quote": "47.5\nR24"
+   },
+   "source_file": "nas://m5-4tb/exports/corpus-deliveries/unassigned-l0-20261007/blobs/f9/9b/f99b5eb9a68e86fcaef44e123e56c391491ec168481a8c0b3f7c073427c8b145.pdf",
+   "source": {
+    "doc_state": "absent",
+    "doc_present_in_vault": false,
+    "doc_alias": "nas://vault/cas/f9/f99b5eb9a68e86fcaef44e123e56c391491ec168481a8c0b3f7c073427c8b145.pdf"
+   },
+   "verification": {
+    "status": "UNKNOWN",
+    "tool": null,
+    "reason": "source doc not in vault CAS"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "SOURCE_MISSING"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "34241fc89e5c87e596246018a94d0cbda3b9bc21c70b30edf8da838c98513662",
+   "identity": {
+    "part": "00001561E",
+    "field": "n_gpio",
+    "value": null,
+    "unit": "pins",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "3d50372dd19b6208d8d431769a8729142330ea279461e991e527404416a252dc",
+    "page": 3,
+    "quote": "12.0 GPIO and LED Interface ........................................................................................................................................................... 117"
+   },
+   "source_file": "https://ww1.microchip.com/downloads/aemDocuments/documents/OTH/ProductDocuments/DataSheets/00001561E.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/3d/3d50372dd19b6208d8d431769a8729142330ea279461e991e527404416a252dc.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "12.0 gpio and led interface ........................................................................................................................................................... 117"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "6d0f285691c9b647465daab400e2efa8fb22ac41a4851c5ba5092bd4992ceab2",
+   "identity": {
+    "part": "MSPM0G3507-Q1",
+    "field": "flash_kb",
+    "value": 128.0,
+    "unit": "KB",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "c44df29a9981ebcd42644371ed59cf8707aa53fc5245e6ebc805ed447abff646",
+    "page": 1,
+    "quote": "Up to 128KB of flash memory with error"
+   },
+   "source_file": "https://www.ti.com/lit/gpn/MSPM0G3507-Q1",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/c4/c44df29a9981ebcd42644371ed59cf8707aa53fc5245e6ebc805ed447abff646.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "up to 128kb of flash memory with error"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "80817040ab690253551ec9327fb86ebb058127ceae4949aa2d9be57524867ab5",
+   "identity": {
+    "part": "fpf1039-d",
+    "field": "temp_range_c",
+    "value": [
+     -40.0,
+     85.0
+    ],
+    "unit": "\u00b0C",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "f5739109445cd62b98b56f78a02a3e06a2535df1ce2df1dbb8a7199368983716",
+    "page": 6,
+    "quote": "Unless otherwise noted, VIN=1.2 to 5.5V and TA=-40 to +85\u00b0C; typical values are at VIN=4.5V and TA=25\u00b0C."
+   },
+   "source_file": "https://www.onsemi.com/download/data-sheet/pdf/fpf1039-d.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/f5/f5739109445cd62b98b56f78a02a3e06a2535df1ce2df1dbb8a7199368983716.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "unless otherwise noted, vin=1.2 to 5.5v and ta=-40 to +85\u00b0c; typical values are at vin=4.5v and ta=25\u00b0c."
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "c8b854cafd72aba580c2e72fb9656bb7e90ad0ceeb2c5606352525b6553bbfd7",
+   "identity": {
+    "part": "infineon-psoc-4-psoc-4100-family-datasheet-en",
+    "field": "flash_kb",
+    "value": 32.0,
+    "unit": "KB",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "96f5358c3c46932a48b967aea9b9378821362c6278b3d03339142bde05509c78",
+    "page": 2,
+    "quote": "\u25a0Up to 32 kB of flash with Read Accelerator"
+   },
+   "source_file": "https://www.infineon.com/assets/row/public/documents/30/49/infineon-psoc-4-psoc-4100-family-datasheet-en.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/96/96f5358c3c46932a48b967aea9b9378821362c6278b3d03339142bde05509c78.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pymupdf"
+    ],
+    "quote_normalized": "\u25a0up to 32 kb of flash with read accelerator",
+    "note": "extractor reading-order differs; matched on pymupdf"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "3018da4ceb7fd835975305f3afacb21362b570b2179603d36c926c600258a041",
+   "identity": {
+    "part": "nxp-cbtl06dp213",
+    "field": "esd_hbm_v",
+    "value": 500.0,
+    "unit": "V",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "395da9dcbb641c14493d0cab41a846ea0f06c863484fb67fbd64e43b04ce03a8",
+    "page": 2,
+    "quote": "\uf06eESD 2 kV HBM, 500 V CDM"
+   },
+   "source_file": "https://www.nxp.com/docs/en/data-sheet/CBTL06DP213.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/39/395da9dcbb641c14493d0cab41a846ea0f06c863484fb67fbd64e43b04ce03a8.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pymupdf"
+    ],
+    "quote_normalized": "\uf06eesd 2 kv hbm, 500 v cdm",
+    "note": "extractor reading-order differs; matched on pymupdf"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "75bd688abfb767ccc4d39dd29ad06a5070c2a3538e374c1a3ea3ce24cf578079",
+   "identity": {
+    "part": "onsemi-74lcx08-d",
+    "field": "esd_hbm_v",
+    "value": 2000.0,
+    "unit": "V",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "4f03c3eca3840aad1e200d1021facf9ec8d84d7b887835cf1d574f3c6dbe26fa",
+    "page": 1,
+    "quote": "\u2666Human body model > 2000 V"
+   },
+   "source_file": "https://www.onsemi.com/download/data-sheet/pdf/74lcx08-d.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/4f/4f03c3eca3840aad1e200d1021facf9ec8d84d7b887835cf1d574f3c6dbe26fa.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pymupdf"
+    ],
+    "quote_normalized": "\u2666human body model > 2000 v",
+    "note": "extractor reading-order differs; matched on pymupdf"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "193b59227ab367c75ff1e0353a775eefa6e760e44f2d057f4aa0ab105fcb613c",
+   "identity": {
+    "part": "silabs-efr32bg24-datasheet",
+    "field": "n_gpio",
+    "value": 32.0,
+    "unit": "pins",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "c504de69a4db88f43106ffd8906299b32aaf12597073078e3f47926f93380b3f",
+    "page": 2,
+    "quote": "\u2022 Up to 32 General Purpose I/O pins with output state reten-"
+   },
+   "source_file": "https://www.silabs.com/documents/public/data-sheets/efr32bg24-datasheet.pdf",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/c5/c504de69a4db88f43106ffd8906299b32aaf12597073078e3f47926f93380b3f.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pymupdf"
+    ],
+    "quote_normalized": "\u2022 up to 32 general purpose i/o pins with output state reten-",
+    "note": "extractor reading-order differs; matched on pymupdf"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "0344fff42e47564e1f87c8b554549b5eb933bfbf5c793ab146c33c67261a1e87",
+   "identity": {
+    "part": "st-en-stm32mp1-press-pres",
+    "field": "n_ethernet",
+    "value": 2.0,
+    "unit": "count",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "eda13cd52e54c0e9a820810465af949916b10f95f03d9545cf42af939ff5aca8",
+    "page": 6,
+    "quote": "\u2022 CAN FD, 2 x Ethernet"
+   },
+   "source_file": "https://www.st.com/content/ccc/resource/sales_and_marketing/presentation/product_presentation/group0/48/cd/72/14/92/a7/44/4a/stm32mp1_press-pres/files/stm32mp1_press-pres.pdf/jcr:content/translations/en.stm32mp1_press-pres.pdf",
+   "source": {
+    "doc_state": "absent",
+    "doc_present_in_vault": false,
+    "doc_alias": "nas://vault/cas/ed/eda13cd52e54c0e9a820810465af949916b10f95f03d9545cf42af939ff5aca8.pdf"
+   },
+   "verification": {
+    "status": "UNKNOWN",
+    "tool": null,
+    "reason": "source doc not in vault CAS"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "SOURCE_MISSING"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "527500a3c4915094941df65e3867bbbd6e1c0ceca389b50846c5baa966011229",
+   "identity": {
+    "part": "ti-sdaa486-pdf-ts-1791471178438",
+    "field": "sram_kb",
+    "value": 4.0,
+    "unit": "KB",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "f80c89f69321e0a982f5684a5926a130d333b8e1ad98193d04479f0df39d9100",
+    "page": 1,
+    "quote": "power sensor controller engine (SCE) MCU core with 4KB of SRAM. The SCE samples, stores, and processes"
+   },
+   "source_file": "https://www.ti.com/lit/an/sdaa486/sdaa486.pdf?ts=1791471178438",
+   "source": {
+    "doc_state": "present",
+    "doc_present_in_vault": true,
+    "doc_alias": "nas://vault/cas/f8/f80c89f69321e0a982f5684a5926a130d333b8e1ad98193d04479f0df39d9100.pdf"
+   },
+   "verification": {
+    "status": "PASS",
+    "tool": "pdftotext,pymupdf",
+    "tools_tried": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "tools_matched": [
+     "pdftotext",
+     "pymupdf"
+    ],
+    "quote_normalized": "power sensor controller engine (sce) mcu core with 4kb of sram. the sce samples, stores, and processes"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "HELD"
+  },
+  {
+   "lane": "MCU",
+   "claim_id": "57114b773f39777b7e232855d358da80a4d95444ef6f90bc23033cab695a952a",
+   "identity": {
+    "part": "ti-tiduex4-pdf-ts-1791315046269",
+    "field": "n_adc",
+    "value": 1.0,
+    "unit": "channels",
+    "conditions": null
+   },
+   "evidence": {
+    "doc_sha256": "0c1f39dd492e3083a266dd0071d7d9bb102c394c2ffbe35c7eefb03a3a7913c4",
+    "page": 3,
+    "quote": "Table 1-3. TPS92520-Q1 Channel One Constant Current Buck Converter"
+   },
+   "source_file": "https://www.ti.com/lit/ug/tiduex4/tiduex4.pdf?ts=1791315046269",
+   "source": {
+    "doc_state": "absent",
+    "doc_present_in_vault": false,
+    "doc_alias": "nas://vault/cas/0c/0c1f39dd492e3083a266dd0071d7d9bb102c394c2ffbe35c7eefb03a3a7913c4.pdf"
+   },
+   "verification": {
+    "status": "UNKNOWN",
+    "tool": null,
+    "reason": "source doc not in vault CAS"
+   },
+   "identity_join": {
+    "served_opn": "UNKNOWN",
+    "status": "UNKNOWN"
+   },
+   "release": {
+    "release_id": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+    "served": false
+   },
+   "resolvable": {
+    "clickable": "UNKNOWN",
+    "note": "no viewer resolver in export; a SHA is not a working link"
+   },
+   "classification": "SOURCE_MISSING"
+  }
+ ]
+}
