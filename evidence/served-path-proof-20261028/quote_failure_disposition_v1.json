@@ -1,0 +1,1015 @@
+{
+ "schema": "designwins.truth-funnel.quote-failure-disposition.v1",
+ "observation": {
+  "now": "2026-10-28T23:58:11+00:00",
+  "host": "m5max-ai"
+ },
+ "summary": {
+  "EXTRACTION_ARTIFACT": 9
+ },
+ "failures": [
+  {
+   "opn": "infineon-imbg40r036m2h-datasheet",
+   "doc_sha256": "04b6b469d0f44a1f17516366914a015363607d8cf319963df452082ac011ffda",
+   "recorded_page": 4,
+   "axis": "rtheta_ja_c_per_w",
+   "value": "40.0",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "884d22cc761a260b176235fad09c441f3c6c6a9ea0d1b73f398be81f3f817efe",
+    "claim": {
+     "opn": "infineon-imbg40r036m2h-datasheet",
+     "axis": "rtheta_ja_c_per_w",
+     "value": "40.0",
+     "unit": "C/W",
+     "page": 4,
+     "doc_sha256": "04b6b469d0f44a1f17516366914a015363607d8cf319963df452082ac011ffda",
+     "conditions": null,
+     "quote": "RthJA | \u2011 \u2011 | 40 | \u00b0C/W",
+     "quote_hash": "70df84614f8d5e15"
+    },
+    "identity": {
+     "opn": "infineon-imbg40r036m2h-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 3,
+      "quote_tokens_present_in_page_raw": 3,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L1",
+       "normalization": "pipe_as_space (column delimiter -> whitespace)",
+       "normalized_quote": "rthja \u2010 \u2010 40 \u00b0c/w"
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/04/04b6b469d0f44a1f17516366914a015363607d8cf319963df452082ac011ffda.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "RthJA | \u2011 \u2011 | 40 | \u00b0C/W",
+   "quote_hash": "70df84614f8d5e15",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "pipe_as_space (column delimiter -> whitespace)",
+    "level": "L1",
+    "cells": null
+   }
+  },
+  {
+   "opn": "infineon-ipp019n08nf2s-datasheet",
+   "doc_sha256": "331ad589e3c3f39ff984a75d825a3bf796232e141d9f21ed9f9328614e23fa4f",
+   "recorded_page": 3,
+   "axis": "rtheta_ja_c_per_w",
+   "value": "40.0",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "f865c9993acffacefa285cd0c8b5a00d189b3eae97e042feba1d9176e7d5fb74",
+    "claim": {
+     "opn": "infineon-ipp019n08nf2s-datasheet",
+     "axis": "rtheta_ja_c_per_w",
+     "value": "40.0",
+     "unit": "C/W",
+     "page": 3,
+     "doc_sha256": "331ad589e3c3f39ff984a75d825a3bf796232e141d9f21ed9f9328614e23fa4f",
+     "conditions": null,
+     "quote": "RthJA | Thermal resistance, junction - ambient, 2) 6 cm\u00b2 cooling area | - | 40 | - | \u00b0C/W",
+     "quote_hash": "57b75d04dd1ca0ff"
+    },
+    "identity": {
+     "opn": "infineon-ipp019n08nf2s-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 11,
+      "quote_tokens_present_in_page_raw": 11,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L3",
+       "normalization": "cell_token_containment (every cell token occurs on the page; permits column-run reading order, wrapped-line joins and repositioned footnote markers)",
+       "cells": [
+        "rthja",
+        "thermal resistance, junction - ambient, 2) 6 cm2 cooling area",
+        "-",
+        "40",
+        "-",
+        "\u00b0c/w"
+       ]
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/33/331ad589e3c3f39ff984a75d825a3bf796232e141d9f21ed9f9328614e23fa4f.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "RthJA | Thermal resistance, junction - ambient, 2) 6 cm\u00b2 cooling area | - | 40 | - | \u00b0C/W",
+   "quote_hash": "57b75d04dd1ca0ff",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "cell_token_containment (every cell token occurs on the page; permits column-run reading order, wrapped-line joins and repositioned footnote markers)",
+    "level": "L3",
+    "cells": [
+     "rthja",
+     "thermal resistance, junction - ambient, 2) 6 cm2 cooling area",
+     "-",
+     "40",
+     "-",
+     "\u00b0c/w"
+    ]
+   }
+  },
+  {
+   "opn": "infineon-irfp260n-datasheet",
+   "doc_sha256": "e5d7669eba2f8e6c4267a6dfd5de58f3ec3bfcbea19306815dcf287c88b57d75",
+   "recorded_page": 1,
+   "axis": "rtheta_jc_c_per_w",
+   "value": "0.5",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "f0a693ee9a3f2f0bbe447a8a38794e048dcfdbaee9b403287f68d9f253550722",
+    "claim": {
+     "opn": "infineon-irfp260n-datasheet",
+     "axis": "rtheta_jc_c_per_w",
+     "value": "0.5",
+     "unit": "C/W",
+     "page": 1,
+     "doc_sha256": "e5d7669eba2f8e6c4267a6dfd5de58f3ec3bfcbea19306815dcf287c88b57d75",
+     "conditions": null,
+     "quote": "R\uf071JC | Junction-to-Case | \u2013\u2013\u2013 | 0.50 | \u00b0C/W",
+     "quote_hash": "1b726d5c27bb3b75"
+    },
+    "identity": {
+     "opn": "infineon-irfp260n-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 5,
+      "quote_tokens_present_in_page_raw": 5,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L2",
+       "normalization": "cell_containment (each '|'-delimited cell is a contiguous run of the line-folded page text; cells may live in separate column runs / wrapped lines)",
+       "cells": [
+        "r\uf071jc",
+        "junction-to-case",
+        "\u2013\u2013\u2013",
+        "0.50",
+        "\u00b0c/w"
+       ]
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/e5/e5d7669eba2f8e6c4267a6dfd5de58f3ec3bfcbea19306815dcf287c88b57d75.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "R\uf071JC | Junction-to-Case | \u2013\u2013\u2013 | 0.50 | \u00b0C/W",
+   "quote_hash": "1b726d5c27bb3b75",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "cell_containment (each '|'-delimited cell is a contiguous run of the line-folded page text; cells may live in separate column runs / wrapped lines)",
+    "level": "L2",
+    "cells": [
+     "r\uf071jc",
+     "junction-to-case",
+     "\u2013\u2013\u2013",
+     "0.50",
+     "\u00b0c/w"
+    ]
+   }
+  },
+  {
+   "opn": "infineon-ipp030n10nf2s-datasheet",
+   "doc_sha256": "167f6855d8962251185af4c817844f9d741b3424631a4ea369757f3fd4714c2b",
+   "recorded_page": 3,
+   "axis": "rtheta_jc_c_per_w",
+   "value": "0.6",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "b5314911a48ba5b94e07b348185c22225569d0c303044da6922faad48eea892f",
+    "claim": {
+     "opn": "infineon-ipp030n10nf2s-datasheet",
+     "axis": "rtheta_jc_c_per_w",
+     "value": "0.6",
+     "unit": "C/W",
+     "page": 3,
+     "doc_sha256": "167f6855d8962251185af4c817844f9d741b3424631a4ea369757f3fd4714c2b",
+     "conditions": null,
+     "quote": "RthJC | Thermal resistance, junction \u2011 case Thermal resistance, junction \u2011 ambient, 5) 6 cm\u00b2 cooling area Thermal resistance, junction \u2011 ambient, minimal footprint | \u2011 | 0.6 | \u2011 | \u00b0C/W",
+     "quote_hash": "2ea30653a575b318"
+    },
+    "identity": {
+     "opn": "infineon-ipp030n10nf2s-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 21,
+      "quote_tokens_present_in_page_raw": 21,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L3",
+       "normalization": "cell_token_containment (every cell token occurs on the page; permits column-run reading order, wrapped-line joins and repositioned footnote markers)",
+       "cells": [
+        "rthjc",
+        "thermal resistance, junction \u2010 case thermal resistance, junction \u2010 ambient, 5) 6 cm2 cooling area thermal resistance, junction \u2010 ambient, minimal footprint",
+        "\u2010",
+        "0.6",
+        "\u2010",
+        "\u00b0c/w"
+       ]
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/16/167f6855d8962251185af4c817844f9d741b3424631a4ea369757f3fd4714c2b.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "RthJC | Thermal resistance, junction \u2011 case Thermal resistance, junction \u2011 ambient, 5) 6 cm\u00b2 cooling area Thermal resistance, junction \u2011 ambient, minimal footprint | \u2011 | 0.6 | \u2011 | \u00b0C/W",
+   "quote_hash": "2ea30653a575b318",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "cell_token_containment (every cell token occurs on the page; permits column-run reading order, wrapped-line joins and repositioned footnote markers)",
+    "level": "L3",
+    "cells": [
+     "rthjc",
+     "thermal resistance, junction \u2010 case thermal resistance, junction \u2010 ambient, 5) 6 cm2 cooling area thermal resistance, junction \u2010 ambient, minimal footprint",
+     "\u2010",
+     "0.6",
+     "\u2010",
+     "\u00b0c/w"
+    ]
+   }
+  },
+  {
+   "opn": "infineon-ipa65r045c7-datasheet",
+   "doc_sha256": "8855af05ab566224fd0b55030080c050f33b0f5520589def0833d5aa7d58e27a",
+   "recorded_page": 4,
+   "axis": "rtheta_jc_c_per_w",
+   "value": "3.6",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "66a27889c452a82717c5df96680ebe3c558c3e05cf393dcc4e7d2c54b472ea2d",
+    "claim": {
+     "opn": "infineon-ipa65r045c7-datasheet",
+     "axis": "rtheta_jc_c_per_w",
+     "value": "3.6",
+     "unit": "C/W",
+     "page": 4,
+     "doc_sha256": "8855af05ab566224fd0b55030080c050f33b0f5520589def0833d5aa7d58e27a",
+     "conditions": null,
+     "quote": "RthJC | - - | 3.6 | \u00b0C/W",
+     "quote_hash": "aed4f4014e1b1ce0"
+    },
+    "identity": {
+     "opn": "infineon-ipa65r045c7-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 3,
+      "quote_tokens_present_in_page_raw": 3,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L1",
+       "normalization": "pipe_as_space (column delimiter -> whitespace)",
+       "normalized_quote": "rthjc - - 3.6 \u00b0c/w"
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/88/8855af05ab566224fd0b55030080c050f33b0f5520589def0833d5aa7d58e27a.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "RthJC | - - | 3.6 | \u00b0C/W",
+   "quote_hash": "aed4f4014e1b1ce0",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "pipe_as_space (column delimiter -> whitespace)",
+    "level": "L1",
+    "cells": null
+   }
+  },
+  {
+   "opn": "infineon-irfp260m-datasheet",
+   "doc_sha256": "3788199cad1f16aac58076e77d652cfc09556ee17bd9490c64d98bb9000a2ff8",
+   "recorded_page": 1,
+   "axis": "rtheta_jc_c_per_w",
+   "value": "0.5",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "2e02e2dc024ca49c81abd6adc12a2abab15f013b9095b9b7771c053573178136",
+    "claim": {
+     "opn": "infineon-irfp260m-datasheet",
+     "axis": "rtheta_jc_c_per_w",
+     "value": "0.5",
+     "unit": "C/W",
+     "page": 1,
+     "doc_sha256": "3788199cad1f16aac58076e77d652cfc09556ee17bd9490c64d98bb9000a2ff8",
+     "conditions": null,
+     "quote": "R\uf071JC | Junction-to-Case | \u2013\u2013\u2013 | 0.50 | \u00b0C/W",
+     "quote_hash": "1b726d5c27bb3b75"
+    },
+    "identity": {
+     "opn": "infineon-irfp260m-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 5,
+      "quote_tokens_present_in_page_raw": 5,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L2",
+       "normalization": "cell_containment (each '|'-delimited cell is a contiguous run of the line-folded page text; cells may live in separate column runs / wrapped lines)",
+       "cells": [
+        "r\uf071jc",
+        "junction-to-case",
+        "\u2013\u2013\u2013",
+        "0.50",
+        "\u00b0c/w"
+       ]
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/37/3788199cad1f16aac58076e77d652cfc09556ee17bd9490c64d98bb9000a2ff8.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "R\uf071JC | Junction-to-Case | \u2013\u2013\u2013 | 0.50 | \u00b0C/W",
+   "quote_hash": "1b726d5c27bb3b75",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "cell_containment (each '|'-delimited cell is a contiguous run of the line-folded page text; cells may live in separate column runs / wrapped lines)",
+    "level": "L2",
+    "cells": [
+     "r\uf071jc",
+     "junction-to-case",
+     "\u2013\u2013\u2013",
+     "0.50",
+     "\u00b0c/w"
+    ]
+   }
+  },
+  {
+   "opn": "infineon-bsc093n15ns5sc-datasheet",
+   "doc_sha256": "b642cb34553f0e76fe879cc22df393c4e850427165dac9cca709b1f1b918b39e",
+   "recorded_page": 3,
+   "axis": "rtheta_ja_c_per_w",
+   "value": "50.0",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "a5764ca261c31adfd8724fd51cce3b860ee535073dfc5431a8589e58e7128a4e",
+    "claim": {
+     "opn": "infineon-bsc093n15ns5sc-datasheet",
+     "axis": "rtheta_ja_c_per_w",
+     "value": "50.0",
+     "unit": "C/W",
+     "page": 3,
+     "doc_sha256": "b642cb34553f0e76fe879cc22df393c4e850427165dac9cca709b1f1b918b39e",
+     "conditions": null,
+     "quote": "RthJA | Thermal resistance, junction \u2011 case, bottom Thermal resistance, junction \u2011 case, top Thermal resistance, junction \u2011 ambient, 2 4) 6 cm cooling area | \u2011 | 50 | \u2011 | K/W",
+     "quote_hash": "a7283d5d803c31f7"
+    },
+    "identity": {
+     "opn": "infineon-bsc093n15ns5sc-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 21,
+      "quote_tokens_present_in_page_raw": 21,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L3",
+       "normalization": "cell_token_containment (every cell token occurs on the page; permits column-run reading order, wrapped-line joins and repositioned footnote markers)",
+       "cells": [
+        "rthja",
+        "thermal resistance, junction \u2010 case, bottom thermal resistance, junction \u2010 case, top thermal resistance, junction \u2010 ambient, 2 4) 6 cm cooling area",
+        "\u2010",
+        "50",
+        "\u2010",
+        "k/w"
+       ]
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/b6/b642cb34553f0e76fe879cc22df393c4e850427165dac9cca709b1f1b918b39e.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "RthJA | Thermal resistance, junction \u2011 case, bottom Thermal resistance, junction \u2011 case, top Thermal resistance, junction \u2011 ambient, 2 4) 6 cm cooling area | \u2011 | 50 | \u2011 | K/W",
+   "quote_hash": "a7283d5d803c31f7",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "cell_token_containment (every cell token occurs on the page; permits column-run reading order, wrapped-line joins and repositioned footnote markers)",
+    "level": "L3",
+    "cells": [
+     "rthja",
+     "thermal resistance, junction \u2010 case, bottom thermal resistance, junction \u2010 case, top thermal resistance, junction \u2010 ambient, 2 4) 6 cm cooling area",
+     "\u2010",
+     "50",
+     "\u2010",
+     "k/w"
+    ]
+   }
+  },
+  {
+   "opn": "infineon-imbf170r650m1-datasheet",
+   "doc_sha256": "cdd3228d4881cbff95b932f0a8ac5e4902f1178d37b7b7a5dc2bec7309fdeea0",
+   "recorded_page": 3,
+   "axis": "rtheta_ja_c_per_w",
+   "value": "62.0",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "bc5272eaabafa35d2151d89cf65cffe06817170292c5e2ca3b76c829b0b6a99e",
+    "claim": {
+     "opn": "infineon-imbf170r650m1-datasheet",
+     "axis": "rtheta_ja_c_per_w",
+     "value": "62.0",
+     "unit": "C/W",
+     "page": 3,
+     "doc_sha256": "cdd3228d4881cbff95b932f0a8ac5e4902f1178d37b7b7a5dc2bec7309fdeea0",
+     "conditions": null,
+     "quote": "Rth(j-a) | Thermal resistance, 1) junction-ambient | 62 | K/W",
+     "quote_hash": "0991b5eda71ea53f"
+    },
+    "identity": {
+     "opn": "infineon-imbf170r650m1-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 7,
+      "quote_tokens_present_in_page_raw": 7,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L3b",
+       "normalization": "cell_token_containment_footnote_folded (as L3, with footnote markers 'N)' stripped from page and cell tokens before comparison \u2014 the extractor may attach or separate a footnote marker from the token it annotates)",
+       "cells": [
+        "rth(j-a)",
+        "thermal resistance, 1) junction-ambient",
+        "62",
+        "k/w"
+       ]
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/cd/cdd3228d4881cbff95b932f0a8ac5e4902f1178d37b7b7a5dc2bec7309fdeea0.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "Rth(j-a) | Thermal resistance, 1) junction-ambient | 62 | K/W",
+   "quote_hash": "0991b5eda71ea53f",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "cell_token_containment_footnote_folded (as L3, with footnote markers 'N)' stripped from page and cell tokens before comparison \u2014 the extractor may attach or separate a footnote marker from the token it annotates)",
+    "level": "L3b",
+    "cells": [
+     "rth(j-a)",
+     "thermal resistance, 1) junction-ambient",
+     "62",
+     "k/w"
+    ]
+   }
+  },
+  {
+   "opn": "infineon-ipd029n04nf2s-datasheet",
+   "doc_sha256": "4824e505bbf079c1cc287442495b5858997469b00bee3bee4cbfacf3e518b3f8",
+   "recorded_page": 4,
+   "axis": "rtheta_ja_c_per_w",
+   "value": "50.0",
+   "unit": "C/W",
+   "original_failed_record_verbatim": {
+    "selection": "doc_sha_overlap",
+    "fe_row_sha256": "43a824504d53352136b18235713e7f2fd933df0277d126fb20be59b1b5acf08d",
+    "claim": {
+     "opn": "infineon-ipd029n04nf2s-datasheet",
+     "axis": "rtheta_ja_c_per_w",
+     "value": "50.0",
+     "unit": "C/W",
+     "page": 4,
+     "doc_sha256": "4824e505bbf079c1cc287442495b5858997469b00bee3bee4cbfacf3e518b3f8",
+     "conditions": null,
+     "quote": "RthJA | \u2011 \u2011 | 50 | \u00b0C/W",
+     "quote_hash": "a53e197725ce49ee"
+    },
+    "identity": {
+     "opn": "infineon-ipd029n04nf2s-datasheet",
+     "manufacturer": "UNKNOWN",
+     "in_catalog": false,
+     "export_opn": null,
+     "join": "UNKNOWN",
+     "class": "SOURCE_MISSING"
+    },
+    "source": {
+     "doc_state": "present",
+     "quote_ok": false,
+     "tool": "pdftotext,pymupdf",
+     "diag": {
+      "quote_tokens_total": 3,
+      "quote_tokens_present_in_page_raw": 3,
+      "normalization_recoverable": true,
+      "normalization_detail": {
+       "tool": "pdftotext",
+       "strict_verbatim": true,
+       "level": "L1",
+       "normalization": "pipe_as_space (column delimiter -> whitespace)",
+       "normalized_quote": "rthja \u2010 \u2010 50 \u00b0c/w"
+      },
+      "note": "strict verbatim failed; tokens present individually \u2014 layout/reading-order mismatch, not proof of absence"
+     },
+     "doc_alias": "nas://vault/cas/48/4824e505bbf079c1cc287442495b5858997469b00bee3bee4cbfacf3e518b3f8.pdf",
+     "class": "FAILED"
+    },
+    "fold": {
+     "fold": "strata->served",
+     "cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "export_cube_sha256": "fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a",
+     "identity_row_count": 0,
+     "class": "ABSENT",
+     "detail": {
+      "reason": "row_absent"
+     },
+     "weak_signals": {
+      "doc_sha_in_export": true,
+      "note": "doc-sha overlap is a separate, weaker signal and does NOT yield fold=VERIFIED"
+     }
+    },
+    "bundle": {
+     "byte_exact": true,
+     "fe_key": null,
+     "export_key_count": 0,
+     "note": "independent claim-key comparison: the FE key is built from the FE bundle row and each export key is built independently from export rows, then compared field-by-field; a raw-line byte match is a separate stronger signal",
+     "class": "UNKNOWN",
+     "export_key": null,
+     "comparison": {
+      "reason": "opn_slug_shaped",
+      "side": "fe_row"
+     }
+    },
+    "authorized": {
+     "approval_record": false,
+     "class": "UNKNOWN",
+     "note": "a manifest is not an approval"
+    },
+    "deployed": {
+     "deployed_sha": null,
+     "fe_commit": "c0810b32822aa74a879a313aad2a2da15da1190d",
+     "state": "unknown",
+     "class": "UNKNOWN"
+    },
+    "resolve": {
+     "artifact_bound": false,
+     "artifact_href": null,
+     "probe": "gated",
+     "state": "missing",
+     "class": "MISSING"
+    }
+   },
+   "quote": "RthJA | \u2011 \u2011 | 50 | \u00b0C/W",
+   "quote_hash": "a53e197725ce49ee",
+   "disposition": "EXTRACTION_ARTIFACT",
+   "evidence": {
+    "normalization": "pipe_as_space (column delimiter -> whitespace)",
+    "level": "L1",
+    "cells": null
+   }
+  }
+ ]
+}

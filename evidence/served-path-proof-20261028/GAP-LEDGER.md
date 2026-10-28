@@ -13,8 +13,10 @@ insufficient the cell reads UNKNOWN, never a guess.
 
 - **G1 missing OPN identity** — the claim carries no manufacturer + exact OPN
   that joins to a served record.
-- **G2 missing fold membership** — the claim row is not present in the export
-  pinned by `fold_manifest.json` + `cube.json`.
+- **G2 missing fold membership** — no export row in the fold pinned by
+  `fold_manifest.json` + `cube.json` matches the claim's IDENTITY
+  (manufacturer/OPN + field + value + conditions + source locator). Doc-sha
+  overlap alone does NOT establish fold membership (correction C1).
 - **G3 unsupported MCU feed lane** — the MCU lane has no spine claim-batch
   format; claims exist only as staged pillar records, so no fold lane carries
   them.
@@ -53,9 +55,12 @@ join; this ledger decomposes *why* each one is held.
     (`infineon-psoc-4-psoc-4100-family-datasheet`, `ti-sdaa486-pdf-ts-…`), which
     is not an exact manufacturer+OPN that joins a served record. Family slugs
     are additionally ambiguous (G1 + ambiguity).
-- **G2 missing fold membership:** 13 / 13. None of these claim rows appear in
-  the export pinned by `fold_manifest.json` (`cube.sha256 =
-  fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a`).
+- **G2 missing fold membership:** 13 / 13. No export row in the fold pinned by
+  `fold_manifest.json` (`cube.sha256 =
+  fe0f85c90e000583d7912dd6ae895d0263ba0954d0eb579d6f3c8df0bc327c5a`) matches the
+  claim identity (manufacturer/OPN + field + value + conditions + locator) of any
+  of these 13. Under correction C1 a doc-sha-only overlap would be recorded as
+  DOC_SHA_ONLY, still not a fold match.
 - **G3 unsupported MCU feed lane:** 8 / 13 (all MCU). The MCU claims exist only
   as per-part staged pillar records under
   `nas://m5-4tb/staging/datasheet_extractions/mcu_family_content`; there is no
