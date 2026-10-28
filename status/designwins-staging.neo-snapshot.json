@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 26368,
+    "uptime_sec": 26970,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,16 +21,16 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T02:53:43Z",
+  "captured_at": "2026-10-28T03:03:46Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 26972,
+    "uptime_sec": 27574,
     "cities_total": 2,
     "cities_running": 2,
-    "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
+    "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
     "startup": {
       "ready": true,
       "phase": "running",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 47323,
+  "last_event_seq": 47537,
   "recent_events": [
     {
-      "seq": 47313,
+      "seq": 47527,
+      "type": "session.woke",
+      "subject": "neo-fixture-1"
+    },
+    {
+      "seq": 47526,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 47525,
       "type": "order.completed",
-      "subject": "mol-dog-doctor"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 47312,
+      "seq": 47524,
       "type": "order.fired",
-      "subject": "mol-dog-doctor"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 47311,
-      "type": "order.fired",
-      "subject": "dolt-health"
+      "seq": 47523,
+      "type": "worker.operation",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 47310,
+      "seq": 47522,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 47521,
+      "type": "bead.closed",
+      "subject": "ds-wisp-j57a22"
+    },
+    {
+      "seq": 47520,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 47519,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 47309,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 47308,
-      "type": "order.fired",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 47307,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 47306,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 47305,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 47304,
-      "type": "order.completed",
-      "subject": "orphan-sweep"
+      "seq": 47518,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     }
   ]
 }
