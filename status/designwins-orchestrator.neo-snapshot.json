@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 60141,
+    "uptime_sec": 60744,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T12:16:39Z",
+  "captured_at": "2026-10-28T12:26:41Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 60747,
+    "uptime_sec": 61350,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 74516,
+  "last_event_seq": 74708,
   "recent_events": [
     {
-      "seq": 74506,
-      "type": "bead.closed",
-      "subject": "do-wisp-xdkb6v"
-    },
-    {
-      "seq": 74505,
-      "type": "bead.closed",
-      "subject": "do-wisp-s6pst0"
-    },
-    {
-      "seq": 74504,
-      "type": "bead.closed",
-      "subject": "do-wisp-maa7oo"
-    },
-    {
-      "seq": 74503,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 74502,
-      "type": "bead.created",
-      "subject": "do-wisp-maa7oo"
-    },
-    {
-      "seq": 74501,
-      "type": "bead.created",
-      "subject": "do-wisp-s6pst0"
-    },
-    {
-      "seq": 74500,
-      "type": "bead.created",
-      "subject": "do-wisp-xdkb6v"
-    },
-    {
-      "seq": 74499,
-      "type": "bead.created",
-      "subject": "do-wisp-qzry6l"
-    },
-    {
-      "seq": 74498,
+      "seq": 74698,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 74497,
+      "seq": 74697,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 74696,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 74695,
       "type": "order.completed",
-      "subject": "spawn-storm-detect"
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 74694,
+      "type": "order.completed",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 74693,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 74692,
+      "type": "order.fired",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 74691,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 74690,
+      "type": "bead.updated",
+      "subject": "do-wisp-3wwxge"
+    },
+    {
+      "seq": 74689,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
     }
   ]
 }
