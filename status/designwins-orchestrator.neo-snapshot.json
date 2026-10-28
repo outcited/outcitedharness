@@ -1,34 +1,36 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 2,
+    "running": 0,
     "suspended": false,
-    "uptime_sec": 75871,
+    "uptime_sec": 75889,
     "version": "1.5.1",
     "agents": {
       "total": 9,
-      "running": 2,
+      "running": 0,
       "suspended": 0,
       "quarantined": 0
     },
     "work": {
-      "in_progress": 1,
-      "ready": 24,
-      "open": 34
+      "in_progress": 2,
+      "ready": 23,
+      "open": 32
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
+      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T16:29:01Z",
+  "captured_at": "2026-10-28T16:39:07Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 75890,
+    "uptime_sec": 76496,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -71,7 +73,7 @@
     },
     {
       "name": "harness/core.control-dispatcher",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": ""
     },
@@ -95,7 +97,7 @@
     },
     {
       "name": "harness/harness-engineer-2",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": ""
     }
@@ -142,55 +144,55 @@
       ]
     }
   ],
-  "last_event_seq": 79296,
+  "last_event_seq": 79495,
   "recent_events": [
     {
-      "seq": 79286,
-      "type": "bead.created",
-      "subject": "do-wisp-6l44qi"
-    },
-    {
-      "seq": 79285,
+      "seq": 79485,
       "type": "order.completed",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 79284,
+      "seq": 79484,
       "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 79483,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 79482,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 79481,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 79480,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 79479,
+      "type": "bead.closed",
+      "subject": "do-wisp-o1ypkz"
+    },
+    {
+      "seq": 79478,
+      "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 79283,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 79282,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 79281,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 79280,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 79279,
-      "type": "order.fired",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 79278,
+      "seq": 79477,
       "type": "bead.updated",
-      "subject": "do-wisp-1zjlyt"
+      "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 79277,
+      "seq": 79476,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     }
