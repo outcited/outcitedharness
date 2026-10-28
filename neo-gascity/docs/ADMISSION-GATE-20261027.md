@@ -37,17 +37,36 @@ Admission (ONE command, 2026-10-27T20:15:19Z):
 Append to `~/designwins-orchestrator/city/city.toml`:
 ```toml
 [[patches.agent]]
-agent = "bd.dog"
+name = "bd.dog"          # REQUIRED key is `name` (AgentPatch, patch.go:40) — NOT `agent`
 provider = "opencode"
 session = "tmux"
 ```
-Validation performed live on staging (2026-10-27): with the patch applied,
-`bd.dog` skip errors ("provider is required" → then "requires ACP transport")
-STOPPED — skip count frozen 36→36 across a full controller tick; patch then
-reverted. Mechanism: `ApplyPatches` → `applyAgentPatch` → `applyAgentMutation`
-copies both `provider` and `session` (`internal/config/patch.go:553-558`;
-city `AgentPatch.Session` documented `"acp" or "tmux"`). v1.5.1 schema-valid.
-Hot-reloads via the config watcher — no supervisor restart needed.
+
+**CORRECTION (2026-10-28):** the first staging attempt used an invalid
+`agent =` selector. That run is INVALIDATED — the apparent "skip freeze" was
+actually the broken patch failing config composition (466 transient
+"name is required" log lines, order-run index fallback; both self-cleared on
+revert and remain frozen).
+
+**Validated with the correct key (2026-10-28T07:12:35Z, staging):** patch
+applied → within one tick: `poolDesired: bd.dog = 1`, no skip line, and a
+bd.dog session **spawned and claimed** its order bead
+(`ds-y3v assignee=ds-wisp-78uf8i routed=bd.dog status=in_progress`;
+session `ds-wisp-78uf8i` active). Patch then reverted; staging composition
+recovered (name-required frozen 466, fallback-lines frozen 2, clean config).
+Mechanism: `ApplyPatches` → `applyAgentPatch` → `applyAgentMutation` copies
+`provider` + `session` (`internal/config/patch.go:553-558`). v1.5.1
+schema-valid; hot-reloads via the config watcher — no supervisor restart.
+
+**Harness demand leg (Fault B fix, 2026-10-28):** with the validated
+`.beads/redirect` at `~/designwins-orchestrator/.beads/redirect` →
+harness store, the exact generated query now executes cleanly from the
+previously-failing cwd:
+`bd ready --metadata-field gc.routed_to=harness/harness-engineer --unassigned`
+→ exit 0 (empty: no routed harness bead exists — none was dispatched).
+"no beads database found" frozen at 223 since 2026-10-27T20:4xZ.
+Demand>0 → spawn mechanics proven on three pools (engineer, neo-fixture,
+bd.dog) with genuinely routed beads.
 
 ## P2 — Admission matrix (production queue, 2026-10-27)
 
