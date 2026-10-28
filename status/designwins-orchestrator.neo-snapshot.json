@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 21542,
+    "uptime_sec": 22145,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T01:33:20Z",
+  "captured_at": "2026-10-28T01:43:23Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 22148,
+    "uptime_sec": 22751,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -112,7 +112,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 33,
+  "beads_total_reported": 34,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -138,57 +138,57 @@
       ]
     }
   ],
-  "last_event_seq": 65530,
+  "last_event_seq": 65628,
   "recent_events": [
     {
-      "seq": 65520,
-      "type": "order.completed",
-      "subject": "nudge-mail-sweep"
+      "seq": 65618,
+      "type": "order.fired",
+      "subject": "beads-health"
     },
     {
-      "seq": 65519,
+      "seq": 65617,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 65616,
       "type": "order.fired",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 65518,
+      "seq": 65615,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 65517,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 65516,
+      "seq": 65614,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 65515,
+      "seq": 65613,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 65514,
+      "seq": 65612,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 65513,
+      "seq": 65611,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 65512,
+      "seq": 65610,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 65511,
+      "seq": 65609,
       "type": "order.completed",
-      "subject": "gate-sweep"
+      "subject": "order-tracking-sweep"
     }
   ]
 }
