@@ -32,7 +32,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use dw_decide::{Candidate, CandidateFacts, CategoryId};
+use dw_decide::{Candidate, CandidateFacts, CategoryId, CategoryMembership, DimensionId};
 use dw_types::SourceRef;
 use serde::{Deserialize, Serialize};
 
@@ -122,7 +122,8 @@ impl CategoryGraph {
         Some((leaf, ancestors, evidence))
     }
 
-    /// Fold every OPN in the graph into a `Candidate` → `CandidateFacts` map.
+    /// Fold every OPN in the graph into a `Candidate` → `CandidateFacts` map,
+    /// in the **`core_family`** dimension.
     ///
     /// `evidence_for` supplies the provenance per OPN; return `Vec::new()` for
     /// an OPN whose source document is unknown, which leaves it unable to
@@ -132,24 +133,62 @@ impl CategoryGraph {
     where
         F: FnMut(&str) -> Vec<SourceRef>,
     {
-        let mut out = BTreeMap::new();
-        for opn in self.opn_closure.keys() {
-            let Some((leaf, ancestors, evidence)) = self.facts_for(opn, evidence_for(opn)) else {
-                continue;
-            };
-            let candidate = Candidate {
-                part_number: opn.clone(),
-                vendor: String::new(),
-            };
-            out.insert(
-                candidate,
-                CandidateFacts {
-                    axes: BTreeMap::new(),
-                    category_leaf: Some(leaf),
-                    category_ancestors: ancestors,
-                    category_evidence: evidence,
-                },
-            );
+        let mut graphs = CategoryGraphs::default();
+        graphs.insert(DimensionId::core_family(), self.clone());
+        graphs.facts_map(|_dim, opn| evidence_for(opn))
+    }
+}
+
+/// N category graphs, one per **dimension** (M4 contract gap #2/#3).
+///
+/// Each dimension is an independent containment namespace with its own
+/// measured provenance. Dimensions **never merge**: a node name that appears
+/// in both `core_family` and `package` is two disjoint memberships, and a
+/// candidate missing a dimension judges `Unknown` for it (never eliminated).
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct CategoryGraphs {
+    /// Per-dimension measured graphs.
+    pub dimensions: BTreeMap<DimensionId, CategoryGraph>,
+}
+
+impl CategoryGraphs {
+    /// Register (or replace) one dimension's graph.
+    pub fn insert(&mut self, dim: DimensionId, graph: CategoryGraph) {
+        self.dimensions.insert(dim, graph);
+    }
+
+    /// The dimensions present.
+    pub fn dimensions(&self) -> impl Iterator<Item = &DimensionId> {
+        self.dimensions.keys()
+    }
+
+    /// Fold every dimension into one `Candidate` → `CandidateFacts` map.
+    ///
+    /// `evidence_for` supplies the provenance per `(dimension, opn)`. Each
+    /// dimension writes its own [`CategoryMembership`] into the candidate's
+    /// `dimensions` map; no dimension can overwrite another.
+    #[must_use]
+    pub fn facts_map<F>(&self, mut evidence_for: F) -> BTreeMap<Candidate, CandidateFacts>
+    where
+        F: FnMut(&DimensionId, &str) -> Vec<SourceRef>,
+    {
+        let mut out: BTreeMap<Candidate, CandidateFacts> = BTreeMap::new();
+        for (dim, graph) in &self.dimensions {
+            for opn in graph.opn_closure.keys() {
+                let Some((leaf, ancestors, evidence)) =
+                    graph.facts_for(opn, evidence_for(dim, opn))
+                else {
+                    continue;
+                };
+                let candidate = Candidate {
+                    part_number: opn.clone(),
+                    vendor: String::new(),
+                };
+                out.entry(candidate).or_default().dimensions.insert(
+                    dim.clone(),
+                    CategoryMembership::new(Some(leaf), ancestors, evidence),
+                );
+            }
         }
         out
     }
@@ -198,12 +237,11 @@ mod tests {
         assert_eq!(leaf.as_str(), "AM13E230");
         assert!(ancestors.contains(&CategoryId::new("AM13x").unwrap()));
 
-        let facts = CandidateFacts {
-            axes: BTreeMap::new(),
-            category_leaf: Some(leaf),
-            category_ancestors: ancestors,
-            category_evidence: vec![],
-        };
+        let mut facts = CandidateFacts::default();
+        facts.dimensions.insert(
+            DimensionId::core_family(),
+            CategoryMembership::new(Some(leaf), ancestors, vec![]),
+        );
         let m4 = CategoryId::new("AM13x").unwrap();
         let other = CategoryId::new("AM1x").unwrap();
         assert_eq!(
@@ -258,12 +296,11 @@ mod tests {
     fn negative_control_is_is_not_within() {
         let g = graph();
         let (leaf, ancestors, _) = g.facts_for("AM13E23019", vec![]).expect("opn known");
-        let facts = CandidateFacts {
-            axes: BTreeMap::new(),
-            category_leaf: Some(leaf.clone()),
-            category_ancestors: ancestors,
-            category_evidence: vec![],
-        };
+        let mut facts = CandidateFacts::default();
+        facts.dimensions.insert(
+            DimensionId::core_family(),
+            CategoryMembership::new(Some(leaf.clone()), ancestors, vec![]),
+        );
 
         let root = CategoryId::new("AM1x").unwrap();
         let self_id = leaf.clone();
@@ -287,6 +324,97 @@ mod tests {
         assert_eq!(
             facts.category_matches(dw_decide::CategoryOp::Excludes, &root),
             Some(false)
+        );
+    }
+
+    /// M4 contract gap #2: `core_family` and `package` are **separate
+    /// namespaces that never merge**, and a candidate lacking a dimension
+    /// judges `Unknown` for it — never eliminated.
+    ///
+    /// The package fixtures here carry **synthetic provenance** and exist for
+    /// this mechanism test only; no package taxonomy is authored.
+    #[test]
+    fn dimensions_never_merge_and_missing_dimension_is_unknown() {
+        let g = graph();
+        // A synthetic one-node package graph: `QFN48 ⊂ QFN`, tagged with a
+        // fake but type-correct provenance (tests only).
+        let package = CategoryGraph {
+            parents: BTreeMap::from([("QFN48".to_string(), vec!["QFN".to_string()])]),
+            opn_closure: BTreeMap::from([(
+                "AM13E23019".to_string(),
+                Closure {
+                    leaf: "QFN48".to_string(),
+                    ancestors: vec!["QFN".to_string()],
+                },
+            )]),
+            node_kinds: BTreeMap::from([("package".to_string(), 2)]),
+        };
+
+        let mut graphs = CategoryGraphs::default();
+        graphs.insert(DimensionId::core_family(), g);
+        graphs.insert(DimensionId::package(), package);
+        let facts = graphs.facts_map(|_dim, _opn| vec![]);
+        let f = facts
+            .get(&Candidate {
+                part_number: "AM13E23019".into(),
+                vendor: String::new(),
+            })
+            .expect("opn present in both dimensions");
+
+        // The same OPN is a core family AND a package — two disjoint facts.
+        assert_eq!(
+            f.category_matches_in(
+                &DimensionId::core_family(),
+                dw_decide::CategoryOp::Within,
+                &CategoryId::new("AM13x").unwrap()
+            ),
+            Some(true)
+        );
+        assert_eq!(
+            f.category_matches_in(
+                &DimensionId::package(),
+                dw_decide::CategoryOp::Within,
+                &CategoryId::new("QFN").unwrap()
+            ),
+            Some(true)
+        );
+        // …and the namespaces do not bleed: AM13x is not a package node.
+        assert_eq!(
+            f.category_matches_in(
+                &DimensionId::package(),
+                dw_decide::CategoryOp::Within,
+                &CategoryId::new("AM13x").unwrap()
+            ),
+            Some(false)
+        );
+
+        // A candidate with only core_family is Unknown on package — never
+        // eliminated, never false.
+        let mut only_core = CandidateFacts::default();
+        only_core.dimensions.insert(
+            DimensionId::core_family(),
+            CategoryMembership::new(
+                Some(CategoryId::new("AM13E230").unwrap()),
+                BTreeSet::new(),
+                vec![],
+            ),
+        );
+        assert_eq!(
+            only_core.category_matches_in(
+                &DimensionId::package(),
+                dw_decide::CategoryOp::Within,
+                &CategoryId::new("QFN").unwrap()
+            ),
+            None
+        );
+        assert_eq!(
+            dw_decide::judge_category_in(
+                Some(&only_core),
+                &DimensionId::package(),
+                dw_decide::CategoryOp::Within,
+                &CategoryId::new("QFN").unwrap()
+            ),
+            dw_types::Verdict::Unknown
         );
     }
 }

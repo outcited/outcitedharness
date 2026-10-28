@@ -621,7 +621,8 @@ pub mod questions;
 
 pub use dw_types::Verdict;
 pub use evaluate::{
-    evaluate, judge, AlwaysResolvable, Bound, CandidateFacts, Evaluation, Evidence, Provenance,
+    evaluate, judge, judge_category, judge_category_in, AlwaysResolvable, Bound, CandidateFacts,
+    CategoryMembership, DimensionId, Evaluation, Evidence, Provenance, SpanEndpoint, SpanEvidence,
     DEFAULT_NEAR_MISS_PCT,
 };
 pub use questions::next_questions;

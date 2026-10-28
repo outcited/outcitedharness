@@ -26,13 +26,15 @@
 
 pub mod alias;
 pub mod category;
+pub mod knife;
 pub mod phrase;
 pub mod rating;
 pub mod registry;
 
 pub use alias::{alias_rows, canonical_key, fold_symbol};
 
-pub use category::{Assignment, CategoryGraph, Closure};
+pub use category::{Assignment, CategoryGraph, CategoryGraphs, Closure};
+pub use knife::{knife_spec_json, spec_for, KnifeSpec, KNIFE_SPEC, KNIFE_SPEC_VERSION};
 pub use phrase::{
     unknowns_from_residue, AtomTemplate, Bound, ColloquialBinding, Drawer, PhraseRegistry, Stamp,
     ACTIVATION_FLOOR,
