@@ -17,3 +17,5 @@ results/
 .DS_Store
 scratch/
 scripts/soak_model_shim_cloud.py
+# Local-only raw evidence (unaliased paths); committed copies are aliased.
+evidence/*/raw/
