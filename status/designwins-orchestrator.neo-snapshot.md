@@ -1,21 +1,23 @@
-# NEO status — {'running': 2, 'suspended': False, 'uptime_sec': 33606, 'version': '1.5.1', 'agents': {'total': 9, 'running': 2, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 2, 'ready': 22, 'open': 30}, 'partial': True, 'partial_errors': ['rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-28T04:54:24Z
+# NEO status — {'running': 0, 'suspended': False, 'uptime_sec': 34211, 'version': '1.5.1', 'agents': {'total': 9, 'running': 0, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 2, 'ready': 22, 'open': 30}, 'partial': True, 'partial_errors': ['sessions: loading session snapshot timed out after 1s', 'rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-28T05:04:29Z
 - supervisor: ok v1.5.1 uptime 9h
-- city running=2 suspended=False agents={'total': 9, 'running': 2, 'suspended': 0, 'quarantined': 0} work={'in_progress': 2, 'ready': 22, 'open': 30}
+- city running=0 suspended=False agents={'total': 9, 'running': 0, 'suspended': 0, 'quarantined': 0} work={'in_progress': 2, 'ready': 22, 'open': 30}
 - sessions: 2 active; pending human interactions: 0
 - NEO findings tracked: 0; duplicate groups: 3
-- event index: None last_seq=67871
+- event index: None last_seq=68024
 
 ## Agents
 - idle bd.dog-1 scaled (min=0, max=2)
 - idle bd.dog-2 
-- RUN core.control-dispatcher 
+- idle core.control-dispatcher 
 - idle pilot-rig/core.control-dispatcher 
 - idle harness/core.control-dispatcher 
-- RUN engineer-1 scaled (min=0, max=2)
+- idle engineer-1 scaled (min=0, max=2)
 - idle engineer-2 
 - idle harness/harness-engineer-1 scaled (min=0, max=2)
 - idle harness/harness-engineer-2 
 
 ## Continuity alerts
-- **city-status-partial** {"errors": ["rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
+- **orchestrator-idle-with-ready-work** {"ready": 22, "running_agents": 0}
+- **in-progress-without-live-session** {"in_progress": 2}
+- **city-status-partial** {"errors": ["sessions: loading session snapshot timed out after 1s", "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
 - **duplicate-findings** {"items": [{"task_id": "PIN-TABLES-VISION-01", "beads": ["hw-b5l", "do-y5b"]}, {"task_id": "CURVES-WINTER-01", "beads": ["hw-wfn", "do-77q"]}, {"task_id": "PACKAGE-TEMP-AXES-01", "beads": ["hw-37d", "do-b6p"]}]}
