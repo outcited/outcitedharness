@@ -1,13 +1,13 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 2,
+    "running": 0,
     "suspended": false,
-    "uptime_sec": 16720,
+    "uptime_sec": 17324,
     "version": "1.5.1",
     "agents": {
       "total": 9,
-      "running": 2,
+      "running": 0,
       "suspended": 0,
       "quarantined": 0
     },
@@ -18,17 +18,18 @@
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T00:12:58Z",
+  "captured_at": "2026-10-28T00:23:01Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 17326,
+    "uptime_sec": 17930,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -59,7 +60,7 @@
     },
     {
       "name": "core.control-dispatcher",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": ""
     },
@@ -77,7 +78,7 @@
     },
     {
       "name": "engineer-1",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": "scaled (min=0, max=2)"
     },
@@ -112,7 +113,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 33,
+  "beads_total_reported": 34,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -138,55 +139,55 @@
       ]
     }
   ],
-  "last_event_seq": 64606,
+  "last_event_seq": 64717,
   "recent_events": [
     {
-      "seq": 64596,
+      "seq": 64707,
       "type": "order.fired",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 64595,
+      "seq": 64706,
       "type": "order.completed",
-      "subject": "beads-health"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 64594,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
+      "seq": 64705,
+      "type": "order.fired",
+      "subject": "gate-sweep"
     },
     {
-      "seq": 64593,
+      "seq": 64704,
+      "type": "order.completed",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 64703,
+      "type": "order.fired",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 64702,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 64592,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 64591,
+      "seq": 64701,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 64590,
-      "type": "order.fired",
-      "subject": "spawn-storm-detect"
+      "seq": 64700,
+      "type": "bead.closed",
+      "subject": "do-wisp-1f8y54"
     },
     {
-      "seq": 64589,
+      "seq": 64699,
       "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
+      "subject": "beads-health"
     },
     {
-      "seq": 64588,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 64587,
+      "seq": 64698,
       "type": "order.completed",
       "subject": "gate-sweep"
     }
