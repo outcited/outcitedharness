@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 92182,
+    "uptime_sec": 92785,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T21:10:38Z",
+  "captured_at": "2026-10-28T21:20:41Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 92787,
+    "uptime_sec": 93390,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -108,7 +108,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 34,
+  "beads_total_reported": 33,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 84853,
+  "last_event_seq": 85043,
   "recent_events": [
     {
-      "seq": 84843,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 84842,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 84841,
+      "seq": 85033,
       "type": "order.completed",
-      "subject": "nudge-on-route"
+      "subject": "renudge-stale-human-gates"
     },
     {
-      "seq": 84840,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 84839,
+      "seq": 85032,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 84838,
+      "seq": 85031,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 84837,
+      "seq": 85030,
+      "type": "order.fired",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 85029,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 85028,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 85027,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 84836,
+      "seq": 85026,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 84835,
+      "seq": 85025,
       "type": "bead.closed",
-      "subject": "do-wisp-o3hc7k"
+      "subject": "do-wisp-i7z5bc"
     },
     {
-      "seq": 84834,
+      "seq": 85024,
       "type": "order.completed",
-      "subject": "nudge-on-route"
+      "subject": "order-tracking-sweep"
     }
   ]
 }
