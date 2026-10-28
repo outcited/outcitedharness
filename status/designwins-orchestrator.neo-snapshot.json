@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 69189,
+    "uptime_sec": 69794,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,21 +14,22 @@
     "work": {
       "in_progress": 0,
       "ready": 22,
-      "open": 28
+      "open": 27
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-28T14:47:26Z",
+  "captured_at": "2026-10-28T14:57:30Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 69795,
+    "uptime_sec": 70399,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -134,57 +135,57 @@
       ]
     }
   ],
-  "last_event_seq": 77337,
+  "last_event_seq": 77521,
   "recent_events": [
     {
-      "seq": 77327,
+      "seq": 77511,
       "type": "order.completed",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 77326,
+      "seq": 77510,
       "type": "order.fired",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 77325,
+      "seq": 77509,
       "type": "order.completed",
-      "subject": "beads-health"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 77324,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 77323,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 77322,
+      "seq": 77508,
       "type": "order.fired",
-      "subject": "beads-health"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 77321,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 77320,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 77319,
+      "seq": 77507,
       "type": "bead.closed",
-      "subject": "do-wisp-5x5w9k"
+      "subject": "do-wisp-7r9y0d"
     },
     {
-      "seq": 77318,
+      "seq": 77506,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 77505,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 77504,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 77503,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 77502,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
     }
   ]
 }
