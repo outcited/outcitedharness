@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 118100,
+    "uptime_sec": 118702,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T04:22:36Z",
+  "captured_at": "2026-10-29T04:32:38Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 118705,
+    "uptime_sec": 119307,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 93014,
+  "last_event_seq": 93205,
   "recent_events": [
     {
-      "seq": 93004,
+      "seq": 93195,
       "type": "order.fired",
-      "subject": "nudge-on-route"
+      "subject": "orphan-sweep"
     },
     {
-      "seq": 93003,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 93002,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 93001,
+      "seq": 93194,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 93000,
-      "type": "bead.updated",
-      "subject": "do-wisp-utolqv9"
-    },
-    {
-      "seq": 92999,
+      "seq": 93193,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 92998,
+      "seq": 93192,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 92997,
+      "seq": 93191,
       "type": "order.completed",
-      "subject": "orphan-sweep"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 92996,
-      "type": "order.completed",
-      "subject": "beads-health"
+      "seq": 93190,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 92995,
+      "seq": 93189,
       "type": "order.completed",
-      "subject": "dolt-health"
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 93188,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 93187,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 93186,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
     }
   ]
 }
