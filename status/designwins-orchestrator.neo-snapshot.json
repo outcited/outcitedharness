@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 159697,
+    "uptime_sec": 160300,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T15:55:53Z",
+  "captured_at": "2026-10-29T16:05:56Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 160302,
+    "uptime_sec": 160905,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -129,55 +129,55 @@
       ]
     }
   ],
-  "last_event_seq": 103271,
+  "last_event_seq": 103385,
   "recent_events": [
     {
-      "seq": 103261,
+      "seq": 103375,
       "type": "bead.created",
-      "subject": "do-wisp-t24zqda"
+      "subject": "do-wisp-38nsko8"
     },
     {
-      "seq": 103260,
+      "seq": 103374,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 103373,
+      "type": "order.completed",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 103372,
+      "type": "order.fired",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 103371,
       "type": "order.fired",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 103259,
+      "seq": 103370,
+      "type": "order.fired",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 103369,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 103258,
+      "seq": 103368,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 103257,
+      "seq": 103367,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 103256,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 103255,
-      "type": "order.completed",
-      "subject": "mol-dog-doctor"
-    },
-    {
-      "seq": 103254,
-      "type": "order.fired",
-      "subject": "mol-dog-doctor"
-    },
-    {
-      "seq": 103253,
-      "type": "bead.closed",
-      "subject": "do-wisp-tnvazqu"
-    },
-    {
-      "seq": 103252,
+      "seq": 103366,
       "type": "order.completed",
       "subject": "dolt-health"
     }
