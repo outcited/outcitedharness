@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 155477,
+    "uptime_sec": 156080,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,13 +21,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T14:45:32Z",
+  "captured_at": "2026-10-29T14:55:35Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 156082,
+    "uptime_sec": 156684,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 88270,
+  "last_event_seq": 88452,
   "recent_events": [
     {
-      "seq": 88260,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 88259,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 88258,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 88257,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 88256,
-      "type": "order.fired",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 88255,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 88254,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 88253,
+      "seq": 88442,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 88252,
+      "seq": 88441,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 88440,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 88251,
+      "seq": 88439,
       "type": "order.fired",
-      "subject": "gate-sweep"
+      "subject": "beads-health"
+    },
+    {
+      "seq": 88438,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 88437,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 88436,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 88435,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 88434,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 88433,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     }
   ]
 }
