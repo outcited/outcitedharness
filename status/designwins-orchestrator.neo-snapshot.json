@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 145830,
+    "uptime_sec": 146432,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T12:04:46Z",
+  "captured_at": "2026-10-29T12:14:49Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 146435,
+    "uptime_sec": 147038,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -129,55 +129,55 @@
       ]
     }
   ],
-  "last_event_seq": 100692,
+  "last_event_seq": 100794,
   "recent_events": [
     {
-      "seq": 100682,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 100681,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 100680,
+      "seq": 100784,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 100679,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 100678,
+      "seq": 100783,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 100677,
+      "seq": 100782,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 100676,
+      "seq": 100781,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 100675,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "seq": 100780,
+      "type": "order.completed",
+      "subject": "jsonl-export"
     },
     {
-      "seq": 100674,
+      "seq": 100779,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 100778,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 100777,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 100673,
+      "seq": 100776,
+      "type": "order.fired",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 100775,
       "type": "order.fired",
       "subject": "gate-sweep"
     }
