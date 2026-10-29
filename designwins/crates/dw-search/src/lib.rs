@@ -34,7 +34,7 @@
 
 use std::collections::BTreeMap;
 
-use dw_decide::{Candidate, CandidateFacts, Evidence};
+use dw_decide::{Bound, Candidate, CandidateFacts, Evidence, Op, SpanEndpoint, SpanEvidence};
 use dw_knives::{rating_class, RatingClass};
 use dw_types::ReleaseId;
 use serde::{Deserialize, Serialize};
@@ -55,9 +55,14 @@ pub struct ClaimRow {
     /// The printed qualifier (`typical`, `minimum`, `maximum`, `rated`, …).
     pub qualifier: Option<String>,
     /// The printed value. A **string** in the corpus (`"0.5"`, not `0.5`).
+    /// A range symbol may print both endpoints (`"-40 -> +40"`, `"-55 175"`).
     pub value: String,
     /// The column header, when the row came from a table.
     pub column_header: Option<String>,
+    /// The printed unit, when the row carried one. Asserted against the
+    /// axis's canonical unit at the population boundary; a mismatch parks.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit: Option<String>,
 }
 
 /// Why a claim row did not become a fact. Named, never silent.
@@ -72,6 +77,14 @@ pub enum SkipReason {
     WrongBound,
     /// The value does not parse as a number.
     UnparseableValue,
+    /// A range symbol whose printed text could not be read as one or two
+    /// endpoints (fail-closed; never best-guessed).
+    RangeUnparseable,
+    /// A span whose two printed endpoints are inverted (`min > max`) or
+    /// non-finite — not a range at all.
+    RangeInvalid,
+    /// The printed unit does not map to the axis's canonical unit.
+    CanonicalUnitMismatch,
 }
 
 /// A population: typed facts per candidate, plus the rows that were skipped
@@ -100,10 +113,147 @@ fn wrong_bound(spec_min_column: bool, column_header: Option<&str>) -> bool {
     col.starts_with("min") || col == "minimum"
 }
 
+/// The canonical unit KIND for a range-valued axis, if the axis is a range.
+///
+/// This is the unit-assertion boundary: a printed range in a unit that does not
+/// map to the axis's canonical kind parks (never silently reinterpreted).
+fn canonical_range_kind(op: Op) -> Option<dw_normalize::units::Kind> {
+    use dw_normalize::units::Kind;
+    if op == Op::Covers {
+        // The only `Covers` axis today is the storage/operating temperature
+        // span (`TstgRangeC`), canonical unit °C.
+        Some(Kind::Celsius)
+    } else {
+        None
+    }
+}
+
+/// The printed-unit spellings that assert cleanly to a canonical kind.
+///
+/// `dw_normalize::units::scale` is a *multiplier* lookup, and its `Celsius`
+/// arm returns a multiplier for **any** token (the frozen vocabulary defers
+/// temperature spellings). That is not an assertion: `unit_asserts` must reject
+/// a printed unit that names a *different* kind (`v`, `kb`, …). So the
+/// accepted spellings for the only range kind in use are listed explicitly —
+/// minting no vocabulary, only the canonical Celsius spellings.
+fn canonical_unit_tokens(kind: dw_normalize::units::Kind) -> &'static [&'static str] {
+    use dw_normalize::units::Kind;
+    match kind {
+        Kind::Celsius => &["c", "°c"],
+        Kind::CelsiusPerWatt => &["c/w", "°c/w"],
+        _ => &[],
+    }
+}
+
+/// Does the printed unit assert cleanly to the axis's canonical unit kind?
+///
+/// `None` means "no unit printed" — no assertion can be made, so it passes.
+/// A printed unit that is not one of the canonical kind's spellings is a
+/// mismatch and parks (never silently reinterpreted as the canonical unit).
+fn unit_asserts(op: Op, unit: Option<&str>) -> bool {
+    let Some(kind) = canonical_range_kind(op) else {
+        return true;
+    };
+    let Some(unit) = unit else {
+        return true;
+    };
+    let tok = dw_normalize::units::unit_token(unit);
+    let tokens = canonical_unit_tokens(kind);
+    let spelling_ok = tokens.contains(&tok.as_str());
+    spelling_ok
+        && matches!(
+            dw_normalize::units::scale(kind, Some(unit)),
+            dw_normalize::units::Scale::Known(_)
+        )
+}
+
+/// Extract every signed finite-looking number from a printed range text.
+///
+/// The scan is deliberately simple and sign-preserving: `-55 175` yields
+/// `[-55, 175]`, `-40 -> +40` yields `[-40, 40]`. It never takes absolute
+/// values — that is exactly the historical TSTG collapse defect.
+fn scan_signed_numbers(text: &str) -> Vec<f64> {
+    let bytes = text.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while let Some(&cur) = bytes.get(i) {
+        let c = cur as char;
+        let sign_starts_number = c == '-' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit);
+        if c.is_ascii_digit() || sign_starts_number {
+            let start = i;
+            i += 1;
+            while let Some(&d) = bytes.get(i) {
+                let dc = d as char;
+                let prev_is_exp = i
+                    .checked_sub(1)
+                    .and_then(|j| bytes.get(j))
+                    .is_some_and(|b| matches!(*b as char, 'e' | 'E'));
+                let exp_sign = (dc == '-' || dc == '+') && prev_is_exp;
+                if dc.is_ascii_digit() || matches!(dc, '.' | 'e' | 'E') || exp_sign {
+                    i += 1;
+                } else {
+                    break;
+                }
+            }
+            if let Ok(v) = text[start..i].parse::<f64>() {
+                out.push(v);
+            }
+        } else {
+            i += 1;
+        }
+    }
+    out
+}
+
+/// Read a range row into span evidence, or park it with a reason.
+///
+/// Two printed numbers give a two-sided span (lower first, as printed — an
+/// inverted print parks). One number with a Min/Max column header gives a
+/// single-ended span (which judges `UNKNOWN` under `Covers`). Anything else
+/// parks fail-closed.
+fn span_from_row(row: &ClaimRow) -> Result<Evidence, SkipReason> {
+    let numbers = scan_signed_numbers(&row.value);
+    if numbers.iter().any(|v| !v.is_finite()) {
+        return Err(SkipReason::RangeInvalid);
+    }
+    let header = row
+        .column_header
+        .as_deref()
+        .map(str::trim)
+        .unwrap_or_default()
+        .to_lowercase();
+    let span = match numbers.as_slice() {
+        [min, max, ..] => {
+            let (min, max) = (*min, *max);
+            if min > max {
+                return Err(SkipReason::RangeInvalid);
+            }
+            SpanEvidence::two_sided(min, max, Bound::Point, vec![])
+        }
+        [only] => {
+            let endpoint = SpanEndpoint::new(*only, Bound::Point, vec![]);
+            if header.starts_with("min") {
+                SpanEvidence::from_endpoints(Some(endpoint), None)
+            } else if header.starts_with("max") {
+                SpanEvidence::from_endpoints(None, Some(endpoint))
+            } else {
+                // A single number with no column role is not a range we can
+                // place — fail closed rather than guess an endpoint.
+                return Err(SkipReason::RangeUnparseable);
+            }
+            .ok_or(SkipReason::RangeUnparseable)?
+        }
+        [] => return Err(SkipReason::RangeUnparseable),
+    };
+    Ok(Evidence::spanned(span, true))
+}
+
 /// Project claim rows into typed facts.
 ///
 /// Best claim wins per axis (the maximum measured value), matching what
-/// `dw_decide::next_questions` means by "best claim per part".
+/// `dw_decide::next_questions` means by "best claim per part". Range-valued
+/// axes ([`Op::Covers`]) build a two-sided span from both printed endpoints
+/// instead of a scalar.
 #[must_use]
 pub fn population_from_rows(rows: &[ClaimRow]) -> Population {
     let registry = dw_knives::registry::by_symbol();
@@ -127,6 +277,37 @@ pub fn population_from_rows(rows: &[ClaimRow]) -> Population {
                 .push((row.symbol.clone(), SkipReason::ClassNotAccepted));
             continue;
         }
+
+        // Range-valued axis: span evidence, built from both printed columns.
+        if spec.op == Op::Covers {
+            if !unit_asserts(spec.op, row.unit.as_deref()) {
+                out.skipped
+                    .push((row.symbol.clone(), SkipReason::CanonicalUnitMismatch));
+                continue;
+            }
+            let evidence = match span_from_row(row) {
+                Ok(e) => e,
+                Err(code) => {
+                    out.skipped.push((row.symbol.clone(), code));
+                    continue;
+                }
+            };
+            let candidate = Candidate {
+                part_number: row.part_number.clone(),
+                vendor: String::new(),
+            };
+            let facts = out.facts.entry(candidate).or_default();
+            // A complete span beats a partial one; otherwise first wins.
+            let replace = match facts.axes.get(&axis).and_then(|e| e.span.as_ref()) {
+                Some(existing) => !existing.is_complete(),
+                None => true,
+            };
+            if replace {
+                facts.axes.insert(axis, evidence);
+            }
+            continue;
+        }
+
         if wrong_bound(spec.min_column_evidence, row.column_header.as_deref()) {
             out.skipped
                 .push((row.symbol.clone(), SkipReason::WrongBound));
@@ -183,7 +364,14 @@ pub fn search(
 ) -> SearchResponse {
     let cohort =
         dw_decide::Cohort::from_candidates(population.facts.keys().cloned().collect::<Vec<_>>());
-    let answer = dw_funnel::accept(sentence, registry, &cohort, &population.facts, release, provenance);
+    let answer = dw_funnel::accept(
+        sentence,
+        registry,
+        &cohort,
+        &population.facts,
+        release,
+        provenance,
+    );
     SearchResponse {
         residue: answer.bound.unmapped.clone(),
         build: answer.build,
@@ -198,6 +386,9 @@ pub fn skip_reason_str(r: SkipReason) -> &'static str {
         SkipReason::ClassNotAccepted => "the rating class cannot speak on this axis",
         SkipReason::WrongBound => "min-column claim on a span quantity (range floor)",
         SkipReason::UnparseableValue => "value does not parse as a number",
+        SkipReason::RangeUnparseable => "range symbol did not print one or two endpoints",
+        SkipReason::RangeInvalid => "printed range is inverted or non-finite",
+        SkipReason::CanonicalUnitMismatch => "printed unit is not the axis's canonical unit",
     }
 }
 

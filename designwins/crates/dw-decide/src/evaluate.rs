@@ -44,7 +44,119 @@ pub enum Bound {
     Floor,
 }
 
+/// One endpoint of a range-valued (span) claim — a printed lower or upper
+/// limit with its own bound, conditions, and provenance.
+///
+/// The magnitude is **signed and in the axis-canonical unit**, preserved
+/// exactly as printed: the historical TSTG `-55 175` defect collapsed the
+/// lower endpoint to `175` by dropping the sign (M4 contract gap #1).
+#[derive(Debug, Clone, PartialEq)]
+pub struct SpanEndpoint {
+    /// Signed magnitude, axis-canonical unit. Never abs-clamped.
+    pub value: f64,
+    /// The semantic bound of this endpoint's printed column.
+    pub bound: Bound,
+    /// The typed condition this endpoint was printed under.
+    pub conditions: BTreeMap<String, CondValue>,
+    /// Where the endpoint came from.
+    pub sources: Vec<SourceRef>,
+}
+
+impl SpanEndpoint {
+    /// A span endpoint with a signed magnitude and its printed bound.
+    #[must_use]
+    pub fn new(value: f64, bound: Bound, sources: Vec<SourceRef>) -> Self {
+        Self {
+            value,
+            bound,
+            conditions: BTreeMap::new(),
+            sources,
+        }
+    }
+
+    /// Attach the typed condition.
+    #[must_use]
+    pub fn with_conditions(mut self, conditions: BTreeMap<String, CondValue>) -> Self {
+        self.conditions = conditions;
+        self
+    }
+}
+
+/// A range-valued claim. **At least one endpoint** — a partial span exists
+/// (one printed column) but judges `UNKNOWN` under [`Op::Covers`], because a
+/// half-range cannot establish containment.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SpanEvidence {
+    /// The lower endpoint, when printed.
+    pub min: Option<SpanEndpoint>,
+    /// The upper endpoint, when printed.
+    pub max: Option<SpanEndpoint>,
+}
+
+impl SpanEvidence {
+    /// Build from endpoints, or `None` when neither is present (an empty span
+    /// is not evidence).
+    #[must_use]
+    pub fn from_endpoints(min: Option<SpanEndpoint>, max: Option<SpanEndpoint>) -> Option<Self> {
+        if min.is_none() && max.is_none() {
+            None
+        } else {
+            Some(Self { min, max })
+        }
+    }
+
+    /// A complete two-sided span from two signed endpoint magnitudes.
+    #[must_use]
+    pub fn two_sided(min: f64, max: f64, bound: Bound, sources: Vec<SourceRef>) -> Self {
+        Self {
+            min: Some(SpanEndpoint::new(min, bound, sources.clone())),
+            max: Some(SpanEndpoint::new(max, bound, sources)),
+        }
+    }
+
+    /// True when both endpoints are present.
+    #[must_use]
+    pub fn is_complete(&self) -> bool {
+        self.min.is_some() && self.max.is_some()
+    }
+
+    /// Both endpoints, lower first.
+    pub fn endpoints(&self) -> impl Iterator<Item = &SpanEndpoint> {
+        self.min.iter().chain(self.max.iter())
+    }
+
+    /// The union of every endpoint's sources, in endpoint order.
+    #[must_use]
+    pub fn sources(&self) -> Vec<SourceRef> {
+        let mut out = Vec::new();
+        for ep in self.endpoints() {
+            out.extend(ep.sources.iter().cloned());
+        }
+        out
+    }
+
+    /// True when any endpoint magnitude is non-finite (fail-closed input).
+    #[must_use]
+    pub fn has_non_finite_endpoint(&self) -> bool {
+        self.endpoints().any(|ep| !ep.value.is_finite())
+    }
+
+    /// True when a complete span is inverted (`min > max`) — a printed range
+    /// that cannot be a range. Parks fail-closed.
+    #[must_use]
+    pub fn is_inverted(&self) -> bool {
+        match (&self.min, &self.max) {
+            (Some(mn), Some(mx)) => mn.value > mx.value,
+            _ => false,
+        }
+    }
+}
+
 /// What is known about one candidate, on one axis.
+///
+/// **Scalar and span are exclusive.** A legal `Evidence` carries exactly one
+/// of [`Evidence::value`] and [`Evidence::span`]; the constructors enforce it
+/// and [`judge`] refuses a shape carrying both (fail-closed).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Evidence {
     /// The measured magnitude, when there is one.
@@ -59,6 +171,8 @@ pub struct Evidence {
     /// Where the number came from. Every verdict carries these so the UI can
     /// open the page without a second call (§0, D7).
     pub sources: Vec<SourceRef>,
+    /// Range-valued evidence (M4 contract gap #1). `None` for a scalar.
+    pub span: Option<SpanEvidence>,
 }
 
 impl Evidence {
@@ -71,6 +185,7 @@ impl Evidence {
             rating_allows_operating,
             conditions: BTreeMap::new(),
             sources,
+            span: None,
         }
     }
 
@@ -91,6 +206,7 @@ impl Evidence {
             rating_allows_operating,
             conditions: BTreeMap::new(),
             sources,
+            span: None,
         }
     }
 
@@ -103,6 +219,23 @@ impl Evidence {
             rating_allows_operating: false,
             conditions: BTreeMap::new(),
             sources,
+            span: None,
+        }
+    }
+
+    /// Range-valued evidence with at least one endpoint. The top-level
+    /// [`Evidence::sources`] is the union of every endpoint's sources so the
+    /// provenance gate covers the whole span.
+    #[must_use]
+    pub fn spanned(span: SpanEvidence, rating_allows_operating: bool) -> Self {
+        let sources = span.sources();
+        Self {
+            value: None,
+            bound: Bound::Point,
+            rating_allows_operating,
+            conditions: BTreeMap::new(),
+            sources,
+            span: Some(span),
         }
     }
 
@@ -112,42 +245,111 @@ impl Evidence {
         self.conditions = conditions;
         self
     }
+
+    /// True when the scalar/span exclusivity invariant holds — a legal
+    /// `Evidence` never carries both a scalar value and a span.
+    #[must_use]
+    pub fn is_well_formed(&self) -> bool {
+        !(self.value.is_some() && self.span.is_some())
+    }
 }
 
-/// Everything the evaluator knows about one candidate.
-#[derive(Debug, Clone, PartialEq, Default)]
-pub struct CandidateFacts {
-    /// Per-axis evidence. An absent axis is `Unknown`, never `None`-means-ok.
-    pub axes: BTreeMap<Axis, Evidence>,
-    /// The **most specific** category node this candidate sits at — its core
-    /// family. `None` is `Unknown`, never "miscellaneous".
-    pub category_leaf: Option<CategoryId>,
-    /// Every ancestor of `category_leaf`, **materialised**. Storing the closure
-    /// rather than the edges means [`CategoryOp::Within`] is a set lookup and
-    /// no graph has to be threaded through the evaluator.
-    pub category_ancestors: BTreeSet<CategoryId>,
-    /// Where the category assignment came from — the family document that
-    /// printed it, with its row receipt. Required for any category-based
-    /// exclusion, so §16.5 ("no unsupported exclusion") holds for categories
-    /// exactly as it holds for scalars.
-    pub category_evidence: Vec<SourceRef>,
-}
+/// A named dimension of **category** facts — a namespace whose nodes contain
+/// one another (`Cortex-M4F ⊂ Cortex-M ⊂ ARM`).
+///
+/// Dimensions are **separate namespaces that never merge**: `core_family` and
+/// `package` are distinct keys in [`CandidateFacts::dimensions`], and a node
+/// name that appears in both is still two disjoint facts. `PRD-PHRASE` §8.1:
+/// a category is containment, not magnitude, and membership in one dimension
+/// says nothing about another (M4 contract gap #2).
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct DimensionId(String);
 
-impl CandidateFacts {
-    /// Which nodes this candidate belongs to, leaf included.
-    pub fn category_nodes(&self) -> impl Iterator<Item = &CategoryId> {
-        self.category_leaf
-            .iter()
-            .chain(self.category_ancestors.iter())
+impl DimensionId {
+    /// The **core family** dimension (the 47% traffic class).
+    pub const CORE_FAMILY: &'static str = "core_family";
+    /// The **package** dimension — nominal, not scalar (`parts.package` is
+    /// `TEXT`, PRD-PHRASE §8.1 *"Category is not Axis"*).
+    pub const PACKAGE: &'static str = "package";
+
+    /// Name a dimension.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`dw_types::LawError::Empty`] if the name is empty.
+    pub fn new(name: impl Into<String>) -> Result<Self, dw_types::LawError> {
+        let s = name.into();
+        if s.is_empty() {
+            return Err(dw_types::LawError::Empty {
+                field: "dimension id",
+            });
+        }
+        Ok(Self(s))
     }
 
-    /// `CategoryOp::Is` / `Within` / `Excludes`, evaluated against the
-    /// materialised closure.
+    /// The core-family dimension handle.
     #[must_use]
-    pub fn category_matches(&self, op: CategoryOp, node: &CategoryId) -> Option<bool> {
-        let leaf = self.category_leaf.as_ref()?;
-        let within =
-            self.category_leaf.as_ref() == Some(node) || self.category_ancestors.contains(node);
+    pub fn core_family() -> Self {
+        Self(Self::CORE_FAMILY.to_string())
+    }
+
+    /// The package dimension handle.
+    #[must_use]
+    pub fn package() -> Self {
+        Self(Self::PACKAGE.to_string())
+    }
+
+    /// The dimension name.
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// One candidate's membership in a single category dimension, with the
+/// measured provenance that justifies it.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct CategoryMembership {
+    /// The **most specific** node this candidate sits at. `None` is `Unknown`,
+    /// never "miscellaneous".
+    pub leaf: Option<CategoryId>,
+    /// Every ancestor of `leaf`, **materialised**. Storing the closure rather
+    /// than the edges means [`CategoryOp::Within`] is a set lookup and no graph
+    /// has to be threaded through the evaluator.
+    pub ancestors: BTreeSet<CategoryId>,
+    /// Where the assignment came from — the document that printed it, with its
+    /// row receipt. Required for any category-based exclusion, so §16.5 ("no
+    /// unsupported exclusion") holds for categories exactly as scalars.
+    pub evidence: Vec<SourceRef>,
+}
+
+impl CategoryMembership {
+    /// A membership from a leaf and its materialised ancestors.
+    #[must_use]
+    pub fn new(
+        leaf: Option<CategoryId>,
+        ancestors: BTreeSet<CategoryId>,
+        evidence: Vec<SourceRef>,
+    ) -> Self {
+        Self {
+            leaf,
+            ancestors,
+            evidence,
+        }
+    }
+
+    /// Which nodes this candidate belongs to, leaf included.
+    pub fn nodes(&self) -> impl Iterator<Item = &CategoryId> {
+        self.leaf.iter().chain(self.ancestors.iter())
+    }
+
+    /// `CategoryOp::Is` / `Within` / `Excludes` against the materialised
+    /// closure. `None` when no leaf is recorded (that is `Unknown`).
+    #[must_use]
+    pub fn matches(&self, op: CategoryOp, node: &CategoryId) -> Option<bool> {
+        let leaf = self.leaf.as_ref()?;
+        let within = self.leaf.as_ref() == Some(node) || self.ancestors.contains(node);
         Some(match op {
             CategoryOp::Is => leaf == node,
             CategoryOp::Within => within,
@@ -156,21 +358,99 @@ impl CandidateFacts {
     }
 }
 
-/// Judge a category atom against a candidate's materialised node closure.
+/// Everything the evaluator knows about one candidate.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct CandidateFacts {
+    /// Per-axis evidence. An absent axis is `Unknown`, never `None`-means-ok.
+    pub axes: BTreeMap<Axis, Evidence>,
+    /// Per-**dimension** category membership. An absent dimension is
+    /// `Unknown`, never a guess (M4 contract gap #2).
+    pub dimensions: BTreeMap<DimensionId, CategoryMembership>,
+}
+
+impl CandidateFacts {
+    /// The membership recorded for one dimension, when there is one.
+    #[must_use]
+    pub fn category_membership(&self, dim: &DimensionId) -> Option<&CategoryMembership> {
+        self.dimensions.get(dim)
+    }
+
+    /// Which nodes this candidate belongs to in the `core_family` dimension.
+    ///
+    /// Retained as the dimension the seed phrase layer binds; new dimensions
+    /// should use [`CandidateFacts::category_nodes_in`].
+    pub fn category_nodes(&self) -> impl Iterator<Item = &CategoryId> {
+        self.dimensions
+            .get(&DimensionId::core_family())
+            .into_iter()
+            .flat_map(CategoryMembership::nodes)
+    }
+
+    /// Which nodes this candidate belongs to in one dimension.
+    pub fn category_nodes_in<'a>(
+        &'a self,
+        dim: &'a DimensionId,
+    ) -> impl Iterator<Item = &'a CategoryId> + 'a {
+        self.dimensions
+            .get(dim)
+            .into_iter()
+            .flat_map(CategoryMembership::nodes)
+    }
+
+    /// `CategoryOp::Is` / `Within` / `Excludes` in one dimension, evaluated
+    /// against the materialised closure.
+    #[must_use]
+    pub fn category_matches_in(
+        &self,
+        dim: &DimensionId,
+        op: CategoryOp,
+        node: &CategoryId,
+    ) -> Option<bool> {
+        self.category_membership(dim)?.matches(op, node)
+    }
+
+    /// `CategoryOp::Is` / `Within` / `Excludes` in the `core_family`
+    /// dimension (the seed binding; see [`judge_category`]).
+    #[must_use]
+    pub fn category_matches(&self, op: CategoryOp, node: &CategoryId) -> Option<bool> {
+        self.category_matches_in(&DimensionId::core_family(), op, node)
+    }
+}
+
+/// Judge a category atom against a candidate's materialised node closure in
+/// one dimension.
 ///
-/// `None` from [`CandidateFacts::category_matches`] means the candidate has no
-/// category recorded — which is `Unknown`, and `Unknown` never eliminates.
+/// `None` means the candidate has **no membership recorded for that
+/// dimension** — which is `Unknown`, and `Unknown` never eliminates. The
+/// dimensions never merge: a candidate with `core_family` but no `package`
+/// judges `Unknown` on a package atom (M4 contract gap #2).
+#[must_use]
+pub fn judge_category_in(
+    facts: Option<&CandidateFacts>,
+    dim: &DimensionId,
+    op: CategoryOp,
+    node: &CategoryId,
+) -> Verdict {
+    match facts.and_then(|f| f.category_matches_in(dim, op, node)) {
+        Some(true) => Verdict::Pass,
+        Some(false) => Verdict::Fail,
+        None => Verdict::Unknown,
+    }
+}
+
+/// Judge a `core_family` category atom against a candidate's materialised
+/// node closure.
+///
+/// This is [`judge_category_in`] with [`DimensionId::core_family`], retained
+/// because the seed phrase layer binds `core_family` category atoms and
+/// package activation is prohibited (M4 `do-9id`).
 #[must_use]
 pub fn judge_category(
     facts: Option<&CandidateFacts>,
     op: CategoryOp,
     node: &CategoryId,
 ) -> Verdict {
-    match facts.and_then(|f| f.category_matches(op, node)) {
-        Some(true) => Verdict::Pass,
-        Some(false) => Verdict::Fail,
-        None => Verdict::Unknown,
-    }
+    judge_category_in(facts, &DimensionId::core_family(), op, node)
 }
 
 /// The margin band inside which a shortfall is `NearMiss` rather than `Fail`.
@@ -223,9 +503,12 @@ pub fn judge(evidence: Option<&Evidence>, atom: &Atom, provenance: &dyn Provenan
     let Some(ev) = evidence else {
         return Verdict::Unknown;
     };
-    let Some(value) = ev.value else {
+
+    // Scalar/span exclusivity: a shape carrying both is malformed and cannot
+    // be trusted to compare honestly — fail closed.
+    if !ev.is_well_formed() {
         return Verdict::Unknown;
-    };
+    }
 
     // Trust gate: a number we cannot open is a number we cannot assert. This
     // is `C9.1` applied to provenance itself.
@@ -269,6 +552,18 @@ pub fn judge(evidence: Option<&Evidence>, atom: &Atom, provenance: &dyn Provenan
         }
     };
     let band = required.abs() * (DEFAULT_NEAR_MISS_PCT / 100.0);
+
+    // `Covers` is the range op: it requires span evidence and is judged over
+    // both endpoints. Every other op is scalar and requires scalar evidence.
+    if op == Op::Covers {
+        return judge_covers(ev, required, band, &atom.required_conditions);
+    }
+
+    // A scalar op on span evidence is the wrong quantity for the axis —
+    // fail closed rather than coerce a range into a point.
+    let Some(value) = ev.value else {
+        return Verdict::Unknown;
+    };
 
     match op {
         Op::MinRating => {
@@ -316,18 +611,74 @@ pub fn judge(evidence: Option<&Evidence>, atom: &Atom, provenance: &dyn Provenan
                 Verdict::Fail
             }
         }
-        Op::Covers => {
-            // Range containment: the evidence must span the requirement.
-            // Without a lower bound on the evidence we cannot establish it.
-            if value >= required {
-                Verdict::Pass
-            } else if value >= required - band {
-                Verdict::NearMiss
-            } else {
-                Verdict::Fail
+        // Unreachable: `Covers` returned above. Kept explicit so a future op
+        // cannot silently fall through to a scalar comparison.
+        Op::Covers => Verdict::Unknown,
+    }
+}
+
+/// `Op::Covers` over span evidence: the claim's range must contain the
+/// requirement, with a per-endpoint near-miss band.
+///
+/// Containment is `claim.min <= requirement <= claim.max` (the requirement is
+/// a scalar operating point, so `req.min == req.max`). A violation on either
+/// endpoint is `NearMiss` when it is within the axis's near-miss band of the
+/// **requirement** magnitude, otherwise `Fail`.
+///
+/// Fail closed on every incomplete or untyped shape:
+/// * scalar evidence on a range axis → `Unknown`;
+/// * a partial span (one endpoint) → `Unknown` (a half-range cannot establish
+///   containment);
+/// * inverted or non-finite spans → `Unknown`;
+/// * any endpoint whose conditions do not cover the requirement → `Unknown`.
+///
+/// `Unknown` never eliminates (`C9.1`).
+#[must_use]
+fn judge_covers(
+    ev: &Evidence,
+    required: f64,
+    band: f64,
+    required_conditions: &BTreeMap<String, CondValue>,
+) -> Verdict {
+    let Some(span) = ev.span.as_ref() else {
+        return Verdict::Unknown;
+    };
+    // Inverted or non-finite spans are not ranges — a printed value that
+    // cannot be a range parks, never best-guesses.
+    if span.has_non_finite_endpoint() || span.is_inverted() {
+        return Verdict::Unknown;
+    }
+    let (Some(min_ep), Some(max_ep)) = (span.min.as_ref(), span.max.as_ref()) else {
+        return Verdict::Unknown;
+    };
+
+    // C9.6 per endpoint: both endpoints must cover the required condition.
+    if !required_conditions.is_empty() {
+        for ep in [min_ep, max_ep] {
+            let coverage = condition_covers(Some(&ep.conditions), Some(required_conditions));
+            if !coverage.may_satisfy() {
+                return Verdict::Unknown;
             }
         }
     }
+
+    // Lower endpoint above the requirement: the range starts too high.
+    if min_ep.value > required {
+        return if min_ep.value - required <= band {
+            Verdict::NearMiss
+        } else {
+            Verdict::Fail
+        };
+    }
+    // Upper endpoint below the requirement: the range ends too low.
+    if max_ep.value < required {
+        return if required - max_ep.value <= band {
+            Verdict::NearMiss
+        } else {
+            Verdict::Fail
+        };
+    }
+    Verdict::Pass
 }
 
 /// The result of running the funnel over a cohort.
@@ -377,7 +728,8 @@ pub fn evaluate(
                 });
                 if !eliminated && crate::Elimination::eliminates(outcome, atom.hard) {
                     let sources = known
-                        .map(|f| f.category_evidence.clone())
+                        .and_then(|f| f.category_membership(&DimensionId::core_family()))
+                        .map(|m| m.evidence.clone())
                         .unwrap_or_default();
                     // §16.5: an exclusion is unconstructible without evidence.
                     // A category membership with no provenance therefore cannot
@@ -413,8 +765,11 @@ pub fn evaluate(
 
             // Unresolvable evidence is an unknown too: we have a number we
             // cannot open, which is the same as not having established it.
+            // Span evidence establishes a number via its endpoints, not via
+            // `value`, so it counts as measured here.
             let unresolvable = evidence.is_some_and(|e| !provenance.resolvable(&e.sources));
-            if evidence.is_none_or(|e| e.value.is_none()) || unresolvable {
+            let measured = evidence.is_some_and(|e| e.value.is_some() || e.span.is_some());
+            if !measured || unresolvable {
                 *unknown_counts.entry(axis).or_insert(0) += 1;
             }
 
@@ -767,5 +1122,210 @@ mod tests {
         );
         let s = build.summary();
         assert!(s.contains("cohort       1 distinct parts"));
+    }
+
+    // ---- Range-valued (span) evidence — M4 contract gap #1 -----------------
+
+    /// A `Covers` atom: the requirement is a scalar operating point.
+    fn covers_atom(required: f64) -> Atom {
+        Atom {
+            knife: KnifeId::Axis(Axis::TstgRangeC),
+            constraint: Constraint::Scalar {
+                op: Op::Covers,
+                value: required,
+                margin_pct: None,
+            },
+            hard: true,
+            required_conditions: BTreeMap::new(),
+        }
+    }
+
+    /// Evidence with at least one signed endpoint (provenance resolvable).
+    fn span(min: Option<f64>, max: Option<f64>) -> Evidence {
+        let mk = |v: f64| SpanEndpoint::new(v, Bound::Point, src());
+        let ev = SpanEvidence::from_endpoints(min.map(mk), max.map(mk))
+            .expect("at least one endpoint is evidence");
+        Evidence::spanned(ev, true)
+    }
+
+    /// Containment: `claim.min <= req <= claim.max` is Pass; a shortfall on
+    /// either endpoint is Fail, and the near-miss band is a band of the
+    /// **requirement**.
+    #[test]
+    fn covers_span_containment_passes_fails_and_near_misses() {
+        let atom = covers_atom(85.0);
+        // TSTG -55..175 covers an operating point of 85 (band = 8.5).
+        assert_eq!(
+            judge(
+                Some(&span(Some(-55.0), Some(175.0))),
+                &atom,
+                &AlwaysResolvable
+            ),
+            Verdict::Pass
+        );
+        // Upper endpoint 80 sits 5 below the requirement — inside the band.
+        assert_eq!(
+            judge(
+                Some(&span(Some(-55.0), Some(80.0))),
+                &atom,
+                &AlwaysResolvable
+            ),
+            Verdict::NearMiss
+        );
+        // Upper endpoint 50 is 35 short — a Fail.
+        assert_eq!(
+            judge(
+                Some(&span(Some(-55.0), Some(50.0))),
+                &atom,
+                &AlwaysResolvable
+            ),
+            Verdict::Fail
+        );
+        // Lower endpoint 90 starts above the requirement — 5 over the band.
+        assert_eq!(
+            judge(
+                Some(&span(Some(90.0), Some(175.0))),
+                &atom,
+                &AlwaysResolvable
+            ),
+            Verdict::NearMiss
+        );
+        assert_eq!(
+            judge(
+                Some(&span(Some(120.0), Some(175.0))),
+                &atom,
+                &AlwaysResolvable
+            ),
+            Verdict::Fail
+        );
+    }
+
+    /// The near-miss band is a fraction of the requirement's magnitude, so a
+    /// **negative** requirement bands symmetrically (regression: the
+    /// `-55 175` collapse class made negative endpoints unrepresentable).
+    #[test]
+    fn covers_near_miss_uses_requirement_magnitude_with_negatives() {
+        let atom = covers_atom(-100.0); // band = 10.0
+                                        // -95 sits 5 above the requirement — inside the band.
+        assert_eq!(
+            judge(
+                Some(&span(Some(-95.0), Some(0.0))),
+                &atom,
+                &AlwaysResolvable
+            ),
+            Verdict::NearMiss
+        );
+        // A signed lower endpoint below the requirement contains it.
+        assert_eq!(
+            judge(
+                Some(&span(Some(-120.0), Some(0.0))),
+                &atom,
+                &AlwaysResolvable
+            ),
+            Verdict::Pass
+        );
+    }
+
+    /// A scalar on a range axis, and a range on a scalar axis, are the wrong
+    /// quantities — `Unknown`, never a coerced comparison.
+    #[test]
+    fn scalar_and_span_shapes_do_not_cross_axes() {
+        assert_eq!(
+            judge(
+                Some(&Evidence::measured(85.0, true, src())),
+                &covers_atom(85.0),
+                &AlwaysResolvable
+            ),
+            Verdict::Unknown,
+            "scalar evidence cannot satisfy a Covers axis"
+        );
+        assert_eq!(
+            judge(
+                Some(&span(Some(30.0), Some(40.0))),
+                &vds_atom(true, None),
+                &AlwaysResolvable
+            ),
+            Verdict::Unknown,
+            "span evidence cannot satisfy a scalar axis"
+        );
+    }
+
+    /// A partial span (one printed column) cannot establish containment.
+    #[test]
+    fn partial_span_is_unknown() {
+        let atom = covers_atom(85.0);
+        assert_eq!(
+            judge(Some(&span(Some(-55.0), None)), &atom, &AlwaysResolvable),
+            Verdict::Unknown
+        );
+        assert_eq!(
+            judge(Some(&span(None, Some(175.0))), &atom, &AlwaysResolvable),
+            Verdict::Unknown
+        );
+    }
+
+    /// An inverted printed range is not a range.
+    #[test]
+    fn inverted_span_is_unknown() {
+        let atom = covers_atom(85.0);
+        let ev = span(Some(175.0), Some(-55.0));
+        assert!(ev.span.as_ref().unwrap().is_inverted());
+        assert_eq!(judge(Some(&ev), &atom, &AlwaysResolvable), Verdict::Unknown);
+    }
+
+    /// Non-finite endpoints park fail-closed.
+    #[test]
+    fn non_finite_span_is_unknown() {
+        let atom = covers_atom(85.0);
+        for bad in [f64::NEG_INFINITY, f64::INFINITY, f64::NAN] {
+            assert_eq!(
+                judge(
+                    Some(&span(Some(bad), Some(175.0))),
+                    &atom,
+                    &AlwaysResolvable
+                ),
+                Verdict::Unknown,
+                "endpoint {bad} must park"
+            );
+        }
+    }
+
+    /// A span endpoint whose condition does not cover the requirement is
+    /// `Unknown` — `C9.6` applied per endpoint.
+    #[test]
+    fn span_endpoint_condition_must_cover_requirement() {
+        let mut atom = covers_atom(85.0);
+        atom.required_conditions
+            .insert("ta_c".to_string(), CondValue::Scalar(125.0));
+
+        let ep = |v: f64| {
+            SpanEndpoint::new(v, Bound::Point, src()).with_conditions(BTreeMap::from([(
+                "ta_c".to_string(),
+                CondValue::Scalar(25.0),
+            )]))
+        };
+        let span_ev = SpanEvidence::from_endpoints(Some(ep(-55.0)), Some(ep(175.0))).unwrap();
+        // Top-level conditions cover so the per-endpoint check is reached.
+        let ev = Evidence::spanned(span_ev, true).with_conditions(BTreeMap::from([(
+            "ta_c".to_string(),
+            CondValue::Scalar(125.0),
+        )]));
+        assert_eq!(judge(Some(&ev), &atom, &AlwaysResolvable), Verdict::Unknown);
+    }
+
+    /// A malformed shape carrying both a scalar and a span cannot be trusted.
+    #[test]
+    fn dual_scalar_and_span_is_malformed_and_unknown() {
+        let mut ev = span(Some(-55.0), Some(175.0));
+        ev.value = Some(85.0);
+        assert!(!ev.is_well_formed());
+        assert_eq!(
+            judge(Some(&ev), &covers_atom(85.0), &AlwaysResolvable),
+            Verdict::Unknown
+        );
+        assert_eq!(
+            judge(Some(&ev), &vds_atom(true, None), &AlwaysResolvable),
+            Verdict::Unknown
+        );
     }
 }

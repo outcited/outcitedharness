@@ -24,6 +24,7 @@ fn row(symbol: &str, value: &str) -> ClaimRow {
         qualifier: None,
         value: value.into(),
         column_header: None,
+        unit: None,
     }
 }
 
@@ -108,7 +109,13 @@ fn search_runs_the_funnel_over_the_population() {
     let pop = population_from_rows(&rows);
     let registry = dw_knives::seed_from_measured_chips();
     let release = ReleaseId::new("rel-test").unwrap();
-    let resp = search("bluetooth sensor", &registry, &pop, release.clone(), &dw_decide::AlwaysResolvable);
+    let resp = search(
+        "bluetooth sensor",
+        &registry,
+        &pop,
+        release.clone(),
+        &dw_decide::AlwaysResolvable,
+    );
     assert_eq!(resp.build.release, release);
     assert_eq!(resp.build.cohort.len(), 2, "distinct parts in, cohort out");
     assert!(

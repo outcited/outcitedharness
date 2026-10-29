@@ -4,7 +4,9 @@
 //! engine [`dw_decide::Atom`]s only when the knife declaration honors them
 //! ([`crate::knife`]); everything else is parked with a machine-readable code.
 //! Accepted atom sets are canonicalized (sorted, value-normalized) and keyed
-//! by SHA-256 for dedupe and receipt identity.
+//! by SHA-256 for receipt identity. A proposal that canonicalizes to an atom
+//! already honored in the same scenario is **rejected** with
+//! [`ParkCode::DuplicateAtom`] — never silently merged into the set.
 
 use std::collections::BTreeMap;
 
@@ -86,6 +88,9 @@ pub enum ParkCode {
     UnitMismatch,
     /// Soft atom — the pilot scores hard atoms only.
     SoftAtom,
+    /// The proposal canonicalizes to an atom already honored in this scenario.
+    /// The duplicate is parked, never silently merged into the set.
+    DuplicateAtom,
 }
 
 impl ParkCode {
@@ -100,6 +105,7 @@ impl ParkCode {
             Self::ValueOutOfRange => "value_out_of_range",
             Self::UnitMismatch => "unit_mismatch",
             Self::SoftAtom => "soft_atom",
+            Self::DuplicateAtom => "duplicate_atom",
         }
     }
 }
@@ -168,6 +174,17 @@ pub fn validate(scenario: Scenario) -> Validated {
         let outcome = compile(&proposal);
         match outcome {
             Ok((atom, canon)) => {
+                // A proposal that canonicalizes to an atom already honored in
+                // this scenario is **rejected**, not silently deduped: the set
+                // is an identity, and a duplicate is a generator defect worth
+                // seeing. The first honored instance stands.
+                if canonical.iter().any(|c| c == &canon) {
+                    dispositions.push(AtomDisposition {
+                        proposal,
+                        outcome: Err(ParkCode::DuplicateAtom),
+                    });
+                    continue;
+                }
                 atoms.push(atom);
                 canonical.push(canon.clone());
                 dispositions.push(AtomDisposition {
