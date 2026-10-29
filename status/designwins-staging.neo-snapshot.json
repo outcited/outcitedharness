@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 109059,
+    "uptime_sec": 109662,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,13 +21,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T01:51:54Z",
+  "captured_at": "2026-10-29T02:01:56Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 109663,
+    "uptime_sec": 110265,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 73725,
+  "last_event_seq": 73912,
   "recent_events": [
     {
-      "seq": 73715,
-      "type": "order.fired",
-      "subject": "mol-dog-doctor"
-    },
-    {
-      "seq": 73714,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 73713,
-      "type": "order.completed",
-      "subject": "reaper"
-    },
-    {
-      "seq": 73712,
+      "seq": 73902,
       "type": "bead.created",
-      "subject": "ds-wisp-hiwwnd"
+      "subject": "ds-wisp-m4bf6t"
     },
     {
-      "seq": 73711,
-      "type": "order.completed",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 73710,
+      "seq": 73901,
       "type": "order.fired",
-      "subject": "reaper"
+      "subject": "order-tracking-sweep"
     },
     {
-      "seq": 73709,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 73708,
-      "type": "bead.closed",
-      "subject": "ds-wisp-727g0a"
-    },
-    {
-      "seq": 73707,
+      "seq": 73900,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 73706,
+      "seq": 73899,
       "type": "order.completed",
       "subject": "beads-health"
+    },
+    {
+      "seq": 73898,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 73897,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 73896,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 73895,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 73894,
+      "type": "bead.closed",
+      "subject": "ds-wisp-bqcsax"
+    },
+    {
+      "seq": 73893,
+      "type": "bead.closed",
+      "subject": "ds-wisp-mfe3ci"
     }
   ]
 }
