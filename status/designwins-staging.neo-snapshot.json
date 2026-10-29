@@ -1,33 +1,34 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 2,
+    "running": 0,
     "suspended": false,
-    "uptime_sec": 162714,
+    "uptime_sec": 163318,
     "version": "1.5.1",
     "agents": {
       "total": 5,
-      "running": 2,
+      "running": 0,
       "suspended": 0,
       "quarantined": 0
     },
     "work": {
       "in_progress": 2,
       "ready": 22,
-      "open": 28
+      "open": 27
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T16:46:09Z",
+  "captured_at": "2026-10-29T16:56:12Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 163318,
+    "uptime_sec": 163922,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -58,13 +59,13 @@
     },
     {
       "name": "core.control-dispatcher",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": ""
     },
     {
       "name": "neo-fixture-1",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": "scaled (min=0, max=2)"
     },
@@ -87,7 +88,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 29,
+  "beads_total_reported": 30,
   "findings": [
     {
       "id": "ds-8ha",
@@ -177,57 +178,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 90448,
+  "last_event_seq": 90654,
   "recent_events": [
     {
-      "seq": 90438,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 90437,
+      "seq": 90644,
       "type": "order.fired",
-      "subject": "gate-sweep"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 90436,
-      "type": "order.completed",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 90435,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 90434,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 90433,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 90432,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 90431,
+      "seq": 90643,
       "type": "order.fired",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 90430,
-      "type": "order.completed",
-      "subject": "gate-sweep"
+      "seq": 90642,
+      "type": "session.woke",
+      "subject": "neo-fixture-1"
     },
     {
-      "seq": 90429,
-      "type": "order.fired",
-      "subject": "gate-sweep"
+      "seq": 90641,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 90640,
+      "type": "worker.operation",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 90639,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 90638,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 90637,
+      "type": "session.drain_acked_with_assigned_work",
+      "subject": "neo-fixture"
+    },
+    {
+      "seq": 90636,
+      "type": "session.stopped",
+      "subject": "neo-fixture"
+    },
+    {
+      "seq": 90635,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     }
   ]
 }
