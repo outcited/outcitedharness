@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 151255,
+    "uptime_sec": 151858,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 22,
-      "open": 26
+      "open": 27
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T13:35:11Z",
+  "captured_at": "2026-10-29T13:45:14Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 151860,
+    "uptime_sec": 152463,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -103,7 +103,7 @@
   "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 33,
+  "beads_total_reported": 32,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -129,55 +129,55 @@
       ]
     }
   ],
-  "last_event_seq": 101672,
+  "last_event_seq": 101782,
   "recent_events": [
     {
-      "seq": 101662,
-      "type": "bead.closed",
-      "subject": "do-wisp-8gprtjl"
-    },
-    {
-      "seq": 101661,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 101660,
+      "seq": 101772,
       "type": "order.fired",
-      "subject": "cross-rig-deps"
+      "subject": "beads-health"
     },
     {
-      "seq": 101659,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 101658,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 101657,
+      "seq": 101771,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 101656,
+      "seq": 101770,
       "type": "bead.created",
-      "subject": "do-wisp-8gprtjl"
+      "subject": "do-wisp-38x7zfu"
     },
     {
-      "seq": 101655,
+      "seq": 101769,
       "type": "order.completed",
-      "subject": "orphan-sweep"
+      "subject": "reaper"
     },
     {
-      "seq": 101654,
+      "seq": 101768,
+      "type": "order.completed",
+      "subject": "dolt-remotes-patrol"
+    },
+    {
+      "seq": 101767,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 101766,
       "type": "order.fired",
-      "subject": "orphan-sweep"
+      "subject": "dolt-remotes-patrol"
     },
     {
-      "seq": 101653,
+      "seq": 101765,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 101764,
+      "type": "order.fired",
+      "subject": "reaper"
+    },
+    {
+      "seq": 101763,
       "type": "order.fired",
       "subject": "order-tracking-sweep"
     }
