@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 149448,
+    "uptime_sec": 150050,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,16 +21,16 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T13:05:02Z",
+  "captured_at": "2026-10-29T13:15:05Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 150052,
+    "uptime_sec": 150654,
     "cities_total": 2,
     "cities_running": 2,
-    "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
+    "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
     "startup": {
       "ready": true,
       "phase": "running",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 86415,
+  "last_event_seq": 86590,
   "recent_events": [
     {
-      "seq": 86405,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 86404,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 86403,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 86402,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 86401,
-      "type": "session.drain_acked_with_assigned_work",
-      "subject": "neo-fixture"
-    },
-    {
-      "seq": 86400,
-      "type": "session.stopped",
-      "subject": "neo-fixture"
-    },
-    {
-      "seq": 86399,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 86398,
+      "seq": 86580,
       "type": "order.completed",
-      "subject": "nudge-on-route"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 86397,
-      "type": "bead.closed",
-      "subject": "ds-wisp-ak9l5u"
-    },
-    {
-      "seq": 86396,
+      "seq": 86579,
       "type": "order.fired",
-      "subject": "nudge-on-route"
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 86578,
+      "type": "bead.closed",
+      "subject": "ds-wisp-nip71o"
+    },
+    {
+      "seq": 86577,
+      "type": "execution.step_stalled",
+      "subject": "ds-0e5"
+    },
+    {
+      "seq": 86576,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 86575,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 86574,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 86573,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 86572,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 86571,
+      "type": "order.fired",
+      "subject": "dolt-health"
     }
   ]
 }
