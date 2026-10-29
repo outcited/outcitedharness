@@ -1,20 +1,20 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 0,
+    "running": 1,
     "suspended": false,
-    "uptime_sec": 127744,
+    "uptime_sec": 128346,
     "version": "1.5.1",
     "agents": {
       "total": 9,
-      "running": 0,
+      "running": 1,
       "suspended": 0,
       "quarantined": 0
     },
     "work": {
-      "in_progress": 0,
+      "in_progress": 1,
       "ready": 22,
-      "open": 27
+      "open": 28
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T07:03:20Z",
+  "captured_at": "2026-10-29T07:13:23Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 128349,
+    "uptime_sec": 128952,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -47,7 +47,7 @@
   "agents": [
     {
       "name": "bd.dog-1",
-      "running": false,
+      "running": true,
       "suspended": false,
       "scale": "scaled (min=0, max=2)"
     },
@@ -102,17 +102,13 @@
   ],
   "sessions": [
     {
-      "id": "do-wisp-hjwkn6t",
-      "state": "active"
-    },
-    {
       "id": "do-wisp-5sl4mp",
       "state": "asleep"
     }
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 35,
+  "beads_total_reported": 33,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -138,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 96064,
+  "last_event_seq": 96283,
   "recent_events": [
     {
-      "seq": 96054,
+      "seq": 96273,
+      "type": "bead.updated",
+      "subject": "do-wisp-nbyyjms"
+    },
+    {
+      "seq": 96272,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 96271,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 96270,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 96269,
+      "type": "order.completed",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 96268,
       "type": "order.fired",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 96053,
+      "seq": 96267,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 96266,
       "type": "order.fired",
-      "subject": "notify-on-human-gate-creation"
+      "subject": "beads-health"
     },
     {
-      "seq": 96052,
-      "type": "bead.updated",
-      "subject": "do-wisp-hjwkn6t"
+      "seq": 96265,
+      "type": "order.fired",
+      "subject": "renudge-stale-human-gates"
     },
     {
-      "seq": 96051,
-      "type": "bead.updated",
-      "subject": "do-wisp-hjwkn6t"
-    },
-    {
-      "seq": 96050,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 96049,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 96048,
-      "type": "bead.closed",
-      "subject": "do-wisp-bi5kakc"
-    },
-    {
-      "seq": 96047,
-      "type": "order.completed",
-      "subject": "jsonl-export"
-    },
-    {
-      "seq": 96046,
-      "type": "bead.created",
-      "subject": "do-wisp-bi5kakc"
-    },
-    {
-      "seq": 96045,
-      "type": "order.completed",
-      "subject": "mol-dog-backup"
+      "seq": 96264,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
     }
   ]
 }
