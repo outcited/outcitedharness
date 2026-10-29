@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 144624,
+    "uptime_sec": 145227,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T11:44:41Z",
+  "captured_at": "2026-10-29T11:54:43Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 145230,
+    "uptime_sec": 145833,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -129,57 +129,57 @@
       ]
     }
   ],
-  "last_event_seq": 100461,
+  "last_event_seq": 100580,
   "recent_events": [
     {
-      "seq": 100451,
+      "seq": 100570,
       "type": "order.completed",
-      "subject": "orphan-sweep"
+      "subject": "beads-health"
     },
     {
-      "seq": 100450,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 100449,
+      "seq": 100569,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 100448,
+      "seq": 100568,
+      "type": "order.completed",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 100567,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 100566,
+      "type": "order.fired",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 100565,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 100447,
-      "type": "order.fired",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 100446,
+      "seq": 100564,
       "type": "order.completed",
-      "subject": "order-tracking-sweep"
+      "subject": "spawn-storm-detect"
     },
     {
-      "seq": 100445,
+      "seq": 100563,
       "type": "order.fired",
-      "subject": "order-tracking-sweep"
+      "subject": "spawn-storm-detect"
     },
     {
-      "seq": 100444,
+      "seq": 100562,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 100443,
+      "seq": 100561,
       "type": "order.fired",
       "subject": "gate-sweep"
-    },
-    {
-      "seq": 100442,
-      "type": "order.completed",
-      "subject": "beads-health"
     }
   ]
 }
