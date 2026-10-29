@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 115688,
+    "uptime_sec": 116291,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 22,
-      "open": 27
+      "open": 28
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T03:42:25Z",
+  "captured_at": "2026-10-29T03:52:27Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 116294,
+    "uptime_sec": 116897,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -108,7 +108,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 34,
+  "beads_total_reported": 33,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 92276,
+  "last_event_seq": 92465,
   "recent_events": [
     {
-      "seq": 92266,
+      "seq": 92455,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 92454,
       "type": "order.fired",
-      "subject": "order-tracking-sweep"
+      "subject": "dolt-health"
     },
     {
-      "seq": 92265,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 92264,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 92263,
-      "type": "bead.closed",
-      "subject": "do-wisp-4inc7ar"
-    },
-    {
-      "seq": 92262,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 92261,
-      "type": "order.completed",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 92260,
+      "seq": 92453,
       "type": "order.fired",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 92259,
+      "seq": 92452,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 92258,
+      "seq": 92451,
       "type": "order.fired",
-      "subject": "nudge-mail-sweep"
+      "subject": "beads-health"
     },
     {
-      "seq": 92257,
+      "seq": 92450,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 92449,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 92448,
       "type": "order.completed",
-      "subject": "dolt-health"
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 92447,
+      "type": "order.completed",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 92446,
+      "type": "order.fired",
+      "subject": "mol-dog-doctor"
     }
   ]
 }
