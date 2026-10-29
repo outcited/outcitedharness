@@ -80,23 +80,25 @@ def _to_base(val: float, u: str) -> float | None:
 def unit_consistent(value: Any, shipped_unit: str | None,
                     printed_value: Any, printed_unit: str | None) -> bool | None:
     """Contract 1: shipped (value, unit) must represent the same physical
-    quantity as the printed (value, unit). Returns None if dimensional
-    check is not applicable."""
+    quantity as the printed (value, unit).
+    Returns None only when BOTH sides are genuinely unitless.
+    Returns False on any dimensional mismatch, unsupported unit, or
+    unparseable value — the caller must HELD, never silently pass."""
     if value is None or printed_value is None:
-        return None
+        return False
     try:
         sv = float(value); pv = float(printed_value)
     except (TypeError, ValueError):
-        return None
+        return False
     su = _norm_unit(shipped_unit); pu = _norm_unit(printed_unit)
     sd = _dimension(su); pd = _dimension(pu)
     if sd is None and pd is None:
-        return None  # both unitless — consistent by default
+        return True  # both genuinely unitless
     if sd != pd:
         return False  # different dimensions — never consistent
     svb = _to_base(sv, su); pvb = _to_base(pv, pu)
     if svb is None or pvb is None:
-        return None
+        return False
     if pvb == 0:
         return svb == 0
     return abs(svb - pvb) / abs(pvb) < 0.01  # 1% tolerance
@@ -106,11 +108,11 @@ def value_in_plausible_range(value: Any, unit: str | None,
     """Contract 1 supplementary: thermal metrics >1000 °C/W or currents >10 A
     on a 3.5 A regulator are dimensionally implausible."""
     if value is None:
-        return None
+        return False
     try:
         f = abs(float(value))
     except (TypeError, ValueError):
-        return None
+        return False
     u = _norm_unit(unit)
     if _dimension(u) == "°C/W" and f > 500:
         return False
@@ -188,7 +190,7 @@ def qa_claim(claim: dict, printed_row: dict) -> list[dict]:
 
     # Contract 1: dimensional consistency
     uc = unit_consistent(shipped_val, shipped_unit, printed_val, printed_unit)
-    if uc is False:
+    if uc is False or uc is None:
         defects.append({
             "contract": 1, "field": field,
             "defect": "unit_dimension_mismatch",

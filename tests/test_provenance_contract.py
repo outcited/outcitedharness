@@ -15,8 +15,25 @@ class TestUnitDimensionalConsistency(unittest.TestCase):
         self.assertTrue(unit_consistent(3e-6, "A", 3.0, "µA"),
                         "3e-6 A = 3.0 µA ✓")
 
-    def test_unitless_matches_unitless(self):
-        self.assertIsNone(unit_consistent("foo", None, "foo", None))
+    def test_unitless_non_numeric_fails_closed(self):
+        self.assertFalse(unit_consistent("foo", None, "foo", None),
+                       "non-numeric values fail closed — cannot verify")
+
+    def test_missing_shipped_unit_fails_closed(self):
+        self.assertFalse(unit_consistent(3.0, None, 3.0, "µA"),
+                         "shipped unit missing → HELD, never pass")
+
+    def test_missing_printed_unit_fails_closed(self):
+        self.assertFalse(unit_consistent(3.0, "µA", 3.0, None),
+                         "printed unit missing → HELD")
+
+    def test_unparseable_value_fails_closed(self):
+        self.assertFalse(unit_consistent("not-a-number", "µA", 3.0, "µA"),
+                         "unparseable → HELD")
+
+    def test_none_value_fails_closed(self):
+        self.assertFalse(unit_consistent(None, "µA", 3.0, "µA"),
+                         "None value → HELD")
 
     def test_dimension_mismatch_never_consistent(self):
         self.assertFalse(unit_consistent(40, "V", 43.2, "°C/W"))
