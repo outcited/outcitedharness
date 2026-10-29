@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 144022,
+    "uptime_sec": 144624,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T11:34:38Z",
+  "captured_at": "2026-10-29T11:44:41Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 144627,
+    "uptime_sec": 145230,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -129,57 +129,57 @@
       ]
     }
   ],
-  "last_event_seq": 100358,
+  "last_event_seq": 100461,
   "recent_events": [
     {
-      "seq": 100348,
+      "seq": 100451,
       "type": "order.completed",
-      "subject": "cross-rig-deps"
+      "subject": "orphan-sweep"
     },
     {
-      "seq": 100347,
-      "type": "order.fired",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 100346,
+      "seq": 100450,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 100345,
+      "seq": 100449,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 100448,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 100344,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 100343,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 100342,
+      "seq": 100447,
       "type": "order.fired",
-      "subject": "gate-sweep"
+      "subject": "orphan-sweep"
     },
     {
-      "seq": 100341,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 100340,
+      "seq": 100446,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 100339,
+      "seq": 100445,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 100444,
       "type": "order.completed",
-      "subject": "orphan-sweep"
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 100443,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 100442,
+      "type": "order.completed",
+      "subject": "beads-health"
     }
   ]
 }
