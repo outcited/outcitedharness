@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 103031,
+    "uptime_sec": 103633,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T00:11:27Z",
+  "captured_at": "2026-10-29T00:21:30Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 103636,
+    "uptime_sec": 104239,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -108,7 +108,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 33,
+  "beads_total_reported": 34,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 88286,
+  "last_event_seq": 88470,
   "recent_events": [
     {
-      "seq": 88276,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 88275,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 88274,
-      "type": "bead.closed",
-      "subject": "do-wisp-3af2tp"
-    },
-    {
-      "seq": 88273,
+      "seq": 88460,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 88272,
+      "seq": 88459,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 88271,
+      "seq": 88458,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 88270,
+      "seq": 88457,
       "type": "order.completed",
-      "subject": "nudge-mail-sweep"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 88269,
+      "seq": 88456,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 88455,
+      "type": "order.completed",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 88454,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 88268,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 88267,
+      "seq": 88453,
       "type": "order.fired",
       "subject": "gate-sweep"
+    },
+    {
+      "seq": 88452,
+      "type": "order.fired",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 88451,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
     }
   ]
 }

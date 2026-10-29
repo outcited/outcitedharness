@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 103032,
+    "uptime_sec": 103635,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,13 +21,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T00:11:27Z",
+  "captured_at": "2026-10-29T00:21:30Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 103636,
+    "uptime_sec": 104239,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 71850,
+  "last_event_seq": 72047,
   "recent_events": [
     {
-      "seq": 71840,
-      "type": "bead.closed",
-      "subject": "ds-wisp-samd00"
-    },
-    {
-      "seq": 71839,
-      "type": "bead.closed",
-      "subject": "ds-wisp-srh8e2"
-    },
-    {
-      "seq": 71838,
+      "seq": 72037,
       "type": "bead.updated",
       "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 71837,
+      "seq": 72036,
       "type": "bead.updated",
       "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 71836,
+      "seq": 72035,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 72034,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 72033,
+      "type": "session.drain_acked_with_assigned_work",
+      "subject": "neo-fixture"
+    },
+    {
+      "seq": 72032,
       "type": "order.completed",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 71835,
+      "seq": 72031,
+      "type": "session.stopped",
+      "subject": "neo-fixture"
+    },
+    {
+      "seq": 72030,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 72029,
       "type": "order.fired",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 71834,
-      "type": "session.woke",
-      "subject": "neo-fixture-1"
-    },
-    {
-      "seq": 71833,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 71832,
-      "type": "worker.operation",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 71831,
-      "type": "order.completed",
-      "subject": "order-tracking-sweep"
+      "seq": 72028,
+      "type": "bead.closed",
+      "subject": "ds-wisp-2ossfp"
     }
   ]
 }
