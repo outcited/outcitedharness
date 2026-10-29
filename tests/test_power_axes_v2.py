@@ -194,8 +194,9 @@ def test_iout_normalizes_to_amps():
 
 
 def test_fsw_normalizes_to_khz():
+    # role-binding fix: fsw binds the MAX column only (typ-only fails closed)
     rows = bounded_axis_rows([_fact(symbol="FSW", parameter="Switching frequency",
-                                    value=1.2, unit="MHz")])
+                                    max=1.2, unit="MHz")])
     assert rows and rows[0]["field"] == "fsw_max_khz" and rows[0]["value"] == 1200.0
 
 

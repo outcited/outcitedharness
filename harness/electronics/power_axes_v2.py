@@ -265,7 +265,14 @@ _IOUT_VOCAB = re.compile(
 )
 _IOUT_REJECT = re.compile(
     r"quiescent|\bIQ\b|leakage|shutdown|short[- ]?circuit|current\s+limit|"
-    r"inrush|reverse|sink|source|limit|threshold|hiccup|fold",
+    r"inrush|reverse|sink|source|limit|threshold|hiccup|fold|"
+    # mode-transition thresholds are NOT output-current capability
+    # (regression: ILPM,enter 'Load current level for entry to LPM' docs
+    #  a0ad8212537c.../1764346810ce... p9; IPWMPFM 'Output current to enter
+    #  PFM mode' doc eb6968a362d8... p5; 'Maximum output load current in PFM
+    #  mode' doc 30183c477d78... p7)
+    r"\bLPM\b|low.?power|\bPFM\b|\bPWM\b|power.?save|entry|enter\b|standby|"
+    r"wake|mode\b|transition",
     re.I,
 )
 _FSW_VOCAB = re.compile(
@@ -353,10 +360,17 @@ def _range_low_high(fact: Mapping[str, Any]) -> tuple[float, float] | None:
 def bounded_axis_rows(facts: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """Fill the bounded decision-critical axes: vin_min_v/vin_max_v, iout_max_a,
     fsw_max_khz, vds_v, rds_on_mohm. Specified-operation rows only; absmax never
-    fills; protection/threshold/leakage/load look-alikes are rejected. A value
-    whose printed unit is incompatible with the axis is dropped (fail-closed).
-    Field names match the vout_min_v/vout_max_v convention so collapse_rows and
-    the wave contract treat each axis independently.
+    fills; protection/threshold/leakage/load look-alikes are rejected; a value
+    with an incompatible printed unit is dropped (fail-closed).
+
+    ROLE BINDING (2026-10-27 fix): max-valued axes (iout_max_a, fsw_max_khz,
+    rds_on_mohm) bind ONLY the printed MAX column, with value_role 'max'. When
+    no max column exists (typ-only rows), the axis FAILS CLOSED — a typical
+    value is never relabeled 'maximum'. Regression sources: STL33N60M6
+    (edbb430ad7d9...) p3 r6 typ 0.115 / max 0.137 Ω must emit 137 mΩ; typ-only
+    must emit nothing. vin range semantics and the vds rating binding are
+    unchanged by this fix (vds rating-vs-column binding is a documented
+    unresolved related axis).
     """
 
     rows: list[dict[str, Any]] = []
@@ -385,6 +399,33 @@ def bounded_axis_rows(facts: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]
                     rows.append(_axis_row("vds_v", max(rng), "rating", "V",
                                           fact, verbatim, unit))
                 break
+            if field in ("iout", "fsw", "rds"):
+                # max-valued axes: ONLY the printed max column binds; a
+                # missing max column fails closed (typ is never relabeled).
+                raw_max = fact.get("max")
+                if not isinstance(raw_max, (int, float)):
+                    break
+                single = float(raw_max)
+                if field == "iout":
+                    amps = _to_amps(single, unit)
+                    if amps is None:
+                        break
+                    rows.append(_axis_row("iout_max_a", amps, "max", "A",
+                                          fact, verbatim, unit))
+                elif field == "fsw":
+                    khz = _to_khz(single, unit)
+                    if khz is None:
+                        break
+                    rows.append(_axis_row("fsw_max_khz", khz, "max", "kHz",
+                                          fact, verbatim, unit))
+                else:  # rds
+                    m = _to_mohm(single, unit)
+                    if m is None:
+                        break
+                    rows.append(_axis_row("rds_on_mohm", m, "max", "mOhm",
+                                          fact, verbatim, unit))
+                break
+            # vds single-value rating (unchanged semantics)
             single = fact.get("value") if isinstance(fact.get("value"), (int, float)) \
                 else fact.get("typ")
             if not isinstance(single, (int, float)):
@@ -393,29 +434,10 @@ def bounded_axis_rows(facts: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]
             if not isinstance(single, (int, float)):
                 continue
             single = float(single)
-            if field == "iout":
-                amps = _to_amps(single, unit)
-                if amps is None:
-                    continue
-                rows.append(_axis_row("iout_max_a", amps, "max", "A",
-                                      fact, verbatim, unit))
-            elif field == "fsw":
-                khz = _to_khz(single, unit)
-                if khz is None:
-                    continue
-                rows.append(_axis_row("fsw_max_khz", khz, "max", "kHz",
-                                      fact, verbatim, unit))
-            elif field == "rds":
-                m = _to_mohm(single, unit)
-                if m is None:
-                    continue
-                rows.append(_axis_row("rds_on_mohm", m, "max", "mOhm",
-                                      fact, verbatim, unit))
-            elif field == "vds":
-                if _norm_unit(unit) != "v":
-                    continue
-                rows.append(_axis_row("vds_v", single, "rating", "V",
-                                      fact, verbatim, unit))
+            if _norm_unit(unit) != "v":
+                continue
+            rows.append(_axis_row("vds_v", single, "rating", "V",
+                                  fact, verbatim, unit))
             break
     return rows
 
