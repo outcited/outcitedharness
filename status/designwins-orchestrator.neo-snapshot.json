@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 121715,
+    "uptime_sec": 122317,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T05:22:51Z",
+  "captured_at": "2026-10-29T05:32:54Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 122320,
+    "uptime_sec": 122923,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 94142,
+  "last_event_seq": 94338,
   "recent_events": [
     {
-      "seq": 94132,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 94131,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 94130,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 94129,
-      "type": "order.completed",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 94128,
+      "seq": 94328,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 94127,
+      "seq": 94327,
+      "type": "bead.updated",
+      "subject": "do-wisp-qhnshog"
+    },
+    {
+      "seq": 94326,
       "type": "bead.updated",
       "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 94126,
-      "type": "bead.closed",
-      "subject": "do-wisp-dnx3czg"
-    },
-    {
-      "seq": 94125,
-      "type": "bead.created",
-      "subject": "do-wisp-phtoghe"
-    },
-    {
-      "seq": 94124,
-      "type": "bead.created",
-      "subject": "do-wisp-dnx3czg"
-    },
-    {
-      "seq": 94123,
+      "seq": 94325,
       "type": "order.completed",
       "subject": "nudge-on-route"
+    },
+    {
+      "seq": 94324,
+      "type": "order.completed",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 94323,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 94322,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 94321,
+      "type": "order.fired",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 94320,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 94319,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
     }
   ]
 }
