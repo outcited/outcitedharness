@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 183829,
+    "uptime_sec": 184431,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,23 +14,21 @@
     "work": {
       "in_progress": 0,
       "ready": 22,
-      "open": 27
+      "open": 26
     },
     "partial": true,
     "partial_errors": [
-      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
-      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T22:38:04Z",
+  "captured_at": "2026-10-29T22:48:07Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 184434,
+    "uptime_sec": 185037,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -105,7 +103,7 @@
   "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 32,
+  "beads_total_reported": 33,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -131,57 +129,57 @@
       ]
     }
   ],
-  "last_event_seq": 107805,
+  "last_event_seq": 107924,
   "recent_events": [
     {
-      "seq": 107795,
-      "type": "order.completed",
-      "subject": "beads-health"
+      "seq": 107914,
+      "type": "bead.closed",
+      "subject": "do-wisp-nlpcf1h"
     },
     {
-      "seq": 107794,
-      "type": "order.fired",
-      "subject": "beads-health"
+      "seq": 107913,
+      "type": "bead.created",
+      "subject": "do-wisp-vw7zal2"
     },
     {
-      "seq": 107793,
+      "seq": 107912,
       "type": "order.completed",
       "subject": "orphan-sweep"
     },
     {
-      "seq": 107792,
+      "seq": 107911,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 107910,
+      "type": "order.fired",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 107909,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 107908,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 107791,
+      "seq": 107907,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 107790,
+      "seq": 107906,
       "type": "order.fired",
       "subject": "orphan-sweep"
     },
     {
-      "seq": 107789,
-      "type": "order.fired",
+      "seq": 107905,
+      "type": "order.completed",
       "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 107788,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 107787,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 107786,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
     }
   ]
 }
