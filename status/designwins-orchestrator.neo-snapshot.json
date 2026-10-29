@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 136184,
+    "uptime_sec": 136787,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T09:24:00Z",
+  "captured_at": "2026-10-29T09:34:03Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 136789,
+    "uptime_sec": 137392,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -108,7 +108,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 34,
+  "beads_total_reported": 33,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,55 +134,55 @@
       ]
     }
   ],
-  "last_event_seq": 98763,
+  "last_event_seq": 98939,
   "recent_events": [
     {
-      "seq": 98753,
+      "seq": 98929,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 98928,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 98752,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 98751,
+      "seq": 98927,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 98750,
+      "seq": 98926,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 98749,
+      "seq": 98925,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 98748,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "seq": 98924,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
     },
     {
-      "seq": 98747,
-      "type": "order.fired",
+      "seq": 98923,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 98922,
+      "type": "bead.closed",
+      "subject": "do-wisp-j5mbptf"
+    },
+    {
+      "seq": 98921,
+      "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 98746,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 98745,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 98744,
+      "seq": 98920,
       "type": "order.completed",
       "subject": "nudge-on-route"
     }
