@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 147640,
+    "uptime_sec": 148242,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,13 +21,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T12:34:54Z",
+  "captured_at": "2026-10-29T12:44:57Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 148244,
+    "uptime_sec": 148846,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 85840,
+  "last_event_seq": 86024,
   "recent_events": [
     {
-      "seq": 85830,
-      "type": "order.completed",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 85829,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 85828,
+      "seq": 86014,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 85827,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 85826,
+      "seq": 86013,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 85825,
-      "type": "order.fired",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 85824,
+      "seq": 86012,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 85823,
+      "seq": 86011,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 85822,
+      "seq": 86010,
+      "type": "order.completed",
+      "subject": "dolt-remotes-patrol"
+    },
+    {
+      "seq": 86009,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 85821,
+      "seq": 86008,
+      "type": "order.fired",
+      "subject": "dolt-remotes-patrol"
+    },
+    {
+      "seq": 86007,
       "type": "order.fired",
       "subject": "dolt-health"
+    },
+    {
+      "seq": 86006,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 86005,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
     }
   ]
 }
