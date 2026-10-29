@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 132567,
+    "uptime_sec": 133171,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,21 +14,23 @@
     "work": {
       "in_progress": 0,
       "ready": 22,
-      "open": 27
+      "open": 28
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
+      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T08:23:43Z",
+  "captured_at": "2026-10-29T08:33:46Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 133172,
+    "uptime_sec": 133775,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -108,7 +110,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 34,
+  "beads_total_reported": 33,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,57 +136,57 @@
       ]
     }
   ],
-  "last_event_seq": 97623,
+  "last_event_seq": 97817,
   "recent_events": [
     {
-      "seq": 97613,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 97612,
-      "type": "order.completed",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 97611,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 97610,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 97609,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 97608,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 97607,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 97606,
-      "type": "bead.updated",
-      "subject": "do-wisp-5sl4mp"
-    },
-    {
-      "seq": 97605,
+      "seq": 97807,
       "type": "bead.closed",
-      "subject": "do-wisp-5bmpwu1"
+      "subject": "do-wisp-ypgq2oo"
     },
     {
-      "seq": 97604,
+      "seq": 97806,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 97805,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 97804,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 97803,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 97802,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 97801,
+      "type": "bead.updated",
+      "subject": "do-wisp-ypgq2oo"
+    },
+    {
+      "seq": 97800,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 97799,
+      "type": "bead.updated",
+      "subject": "do-wisp-5sl4mp"
+    },
+    {
+      "seq": 97798,
+      "type": "order.completed",
+      "subject": "orphan-sweep"
     }
   ]
 }
