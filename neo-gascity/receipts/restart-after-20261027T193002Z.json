@@ -1,0 +1,83 @@
+{
+  "tag": "after",
+  "at": "2026-10-27T19:30:02Z",
+  "schema": "gc.restart-receipt.v1",
+  "cities": {
+    "designwins-orchestrator": {
+      "running": 0,
+      "suspended": false,
+      "agents": {
+        "total": 9,
+        "running": 0,
+        "suspended": 0,
+        "quarantined": 0
+      },
+      "work": {
+        "in_progress": 0,
+        "ready": 21,
+        "open": 27
+      },
+      "partial": true,
+      "partial_errors": [
+        "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
+        "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
+      ],
+      "bead_count": 27,
+      "bead_set_digest": "423087f69547e5be",
+      "statuses": {
+        "open": 27,
+        "in_progress": 0,
+        "closed": 0
+      },
+      "sessions": []
+    },
+    "designwins-staging": {
+      "running": 0,
+      "suspended": false,
+      "agents": {
+        "total": 3,
+        "running": 0,
+        "suspended": 0,
+        "quarantined": 0
+      },
+      "work": {
+        "in_progress": 0,
+        "ready": 0,
+        "open": 22
+      },
+      "partial": true,
+      "partial_errors": [
+        "city work ready: reading complete ready projection from cache: bead cache unavailable",
+        "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
+      ],
+      "bead_count": 23,
+      "bead_set_digest": "f31cd7d2148982a8",
+      "statuses": {
+        "open": 23,
+        "in_progress": 0,
+        "closed": 0
+      },
+      "sessions": []
+    }
+  },
+  "supervisor": {
+    "status": "ok",
+    "version": "1.5.1",
+    "build_id": "unknown",
+    "uptime_sec": 350,
+    "cities_total": 2,
+    "cities_running": 2,
+    "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
+    "startup": {
+      "ready": true,
+      "phase": "running",
+      "phases_completed": [
+        "loading_config",
+        "starting_bead_store",
+        "resolving_formulas",
+        "adopting_sessions",
+        "starting_agents"
+      ]
+    }
+  }
+}
