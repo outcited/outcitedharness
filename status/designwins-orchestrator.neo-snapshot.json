@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 169952,
+    "uptime_sec": 170556,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-29T18:46:48Z",
+  "captured_at": "2026-10-29T18:56:51Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 170558,
+    "uptime_sec": 171161,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -129,57 +129,57 @@
       ]
     }
   ],
-  "last_event_seq": 105194,
+  "last_event_seq": 105309,
   "recent_events": [
     {
-      "seq": 105184,
+      "seq": 105299,
       "type": "order.completed",
-      "subject": "dolt-health"
+      "subject": "beads-health"
     },
     {
-      "seq": 105183,
+      "seq": 105298,
       "type": "order.fired",
-      "subject": "dolt-health"
+      "subject": "beads-health"
     },
     {
-      "seq": 105182,
-      "type": "order.fired",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 105181,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 105180,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 105179,
+      "seq": 105297,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 105178,
+      "seq": 105296,
       "type": "order.completed",
-      "subject": "beads-health"
+      "subject": "jsonl-export"
     },
     {
-      "seq": 105177,
+      "seq": 105295,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 105176,
+      "seq": 105294,
       "type": "order.fired",
-      "subject": "beads-health"
+      "subject": "dolt-health"
     },
     {
-      "seq": 105175,
+      "seq": 105293,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 105292,
       "type": "order.completed",
-      "subject": "spawn-storm-detect"
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 105291,
+      "type": "order.fired",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 105290,
+      "type": "order.fired",
+      "subject": "gate-sweep"
     }
   ]
 }
