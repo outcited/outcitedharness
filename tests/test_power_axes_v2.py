@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from harness.electronics.power_axes_v2 import (
+    bounded_axis_rows,
     collapse_rows,
     front_vout_rows,
     iq_rows,
@@ -162,3 +163,82 @@ def test_protection_thresholds_and_dropout_never_fill_vout():
         },
     ]
     assert vout_rows(facts) == []
+
+
+# --- bounded decision-critical axes (vin / iout / fsw / vds / rds) ---------
+
+def _fact(**kw):
+    base = {
+        "symbol": "", "parameter": "", "value": None, "min": None, "max": None,
+        "typ": None, "unit": None, "page": 5,
+        "table_title": "Electrical Characteristics", "table_kind": "ec",
+        "verbatim": "row", "condition_verbatim": None,
+    }
+    base.update(kw)
+    return base
+
+
+def test_vin_range_fills_two_axis_rows():
+    rows = bounded_axis_rows([_fact(symbol="VIN", parameter="Input voltage range",
+                                    min=2.2, max=5.5, unit="V")])
+    got = {r["field"]: r["value"] for r in rows}
+    assert got["vin_min_v"] == 2.2
+    assert got["vin_max_v"] == 5.5
+
+
+def test_iout_normalizes_to_amps():
+    rows = bounded_axis_rows([_fact(symbol="IOUT", parameter="Maximum output current",
+                                    max=200.0, unit="mA")])
+    assert len(rows) == 1 and rows[0]["field"] == "iout_max_a"
+    assert abs(rows[0]["value"] - 0.2) < 1e-12 and rows[0]["unit"] == "A"
+
+
+def test_fsw_normalizes_to_khz():
+    rows = bounded_axis_rows([_fact(symbol="FSW", parameter="Switching frequency",
+                                    value=1.2, unit="MHz")])
+    assert rows and rows[0]["field"] == "fsw_max_khz" and rows[0]["value"] == 1200.0
+
+
+def test_vds_rating_and_rds_mohm():
+    rows = bounded_axis_rows([
+        _fact(symbol="VDSS", parameter="Drain-to-source breakdown voltage",
+              value=60.0, unit="V"),
+        _fact(symbol="RDS(on)", parameter="Drain-to-source on-resistance",
+              max=44.0, unit="mOhm"),
+    ])
+    got = {r["field"]: r["value"] for r in rows}
+    assert got.get("vds_v") == 60.0
+    assert got.get("rds_on_mohm") == 44.0
+
+
+def test_bounded_absmax_never_fills():
+    rows = bounded_axis_rows([
+        _fact(symbol="VIN", parameter="Input voltage range", min=-0.3, max=7.0,
+              unit="V", table_title="Absolute Maximum Ratings", table_kind="absmax"),
+        _fact(symbol="IOUT", parameter="Maximum output current", max=5.0,
+              unit="A", table_title="Absolute Maximum Ratings", table_kind="absmax"),
+    ])
+    assert rows == []
+
+
+def test_bounded_rejects_uvlo_thresholds():
+    rows = bounded_axis_rows([
+        _fact(symbol="UVLORISE", parameter="Undervoltage lockout input voltage rising",
+              value=1.28, unit="V"),
+        _fact(symbol="VIN", parameter="Input voltage range", min=2.2, max=5.5, unit="V"),
+    ])
+    assert [r["field"] for r in rows] == ["vin_min_v", "vin_max_v"]
+
+
+def test_bounded_rejects_incompatible_unit():
+    rows = bounded_axis_rows([_fact(symbol="IVIN", parameter="VIN pin leakage current",
+                                    typ=1.0, unit="uA")])
+    assert rows == []
+
+
+def test_bounded_no_concatenated_header_match():
+    rows = bounded_axis_rows([_fact(
+        symbol="UVLORISEUVLOFALLUVLOHYS",
+        parameter="UNDERVOLTAGE LOCKOUT Input Voltage Rising Input Voltage Falling",
+        value=1.28, unit="V")])
+    assert rows == []
