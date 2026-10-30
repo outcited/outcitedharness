@@ -1,34 +1,36 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 1,
+    "running": 0,
     "suspended": false,
-    "uptime_sec": 256836,
+    "uptime_sec": 257441,
     "version": "1.5.1",
     "agents": {
       "total": 9,
-      "running": 1,
+      "running": 0,
       "suspended": 0,
       "quarantined": 0
     },
     "work": {
       "in_progress": 0,
       "ready": 25,
-      "open": 30
+      "open": 31
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
+      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T18:54:52Z",
+  "captured_at": "2026-10-30T19:04:56Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 257442,
+    "uptime_sec": 258046,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -47,7 +49,7 @@
   "agents": [
     {
       "name": "bd.dog-1",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": "scaled (min=0, max=2)"
     },
@@ -108,7 +110,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 37,
+  "beads_total_reported": 38,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,57 +136,57 @@
       ]
     }
   ],
-  "last_event_seq": 121750,
+  "last_event_seq": 121856,
   "recent_events": [
     {
-      "seq": 121740,
+      "seq": 121846,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 121845,
+      "type": "bead.created",
+      "subject": "do-wisp-40lupo5"
+    },
+    {
+      "seq": 121844,
+      "type": "order.completed",
+      "subject": "mol-dog-phantom-db"
+    },
+    {
+      "seq": 121843,
       "type": "order.fired",
+      "subject": "mol-dog-phantom-db"
+    },
+    {
+      "seq": 121842,
+      "type": "bead.closed",
+      "subject": "do-wisp-lg05guy"
+    },
+    {
+      "seq": 121841,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 121840,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 121839,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 121838,
+      "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 121739,
+      "seq": 121837,
       "type": "order.completed",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 121738,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 121737,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 121736,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 121735,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 121734,
-      "type": "order.fired",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 121733,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 121732,
-      "type": "order.fired",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 121731,
-      "type": "bead.closed",
-      "subject": "do-wisp-md06obe"
+      "subject": "gate-sweep"
     }
   ]
 }
