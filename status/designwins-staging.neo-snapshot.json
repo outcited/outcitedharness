@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 256233,
+    "uptime_sec": 256838,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,13 +21,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T18:44:48Z",
+  "captured_at": "2026-10-30T18:54:53Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 256839,
+    "uptime_sec": 257443,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 120222,
+  "last_event_seq": 120408,
   "recent_events": [
     {
-      "seq": 120212,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 120211,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 120210,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 120209,
-      "type": "worker.operation",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 120208,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 120207,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 120206,
+      "seq": 120398,
       "type": "bead.closed",
-      "subject": "ds-wisp-lr97mvc"
+      "subject": "ds-wisp-tccbuvg"
     },
     {
-      "seq": 120205,
+      "seq": 120397,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 120396,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 120395,
+      "type": "order.completed",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 120394,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 120393,
+      "type": "order.completed",
+      "subject": "wisp-compact"
+    },
+    {
+      "seq": 120392,
+      "type": "order.fired",
+      "subject": "mol-dog-doctor"
+    },
+    {
+      "seq": 120391,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 120390,
+      "type": "order.fired",
+      "subject": "wisp-compact"
+    },
+    {
+      "seq": 120389,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 120204,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 120203,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
     }
   ]
 }
