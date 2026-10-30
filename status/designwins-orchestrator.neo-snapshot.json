@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 227254,
+    "uptime_sec": 227857,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,23 +14,22 @@
     "work": {
       "in_progress": 0,
       "ready": 25,
-      "open": 30
+      "open": 31
     },
     "partial": true,
     "partial_errors": [
       "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
-      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T10:41:49Z",
+  "captured_at": "2026-10-30T10:51:52Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 227859,
+    "uptime_sec": 228462,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -110,7 +109,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 37,
+  "beads_total_reported": 36,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -136,57 +135,57 @@
       ]
     }
   ],
-  "last_event_seq": 116211,
+  "last_event_seq": 116324,
   "recent_events": [
     {
-      "seq": 116201,
+      "seq": 116314,
       "type": "order.fired",
-      "subject": "dolt-remotes-patrol"
+      "subject": "beads-health"
     },
     {
-      "seq": 116200,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 116199,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 116198,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 116197,
-      "type": "order.fired",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 116196,
-      "type": "bead.closed",
-      "subject": "do-wisp-63mu862"
-    },
-    {
-      "seq": 116195,
+      "seq": 116313,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 116194,
-      "type": "order.completed",
-      "subject": "gate-sweep"
+      "seq": 116312,
+      "type": "bead.created",
+      "subject": "do-wisp-7qwk883"
     },
     {
-      "seq": 116193,
-      "type": "order.completed",
-      "subject": "beads-health"
+      "seq": 116311,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
     },
     {
-      "seq": 116192,
+      "seq": 116310,
       "type": "order.completed",
-      "subject": "cross-rig-deps"
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 116309,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 116308,
+      "type": "order.completed",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 116307,
+      "type": "order.completed",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 116306,
+      "type": "order.fired",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 116305,
+      "type": "order.fired",
+      "subject": "orphan-sweep"
     }
   ]
 }
