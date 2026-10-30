@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 261065,
+    "uptime_sec": 261668,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -19,17 +19,16 @@
     "partial": true,
     "partial_errors": [
       "sessions: loading session snapshot timed out after 1s",
-      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T20:05:18Z",
+  "captured_at": "2026-10-30T20:15:22Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 261669,
+    "uptime_sec": 262272,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -179,57 +178,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 121838,
+  "last_event_seq": 122042,
   "recent_events": [
     {
-      "seq": 121828,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 121827,
+      "seq": 122032,
       "type": "order.completed",
-      "subject": "mol-dog-doctor"
+      "subject": "order-tracking-sweep"
     },
     {
-      "seq": 121826,
-      "type": "order.fired",
-      "subject": "mol-dog-doctor"
-    },
-    {
-      "seq": 121825,
-      "type": "bead.closed",
-      "subject": "ds-wisp-xdb993b"
-    },
-    {
-      "seq": 121824,
-      "type": "bead.closed",
-      "subject": "ds-wisp-6fujft0"
-    },
-    {
-      "seq": 121823,
-      "type": "order.completed",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 121822,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 121821,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 121820,
+      "seq": 122031,
       "type": "order.completed",
       "subject": "renudge-stale-human-gates"
     },
     {
-      "seq": 121819,
+      "seq": 122030,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 122029,
+      "type": "order.completed",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 122028,
       "type": "order.fired",
-      "subject": "dolt-health"
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 122027,
+      "type": "order.fired",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 122026,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 122025,
+      "type": "order.fired",
+      "subject": "cross-rig-deps"
+    },
+    {
+      "seq": 122024,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 122023,
+      "type": "order.fired",
+      "subject": "beads-health"
     }
   ]
 }

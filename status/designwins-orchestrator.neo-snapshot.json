@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 261063,
+    "uptime_sec": 261666,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -24,13 +24,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T20:05:18Z",
+  "captured_at": "2026-10-30T20:15:21Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 261668,
+    "uptime_sec": 262272,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -110,7 +110,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 36,
+  "beads_total_reported": 40,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -136,56 +136,56 @@
       ]
     }
   ],
-  "last_event_seq": 122517,
+  "last_event_seq": 122633,
   "recent_events": [
     {
-      "seq": 122507,
+      "seq": 122623,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 122622,
+      "type": "order.fired",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 122621,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 122620,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 122506,
+      "seq": 122619,
+      "type": "order.completed",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 122618,
+      "type": "order.completed",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 122617,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 122505,
-      "type": "order.completed",
-      "subject": "wisp-compact"
-    },
-    {
-      "seq": 122504,
+      "seq": 122616,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 122503,
+      "seq": 122615,
       "type": "order.fired",
-      "subject": "wisp-compact"
+      "subject": "renudge-stale-human-gates"
     },
     {
-      "seq": 122502,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 122501,
+      "seq": 122614,
       "type": "order.fired",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 122500,
-      "type": "bead.closed",
-      "subject": "do-wisp-zue2gsg"
-    },
-    {
-      "seq": 122499,
-      "type": "bead.closed",
-      "subject": "do-wisp-7frnl74"
-    },
-    {
-      "seq": 122498,
-      "type": "order.completed",
       "subject": "orphan-sweep"
     }
   ]
