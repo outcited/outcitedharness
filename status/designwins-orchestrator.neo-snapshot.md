@@ -1,9 +1,9 @@
-# NEO status — {'running': 1, 'suspended': False, 'uptime_sec': 244133, 'version': '1.5.1', 'agents': {'total': 9, 'running': 1, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 0, 'ready': 25, 'open': 30}, 'partial': True, 'partial_errors': ['rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-30T15:23:09Z
-- supervisor: ok v1.5.1 uptime 67h
+# NEO status — {'running': 1, 'suspended': False, 'uptime_sec': 244736, 'version': '1.5.1', 'agents': {'total': 9, 'running': 1, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 0, 'ready': 25, 'open': 30}, 'partial': True, 'partial_errors': ['rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-30T15:33:12Z
+- supervisor: ok v1.5.1 uptime 68h
 - city running=1 suspended=False agents={'total': 9, 'running': 1, 'suspended': 0, 'quarantined': 0} work={'in_progress': 0, 'ready': 25, 'open': 30}
 - sessions: 1 active; pending human interactions: 0
 - NEO findings tracked: 0; duplicate groups: 3
-- event index: None last_seq=119483
+- event index: None last_seq=119592
 
 ## Agents
 - RUN bd.dog-1 scaled (min=0, max=2)
