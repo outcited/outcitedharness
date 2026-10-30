@@ -7,4 +7,4 @@
 ## designwins-staging
 - **orchestrator-idle-with-ready-work** {"ready": 22, "running_agents": 0}
 - **in-progress-without-live-session** {"in_progress": 2}
-- **city-status-partial** {"errors": ["sessions: loading session snapshot timed out after 1s", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
+- **city-status-partial** {"errors": ["sessions: loading session snapshot timed out after 1s", "mail: count timed out after 1s", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
