@@ -1,9 +1,9 @@
-# NEO status — {'running': 1, 'suspended': False, 'uptime_sec': 242928, 'version': '1.5.1', 'agents': {'total': 9, 'running': 1, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 0, 'ready': 25, 'open': 31}, 'partial': True, 'partial_errors': ['rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-30T15:03:03Z
+# NEO status — {'running': 1, 'suspended': False, 'uptime_sec': 243531, 'version': '1.5.1', 'agents': {'total': 9, 'running': 1, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 0, 'ready': 25, 'open': 31}, 'partial': True, 'partial_errors': ['rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable', 'mail: count timed out after 1s', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-30T15:13:06Z
 - supervisor: ok v1.5.1 uptime 67h
 - city running=1 suspended=False agents={'total': 9, 'running': 1, 'suspended': 0, 'quarantined': 0} work={'in_progress': 0, 'ready': 25, 'open': 31}
 - sessions: 1 active; pending human interactions: 0
 - NEO findings tracked: 0; duplicate groups: 3
-- event index: None last_seq=119236
+- event index: None last_seq=119360
 
 ## Agents
 - RUN bd.dog-1 scaled (min=0, max=2)
@@ -17,5 +17,5 @@
 - idle harness/harness-engineer-2 
 
 ## Continuity alerts
-- **city-status-partial** {"errors": ["rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
+- **city-status-partial** {"errors": ["rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable", "mail: count timed out after 1s", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
 - **duplicate-findings** {"items": [{"task_id": "PIN-TABLES-VISION-01", "beads": ["hw-b5l", "do-y5b"]}, {"task_id": "CURVES-WINTER-01", "beads": ["hw-wfn", "do-77q"]}, {"task_id": "PACKAGE-TEMP-AXES-01", "beads": ["hw-37d", "do-b6p"]}]}
