@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 271931,
+    "uptime_sec": 272535,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 25,
-      "open": 30
+      "open": 31
     },
     "partial": true,
     "partial_errors": [
@@ -24,13 +24,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T23:06:25Z",
+  "captured_at": "2026-10-30T23:16:29Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 272536,
+    "uptime_sec": 273140,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -110,7 +110,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 37,
+  "beads_total_reported": 38,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -136,57 +136,57 @@
       ]
     }
   ],
-  "last_event_seq": 124390,
+  "last_event_seq": 124495,
   "recent_events": [
     {
-      "seq": 124380,
+      "seq": 124485,
       "type": "order.completed",
-      "subject": "beads-health"
+      "subject": "dolt-remotes-patrol"
     },
     {
-      "seq": 124379,
+      "seq": 124484,
       "type": "order.completed",
-      "subject": "gate-sweep"
+      "subject": "mol-dog-doctor"
     },
     {
-      "seq": 124378,
+      "seq": 124483,
       "type": "order.fired",
-      "subject": "gate-sweep"
+      "subject": "mol-dog-doctor"
     },
     {
-      "seq": 124377,
+      "seq": 124482,
       "type": "order.fired",
-      "subject": "beads-health"
+      "subject": "dolt-remotes-patrol"
     },
     {
-      "seq": 124376,
+      "seq": 124481,
+      "type": "order.completed",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 124480,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 124479,
+      "type": "bead.closed",
+      "subject": "do-wisp-qco2qbb"
+    },
+    {
+      "seq": 124478,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 124477,
       "type": "bead.created",
-      "subject": "do-wisp-yzy29h5"
+      "subject": "do-wisp-qco2qbb"
     },
     {
-      "seq": 124375,
-      "type": "order.completed",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 124374,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 124373,
+      "seq": 124476,
       "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 124372,
-      "type": "order.completed",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 124371,
-      "type": "order.fired",
-      "subject": "orphan-sweep"
+      "subject": "order-tracking-sweep"
     }
   ]
 }
