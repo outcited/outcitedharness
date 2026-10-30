@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 252602,
+    "uptime_sec": 253205,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -21,16 +21,16 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T17:44:16Z",
+  "captured_at": "2026-10-30T17:54:19Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 253206,
+    "uptime_sec": 253809,
     "cities_total": 2,
     "cities_running": 2,
-    "packs_lock_sha256": "677274fb35acd27c942e798cf6dacbadab0334605ff98628a30e117919c03618",
+    "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
     "startup": {
       "ready": true,
       "phase": "running",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 118997,
+  "last_event_seq": 119186,
   "recent_events": [
     {
-      "seq": 118987,
-      "type": "bead.closed",
-      "subject": "ds-wisp-8y83xf8"
+      "seq": 119176,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 118986,
-      "type": "bead.created",
-      "subject": "ds-wisp-wm1h4x6"
-    },
-    {
-      "seq": 118985,
-      "type": "bead.created",
-      "subject": "ds-wisp-xbeicx5"
-    },
-    {
-      "seq": 118984,
-      "type": "bead.created",
-      "subject": "ds-wisp-dgrlbae"
-    },
-    {
-      "seq": 118983,
+      "seq": 119175,
       "type": "order.completed",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 118982,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 118981,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 118980,
+      "seq": 119174,
       "type": "order.fired",
       "subject": "nudge-on-route"
     },
     {
-      "seq": 118979,
+      "seq": 119173,
+      "type": "session.woke",
+      "subject": "neo-fixture-1"
+    },
+    {
+      "seq": 119172,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 119171,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 119170,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 119169,
+      "type": "order.completed",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 119168,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 118978,
-      "type": "order.fired",
-      "subject": "jsonl-export"
+      "seq": 119167,
+      "type": "worker.operation",
+      "subject": "ds-wisp-sm2rw3"
     }
   ]
 }
