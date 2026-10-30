@@ -1,34 +1,33 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 0,
+    "running": 2,
     "suspended": false,
-    "uptime_sec": 247151,
+    "uptime_sec": 247754,
     "version": "1.5.1",
     "agents": {
       "total": 5,
-      "running": 0,
+      "running": 2,
       "suspended": 0,
       "quarantined": 0
     },
     "work": {
       "in_progress": 2,
       "ready": 22,
-      "open": 27
+      "open": 28
     },
     "partial": true,
     "partial_errors": [
-      "sessions: loading session snapshot timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T16:13:25Z",
+  "captured_at": "2026-10-30T16:23:28Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 247755,
+    "uptime_sec": 248358,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -59,13 +58,13 @@
     },
     {
       "name": "core.control-dispatcher",
-      "running": false,
+      "running": true,
       "suspended": false,
       "scale": ""
     },
     {
       "name": "neo-fixture-1",
-      "running": false,
+      "running": true,
       "suspended": false,
       "scale": "scaled (min=0, max=2)"
     },
@@ -88,7 +87,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 30,
+  "beads_total_reported": 29,
   "findings": [
     {
       "id": "ds-8ha",
@@ -178,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 117214,
+  "last_event_seq": 117420,
   "recent_events": [
     {
-      "seq": 117204,
-      "type": "order.completed",
-      "subject": "nudge-on-route"
+      "seq": 117410,
+      "type": "session.stopped",
+      "subject": "neo-fixture"
     },
     {
-      "seq": 117203,
-      "type": "order.fired",
-      "subject": "nudge-on-route"
-    },
-    {
-      "seq": 117202,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 117201,
+      "seq": 117409,
       "type": "bead.updated",
       "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 117200,
+      "seq": 117408,
+      "type": "bead.closed",
+      "subject": "ds-wisp-asrnjin"
+    },
+    {
+      "seq": 117407,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 117406,
+      "type": "order.fired",
+      "subject": "nudge-on-route"
+    },
+    {
+      "seq": 117405,
+      "type": "worker.operation",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 117404,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 117403,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 117199,
+      "seq": 117402,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 117401,
       "type": "order.fired",
       "subject": "gate-sweep"
-    },
-    {
-      "seq": 117198,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 117197,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 117196,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 117195,
-      "type": "order.completed",
-      "subject": "spawn-storm-detect"
     }
   ]
 }
