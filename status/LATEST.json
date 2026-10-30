@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-10-30T13:32:37Z",
+  "captured_at": "2026-10-30T13:42:40Z",
   "max_freshness_min": 15,
   "cities": {
     "designwins-orchestrator": {
@@ -14,5 +14,5 @@
       ]
     }
   },
-  "stable_digest": "27812ea8e57a59f9"
+  "stable_digest": "d8ef0abc81f41d9d"
 }
