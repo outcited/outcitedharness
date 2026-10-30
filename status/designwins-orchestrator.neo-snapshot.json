@@ -3,7 +3,7 @@
   "city": {
     "running": 1,
     "suspended": false,
-    "uptime_sec": 258648,
+    "uptime_sec": 259251,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,22 +14,21 @@
     "work": {
       "in_progress": 0,
       "ready": 25,
-      "open": 30
+      "open": 31
     },
     "partial": true,
     "partial_errors": [
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
-      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T19:25:02Z",
+  "captured_at": "2026-10-30T19:35:05Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 259253,
+    "uptime_sec": 259856,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -135,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 122066,
+  "last_event_seq": 122189,
   "recent_events": [
     {
-      "seq": 122056,
-      "type": "bead.closed",
-      "subject": "do-wisp-1bc5km5"
+      "seq": 122179,
+      "type": "order.fired",
+      "subject": "beads-health"
     },
     {
-      "seq": 122055,
-      "type": "bead.closed",
-      "subject": "do-wisp-r43g26j"
+      "seq": 122178,
+      "type": "order.completed",
+      "subject": "dolt-health"
     },
     {
-      "seq": 122054,
+      "seq": 122177,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 122176,
+      "type": "order.fired",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 122175,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 122053,
+      "seq": 122174,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 122052,
+      "seq": 122173,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 122051,
-      "type": "order.completed",
-      "subject": "orphan-sweep"
+      "seq": 122172,
+      "type": "bead.closed",
+      "subject": "do-wisp-fg4jmyn"
     },
     {
-      "seq": 122050,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 122049,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 122048,
+      "seq": 122171,
       "type": "bead.created",
-      "subject": "do-wisp-r43g26j"
+      "subject": "do-wisp-dd8u3ov"
     },
     {
-      "seq": 122047,
+      "seq": 122170,
       "type": "bead.created",
-      "subject": "do-wisp-1bc5km5"
+      "subject": "do-wisp-fg4jmyn"
     }
   ]
 }
