@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 207951,
+    "uptime_sec": 208554,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -24,13 +24,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T05:20:06Z",
+  "captured_at": "2026-10-30T05:30:11Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 208556,
+    "uptime_sec": 209160,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -136,57 +136,57 @@
       ]
     }
   ],
-  "last_event_seq": 112515,
+  "last_event_seq": 112633,
   "recent_events": [
     {
-      "seq": 112505,
-      "type": "order.completed",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 112504,
-      "type": "bead.created",
-      "subject": "do-wisp-bt5ka1p"
-    },
-    {
-      "seq": 112503,
-      "type": "bead.created",
-      "subject": "do-wisp-86ok2uq"
-    },
-    {
-      "seq": 112502,
-      "type": "bead.created",
-      "subject": "do-wisp-pcys5hk"
-    },
-    {
-      "seq": 112501,
-      "type": "bead.created",
-      "subject": "do-wisp-5drpzzt"
-    },
-    {
-      "seq": 112500,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 112499,
+      "seq": 112623,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 112498,
+      "seq": 112622,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 112497,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "seq": 112621,
+      "type": "order.completed",
+      "subject": "nudge-mail-sweep"
     },
     {
-      "seq": 112496,
+      "seq": 112620,
       "type": "order.fired",
-      "subject": "orphan-sweep"
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 112619,
+      "type": "order.completed",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 112618,
+      "type": "order.fired",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 112617,
+      "type": "bead.created",
+      "subject": "do-wisp-b73wf50"
+    },
+    {
+      "seq": 112616,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 112615,
+      "type": "order.fired",
+      "subject": "jsonl-export"
+    },
+    {
+      "seq": 112614,
+      "type": "order.fired",
+      "subject": "gate-sweep"
     }
   ]
 }
