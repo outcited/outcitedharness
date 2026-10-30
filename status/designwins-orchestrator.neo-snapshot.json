@@ -3,7 +3,7 @@
   "city": {
     "running": 1,
     "suspended": false,
-    "uptime_sec": 225445,
+    "uptime_sec": 226048,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 25,
-      "open": 31
+      "open": 32
     },
     "partial": true,
     "partial_errors": [
@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T10:11:40Z",
+  "captured_at": "2026-10-30T10:21:43Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 226050,
+    "uptime_sec": 226653,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -108,7 +108,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 38,
+  "beads_total_reported": 36,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -134,57 +134,57 @@
       ]
     }
   ],
-  "last_event_seq": 115856,
+  "last_event_seq": 115965,
   "recent_events": [
     {
-      "seq": 115846,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 115845,
-      "type": "bead.closed",
-      "subject": "do-wisp-7o7702l"
-    },
-    {
-      "seq": 115844,
+      "seq": 115955,
       "type": "order.completed",
-      "subject": "beads-health"
+      "subject": "mol-dog-doctor"
     },
     {
-      "seq": 115843,
-      "type": "order.fired",
-      "subject": "beads-health"
-    },
-    {
-      "seq": 115842,
-      "type": "order.completed",
-      "subject": "dolt-remotes-patrol"
-    },
-    {
-      "seq": 115841,
+      "seq": 115954,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 115840,
+      "seq": 115953,
       "type": "order.fired",
-      "subject": "dolt-remotes-patrol"
+      "subject": "mol-dog-doctor"
     },
     {
-      "seq": 115839,
+      "seq": 115952,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 115838,
+      "seq": 115951,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 115837,
+      "seq": 115950,
       "type": "bead.created",
-      "subject": "do-wisp-7o7702l"
+      "subject": "do-wisp-orkaa0f"
+    },
+    {
+      "seq": 115949,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 115948,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 115947,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 115946,
+      "type": "order.fired",
+      "subject": "gate-sweep"
     }
   ]
 }
