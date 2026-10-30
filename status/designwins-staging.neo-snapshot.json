@@ -1,13 +1,13 @@
 {
   "schema": "dw.neo-status.v1",
   "city": {
-    "running": 2,
+    "running": 1,
     "suspended": false,
-    "uptime_sec": 223637,
+    "uptime_sec": 224241,
     "version": "1.5.1",
     "agents": {
       "total": 5,
-      "running": 2,
+      "running": 1,
       "suspended": 0,
       "quarantined": 0
     },
@@ -21,13 +21,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T09:41:32Z",
+  "captured_at": "2026-10-30T09:51:35Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 224242,
+    "uptime_sec": 224845,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -64,7 +64,7 @@
     },
     {
       "name": "neo-fixture-1",
-      "running": true,
+      "running": false,
       "suspended": false,
       "scale": "scaled (min=0, max=2)"
     },
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 109305,
+  "last_event_seq": 109507,
   "recent_events": [
     {
-      "seq": 109295,
+      "seq": 109497,
       "type": "order.fired",
-      "subject": "nudge-on-route"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 109294,
+      "seq": 109496,
       "type": "execution.step_stalled",
       "subject": "ds-0e5"
     },
     {
-      "seq": 109293,
+      "seq": 109495,
       "type": "bead.updated",
       "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 109292,
+      "seq": 109494,
       "type": "bead.updated",
       "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 109291,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 109290,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 109289,
+      "seq": 109493,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 109288,
+      "seq": 109492,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 109287,
+      "seq": 109491,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 109286,
+      "seq": 109490,
       "type": "order.fired",
       "subject": "dolt-health"
+    },
+    {
+      "seq": 109489,
+      "type": "bead.closed",
+      "subject": "ds-wisp-0b89ik2"
+    },
+    {
+      "seq": 109488,
+      "type": "order.completed",
+      "subject": "gate-sweep"
     }
   ]
 }
