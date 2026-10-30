@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 273742,
+    "uptime_sec": 274347,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -24,13 +24,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T23:36:39Z",
+  "captured_at": "2026-10-30T23:46:41Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 274349,
+    "uptime_sec": 274952,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -136,57 +136,57 @@
       ]
     }
   ],
-  "last_event_seq": 124650,
+  "last_event_seq": 124744,
   "recent_events": [
     {
-      "seq": 124640,
+      "seq": 124734,
       "type": "bead.closed",
-      "subject": "do-wisp-nkr76wc"
+      "subject": "do-wisp-aminn4f"
     },
     {
-      "seq": 124639,
-      "type": "bead.created",
-      "subject": "do-wisp-4vac85x"
-    },
-    {
-      "seq": 124638,
+      "seq": 124733,
       "type": "order.completed",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 124637,
-      "type": "order.completed",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 124636,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 124635,
-      "type": "order.fired",
-      "subject": "spawn-storm-detect"
-    },
-    {
-      "seq": 124634,
-      "type": "order.fired",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 124633,
+      "seq": 124732,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 124632,
+      "seq": 124731,
+      "type": "order.completed",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 124730,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 124631,
+      "seq": 124729,
+      "type": "order.fired",
+      "subject": "beads-health"
+    },
+    {
+      "seq": 124728,
       "type": "order.completed",
-      "subject": "order-tracking-sweep"
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 124727,
+      "type": "bead.closed",
+      "subject": "do-wisp-78uktrb"
+    },
+    {
+      "seq": 124726,
+      "type": "order.fired",
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 124725,
+      "type": "order.completed",
+      "subject": "orphan-sweep"
     }
   ]
 }
