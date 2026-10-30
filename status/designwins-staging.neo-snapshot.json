@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 243532,
+    "uptime_sec": 244135,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -14,20 +14,20 @@
     "work": {
       "in_progress": 2,
       "ready": 22,
-      "open": 28
+      "open": 27
     },
     "partial": true,
     "partial_errors": [
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T15:13:06Z",
+  "captured_at": "2026-10-30T15:23:09Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 244136,
+    "uptime_sec": 244739,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -87,7 +87,7 @@
   ],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 29,
+  "beads_total_reported": 30,
   "findings": [
     {
       "id": "ds-8ha",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 116008,
+  "last_event_seq": 116222,
   "recent_events": [
     {
-      "seq": 115998,
-      "type": "order.fired",
-      "subject": "gate-sweep"
+      "seq": 116212,
+      "type": "session.woke",
+      "subject": "neo-fixture-1"
     },
     {
-      "seq": 115997,
+      "seq": 116211,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 116210,
+      "type": "worker.operation",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 116209,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 115996,
-      "type": "order.completed",
-      "subject": "orphan-sweep"
+      "seq": 116208,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 115995,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
+      "seq": 116207,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 115994,
-      "type": "order.fired",
-      "subject": "cross-rig-deps"
+      "seq": 116206,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 115993,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
+      "seq": 116205,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
     },
     {
-      "seq": 115992,
-      "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "seq": 116204,
+      "type": "session.drain_acked_with_assigned_work",
+      "subject": "neo-fixture"
     },
     {
-      "seq": 115991,
-      "type": "order.fired",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 115990,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 115989,
-      "type": "order.completed",
-      "subject": "gate-sweep"
+      "seq": 116203,
+      "type": "session.stopped",
+      "subject": "neo-fixture"
     }
   ]
 }
