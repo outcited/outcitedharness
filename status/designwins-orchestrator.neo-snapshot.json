@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 260458,
+    "uptime_sec": 261063,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -24,13 +24,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-30T19:55:14Z",
+  "captured_at": "2026-10-30T20:05:18Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 261064,
+    "uptime_sec": 261668,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -136,57 +136,57 @@
       ]
     }
   ],
-  "last_event_seq": 122411,
+  "last_event_seq": 122517,
   "recent_events": [
     {
-      "seq": 122401,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 122400,
+      "seq": 122507,
       "type": "order.fired",
-      "subject": "cross-rig-deps"
-    },
-    {
-      "seq": 122399,
-      "type": "order.completed",
-      "subject": "mol-dog-doctor"
-    },
-    {
-      "seq": 122398,
-      "type": "order.fired",
-      "subject": "mol-dog-doctor"
-    },
-    {
-      "seq": 122397,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 122396,
-      "type": "order.completed",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 122395,
-      "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 122394,
-      "type": "order.fired",
-      "subject": "gate-sweep"
-    },
-    {
-      "seq": 122393,
+      "seq": 122506,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 122392,
+      "seq": 122505,
+      "type": "order.completed",
+      "subject": "wisp-compact"
+    },
+    {
+      "seq": 122504,
       "type": "order.fired",
-      "subject": "beads-health"
+      "subject": "dolt-health"
+    },
+    {
+      "seq": 122503,
+      "type": "order.fired",
+      "subject": "wisp-compact"
+    },
+    {
+      "seq": 122502,
+      "type": "order.completed",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 122501,
+      "type": "order.fired",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 122500,
+      "type": "bead.closed",
+      "subject": "do-wisp-zue2gsg"
+    },
+    {
+      "seq": 122499,
+      "type": "bead.closed",
+      "subject": "do-wisp-7frnl74"
+    },
+    {
+      "seq": 122498,
+      "type": "order.completed",
+      "subject": "orphan-sweep"
     }
   ]
 }
