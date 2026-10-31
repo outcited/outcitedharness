@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 1423,
+    "uptime_sec": 2028,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -18,16 +18,18 @@
     },
     "partial": true,
     "partial_errors": [
+      "sessions: loading session snapshot timed out after 1s",
+      "mail: count timed out after 1s",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-31T02:47:45Z",
+  "captured_at": "2026-10-31T02:57:48Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 2031,
+    "uptime_sec": 2634,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -78,7 +80,7 @@
   "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 22,
+  "beads_total_reported": 23,
   "findings": [
     {
       "id": "ds-8ha",
@@ -168,56 +170,56 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 129739,
+  "last_event_seq": 129855,
   "recent_events": [
     {
-      "seq": 129729,
-      "type": "order.fired",
-      "subject": "orphan-sweep"
-    },
-    {
-      "seq": 129728,
+      "seq": 129845,
       "type": "order.completed",
-      "subject": "order-tracking-sweep"
+      "subject": "reaper"
     },
     {
-      "seq": 129727,
-      "type": "bead.created",
-      "subject": "ds-wisp-vxwzequ"
-    },
-    {
-      "seq": 129726,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 129725,
+      "seq": 129844,
       "type": "order.completed",
-      "subject": "gate-sweep"
+      "subject": "wisp-compact"
     },
     {
-      "seq": 129724,
+      "seq": 129843,
+      "type": "order.fired",
+      "subject": "wisp-compact"
+    },
+    {
+      "seq": 129842,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 129723,
+      "seq": 129841,
+      "type": "order.fired",
+      "subject": "reaper"
+    },
+    {
+      "seq": 129840,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 129839,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 129722,
+      "seq": 129838,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 129721,
-      "type": "order.completed",
-      "subject": "dolt-health"
+      "seq": 129837,
+      "type": "bead.closed",
+      "subject": "ds-wisp-8n822qr"
     },
     {
-      "seq": 129720,
-      "type": "order.fired",
+      "seq": 129836,
+      "type": "order.completed",
       "subject": "dolt-health"
     }
   ]
