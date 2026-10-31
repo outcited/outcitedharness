@@ -1,0 +1,21 @@
+{
+  "captured_at": "2026-10-31T00:06:50Z",
+  "max_freshness_min": 15,
+  "cities": {
+    "designwins-orchestrator": {
+      "alerts": [
+        "orchestrator-idle-with-ready-work",
+        "city-status-partial",
+        "duplicate-findings"
+      ]
+    },
+    "designwins-staging": {
+      "alerts": [
+        "orchestrator-idle-with-ready-work",
+        "in-progress-without-live-session",
+        "city-status-partial"
+      ]
+    }
+  },
+  "stable_digest": "1fe18caefc08eedd"
+}
