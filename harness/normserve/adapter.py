@@ -9,6 +9,12 @@ Raw extractor output varies by lane:
 No values are invented: verbatim, page, condition and verdict pass
 through unchanged; unit_as_printed is preserved alongside the
 canonicalized unit.
+
+verified_by semantics (NEO source review at merge 47cac640):
+`verified_by` records the EVIDENCE-BACKED VERDICT (e.g. "printed_row")
+— what vouches for the claim. The extraction method is a separate
+provenance field `extractor_method`; relabeling method as verification
+over-claims.
 """
 
 import re
@@ -61,8 +67,9 @@ def adapt_power_axes_row(raw: dict, opn_default: str = None):
         "page": raw.get("page_1based"),
         "verbatim": raw.get("verbatim"),
         "span": raw.get("span"),
-        "verified_by": raw.get("method"),
+        "verified_by": raw.get("verdict"),
         "rule_version": raw.get("schema"),
+        "extractor_method": raw.get("method"),
         "evidence_ref": raw.get("evidence_ref"),
         "source_url": raw.get("source_url"),
         "schema": raw.get("schema"),
