@@ -1,0 +1,21 @@
+{
+ "head": "61e95297",
+ "variant_summary": {
+  "loaded": 2,
+  "rejected": 0,
+  "duplicates": 0,
+  "rejections": []
+ },
+ "variant_stored": [
+  [
+   22.0,
+   50,
+   "typ"
+  ],
+  [
+   23.8,
+   50,
+   "max"
+  ]
+ ]
+}
