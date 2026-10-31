@@ -3,7 +3,7 @@
   "city": {
     "running": 2,
     "suspended": false,
-    "uptime_sec": 282189,
+    "uptime_sec": 282793,
     "version": "1.5.1",
     "agents": {
       "total": 5,
@@ -14,20 +14,20 @@
     "work": {
       "in_progress": 2,
       "ready": 22,
-      "open": 28
+      "open": 27
     },
     "partial": true,
     "partial_errors": [
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-31T01:57:23Z",
+  "captured_at": "2026-10-31T02:07:26Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 282793,
+    "uptime_sec": 283396,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -177,57 +177,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 128838,
+  "last_event_seq": 129064,
   "recent_events": [
     {
-      "seq": 128828,
-      "type": "order.fired",
-      "subject": "dolt-health"
+      "seq": 129054,
+      "type": "order.completed",
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 128827,
+      "seq": 129053,
       "type": "order.fired",
-      "subject": "wisp-compact"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 128826,
+      "seq": 129052,
+      "type": "order.completed",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 129051,
       "type": "order.fired",
       "subject": "spawn-storm-detect"
     },
     {
-      "seq": 128825,
+      "seq": 129050,
+      "type": "bead.updated",
+      "subject": "ds-wisp-sm2rw3"
+    },
+    {
+      "seq": 129049,
       "type": "order.completed",
-      "subject": "reaper"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 128824,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
-    },
-    {
-      "seq": 128823,
+      "seq": 129048,
       "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "subject": "nudge-on-route"
     },
     {
-      "seq": 128822,
-      "type": "order.fired",
-      "subject": "reaper"
-    },
-    {
-      "seq": 128821,
-      "type": "order.fired",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 128820,
-      "type": "order.fired",
-      "subject": "jsonl-export"
-    },
-    {
-      "seq": 128819,
+      "seq": 129047,
       "type": "order.completed",
       "subject": "gate-sweep"
+    },
+    {
+      "seq": 129046,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 129045,
+      "type": "order.completed",
+      "subject": "beads-health"
     }
   ]
 }
