@@ -43,7 +43,7 @@ class Store:
         self.con = sqlite3.connect(db_path, timeout=30, check_same_thread=False)
         self.con.row_factory = sqlite3.Row
         self._fail_closed_preflight()
-        self.con.executescript(schema_mod.SCHEMA_V2)
+        self.con.executescript(schema_mod.SCHEMA_V3)
         self.con.commit()
 
     def _fail_closed_preflight(self):
@@ -64,6 +64,12 @@ class Store:
                 "extractor_method column); refusing to open — export the "
                 "rows and load into a new store; live data is never "
                 "auto-migrated")
+        if "conditions_sig" not in cols:
+            raise Rejection(
+                "existing store predates norm-serve.v3 (missing "
+                "conditions_sig column); refusing to open — export the "
+                "rows and load into a new store; live data is never "
+                "auto-migrated")
         # NEO round-3 (8): an EMPTY store that still carries the OLD
         # no-page unique key would pass every row-level check but break
         # on the first second-page insert (IntegrityError). Detect the
@@ -82,12 +88,14 @@ class Store:
             "AND name='uq_norm_claims_key'").fetchone()
         if uq and uq["sql"]:
             ddl = uq["sql"].lower()
-            if "page" not in ddl or "coalesce" not in ddl:
+            if "page" not in ddl or "coalesce" not in ddl or                     "conditions_sig" not in ddl:
                 raise Rejection(
-                    "existing store has the OLD no-page uq_norm_claims_key "
-                    "index; second-page inserts would fail (IntegrityError) "
-                    "— refusing to open; export the rows and load into a "
-                    "new store; live data is never auto-migrated")
+                    "existing store has an OLD uq_norm_claims_key index "
+                    "(no page or no conditions_sig in the key); "
+                    "second-page or distinct-condition inserts would fail "
+                    "or collapse — refusing to open; export the rows and "
+                    "load into a new store; live data is never "
+                    "auto-migrated")
         stored = {r[0] for r in self.con.execute(
             "SELECT DISTINCT schema_version FROM norm_claims")}
         stale = stored - {schema_mod.SCHEMA_VERSION}
@@ -99,7 +107,8 @@ class Store:
         dups = self.con.execute(
             "SELECT COUNT(*) FROM (SELECT 1 FROM norm_claims "
             "GROUP BY opn, doc_sha, field, page, "
-            "COALESCE(value_role,''), COALESCE(condition_verbatim,'') "
+            "COALESCE(value_role,''), COALESCE(condition_verbatim,''), "
+            "COALESCE(conditions_sig,'') "
             "HAVING COUNT(*) > 1)").fetchone()[0]
         if dups:
             raise Rejection(
@@ -116,6 +125,7 @@ class Store:
         ignored, never mislabeled as a duplicate)."""
         cols = ("opn", "doc_sha", "field", "value", "value_min", "value_max",
                 "unit", "unit_as_printed", "value_role", "condition_verbatim",
+                "conditions_sig",
                 "verdict", "table_kind", "page", "verbatim", "span",
                 "verified_by", "rule_version", "extractor_method",
                 "evidence_ref", "source_url",
@@ -132,11 +142,13 @@ class Store:
         except sqlite3.IntegrityError:
             key = (row["opn"], row["doc_sha"], row["field"], row["page"],
                    row.get("value_role") or "",
-                   row.get("condition_verbatim") or "")
+                   row.get("condition_verbatim") or "",
+                   row.get("conditions_sig") or "")
             existing = self.con.execute(
                 "SELECT * FROM norm_claims WHERE opn=? AND doc_sha=? AND "
                 "field=? AND page=? AND COALESCE(value_role,'')=? AND "
-                "COALESCE(condition_verbatim,'')=?", key).fetchone()
+                "COALESCE(condition_verbatim,'')=? AND "
+                "COALESCE(conditions_sig,'')=?", key).fetchone()
             self.con.rollback()
             if existing is None:
                 raise

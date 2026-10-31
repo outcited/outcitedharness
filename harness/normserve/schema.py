@@ -16,18 +16,25 @@ v2 (hw-x9g, NEO round-2 review at head 61e95297):
   - entailment gate is field-bound: a claimed value must be entailed in
     the quoted row AFTER the field's own label — numeric token presence
     alone is not entailment.
-  - round-3 (NEO review of f41c18eb): the gate is SEMANTIC — value is
-    bound on the label's own line to the printed unit (9mV != 9V), the
-    printed role (typ != max), range endpoints (min != upper bound),
-    never after a page reference; OPN applicability must be evidenced
-    (mentioned in quote/condition/source/evidence_ref, or a named rule
-    WITH receipt); a raw applicability_rule verdict without receipt is
-    self-assertion and is refused.
+   - round-3 (NEO review of f41c18eb): the gate is SEMANTIC — value is
+     bound on the label's own line to the printed unit (9mV != 9V), the
+     printed role (typ != max), range endpoints (min != upper bound),
+     never after a page reference; OPN applicability must be evidenced
+     (mentioned in quote/condition/source/evidence_ref, or a named rule
+     WITH receipt); a raw applicability_rule verdict without receipt is
+     self-assertion and is refused.
+  - v3 (hw-x9g round 6, NEO round-5 review at PR75 head 3718c73c): the
+    UNIQUE key now carries `conditions_sig` — the canonical signature of
+    the FULL condition set (verbatim+precedence+source_page). Two
+    observations differing only in their condition binding (TA25 vs
+    TA105) are DISTINCT rows; conditions survive the storage comparison.
+    Existing v2 stores are fail-closed detected and REFUSED; live data
+    is never auto-migrated.
 """
 
 import re
 
-SCHEMA_VERSION = "norm-serve.v2"
+SCHEMA_VERSION = "norm-serve.v3"
 
 REQUIRED_PROVENANCE = ("doc_sha", "page", "verbatim", "verified_by",
                        "rule_version")
@@ -48,7 +55,7 @@ VERDICT_TO_VERIFIED_BY = {
     "applicability_rule": "applicability_rule",
 }
 
-SCHEMA_V2 = """
+SCHEMA_V3 = """
 CREATE TABLE IF NOT EXISTS norm_claims (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     opn TEXT NOT NULL,
@@ -61,6 +68,7 @@ CREATE TABLE IF NOT EXISTS norm_claims (
     unit_as_printed TEXT,
     value_role TEXT,
     condition_verbatim TEXT,
+    conditions_sig TEXT,
     verdict TEXT,
     table_kind TEXT,
     page INTEGER NOT NULL,
@@ -78,18 +86,20 @@ CREATE TABLE IF NOT EXISTS norm_claims (
 CREATE INDEX IF NOT EXISTS idx_norm_claims_opn ON norm_claims(opn);
 CREATE INDEX IF NOT EXISTS idx_norm_claims_doc ON norm_claims(doc_sha);
 -- Null-safe uniqueness (SQL UNIQUE treats NULLs as distinct; COALESCE
--- folds NULL to ''). `page` is part of the KEY in v2: observations on
--- different pages are distinct rows — a same-key different-page row is
--- NEW evidence, not a duplicate (NEO round-2: silent-drop defect).
+-- folds NULL to ''). `page` (v2) and `conditions_sig` (v3) are part of
+-- the KEY: observations on different pages or under different printed
+-- condition bindings are distinct rows — never silently deduped away
+-- (NEO round-2 silent-drop defect; round-5 condition-collapse defect).
 CREATE UNIQUE INDEX IF NOT EXISTS uq_norm_claims_key
     ON norm_claims(opn, doc_sha, field, page,
                    COALESCE(value_role, ''),
-                   COALESCE(condition_verbatim, ''));
+                   COALESCE(condition_verbatim, ''),
+                   COALESCE(conditions_sig, ''));
 """
 
 # Postgres dialect (PG on x — mfg_dosier). Applied by the loader when the
 # target is a Postgres URL; never applied locally without authorization.
-SCHEMA_V2_PG = """
+SCHEMA_V3_PG = """
 CREATE TABLE IF NOT EXISTS norm_claims (
     id BIGSERIAL PRIMARY KEY,
     opn TEXT NOT NULL,
@@ -102,6 +112,7 @@ CREATE TABLE IF NOT EXISTS norm_claims (
     unit_as_printed TEXT,
     value_role TEXT,
     condition_verbatim TEXT,
+    conditions_sig TEXT,
     verdict TEXT,
     table_kind TEXT,
     page INTEGER NOT NULL,
@@ -121,7 +132,8 @@ CREATE INDEX IF NOT EXISTS idx_norm_claims_doc ON norm_claims(doc_sha);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_norm_claims_key
     ON norm_claims(opn, doc_sha, field, page,
                    COALESCE(value_role, ''),
-                   COALESCE(condition_verbatim, ''));
+                   COALESCE(condition_verbatim, ''),
+                   COALESCE(conditions_sig, ''));
 """
 
 # Columns compared when a key collides: identical content -> duplicate;
@@ -130,7 +142,28 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_norm_claims_key
 SUBSTANTIVE_COLS = ("value", "value_min", "value_max", "unit",
                     "unit_as_printed", "verbatim", "span", "verdict",
                     "verified_by", "rule_version", "extractor_method",
-                    "evidence_ref", "source_url")
+                    "evidence_ref", "source_url", "conditions_sig")
+
+
+def conditions_signature(conditions):
+    """Canonical signature of a condition binding (v3): the sorted set
+    of verbatim#precedence#source_page triples. Two observations bound
+    to different printed conditions (TA25 vs TA105) produce DIFFERENT
+    signatures — the condition binding survives storage comparison and
+    never collapses distinct rows into a 'duplicate'. Order-independent;
+    None when no conditions are bound."""
+    if not isinstance(conditions, list) or not conditions:
+        return None
+    parts = []
+    for c in conditions:
+        if not isinstance(c, dict):
+            continue
+        verbatim = re.sub(r"\s+", " ", (c.get("verbatim") or "")).strip()
+        parts.append(f"{verbatim}#{c.get('precedence')}#"
+                     f"{c.get('source_page')}")
+    if not parts:
+        return None
+    return "|".join(sorted(parts))
 
 
 def validate_typed_row(row: dict):

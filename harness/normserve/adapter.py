@@ -51,6 +51,7 @@ def adapt_power_axes_row(raw: dict, opn_default: str = None):
         return None, f"no numeric value for field {field}"
 
     from . import schema as schema_mod
+    conditions_sig = schema_mod.conditions_signature(raw.get("conditions"))
     verdict = (raw.get("verdict") or "").strip()
     verified_by = schema_mod.VERDICT_TO_VERIFIED_BY.get(verdict)
     if verified_by is None:
@@ -69,6 +70,7 @@ def adapt_power_axes_row(raw: dict, opn_default: str = None):
         "unit_as_printed": raw.get("unit_as_printed"),
         "value_role": raw.get("value_role"),
         "condition_verbatim": raw.get("condition_verbatim"),
+        "conditions_sig": conditions_sig,
         "verdict": raw.get("verdict"),
         "table_kind": raw.get("table_kind"),
         "page": raw.get("page_1based"),

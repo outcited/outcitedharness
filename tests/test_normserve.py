@@ -169,6 +169,7 @@ def structured(raw, sha, quoted_text, column_key, column_role, header,
         "source_uri": f"file://vault/{sha}.pdf",
         "page_1based": page, "table_index": table, "row_index": row_idx,
         "column_index": column, "quoted_text": quoted_text,
+        "table_headers_on_page": [header],
     }]
     row["field_binding"] = {"table": table, "column_key": column_key,
                             "column_role": column_role,
@@ -433,7 +434,8 @@ def test_conflicting_same_key_observation_refused_loudly(store, vault):
     r2 = structured(dict(make_rows(sha)[0], value=4.7,
                          verbatim="VIN | Operating input voltage range | "
                                   "4.7 | 5.5 | V"),
-                    sha, "4.7 | 5.5 | V", "vin", "min", VIN_HEADER, page=2)
+                    sha, "4.7 | 5.5 | V", "vin", "min", VIN_HEADER, page=2,
+                    row_idx=3)
     load_rows(store, [r1], vault_root=root, opn_default="ST1S15")
     report = load_rows(store, [r2], vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and report.duplicates == 0
@@ -552,7 +554,7 @@ def test_empty_old_index_store_refused_fail_closed(tmp_path):
     first second-page insert. Preflight refuses BEFORE any load."""
     db = str(tmp_path / "old-index.db")
     _make_empty_old_index_store(db)
-    with pytest.raises(Rejection, match="OLD no-page"):
+    with pytest.raises(Rejection, match="refusing to open"):
         Store(db)
 
 
@@ -571,7 +573,7 @@ def test_populated_old_index_store_refused_fail_closed(tmp_path):
         " ?, 0.0)", ("c" * 64, SCHEMA_VERSION))
     con.commit()
     con.close()
-    with pytest.raises(Rejection, match="OLD no-page"):
+    with pytest.raises(Rejection, match="refusing to open"):
         Store(db)
 
 
@@ -689,7 +691,8 @@ def test_min_taken_from_range_upper_bound_rejected(store, vault):
         _vout_row(sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
                   {"field": "vin_min_v", "value": 5.5, "unit": "V",
                    "value_role": "range"}),
-        sha, "2.3 to 5.5 | V", "vin", "min", VIN_HEADER, page=2)
+        sha, "2.3 to 5.5 | V", "vin", "min", VIN_HEADER, page=2,
+        row_idx=2)
     report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.rejections) == 1
     assert "lower bound" in report.rejections[0]["reason"]
@@ -698,7 +701,8 @@ def test_min_taken_from_range_upper_bound_rejected(store, vault):
         _vout_row(sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
                   {"field": "vin_min_v", "value": 2.3, "unit": "V",
                    "value_role": "range"}),
-        sha, "2.3 to 5.5 | V", "vin", "min", VIN_HEADER, page=2)
+        sha, "2.3 to 5.5 | V", "vin", "min", VIN_HEADER, page=2,
+        row_idx=2)
     report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
     assert report.loaded == 1, report.summary()
 
@@ -1008,3 +1012,156 @@ def test_missing_verbatim_span_in_source_held(store, vault):
     report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.holds) == 1
     assert report.holds[0]["reason_code"] == "span_not_in_source"
+
+
+# --- round 6 (hw-x9g, NEO round-5 review at PR75 head 3718c73c): the
+# --- four remaining failures, each resolved against the source bytes ---
+
+def test_invented_table_row_column_indices_held(store, vault):
+    """Failure 1: invented table_index/row_index/column_index 999 no
+    longer admits — structure coordinates are source-RESOLVED:
+    table_index must fall inside the printed table_headers_on_page
+    anchors, row_index must equal the quoted row's line distance from
+    the cited header, and column_index must reach the claimed value in
+    the row's printed cells."""
+    root, sha = vault
+    for kwargs, coord in [({"table": 999}, "table_index"),
+                          ({"row_idx": 999}, "row_index"),
+                          ({"column": 999}, "column_index")]:
+        row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin",
+                         "min", VIN_HEADER, page=2, **kwargs)
+        report = load_rows(store, [row], vault_root=root,
+                           opn_default="ST1S15")
+        assert report.loaded == 0, (coord, report.summary())
+        assert len(report.holds) == 1, (coord, report.summary())
+        assert report.holds[0]["reason_code"] == "structure_not_in_source", \
+            (coord, report.holds[0])
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_truthful_coordinates_still_load(store, vault):
+    """Round-6 positive control: the same rows with truthful coordinates
+    (table 0, row 1, column 2) still load — resolution is strict but
+    does not over-hold the valid receipt."""
+    root, sha = vault
+    report = load_rows(store, sample_structured_rows(sha), vault_root=root,
+                       opn_default="ST1S15")
+    assert report.holds == [] and report.loaded == 3, report.summary()
+
+
+def test_header_printed_unit_wins_over_column_unit(store, tmp_path):
+    """Failure 2: printed header 'Unit mV' + declared column_unit V must
+    NOT admit 9 as 9V — when the cell prints no unit of its own, the
+    printed header is the unit evidence; a conflicting declared
+    column_unit is ignored (printed wins), so claiming V is HELD and
+    claiming the printed mV loads."""
+    pages = [
+        ["ST1S15",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        ["VOUT Min Typ Max Unit mV",
+         "VOUT | Output voltage | 9"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    row_v = structured(
+        dict(SAMPLE_ROWS[2], unit="V", unit_as_printed=None, value=9.0,
+             verbatim="VOUT | Output voltage | 9"),
+        sha, "VOUT | Output voltage | 9", "vout", "value",
+        "VOUT Min Typ Max Unit mV", page=2, column_unit="V")
+    report = load_rows(store, [row_v], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0, report.summary()
+    assert len(report.holds) == 1, report.summary()
+    assert report.holds[0]["reason_code"] == "unit_unbound"
+    assert "header" in report.holds[0]["detail"]
+    row_mv = structured(
+        dict(SAMPLE_ROWS[2], unit="mV", unit_as_printed="mV", value=9.0,
+             verbatim="VOUT | Output voltage | 9"),
+        sha, "VOUT | Output voltage | 9", "vout", "value",
+        "VOUT Min Typ Max Unit mV", page=2, column_unit="V")
+    report = load_rows(store, [row_mv], vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 1 and report.holds == [], report.summary()
+
+
+def test_negated_applicability_held(store, tmp_path):
+    """Failure 3: the document explicitly says 'Not applicable to
+    ST1S15' — the OPN printed ONLY inside a negated sentence is not
+    positive printed evidence -> HELD applicability_negated."""
+    pages = [
+        ["Not applicable to ST1S15"],
+        ["VOUT Min Typ Max Unit",
+         "VOUT | Output voltage | 9 | V"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    row = structured(make_rows(sha)[2], sha, "9 | V", "vout", "value",
+                     "VOUT Min Typ Max Unit", page=2,
+                     applicability={"structure": "device_summary",
+                                    "structure_page": 1,
+                                    "cell_text": "ST1S15"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0, report.summary()
+    assert len(report.holds) == 1, report.summary()
+    assert report.holds[0]["reason_code"] == "applicability_negated"
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_distinct_conditions_both_retained(store, vault):
+    """Failure 4: TA25 and TA105 observations that share every other key
+    element no longer COLLAPSE as duplicates — the canonical condition
+    signature is part of the v3 unique key, so both distinct condition
+    bindings are retained and an identical replay adds zero."""
+    root, sha = vault
+    ta25 = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                      VIN_HEADER, page=2,
+                      conditions=[dict(CONDITION_LOCAL_VDD),
+                                  dict(COND_TA25_INHERITED)])
+    ta105 = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                       VIN_HEADER, page=2,
+                       conditions=[dict(CONDITION_LOCAL_VDD),
+                                   dict(COND_TA105_COLUMN)])
+    report = load_rows(store, [ta25, ta105], vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 2, report.summary()
+    assert report.duplicates == 0 and report.holds == []
+    replay = load_rows(store, [ta25, ta105], vault_root=root,
+                       opn_default="ST1S15")
+    assert replay.loaded == 0 and replay.duplicates == 2, replay.summary()
+    claims = [c for c in store.claims_for_opn("st1s15")
+              if c["field"] == "vin_min_v"]
+    sigs = {c["conditions_sig"] for c in claims}
+    assert len(sigs) == 2 and all(sigs), claims
+
+
+def test_v2_store_refused_fail_closed(tmp_path):
+    """A populated norm-serve.v2 store (no conditions_sig column, no
+    conditions in the unique key) is REFUSED by the v3 preflight —
+    live data is never auto-migrated, distinct-condition inserts would
+    otherwise fail or collapse."""
+    db = str(tmp_path / "v2.db")
+    con = sqlite3.connect(db)
+    con.executescript("""
+        CREATE TABLE norm_claims (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            opn TEXT NOT NULL, doc_sha TEXT NOT NULL, field TEXT NOT NULL,
+            value REAL, value_min REAL, value_max REAL, unit TEXT,
+            unit_as_printed TEXT, value_role TEXT, condition_verbatim TEXT,
+            verdict TEXT, table_kind TEXT, page INTEGER NOT NULL,
+            verbatim TEXT NOT NULL, span TEXT, verified_by TEXT NOT NULL,
+            rule_version TEXT NOT NULL, extractor_method TEXT,
+            evidence_ref TEXT, source_url TEXT, schema TEXT,
+            schema_version TEXT NOT NULL, loaded_at REAL NOT NULL);
+        CREATE UNIQUE INDEX uq_norm_claims_key ON norm_claims(
+            opn, doc_sha, field, page, COALESCE(value_role, ''),
+            COALESCE(condition_verbatim, ''));
+    """)
+    con.execute(
+        "INSERT INTO norm_claims (opn, doc_sha, field, page, verbatim, "
+        "verified_by, rule_version, schema_version, loaded_at) "
+        "VALUES ('ST1S15', ?, 'vout', 3, '9 V', 'quote_pass', 'rv', "
+        "'norm-serve.v2', 0.0)", ("c" * 64,))
+    con.commit()
+    con.close()
+    with pytest.raises(Rejection, match="predates norm-serve.v3"):
+        Store(db)

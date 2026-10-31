@@ -29,11 +29,21 @@ type — vault_sha_recompute gets no metadata-only bypass):
       page's text, and the column_role word (min/max/typ) is printed
       in that header -> HOLD header_not_in_source / role_not_in_header
    e. the applicability structure_page is in range and the OPN is
-      printed as the cell's own value on THAT page
-      -> HOLD applicability_not_in_source
+      printed as the cell's own value on THAT page, and the printed
+      context is not a NEGATION ('Not applicable to ST1S15' never
+      admits — every printed occurrence inside a negated sentence is
+      refused) -> HOLD applicability_not_in_source /
+      applicability_negated
    f. every condition's verbatim is present in the text of its
       source_page (which must be in range)
       -> HOLD condition_not_in_source
+   g. COORDINATE RESOLUTION (round 6): the self-declared
+      table_index/row_index/column_index resolve against the current
+      bytes — via the evidence's table_headers_on_page anchors (printed,
+      ascending, anchoring the cited header), the quoted row's line
+      distance from the cited header (== row_index), and the claimed
+      values printing at/after column_index in the row's own cells
+      -> HOLD structure_not_in_source
 3. FIELD BINDING BY EXTRACTION — field derived from the extractor's
    column_key at that cell; table matches. -> HOLD field_unbound
 4. ROLE BINDING — printed column_role bound to value_role/min-max
@@ -73,6 +83,12 @@ APPLICABILITY_STRUCTURES = ("ordering_table", "device_summary",
 COLUMN_ROLES = ("min", "typ", "max", "value")
 
 CONDITION_PRECEDENCES = ("local", "column", "inherited")
+
+# Printed negation cues (round 6): an OPN printed ONLY inside a negated
+# sentence is not applicable — positive printed evidence is required.
+_NEGATION_RE = re.compile(
+    r"not\s+applicable|not\s+supported|does\s+not\s+(?:apply|support)|"
+    r"\bexcept\b|\bexcluding\b", re.IGNORECASE)
 
 _CELL_KINDS = ("table_cell",)
 
@@ -141,81 +157,91 @@ def _page_text(doc, page_1based):
 def _resolve_source(typed, raw, cell, vault_root):
     """Re-read the source PDF from the vault and verify EVERY cited
     content element against CURRENT bytes. Runs for all receipt types.
-    Returns None when everything resolves, else (reason_code, detail).
+    Returns (None, lines_by_page) when everything resolves — the
+    normalized per-page line lists are returned for the downstream
+    coordinate resolution — else ((reason_code, detail), None).
     """
     if not vault_root:
-        return ("receipt_unverifiable",
-                "vault_root required — the gate must re-read the source "
-                "PDF; metadata-only admission is refused")
+        return (("receipt_unverifiable",
+                 "vault_root required — the gate must re-read the source "
+                 "PDF; metadata-only admission is refused"), None)
     try:
         import fitz
     except ImportError:
-        return ("receipt_unverifiable",
-                "pymupdf not available; source re-resolution impossible")
+        return (("receipt_unverifiable",
+                 "pymupdf not available; source re-resolution impossible"),
+                None)
     blob = vault_mod.blob_path(vault_root, typed["doc_sha"])
-    page_texts = {}
+    page_texts, lines_by_page = {}, {}
     try:
         with fitz.open(blob) as doc:
             page_count = doc.page_count
             for p in range(1, page_count + 1):
-                page_texts[p] = _norm(doc[p - 1].get_text())
+                text = doc[p - 1].get_text()
+                page_texts[p] = _norm(text)
+                lines_by_page[p] = [_norm(l)
+                                    for l in text.splitlines() if l.strip()]
     except Exception as e:
-        return ("receipt_unverifiable",
-                f"source PDF could not be opened: {type(e).__name__}: {e}")
+        return (("receipt_unverifiable",
+                 f"source PDF could not be opened: {type(e).__name__}: {e}"),
+                None)
 
     def text_of(p):
         return page_texts.get(p, "")
 
     page = cell["page_1based"]
     if page > page_count:
-        return ("no_structured_observation",
-                f"cited page {page} out of range (document has "
-                f"{page_count} page(s)) — invented page refused")
+        return (("no_structured_observation",
+                 f"cited page {page} out of range (document has "
+                 f"{page_count} page(s)) — invented page refused"), None)
+
     page_text = text_of(page)
 
     verbatim = _norm(typed.get("verbatim"))
     if not verbatim or verbatim not in page_text:
-        return ("span_not_in_source",
-                f"verbatim span not present in current bytes of page "
-                f"{page}")
+        return (("span_not_in_source",
+                 f"verbatim span not present in current bytes of page "
+                 f"{page}"), None)
 
     cell_text = _norm(cell.get("quoted_text"))
     if not cell_text:
-        return ("cell_not_in_source", "cited cell has no quoted_text")
+        return (("cell_not_in_source", "cited cell has no quoted_text"),
+                None)
     if cell_text not in page_text:
-        return ("cell_not_in_source",
-                f"cited cell text {cell_text!r} not present in current "
-                f"bytes of page {page} — invented cell refused")
+        return (("cell_not_in_source",
+                 f"cited cell text {cell_text!r} not present in current "
+                 f"bytes of page {page} — invented cell refused"), None)
     value_err = _value_not_in_cell(typed, cell_text)
     if value_err:
-        return value_err
+        return (value_err, None)
 
     binding = raw.get("field_binding") or {}
     header = _norm(binding.get("header_verbatim"))
     if not header:
-        return ("header_not_in_source",
-                "field_binding missing header_verbatim — the column "
-                "header must be quoted from the source")
+        return (("header_not_in_source",
+                 "field_binding missing header_verbatim — the column "
+                 "header must be quoted from the source"), None)
     if header not in page_text:
-        return ("header_not_in_source",
-                f"column header {header!r} not present in current bytes "
-                f"of page {page}")
+        return (("header_not_in_source",
+                 f"column header {header!r} not present in current bytes "
+                 f"of page {page}"), None)
     role = binding.get("column_role")
     if role in ("min", "typ", "max"):
         if not re.search(r"(?<![A-Za-z])" + role + r"(?![A-Za-z])",
                          header, re.IGNORECASE):
-            return ("role_not_in_header",
-                    f"column_role {role!r} is not printed in the "
-                    f"cited header {header!r}")
+            return (("role_not_in_header",
+                     f"column_role {role!r} is not printed in the "
+                     f"cited header {header!r}"), None)
 
-    app_err = _resolve_applicability_source(raw, text_of, page_count)
+    app_err = _resolve_applicability_source(raw, text_of, lines_by_page,
+                                            page_count)
     if app_err:
-        return app_err
+        return (app_err, None)
 
     cond_err = _resolve_conditions_source(raw, text_of, page_count)
     if cond_err:
-        return cond_err
-    return None
+        return (cond_err, None)
+    return (None, lines_by_page)
 
 
 def _value_not_in_cell(typed, cell_text):
@@ -239,9 +265,13 @@ def _value_in_text(value, text):
     return False
 
 
-def _resolve_applicability_source(raw, text_of, page_count):
+def _resolve_applicability_source(raw, text_of, lines_by_page, page_count):
     """The applicability cell's OPN text must be printed on the cited
-    structure page of the CURRENT bytes."""
+    structure page of the CURRENT bytes — and never only in a NEGATED
+    context: if every printed occurrence of the cited cell text on that
+    page sits in a negation ('Not applicable to ST1S15'), the
+    applicability is refused (round 6: negation is not positive
+    printed evidence)."""
     app = raw.get("applicability")
     if not isinstance(app, dict):
         return None  # shape checked later (opn_unbound)
@@ -256,6 +286,16 @@ def _resolve_applicability_source(raw, text_of, page_count):
         return ("applicability_not_in_source",
                 f"applicability cell {cell_text!r} not present in "
                 f"current bytes of structure page {spage}")
+    if cell_text:
+        occurrences = [ln for ln in lines_by_page.get(spage, [])
+                       if cell_text in ln]
+        if occurrences and all(_NEGATION_RE.search(ln)
+                               for ln in occurrences):
+            return ("applicability_negated",
+                    f"every printed occurrence of {cell_text!r} on "
+                    f"structure page {spage} is negated in the source "
+                    "(e.g. 'Not applicable to ...') — negation is not "
+                    "positive printed evidence")
     return None
 
 
@@ -336,12 +376,20 @@ def _check_unit_bound(typed, raw, cell):
         return "claim unit absent"
     cell_text = cell.get("quoted_text") or ""
     printed = _printed_units(cell_text)
+    source = "cell text"
+    if not printed:
+        # PRINTED-FIRST, extended (round 6 failure 2): if the cell
+        # prints no unit of its own, the printed COLUMN HEADER is the
+        # unit evidence — a declared column_unit never overrides a unit
+        # printed in the header (counterexample: cell prints '9', header
+        # prints 'Unit mV', column_unit declared 'V' -> the printed mV
+        # wins; admitting 9 as 9V is over-claim).
+        printed = _printed_units(
+            (raw.get("field_binding") or {}).get("header_verbatim"))
+        source = "cited header"
     if printed:
-        # PRINTED-FIRST: the cell's own units are the evidence. A
-        # declared column_unit never overrides a printed unit (f3df
-        # counterexample: cell prints 9mV, column_unit declared V).
         if unit not in printed:
-            return (f"cell text prints units {sorted(printed)} "
+            return (f"{source} prints units {sorted(printed)} "
                     f"conflicting with claim unit {unit!r} — printed "
                     "unit wins over declared column_unit")
         return None
@@ -350,10 +398,93 @@ def _check_unit_bound(typed, raw, cell):
     if column_unit == unit:
         return None
     if column_unit:
-        return (f"no unit printed in the cited cell and declared "
+        return (f"no unit printed in the cited cell/header and declared "
                 f"column_unit {column_unit!r} conflicts with claim "
                 f"unit {unit!r}")
-    return "no unit in cell text and no declared column unit"
+    return "no unit in cell/header text and no declared column unit"
+
+
+def _resolve_coordinates(typed, raw, cell, lines_by_page):
+    """Source-resolve the STRUCTURE coordinates (round 6 failure 1):
+    table_index / row_index / column_index are self-declared integers
+    that previously admitted 999s. Resolution contract, all against the
+    current bytes of the cited page:
+
+    - table: the cell evidence carries `table_headers_on_page` — the
+      ordered list of table-header verbatims on the page. Every anchor
+      must be printed, anchors must be in ascending line order, the
+      cited table_index must fall inside the anchor list, and
+      anchors[table_index] must BE the cited header.
+    - row: the quoted cell content must be the row_index-th line after
+      the cited header line in reading order (rows print one line each
+      under this extractor lane's model; rows that do not resolve are
+      HELD, never guessed).
+    - column: the claimed values must be printed at/after the cited
+      column_index in the cited row's own verbatim cell list.
+    """
+    page_lines = lines_by_page.get(cell["page_1based"], [])
+    binding = raw.get("field_binding") or {}
+    header = _norm(binding.get("header_verbatim"))
+    quoted = _norm(cell.get("quoted_text"))
+
+    anchors = cell.get("table_headers_on_page")
+    if not isinstance(anchors, list) or not anchors or \
+            not all(isinstance(a, str) and a.strip() for a in anchors):
+        return ("structure_not_in_source",
+                "cell evidence missing table_headers_on_page anchors — "
+                "self-declared table_index is not evidence")
+    table_index = cell["table_index"]
+    if table_index >= len(anchors):
+        return ("structure_not_in_source",
+                f"table_index {table_index} outside the "
+                f"{len(anchors)} printed table anchor(s) on the cited "
+                "page — invented table refused")
+    anchor_lines = []
+    for a in anchors:
+        na = _norm(a)
+        idx = [i for i, ln in enumerate(page_lines) if na in ln]
+        if not idx:
+            return ("structure_not_in_source",
+                    f"table anchor {na!r} not present in current bytes "
+                    f"of page {cell['page_1based']} — invented table "
+                    "refused")
+        anchor_lines.append(idx[0])
+    if any(b <= a for a, b in zip(anchor_lines, anchor_lines[1:])):
+        return ("structure_not_in_source",
+                "table_headers_on_page anchors are not in ascending "
+                "line order on the cited page")
+    if _norm(anchors[table_index]) != header:
+        return ("structure_not_in_source",
+                f"cited table_index {table_index} anchors to "
+                f"{_norm(anchors[table_index])!r}, not the cited header "
+                f"{header!r}")
+
+    header_lines = [i for i, ln in enumerate(page_lines)
+                    if header and header in ln]
+    quoted_lines = [i for i, ln in enumerate(page_lines)
+                    if quoted and quoted in ln]
+    row = cell["row_index"]
+    if not any(q - h == row for h in header_lines
+               for q in quoted_lines if q > h):
+        return ("structure_not_in_source",
+                f"row_index {row} does not resolve: the quoted row is "
+                f"not {row} line(s) after the cited header in the "
+                "current bytes")
+
+    cells = [c.strip() for c in (typed.get("verbatim") or "").split("|")]
+    col = cell["column_index"]
+    if col >= len(cells):
+        return ("structure_not_in_source",
+                f"column_index {col} outside the {len(cells)} printed "
+                "cell(s) of the cited row — invented column refused")
+    tail = " | ".join(cells[col:])
+    for key in ("value", "value_min", "value_max"):
+        v = typed.get(key)
+        if v is not None and not _value_in_text(v, tail):
+            return ("structure_not_in_source",
+                    f"{key}={v!r} not printed at/after cited "
+                    f"column_index {col} in the cited row's cells")
+    return None
 
 
 def _check_applicability(typed, raw):
@@ -435,7 +566,7 @@ def evaluate(typed, raw, vault_root=None, ratified_rules=None):
     err = _check_structured_observation(typed, cell)
     if err:
         return AdmissionDecision(False, "no_structured_observation", err)
-    err = _resolve_source(typed, raw, cell, vault_root)
+    err, lines_by_page = _resolve_source(typed, raw, cell, vault_root)
     if err:
         return AdmissionDecision(False, err[0], err[1])
     err = _check_field_binding(typed, raw, cell)
@@ -447,6 +578,9 @@ def evaluate(typed, raw, vault_root=None, ratified_rules=None):
     err = _check_unit_bound(typed, raw, cell)
     if err:
         return AdmissionDecision(False, "unit_unbound", err)
+    err = _resolve_coordinates(typed, raw, cell, lines_by_page)
+    if err:
+        return AdmissionDecision(False, err[0], err[1])
     err = _check_applicability(typed, raw)
     if err:
         return AdmissionDecision(False, "opn_unbound", err)
