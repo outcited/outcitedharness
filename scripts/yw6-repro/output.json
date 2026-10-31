@@ -1,0 +1,23 @@
+{
+  "R1_status": 200,
+  "R1_part_number": "STM32F051K4",
+  "R1_row_count": 1,
+  "R1_row_pdf_sha": "b3cc0475",
+  "R3a_typed_opn": "STM32F051K6U7",
+  "R3a_validation_errors": [],
+  "R3b_summary": {
+    "loaded": 1,
+    "rejected": 0,
+    "duplicates": 1,
+    "rejections": []
+  },
+  "R3b_stored": [
+    [
+      22.0,
+      50
+    ]
+  ],
+  "R3b_groupby_having": [],
+  "Ra_stm32f051k6ux": "{'scheme': 'stm32', 'flash_kb': 32, 'pin_count_nominal': 32}",
+  "Ra_pic32mx": "{'scheme': 'pic32', 'flash_kb': 512, 'pin_count': 100}"
+}
