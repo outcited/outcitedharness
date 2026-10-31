@@ -436,3 +436,164 @@ def test_conflicting_same_key_observation_refused_loudly(store, vault):
     claims = [c for c in store.claims_for_opn("st1s15")
               if c["field"] == "vin_min_v"]
     assert len(claims) == 1 and claims[0]["value"] == 2.3
+
+
+# --- round-3 corrections (hw-x9g, NEO consolidated review of f41c18eb):
+# semantic binding — value + unit + role + range + page context + OPN
+# applicability must ALL bind to the printed row, or the row is held. ---
+
+def test_unit_not_bound_rejected(store, vault):
+    """(1) '9mV' printed but 9 V claimed: the value token matches, the
+    printed unit does not — the row is held, never served as 9 V."""
+    root, sha = vault
+    row = _vout_row(sha, "VOUT | Output voltage | 9mV",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "unit" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_printed_unit_served_with_claim_loads(store, vault):
+    """Positive control for (1): 9 V printed and 9 V claimed binds."""
+    root, sha = vault
+    row = _vout_row(sha, "VOUT | Output voltage | 9mV",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0, "unit": "mV"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+    assert store.claims_for_opn("st1s15")[0]["unit"] == "mV"
+
+
+def test_cross_field_current_voltage_rejected(store, vault):
+    """(2) VOUT 1.2 V row then IQ 9 mA row: the CURRENT value must not
+    be served as the VOLTAGE field — binding is line-scoped to the
+    field's own label row."""
+    root, sha = vault
+    row = _vout_row(
+        sha, "VOUT | Output voltage | 1.2 | V\nIQ | Quiescent current | 9 | mA",
+        {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "entail" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_page_reference_number_rejected(store, vault):
+    """(3) 'VOUT | See page | 9': the 9 is a page number, not a value —
+    held, never served as 9 V."""
+    root, sha = vault
+    row = _vout_row(sha, "VOUT | See page | 9",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "page reference" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_min_taken_from_range_upper_bound_rejected(store, vault):
+    """(4) VIN min 5.5 against a printed 2.3 to 5.5 range: the min must
+    bind to the range's LOWER endpoint."""
+    root, sha = vault
+    row = _vout_row(sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
+                    {"field": "vin_min_v", "value": 5.5, "unit": "V",
+                     "value_role": "range"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "lower bound" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+    # positive control: the correct endpoint binds
+    row_ok = _vout_row(
+        sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
+        {"field": "vin_min_v", "value": 2.3, "unit": "V",
+         "value_role": "range"})
+    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+
+
+def test_typ_mislabeled_max_rejected(store, vault):
+    """(5) 'typ 9' printed but max claimed: the role must bind to the
+    printed role."""
+    root, sha = vault
+    row = _vout_row(sha, "VOUT | Output voltage | typ | 9 | V",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0,
+                     "value_role": "max"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "role" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+    # positive control: claiming the printed role binds
+    row_ok = _vout_row(sha, "VOUT | Output voltage | typ | 9 | V",
+                       {"value": 9.0, "value_role": "typ"})
+    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+
+
+def test_unrelated_opn_held(store, vault):
+    """(6) UNRELATED-OPN: the OPN appears nowhere in the quote,
+    condition, source URL, or evidence_ref — applicability is not
+    evidenced, the row is held."""
+    root, sha = vault
+    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
+    report = load_rows(store, [row], vault_root=root, opn_default="LM9999X")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "applicability" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("LM9999X") == []
+    # positive control: the real OPN is evidenced via source_url and loads
+    report = load_rows(store, [json.loads(json.dumps(SAMPLE_ROWS[2])
+                              .replace(ST1S15_SHA, sha))],
+                       vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+
+
+def test_applicability_rule_self_assertion_rejected(store, vault):
+    """(7) raw applicability_rule verdict WITHOUT a rule receipt
+    (evidence_ref + span naming the OPN) is self-assertion — refused."""
+    root, sha = vault
+    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
+    row["verdict"] = "applicability_rule"
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    reason = report.rejections[0]["reason"]
+    assert "self-assertion" in reason
+    assert store.claims_for_opn("st1s15") == []
+    # with an actual receipt (evidence_ref + span naming the OPN) it loads
+    row_ok = dict(row, evidence_ref=f"applicability:ST1S15@p1",
+                  span="ST1S15: device applicable to 2A buck")
+    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+
+
+def _make_empty_old_index_store(path):
+    """A PR66-era store: v2 columns (extractor_method present) but the
+    OLD no-page unique index — empty, so every row-level check passes."""
+    import sqlite3
+    con = sqlite3.connect(path)
+    con.executescript("""
+    CREATE TABLE IF NOT EXISTS norm_claims (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        opn TEXT NOT NULL, doc_sha TEXT NOT NULL, field TEXT NOT NULL,
+        value REAL, value_min REAL, value_max REAL, unit TEXT,
+        unit_as_printed TEXT, value_role TEXT, condition_verbatim TEXT,
+        verdict TEXT, table_kind TEXT, page INTEGER NOT NULL,
+        verbatim TEXT NOT NULL, span TEXT, verified_by TEXT NOT NULL,
+        rule_version TEXT NOT NULL, extractor_method TEXT,
+        evidence_ref TEXT, source_url TEXT,
+        schema TEXT, schema_version TEXT NOT NULL,
+        loaded_at REAL NOT NULL
+    );""")
+    con.execute(
+        "CREATE UNIQUE INDEX uq_norm_claims_key ON norm_claims("
+        "opn, doc_sha, field, value_role, condition_verbatim)")
+    con.commit()
+    con.close()
+
+
+def test_empty_old_index_store_refused_fail_closed(tmp_path):
+    """(8) an EMPTY old-schema store passes row-level checks but its
+    no-page unique key makes the first second-page insert raise raw
+    IntegrityError. The preflight must detect the old index and refuse
+    BEFORE any load — fail-closed, never auto-migrate."""
+    db = str(tmp_path / "old-index.db")
+    _make_empty_old_index_store(db)
+    with pytest.raises(Rejection, match="OLD no-page"):
+        Store(db)

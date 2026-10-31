@@ -64,6 +64,30 @@ class Store:
                 "extractor_method column); refusing to open — export the "
                 "rows and load into a new store; live data is never "
                 "auto-migrated")
+        # NEO round-3 (8): an EMPTY store that still carries the OLD
+        # no-page unique key would pass every row-level check but break
+        # on the first second-page insert (IntegrityError). Detect the
+        # old key definition and refuse before any load.
+        auto_uq = self.con.execute(
+            "SELECT name FROM pragma_index_list('norm_claims') "
+            "WHERE origin='u' AND name LIKE 'sqlite_autoindex%'").fetchall()
+        if auto_uq:
+            raise Rejection(
+                "existing store uses an inline pre-v2 UNIQUE key "
+                f"({[r['name'] for r in auto_uq]}); refusing to open — "
+                "export the rows and load into a new store; live data is "
+                "never auto-migrated")
+        uq = self.con.execute(
+            "SELECT sql FROM sqlite_master WHERE type='index' "
+            "AND name='uq_norm_claims_key'").fetchone()
+        if uq and uq["sql"]:
+            ddl = uq["sql"].lower()
+            if "page" not in ddl or "coalesce" not in ddl:
+                raise Rejection(
+                    "existing store has the OLD no-page uq_norm_claims_key "
+                    "index; second-page inserts would fail (IntegrityError) "
+                    "— refusing to open; export the rows and load into a "
+                    "new store; live data is never auto-migrated")
         stored = {r[0] for r in self.con.execute(
             "SELECT DISTINCT schema_version FROM norm_claims")}
         stale = stored - {schema_mod.SCHEMA_VERSION}
