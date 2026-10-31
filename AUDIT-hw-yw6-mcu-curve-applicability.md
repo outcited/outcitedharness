@@ -1,9 +1,13 @@
-# hw-yw6 — Audit REV 3 (FINAL): MCU curve applicability (investigation + test design ONLY)
+# hw-yw6 — Audit REV 3.1: MCU curve applicability (investigation + test design ONLY)
 
 Revision of REV2 snapshot `0de3c800b4ce1b4dc3704687032b691eb143e87a61c38c399064d6643156b4eb`
 (AUDIT-hw-yw6-mcu-curve-applicability.md @ `curve/mcu-audit-rev` commit `743c18ea`)
 per the NEO consolidated parent review on the bead (8 verbatim corrections).
 REV1 `108f6cc236477a797ec4cc788863f6be5e6343d0` remains superseded.
+**REV3.1 addendum (this commit): NEO checkpoint corrections 08:00Z (R1 label
+downgrade + receipt-quality appendix ACKs) and the retained-pin census
+deliverable; the PDF-grounded fixture facts (DS_stm32f051c8.pdf, mayor-
+supplied) are integrated into §5. See §8.**
 
 **Labels used throughout** (parent-mandated format):
 **TESTED** = executed by this worker at `61e95297` (PR66 head), raw output in
@@ -28,7 +32,7 @@ unfreeze. FREEZE holds.
 | path | verdict @61e95297 | evidence label |
 |---|---|---|
 | norm-serve (adapter→loader→`GET /api/v1/opn/<OPN>`) | OPN lookup correct; opn_default provenance gap (R3a); same-key silent drop (R3b) | R3a/R3b **TESTED** |
-| curve API (`GET /api/extraction/v1/parts/<PN>?atom_class=curve`) | shared-SHA K6-only curve served stamped K4, HTTP 200 | R1 **TESTED** |
+| curve API (`GET /api/extraction/v1/parts/<PN>?atom_class=curve`) | stem-joined sha curves served under requested token, HTTP 200, part restamped — **fixture lacked wrong-part binding; K6-bound→K4 leak NOT exercised** (R1, NEO checkpoint) | stamping **TESTED**; wrong-part leak **DESIGNED/UNKNOWN** |
 | staging curve index (`extraction_api.py:218-233` glob) | susceptible — same stem→sha join feeds PART_SHAS; incidence **UNKNOWN** pending census | **SOURCE-CONFIRMED** + **UNKNOWN** |
 | family-export (`designwins/crates/dw-extract/tools/export_api_store.py`) | does NOT serve curves — projects `claims_canonical` → PartRecord wire shapes; cube cells hard-code `curves: False` (export_api_store.py:127,176); page fold keeps `page: null` + `match` reason (docstring, "honest absence") | **SOURCE-CONFIRMED** |
 | `_table_facts` anchor conversion (max→typ) | role discarded at extract_typical_curves.py:98 | R2 **SOURCE-CONFIRMED**; PDF-reader E2E **DESIGNED, not executed** (parent correction 2) |
@@ -44,19 +48,33 @@ conversion; that is the parent's execution, not this worker's. The
 PDF-reader end-to-end repro is a **distinct, still-unexecuted** design (§7
 assertion 8; Blocker 2). Two separate evidence tiers; not conflated.
 
-### R1 summary (**TESTED**; unchanged from REV2)
-Seeded `PART_SHAS["STM32F051K4"] = [synthetic_sha]` +
-`CURVES_BY_SHA[synthetic_sha] = [K6-only row]`, issued the real request through
-the real `Handler`: **status=200, part_number="STM32F051K4", row_count=1**
-(output.json). The row `{**cr, "part_number": part}` restamp
-(extraction_api.py:385 @323d0f80) is the mechanism. Blobs unchanged by PR66 —
-this leak **STILL APPLY** at 61e95297.
+### R1 summary (label DOWNGRADED per NEO checkpoint (1))
+REV2 called this **TESTED** with the framing "shared-SHA K6-only curve served
+stamped K4". **Downgraded — the fixture lacks K6 applicability binding.** The
+repro seeded `CURVES_BY_SHA[synthetic_sha]` with a synthetic row carrying no
+K6 binding whatsoever (no part identity on the row), so what was proven is:
+a stem-joined sha's curve rows are served under the *requested* part token
+with HTTP 200, top-level `part_number="STM32F051K4"`, and rows restamped via
+`{**cr, "part_number": part}` (extraction_api.py:385 @323d0f80). The specific
+wrong-part leak — a **K6-bound** curve served as K4 — was **NOT** exercised
+by this fixture. Status: handler stamping over stem-joined shas **TESTED**;
+per-row restamp mechanism **SOURCE-CONFIRMED** (verbatim citation);
+K6-bound→K4 wrong-part leak end-to-end: **DESIGNED** (§5 assertion 7),
+**UNKNOWN** as observed production behavior.
 
-### R3a summary (**TESTED**; unchanged)
+### R3a summary (**TESTED** at the adapter boundary; framing corrected per NEO appendix "wrong-path")
 One fully-provenanced synthetic row with no row-carried OPN loaded with
 `opn_default="STM32F051K6U7"`: `typed["opn"]=="STM32F051K6U7"`,
-`validate_typed_row → []` (adapter.py:38-41 @61e95297). Serves under K6U7 with
-no record that the OPN was operator-supplied.
+`validate_typed_row → []` (adapter.py:38-41 @61e95297). **Framing correction:**
+`opn_default` is a documented, deliberate mechanism for the Sam-directed
+ST1S15 proving sample (adapter.py docstring: "the OPN is operator-supplied at
+load time … never invented by this code") — REV2's presentation of it as an
+unqualified applicability defect on serving paths was the **wrong path**: the
+tested boundary is the load-lane adapter, not any serving path. The residual,
+real gap stands at the load lane: rows loaded via `opn_default` record no
+`opn_provenance`, so an operator-default OPN is indistinguishable from a
+row-carried one downstream (policy recommendation, §2 — no admission change
+made).
 
 ### R3b summary (**TESTED**; unchanged)
 Two provenanced rows identical on the full UNIQUE key (schema.py:47-50),
@@ -259,13 +277,119 @@ REV2 collapsed these; corrected:
 
 ---
 
-### Appendix — evidence receipt (REV3)
+## 8. REV3.1 addendum — NEO checkpoint corrections (08:00Z) + retained-pin census
+
+### 8a. Receipt-quality appendix ACKs (proof-of-appendix-read; one sentence each)
+
+1. **R1 fixture gap — ACK'd.** The R1 repro's synthetic curve row carried no
+   K6 applicability binding, so only top-level/part-token stamping over a
+   stem-joined sha was proven; the K6-bound→K4 wrong-part leak was never
+   exercised (R1 label downgraded in §1, corrected framing above).
+2. **R3a wrong-path — ACK'd.** `opn_default` is the documented Sam-directed
+   ST1S15 proving-sample load lane, not a serving path; REV2's presentation
+   of the adapter test as a serving-path applicability defect mislocated the
+   concern (§1 R3a framing corrected; the real gap is the missing
+   `opn_provenance` record at the load lane).
+3. **Line-161 missing proof — ACK'd.** REV2 L161-162's "R3b's variant also
+   proved the distinct-condition pair loads as 2 rows" had **no archived
+   output**. Now executed for this addendum at 61e95297 (**TESTED**,
+   receipt below): distinct-role/condition rows `22.0 typ p50` + `23.8 max
+   p50` → `loaded=2, rejected=0, duplicates=0`, both stored.
+4. **Lines 300-301 phantom R2 code — ACK'd.** REV2 L300-301 claimed "the
+   repro script is included with this commit for whoever holds a fixture" —
+   the committed `yw6_repro.py` contains **no R2 repro code at all** (it has
+   R1, R3a, R3b, Ra only); the reference was phantom and is withdrawn. Any
+   R2 repro code must actually exist before it is claimed.
+
+### 8b. R3b-variant receipt (**TESTED** this addendum, at 61e95297)
+
+Executed in a clean worktree at 61e95297 (`git worktree add`), synthetic
+provenanced rows, archived as `scripts/yw6-repro/yw6_variant_receipt.json`:
+`{"loaded": 2, "rejected": 0, "duplicates": 0}`; stored =
+`[[22.0, 50, "typ"], [23.8, 50, "max"]]`. The distinct-role/condition pair
+survives as two rows — confirming the collision class is keyed on the full
+UNIQUE key (R3b), not on value or page alone.
+
+### 8c. Retained-pin census (the open deliverable — **TESTED**, read-only)
+
+Corpus: `happy:/mnt/eda/m5-4tb/DigiKey_Reference_Designs/` —
+`MCU_Pinout_Extractions/` (main 299 files + 18 in `_quarantine_package_merge`),
+`MCU_Pinout_Validated/` (main 1,889 + 31 in `_superseded_local`),
+`training_data_pinout_rows_v1/canonical/` (3 files, 9,505 rows).
+Method: **full enumeration** (denominator = every JSON file, 0 unreadable),
+deterministic field-level classifier (package keyword scan over the record +
+`_meta.pin_table_pages` + per-record pin_no duplication check), cross-file
+conflict = same exact part_number token with diverging pin maps
+(empty-pn family files never grouped; special dirs reported separately,
+not merged into conflicts). Script + raw output archived with this commit
+(`scripts/yw6-repro/yw6_pin_census.py`, `yw6_pin_census.out.json`).
+
+| corpus | supported-exact | package-only | unresolved | conflicting |
+|---|---|---|---|---|
+| MCU_Pinout_Extractions (n=299 main) | 6 (2.0%) | 11 | 290 (97.0%) | 10 |
+| MCU_Pinout_Validated (n=1,889 main) | 5 (0.3%) | 1,338 (70.8%) | 399 (21.1%) | 178 (9.4%) |
+| canonical training rows (n=9,505) | 9,505 (100%) | 0 | 0 | 0 |
+
+Cross-file same-OPN pin-map conflicts: **18** (Extractions — mostly
+vision-vs-datasheet extractions of the same part diverging, e.g.
+`nxp_IMXRT1050_datasheet_extraction` vs `nxp_IMXRT1050_vision_extraction`;
+plus quarantine copies) and **101** (Validated — largely validated-vs-
+unvalidated duplicate pairs of the same sheet, e.g. `microchip_PIC12F.json`
+vs `microchip_PIC12F_validated.json`).
+
+Honest caveats on the classifier (structural, not semantic):
+- "supported-exact" requires package-scoped structure + pin-table pages; the
+  Extractions' 6 include a family-token pn (`KL26`), so *exact-OPN* support
+  is **rarer than 2.0%** — the classifier cannot verify the pn is a complete
+  ordering string, only that the binding structure is present.
+- The Validated corpus is dominantly **package-scoped family records**
+  (70.8% package-only, e.g. `PIC12F508/509/16F505` as one part_number) —
+  exactly the family-not-exact-OPN grain this audit warns about (§2/§4).
+- Incidence linkage kept honest per the standing rule: this census measures
+  the **retained-pin corpus**, not norm_claims/production serving; the
+  norm-serve/curve-API census (§6) still requires store access — impact there
+  remains **UNKNOWN**.
+- Duplicated-file sources (`_superseded_local`, `_quarantine_package_merge`)
+  diverge from their main copies — any future load lane over this corpus
+  must pin one canonical copy per record before classification is trusted.
+
+### 8d. PDF-grounded fixture facts integrated (mayor-supplied)
+
+Fixture: `DS_stm32f051c8.pdf`, sha256 `80848a22…` (same DocID022265 Rev7;
+≠ aggregator sha `5cfb0e2e…`). Facts confirmed by mayor (used verbatim in
+§5 fixtures; **SOURCE-CONFIRMED** = mayor/NEO-supplied, artifact location
+**UNKNOWN** from this lane — not found under `/mnt/eda/m5-4tb` or
+charleybasecamp roots via read-only probe 08:1xZ; not acquired):
+- Table 25 p50: IDD RUN typ **22.0** (48 MHz HSE bypass, PLL on) under §6.1.2
+  p42 conditions (`TA = 25 °C, VDD = VDDA = 3.3 V`); max column `from VDD at
+  3.6 V`: **22.8 @ TA=25 °C**, **23.8 @ TA=105 °C**;
+- Table 20 p47: grade suffix 6 vs 7 (grade-7 low-power TA to 125 °C
+  conditional on T_J ≤ 125 °C, footnote 3) with p112 method — the DISTINCT
+  thermal parameter (§3/§5 row 3);
+- Table 13 p31-36: per-package pin-number columns incl. LQFP32 vs UFQFPN32
+  (GPIO 25 vs 27); note 5: WLCSP36 PB8-PB15 pads unconnected;
+- Table 75 p115: ordering scheme; **STM32F051C8T6** = exact ordering-string
+  evidence example — the complete-OPN identity shape §5 row 5 needs.
+§5's base-part fixture labels stand (they remain deliberately incomplete
+OPNs for key-structure tests); the exact-OPN integration test now has a real
+candidate ordering string (`STM32F051C8T6`, Table 75 p115) to parameterize
+when the artifact is locatable.
+
+---
+
+### Appendix — evidence receipt (REV3/REV3.1)
 
 Carried from REV2 (verified again this revision):
 - **TESTED** at 61e95297, `scripts/yw6-repro/yw6_repro.py` + raw
   `scripts/yw6-repro/output.json` (commit `743c18ea` on `curve/mcu-audit-rev`):
-  R1 (200/K4 restamp), R3a (opn_default accepted, errors []), R3b (silent
-  same-key drop, GROUPBY/HAVING []), Ra decodes (X pin letter, PIC32MX).
+  R1 (200/K4 restamp — **label downgraded per §1/§8a**: stamping proven,
+  wrong-part binding never exercised), R3a (opn_default accepted, errors []),
+  R3b (silent same-key drop, GROUPBY/HAVING []), Ra decodes (X pin letter,
+  PIC32MX).
+- **TESTED** this addendum, archived: R3b-variant distinct-condition pair
+  (`scripts/yw6-repro/yw6_variant_receipt.json`); retained-pin census
+  (`scripts/yw6-repro/yw6_pin_census.py` + `yw6_pin_census.out.json`,
+  executed read-only on happy:/mnt/eda via SSH).
 - **SOURCE-CONFIRMED** this revision (verbatim, at 61e95297 worktree):
   adapter OPN string-only check (adapter.py:38-41); export_api_store
   `curves: False` (export_api_store.py:127,176) + `page: null` honest-absence

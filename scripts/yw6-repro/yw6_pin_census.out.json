@@ -1,0 +1,797 @@
+{
+ "corpora": {
+  "MCU_Pinout_Extractions": {
+   "denominator_files_main": 299,
+   "special_dir_files": 18,
+   "unreadable": 0,
+   "counts": {
+    "unresolved": 290,
+    "conflicting": 10,
+    "package-only": 11,
+    "supported-exact": 6
+   },
+   "conflicting_across_files": {
+    "IMXRT1050": [
+     "MCU_Pinout_Extractions/nxp/nxp_IMXRT1050_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/nxp/nxp_IMXRT1050_vision_extraction_2026-W30.json"
+    ],
+    "IMXRT1064": [
+     "MCU_Pinout_Extractions/nxp/nxp_IMXRT1064_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/nxp/nxp_IMXRT1064_vision_extraction_2026-W30.json"
+    ],
+    "KL26": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/nxp_KL26_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/nxp/nxp_KL26_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/nxp/nxp_KL26_vision_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/nxp/nxp_kl26p121m48sf4_datasheet_extraction_2026-W30.json"
+    ],
+    "MCXC44X": [
+     "MCU_Pinout_Extractions/nxp/nxp_MCXC44X_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/nxp/nxp_MCXC44X_vision_extraction_2026-W30.json"
+    ],
+    "EFR32FG28": [
+     "MCU_Pinout_Extractions/silabs/silabs_EFR32FG28_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/silabs/silabs_efr32fg28_pinout.json"
+    ],
+    "EFR32MG29": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/silabs_EFR32MG29_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/silabs/silabs_EFR32MG29_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32H562ZG": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32h562zg_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32h562zg_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L475RE": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l475re_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l475re_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L4P5CE": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l4p5ce_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l4p5ce_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L4Q5AG": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l4q5ag_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l4q5ag_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L4R5AI": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l4r5ai_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l4r5ai_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L4R9ZI": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l4r9zi_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l4r9zi_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L4S5AI": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l4s5ai_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l4s5ai_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L4S5VI": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l4s5vi_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l4s5vi_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L552CC": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l552cc_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l552cc_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L552RC": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l552rc_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l552rc_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L552VC": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l552vc_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l552vc_datasheet_extraction_2026-W30.json"
+    ],
+    "STM32L562CE": [
+     "MCU_Pinout_Extractions/_quarantine_package_merge/st_stm32l562ce_datasheet_extraction_2026-W30.json",
+     "MCU_Pinout_Extractions/st/st_stm32l562ce_datasheet_extraction_2026-W30.json"
+    ]
+   }
+  },
+  "MCU_Pinout_Validated": {
+   "denominator_files_main": 1889,
+   "special_dir_files": 31,
+   "unreadable": 0,
+   "counts": {
+    "package-only": 1338,
+    "unresolved": 399,
+    "conflicting": 178,
+    "supported-exact": 5
+   },
+   "conflicting_across_files": {
+    "PIC12F508/509/16F505": [
+     "MCU_Pinout_Validated/microchip/microchip_PIC12F.json",
+     "MCU_Pinout_Validated/microchip/microchip_PIC12F_validated.json"
+    ],
+    "PIC16F15256-74-75-76-MICROCONTROLLER-DATA-SHEET-40002305": [
+     "MCU_Pinout_Validated/microchip/microchip_PIC16F15256-74-75-76-Microcontroller-Data-Sheet-40002305.json",
+     "MCU_Pinout_Validated/microchip/microchip_pic16f15256_74_75_76_microcontroller_data_sheet_40002305_unvalidated.json"
+    ],
+    "PIC18F26-46-56Q71-MICROCONTROLLER-DATA-SHEET-DS40002329": [
+     "MCU_Pinout_Validated/microchip/microchip_PIC18F26-46-56Q71-Microcontroller-Data-Sheet-DS40002329.json",
+     "MCU_Pinout_Validated/microchip/microchip_pic18f26_46_56q71_microcontroller_data_sheet_ds40002329_unvalidated.json"
+    ],
+    "PIC18F27-47-57Q43-DATA-SHEET-DS40002147D": [
+     "MCU_Pinout_Validated/microchip/microchip_PIC18F27-47-57Q43-Data-Sheet-DS40002147D.json",
+     "MCU_Pinout_Validated/microchip/microchip_pic18f27_47_57q43_data_sheet_ds40002147d_unvalidated.json"
+    ],
+    "SAM-E70-S70-V70-V71-FAMILY-DATA-SHEET-DS60001527D": [
+     "MCU_Pinout_Validated/microchip/microchip_SAM-E70-S70-V70-V71-Family-Data-Sheet-DS60001527D.json",
+     "MCU_Pinout_Validated/microchip/microchip_sam_e70_s70_v70_v71_unvalidated.json"
+    ],
+    "ATtiny202/204/402/404/406": [
+     "MCU_Pinout_Validated/_superseded_local/microchip_tinyAVR_0-series_unvalidated.json",
+     "MCU_Pinout_Validated/microchip/microchip_tinyAVR_0-series.json"
+    ],
+    "EFR32FG25": [
+     "MCU_Pinout_Validated/silabs/silabs_EFR32FG25.json",
+     "MCU_Pinout_Validated/silabs/silabs_EFR32FG25_validated.json"
+    ],
+    "EFR32FG28": [
+     "MCU_Pinout_Validated/silabs/silabs_EFR32FG28.json",
+     "MCU_Pinout_Validated/silabs/silabs_EFR32FG28_validated.json"
+    ],
+    "EFM32HG-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm32hg-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm32hg_datasheet_unvalidated.json"
+    ],
+    "EFM32JG12-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm32jg12-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm32jg12_datasheet_unvalidated.json"
+    ],
+    "EFM32PG12-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg12-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg12_datasheet_unvalidated.json"
+    ],
+    "EFM32PG22-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg22-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg22_datasheet_unvalidated.json"
+    ],
+    "EFM32PG23-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg23-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg23_datasheet_unvalidated.json"
+    ],
+    "EFM32PG26-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg26-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm32pg26_datasheet_unvalidated.json"
+    ],
+    "EFM32TG11-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm32tg11-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm32tg11_datasheet_unvalidated.json"
+    ],
+    "EFM8BB52-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm8bb52-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm8bb52_datasheet_unvalidated.json"
+    ],
+    "EFM8LB1-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm8lb1-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm8lb1_datasheet_unvalidated.json"
+    ],
+    "EFM8SB1-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm8sb1-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm8sb1_datasheet_unvalidated.json"
+    ],
+    "EFM8SB2-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm8sb2-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm8sb2_datasheet_unvalidated.json"
+    ],
+    "EFM8UB1-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm8ub1-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm8ub1_datasheet_unvalidated.json"
+    ],
+    "EFM8UB2-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efm8ub2-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efm8ub2_datasheet_unvalidated.json"
+    ],
+    "EFR32MG26-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efr32mg26-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efr32mg26_datasheet_unvalidated.json"
+    ],
+    "EFR32ZG28-DATASHEET": [
+     "MCU_Pinout_Validated/silabs/silabs_efr32zg28-datasheet.json",
+     "MCU_Pinout_Validated/silabs/silabs_efr32zg28_datasheet_unvalidated.json"
+    ],
+    "STM32C071C8": [
+     "MCU_Pinout_Validated/st/st_stm32c071c8.json",
+     "MCU_Pinout_Validated/st/st_stm32c071c8_validated.json"
+    ],
+    "STM32C091CB": [
+     "MCU_Pinout_Validated/st/st_stm32c091cb.json",
+     "MCU_Pinout_Validated/st/st_stm32c091cb_validated.json"
+    ],
+    "STM32F103RG": [
+     "MCU_Pinout_Validated/st/st_stm32f103rg.json",
+     "MCU_Pinout_Validated/st/st_stm32f103rg_validated.json"
+    ],
+    "STM32F412CG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32f412cg_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32f412cg.json"
+    ],
+    "STM32F730Z8": [
+     "MCU_Pinout_Validated/st/st_stm32f730z8.json",
+     "MCU_Pinout_Validated/st/st_stm32f730z8_validated.json"
+    ],
+    "STM32F733IE": [
+     "MCU_Pinout_Validated/st/st_stm32f733ie.json",
+     "MCU_Pinout_Validated/st/st_stm32f733ie_validated.json"
+    ],
+    "STM32F746ZG": [
+     "MCU_Pinout_Validated/st/st_stm32f745ve.json",
+     "MCU_Pinout_Validated/st/st_stm32f746zg_unvalidated.json"
+    ],
+    "STM32F756VG": [
+     "MCU_Pinout_Validated/st/st_stm32f756vg.json",
+     "MCU_Pinout_Validated/st/st_stm32f756vg_validated.json"
+    ],
+    "STM32G441xB": [
+     "MCU_Pinout_Validated/st/st_stm32g441cb_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32g441kb_validated.json"
+    ],
+    "STM32G441MB": [
+     "MCU_Pinout_Validated/st/st_stm32g441mb.json",
+     "MCU_Pinout_Validated/st/st_stm32g441mb_validated.json"
+    ],
+    "STM32G473CC": [
+     "MCU_Pinout_Validated/st/st_stm32g473cc.json",
+     "MCU_Pinout_Validated/st/st_stm32g473cc_validated.json"
+    ],
+    "STM32G483xE": [
+     "MCU_Pinout_Validated/st/st_stm32g483ce_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32g483me.json",
+     "MCU_Pinout_Validated/st/st_stm32g483me_validated.json"
+    ],
+    "STM32G483PE": [
+     "MCU_Pinout_Validated/st/st_stm32g483pe.json",
+     "MCU_Pinout_Validated/st/st_stm32g483pe_validated.json"
+    ],
+    "STM32G483RE": [
+     "MCU_Pinout_Validated/st/st_stm32g483re.json",
+     "MCU_Pinout_Validated/st/st_stm32g483re_validated.json"
+    ],
+    "STM32G483VE": [
+     "MCU_Pinout_Validated/st/st_stm32g483ve.json",
+     "MCU_Pinout_Validated/st/st_stm32g483ve_validated.json"
+    ],
+    "STM32H523RC": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h523rc_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h523rc.json"
+    ],
+    "STM32H543CE": [
+     "MCU_Pinout_Validated/st/st_stm32h543ce.json",
+     "MCU_Pinout_Validated/st/st_stm32h543ce_validated.json"
+    ],
+    "STM32H543CG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h543cg_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h543cg.json"
+    ],
+    "STM32H543xx": [
+     "MCU_Pinout_Validated/st/st_stm32h543re.json",
+     "MCU_Pinout_Validated/st/st_stm32h543re_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32h543rg.json",
+     "MCU_Pinout_Validated/st/st_stm32h543rg_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32h543ve.json",
+     "MCU_Pinout_Validated/st/st_stm32h543ve_validated.json"
+    ],
+    "STM32H553CG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h553cg_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h553cg.json"
+    ],
+    "STM32H553RG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h553rg_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h553rg.json"
+    ],
+    "STM32H553ZG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h553zg_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h553zg.json"
+    ],
+    "STM32H562AG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h562ag_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h562ag.json"
+    ],
+    "STM32H562AI": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h562ai_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h562ai.json"
+    ],
+    "STM32H563II": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h563ii_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h563ii.json"
+    ],
+    "STM32H5F4ZJ": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h5f4zj_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h5f4zj.json"
+    ],
+    "STM32H725xE/G": [
+     "MCU_Pinout_Validated/st/st_stm32h725ie.json",
+     "MCU_Pinout_Validated/st/st_stm32h725ie_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32h725ig.json",
+     "MCU_Pinout_Validated/st/st_stm32h725ig_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32h725rg_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32h725vg.json",
+     "MCU_Pinout_Validated/st/st_stm32h725vg_validated.json"
+    ],
+    "STM32H725VE": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h725ve_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h725ve.json"
+    ],
+    "STM32H735xG": [
+     "MCU_Pinout_Validated/st/st_stm32h735vg.json",
+     "MCU_Pinout_Validated/st/st_stm32h735vg_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32h735zg.json",
+     "MCU_Pinout_Validated/st/st_stm32h735zg_validated.json"
+    ],
+    "STM32H745xI/G": [
+     "MCU_Pinout_Validated/st/st_stm32h745bg.json",
+     "MCU_Pinout_Validated/st/st_stm32h745bg_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32h745zi.json",
+     "MCU_Pinout_Validated/st/st_stm32h745zi_validated.json"
+    ],
+    "STM32H745BI": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h745bi_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h745bi.json"
+    ],
+    "STM32H745IG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h745ig_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h745ig.json"
+    ],
+    "STM32H755BI": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h755bi_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h755bi.json"
+    ],
+    "STM32H755ZI": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h755zi_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h755zi.json"
+    ],
+    "STM32H757AI": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h757ai_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h757ai.json"
+    ],
+    "STM32H757BI": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32h757bi_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32h757bi.json"
+    ],
+    "STM32L082CZ": [
+     "MCU_Pinout_Validated/st/st_stm32l082cz.json",
+     "MCU_Pinout_Validated/st/st_stm32l082cz_validated.json"
+    ],
+    "STM32L422TB": [
+     "MCU_Pinout_Validated/st/st_stm32l422tb.json",
+     "MCU_Pinout_Validated/st/st_stm32l422tb_validated.json"
+    ],
+    "STM32L476VE": [
+     "MCU_Pinout_Validated/st/st_stm32l476ve.json",
+     "MCU_Pinout_Validated/st/st_stm32l476ve_validated.json"
+    ],
+    "STM32L4P5AG": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32l4p5ag_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32l4p5ag.json"
+    ],
+    "STM32L552xx": [
+     "MCU_Pinout_Validated/st/st_stm32l552cc_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32l552qe.json",
+     "MCU_Pinout_Validated/st/st_stm32l552rc.json",
+     "MCU_Pinout_Validated/st/st_stm32l552rc_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32l552vc.json",
+     "MCU_Pinout_Validated/st/st_stm32l552vc_validated.json"
+    ],
+    "STM32L552ME": [
+     "MCU_Pinout_Validated/st/st_stm32l552me.json",
+     "MCU_Pinout_Validated/st/st_stm32l552me_validated.json"
+    ],
+    "STM32L552QC": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32l552qc_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32l552qc.json"
+    ],
+    "STM32L552RE": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32l552re_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32l552re.json"
+    ],
+    "STM32L562ME": [
+     "MCU_Pinout_Validated/st/st_stm32l562me.json",
+     "MCU_Pinout_Validated/st/st_stm32l562me_validated.json"
+    ],
+    "STM32L562QE": [
+     "MCU_Pinout_Validated/st/st_stm32l562qe.json",
+     "MCU_Pinout_Validated/st/st_stm32l562qe_validated.json"
+    ],
+    "STM32L562RE": [
+     "MCU_Pinout_Validated/st/st_stm32l562re.json",
+     "MCU_Pinout_Validated/st/st_stm32l562re_validated.json"
+    ],
+    "STM32L562VE": [
+     "MCU_Pinout_Validated/_superseded_local/st_stm32l562ve_unvalidated.json",
+     "MCU_Pinout_Validated/st/st_stm32l562ve.json"
+    ],
+    "STM32L562ZE": [
+     "MCU_Pinout_Validated/st/st_stm32l562ze.json",
+     "MCU_Pinout_Validated/st/st_stm32l562ze_validated.json"
+    ],
+    "STM32N657X0": [
+     "MCU_Pinout_Validated/st/st_stm32n645z0_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32n647l0.json",
+     "MCU_Pinout_Validated/st/st_stm32n647l0_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32n647z0.json",
+     "MCU_Pinout_Validated/st/st_stm32n647z0_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32n655z0_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32n657x0_unvalidated.json"
+    ],
+    "STM32U073CC": [
+     "MCU_Pinout_Validated/st/st_stm32u073cc.json",
+     "MCU_Pinout_Validated/st/st_stm32u073cc_validated.json"
+    ],
+    "STM32U535xx": [
+     "MCU_Pinout_Validated/st/st_stm32u535cc.json",
+     "MCU_Pinout_Validated/st/st_stm32u535cc_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u535ce_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u535nc.json",
+     "MCU_Pinout_Validated/st/st_stm32u535nc_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u535ne.json",
+     "MCU_Pinout_Validated/st/st_stm32u535ne_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u535rb.json",
+     "MCU_Pinout_Validated/st/st_stm32u535rb_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u535rc.json",
+     "MCU_Pinout_Validated/st/st_stm32u535rc_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u535re.json",
+     "MCU_Pinout_Validated/st/st_stm32u535re_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u535vc.json",
+     "MCU_Pinout_Validated/st/st_stm32u535vc_validated.json"
+    ],
+    "STM32U585xx": [
+     "MCU_Pinout_Validated/st/st_stm32u585ci.json",
+     "MCU_Pinout_Validated/st/st_stm32u585ci_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u585vi.json",
+     "MCU_Pinout_Validated/st/st_stm32u585vi_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u585zi.json"
+    ],
+    "STM32U59xxx": [
+     "MCU_Pinout_Validated/st/st_stm32u595aj.json",
+     "MCU_Pinout_Validated/st/st_stm32u595aj_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u599vj.json",
+     "MCU_Pinout_Validated/st/st_stm32u599vj_validated.json"
+    ],
+    "STM32U5F9BJ": [
+     "MCU_Pinout_Validated/st/st_stm32u5f7vj.json",
+     "MCU_Pinout_Validated/st/st_stm32u5f7vj_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32u5f9bj.json",
+     "MCU_Pinout_Validated/st/st_stm32u5f9bj_validated.json"
+    ],
+    "STM32WBA5xxx": [
+     "MCU_Pinout_Validated/st/st_stm32wba52ce.json",
+     "MCU_Pinout_Validated/st/st_stm32wba52ce_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32wba52kg_validated.json"
+    ],
+    "STM32WBA6xxx": [
+     "MCU_Pinout_Validated/st/st_stm32wba62ci.json",
+     "MCU_Pinout_Validated/st/st_stm32wba62ci_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32wba62mg_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32wba64ci.json",
+     "MCU_Pinout_Validated/st/st_stm32wba64ci_validated.json"
+    ],
+    "STM32WBA65PG": [
+     "MCU_Pinout_Validated/st/st_stm32wba65pg.json",
+     "MCU_Pinout_Validated/st/st_stm32wba65pg_validated.json"
+    ],
+    "STM32WLE5xx/STM32WLE4xx": [
+     "MCU_Pinout_Validated/st/st_stm32wle4cc_validated.json",
+     "MCU_Pinout_Validated/st/st_stm32wle5cb.json",
+     "MCU_Pinout_Validated/st/st_stm32wle5cb_validated.json"
+    ],
+    "MSP430F67621A": [
+     "MCU_Pinout_Validated/ti/ti_msp430f67621a.json",
+     "MCU_Pinout_Validated/ti/ti_msp430f67621a_validated.json"
+    ],
+    "MSP430FG437": [
+     "MCU_Pinout_Validated/ti/ti_msp430fg437.json",
+     "MCU_Pinout_Validated/ti/ti_msp430fg437_validated.json"
+    ],
+    "MSP430FG438": [
+     "MCU_Pinout_Validated/ti/ti_msp430fg438.json",
+     "MCU_Pinout_Validated/ti/ti_msp430fg438_validated.json"
+    ],
+    "MSP430FG4616": [
+     "MCU_Pinout_Validated/ti/ti_msp430fg4616.json",
+     "MCU_Pinout_Validated/ti/ti_msp430fg4616_validated.json"
+    ],
+    "MSP430FG477": [
+     "MCU_Pinout_Validated/ti/ti_msp430fg477.json",
+     "MCU_Pinout_Validated/ti/ti_msp430fg477_validated.json"
+    ],
+    "MSP430FR2433": [
+     "MCU_Pinout_Validated/_superseded_local/ti_msp430fr2433_unvalidated.json",
+     "MCU_Pinout_Validated/ti/ti_msp430fr2433.json"
+    ],
+    "MSP430FR5994": [
+     "MCU_Pinout_Validated/_superseded_local/ti_msp430fr5994_unvalidated.json",
+     "MCU_Pinout_Validated/ti/ti_msp430fr5994.json"
+    ],
+    "MSP430G2553": [
+     "MCU_Pinout_Validated/ti/ti_msp430g2153.json",
+     "MCU_Pinout_Validated/ti/ti_msp430g2153_validated.json",
+     "MCU_Pinout_Validated/ti/ti_msp430g2553.json"
+    ],
+    "MSPM0G3507": [
+     "MCU_Pinout_Validated/_superseded_local/ti_mspm0g3507_unvalidated.json",
+     "MCU_Pinout_Validated/ti/ti_mspm0g3507.json"
+    ],
+    "TM4C1294NCPDT": [
+     "MCU_Pinout_Validated/_superseded_local/ti_tm4c1294ncpdt_unvalidated.json",
+     "MCU_Pinout_Validated/ti/ti_tm4c1294ncpdt.json"
+    ],
+    "TMS320F280033": [
+     "MCU_Pinout_Validated/ti/ti_tms320f280033.json",
+     "MCU_Pinout_Validated/ti/ti_tms320f280033_validated.json"
+    ],
+    "TMS320F28335": [
+     "MCU_Pinout_Validated/ti/ti_tms320f28334.json",
+     "MCU_Pinout_Validated/ti/ti_tms320f28334_validated.json",
+     "MCU_Pinout_Validated/ti/ti_tms320f28335.json"
+    ],
+    "TMS320F28379D": [
+     "MCU_Pinout_Validated/_superseded_local/ti_tms320f28379d_unvalidated.json",
+     "MCU_Pinout_Validated/ti/ti_tms320f28379d.json"
+    ],
+    "TMS320LF2407A": [
+     "MCU_Pinout_Validated/ti/ti_tms320lf2402a.json",
+     "MCU_Pinout_Validated/ti/ti_tms320lf2402a_validated.json",
+     "MCU_Pinout_Validated/ti/ti_tms320lf2403a.json",
+     "MCU_Pinout_Validated/ti/ti_tms320lf2403a_validated.json",
+     "MCU_Pinout_Validated/ti/ti_tms320lf2407a.json"
+    ],
+    "TMS320R2811": [
+     "MCU_Pinout_Validated/ti/ti_tms320r2811.json",
+     "MCU_Pinout_Validated/ti/ti_tms320r2811_validated.json"
+    ],
+    "TMS570LS0332": [
+     "MCU_Pinout_Validated/ti/ti_tms570ls0332.json",
+     "MCU_Pinout_Validated/ti/ti_tms570ls0332_validated.json"
+    ],
+    "TMS570LS1225": [
+     "MCU_Pinout_Validated/_superseded_local/ti_tms570ls1225_unvalidated.json",
+     "MCU_Pinout_Validated/ti/ti_tms570ls1225.json"
+    ],
+    "TMS570LS3135": [
+     "MCU_Pinout_Validated/ti/ti_tms570ls2125.json",
+     "MCU_Pinout_Validated/ti/ti_tms570ls2125_validated.json",
+     "MCU_Pinout_Validated/ti/ti_tms570ls3135.json",
+     "MCU_Pinout_Validated/ti/ti_tms570ls3135_validated.json"
+    ],
+    "TMS570LS3137": [
+     "MCU_Pinout_Validated/ti/ti_tms570ls3137.json",
+     "MCU_Pinout_Validated/ti/ti_tms570ls3137_validated.json"
+    ]
+   }
+  }
+ },
+ "canonical": {
+  "denominator_files": 3,
+  "counts": {
+   "supported-exact": 9505
+  },
+  "samples": [
+   {
+    "file": "test.jsonl",
+    "line": 0,
+    "example_id": "0002433f66b687db8f934585",
+    "package": "48-Pin PT LQFP",
+    "page_1based": 36
+   },
+   {
+    "file": "test.jsonl",
+    "line": 1,
+    "example_id": "00ded4ffca7db99d70fc4190",
+    "package": "PT (LQFP, 48)",
+    "page_1based": 18
+   },
+   {
+    "file": "test.jsonl",
+    "line": 2,
+    "example_id": "0139f3972555bce4b8925e4a",
+    "package": "80-pin LQFP (PN)",
+    "page_1based": 29
+   },
+   {
+    "file": "test.jsonl",
+    "line": 3,
+    "example_id": "013bf4aa80eeb2d29652eb93",
+    "package": "337-ball ZWT nFBGA",
+    "page_1based": 34
+   },
+   {
+    "file": "test.jsonl",
+    "line": 4,
+    "example_id": "01a3729f6a6f0ee0423c1215",
+    "package": "LQFP-48 (PT)",
+    "page_1based": 16
+   },
+   {
+    "file": "test.jsonl",
+    "line": 5,
+    "example_id": "027c4fc43fa875e88b55a370",
+    "package": "144-Pin LQFP (PGE)",
+    "page_1based": 23
+   },
+   {
+    "file": "test.jsonl",
+    "line": 6,
+    "example_id": "028c4f6a6f545b1f706af701",
+    "package": "48-pin RGZ VQFN",
+    "page_1based": 19
+   },
+   {
+    "file": "test.jsonl",
+    "line": 7,
+    "example_id": "02cde53edcd9bfdef7dc3f6e",
+    "package": "LQFP144",
+    "page_1based": 83
+   }
+  ]
+ },
+ "samples": {
+  "unresolved": [
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_0a_esp8266ex_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='0A-ESP8266EX', 80 pin rows, no package binding"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_esp32_c6_wroom_1_wroom_1u_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='ESP32-C6-WROOM-1_WROOM-1U', 29 pin rows, no package binding"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_esp32_pico_v3_02_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='ESP32-PICO-V3-02', 47 pin rows, no package binding"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_esp32_s2_wroom_esp32_s2_wroom_i_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='ESP32-S2-WROOM_ESP32-S2-WROOM-I', 80 pin rows, no package binding"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_esp32_s2_wrover_esp32_s2_wrover_i_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='ESP32-S2-WROVER_ESP32-S2-WROVER-I', 80 pin rows, no package binding"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_esp32_s3_wroom_2_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='ESP32-S3-WROOM-2', 41 pin rows, no package binding"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_esp32_solo_1_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='ESP32-SOLO-1', 38 pin rows, no package binding"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/espressif/espressif_esp32_wroom_32e_esp32_wroom_32ue_datasheet_extraction_2026-W29.json",
+    "class": "unresolved",
+    "why": "pn='ESP32-WROOM-32E_ESP32-WROOM-32UE', 38 pin rows, no package binding"
+   }
+  ],
+  "conflicting": [
+   {
+    "file": "MCU_Pinout_Extractions/infineon/infineon_psoc4100s_plus_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/microchip/microchip_pic16f15256_74_75_76_microcontroller_data_sheet_40002305_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/nxp/nxp_lpc435x_3x_2x_1x_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/nxp/nxp_lpc55s2x_lpc552x_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/nxp/nxp_mcxnp184m150f70_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/silabs/silabs_efm32hg_datasheet_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/silabs/silabs_efm32jg12_datasheet_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/silabs/silabs_efm32tg11_datasheet_datasheet_extraction_2026-W29.json",
+    "class": "conflicting",
+    "why": "duplicate pin_no within record"
+   }
+  ],
+  "package-only": [
+   {
+    "file": "MCU_Pinout_Extractions/microchip/microchip_pic12f_pinout.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number='PIC12F508/509/16F505'"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/microchip/microchip_tinyavr_0-series_pinout.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number='ATtiny202/204/402/404/406'"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_RA2L1_datasheet_extraction_2026-W29.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number=''"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_RA6E1_datasheet_extraction_2026-W29.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number=''"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_RA6T1_datasheet_extraction_2026-W29.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number=''"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_RA8D1_datasheet_extraction_2026-W29.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number=''"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_RA8M1_datasheet_extraction_2026-W29.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number=''"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_RX130_datasheet_extraction_2026-W29.json",
+    "class": "package-only",
+    "why": "package-scoped pin rows, part_number=''"
+   }
+  ],
+  "supported-exact": [
+   {
+    "file": "MCU_Pinout_Extractions/nxp/nxp_kl26p121m48sf4_datasheet_extraction_2026-W30.json",
+    "class": "supported-exact",
+    "why": "pn='KL26' pin_table_pages='49,50,51,52' package-scoped"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_R7FA4M1AB3CNB#BA0_datasheet_extraction_2026-W29.json",
+    "class": "supported-exact",
+    "why": "pn='R7FA4M1AB3CNB#BA0' pin_table_pages='16-24' package-scoped"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_R7FA4M1AB3CNE#AA0_datasheet_extraction_2026-W29.json",
+    "class": "supported-exact",
+    "why": "pn='R7FA4M1AB3CNE#AA0' pin_table_pages='16-24' package-scoped"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_R7FA4M1AB3CNE#BA0_datasheet_extraction_2026-W29.json",
+    "class": "supported-exact",
+    "why": "pn='R7FA4M1AB3CNE#BA0' pin_table_pages='16-24' package-scoped"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_R7FA4M1AB3CNF#AA0_datasheet_extraction_2026-W29.json",
+    "class": "supported-exact",
+    "why": "pn='R7FA4M1AB3CNF#AA0' pin_table_pages='16-24' package-scoped"
+   },
+   {
+    "file": "MCU_Pinout_Extractions/renesas/renesas_R7FA4M1AB3CNF#BA0_datasheet_extraction_2026-W29.json",
+    "class": "supported-exact",
+    "why": "pn='R7FA4M1AB3CNF#BA0' pin_table_pages='16-24' package-scoped"
+   },
+   {
+    "file": "MCU_Pinout_Validated/renesas/renesas_R7FA4M1AB3CNB#BA0_unvalidated.json",
+    "class": "supported-exact",
+    "why": "pn='R7FA4M1AB3CNB#BA0' pin_table_pages='16-24' package-scoped"
+   },
+   {
+    "file": "MCU_Pinout_Validated/renesas/renesas_R7FA4M1AB3CNE#AA0_unvalidated.json",
+    "class": "supported-exact",
+    "why": "pn='R7FA4M1AB3CNE#AA0' pin_table_pages='16-24' package-scoped"
+   }
+  ]
+ }
+}
