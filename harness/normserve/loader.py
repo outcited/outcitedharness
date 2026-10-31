@@ -42,22 +42,89 @@ class Store:
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self.con = sqlite3.connect(db_path, timeout=30, check_same_thread=False)
         self.con.row_factory = sqlite3.Row
-        self.con.executescript(schema_mod.SCHEMA_V1)
+        self._fail_closed_preflight()
+        self.con.executescript(schema_mod.SCHEMA_V2)
         self.con.commit()
 
+    def _fail_closed_preflight(self):
+        """NEO round-2 (hw-x9g): an existing store that predates
+        norm-serve.v2 — or holds rows of another version, or already
+        contains duplicate key groups — is REFUSED. Never auto-migrate
+        live data; instruct instead."""
+        table = self.con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name='norm_claims'").fetchone()
+        if not table:
+            return
+        cols = {r["name"] for r in
+                self.con.execute("PRAGMA table_info(norm_claims)")}
+        if "extractor_method" not in cols:
+            raise Rejection(
+                "existing store predates norm-serve.v2 (missing "
+                "extractor_method column); refusing to open — export the "
+                "rows and load into a new store; live data is never "
+                "auto-migrated")
+        stored = {r[0] for r in self.con.execute(
+            "SELECT DISTINCT schema_version FROM norm_claims")}
+        stale = stored - {schema_mod.SCHEMA_VERSION}
+        if stale:
+            raise Rejection(
+                f"existing store holds rows with schema_version {sorted(stale)} "
+                f"(this code is {schema_mod.SCHEMA_VERSION}); refusing to open "
+                "— export/reload explicitly; never auto-migrate live data")
+        dups = self.con.execute(
+            "SELECT COUNT(*) FROM (SELECT 1 FROM norm_claims "
+            "GROUP BY opn, doc_sha, field, page, "
+            "COALESCE(value_role,''), COALESCE(condition_verbatim,'') "
+            "HAVING COUNT(*) > 1)").fetchone()[0]
+        if dups:
+            raise Rejection(
+                f"existing store has {dups} duplicate key group(s); "
+                "refusing to create uq_norm_claims_key — dedupe "
+                "explicitly (never silently); live data is never "
+                "auto-migrated")
+
     def insert(self, row: dict):
+        """Insert one typed row. Returns 'loaded' or 'duplicate'.
+
+        A key collision with DIFFERENT content is a conflicting
+        observation — raises Rejection (recorded, never silently
+        ignored, never mislabeled as a duplicate)."""
         cols = ("opn", "doc_sha", "field", "value", "value_min", "value_max",
                 "unit", "unit_as_printed", "value_role", "condition_verbatim",
                 "verdict", "table_kind", "page", "verbatim", "span",
-                "verified_by", "rule_version", "evidence_ref", "source_url",
+                "verified_by", "rule_version", "extractor_method",
+                "evidence_ref", "source_url",
                 "schema", "schema_version", "loaded_at")
         row = dict(row, loaded_at=time.time())
         placeholders = ",".join("?" for _ in cols)
-        self.con.execute(
-            f"INSERT OR IGNORE INTO norm_claims ({','.join(cols)}) "
-            f"VALUES ({placeholders})",
-            tuple(row.get(c) for c in cols))
-        self.con.commit()
+        try:
+            self.con.execute(
+                f"INSERT INTO norm_claims ({','.join(cols)}) "
+                f"VALUES ({placeholders})",
+                tuple(row.get(c) for c in cols))
+            self.con.commit()
+            return "loaded"
+        except sqlite3.IntegrityError:
+            key = (row["opn"], row["doc_sha"], row["field"], row["page"],
+                   row.get("value_role") or "",
+                   row.get("condition_verbatim") or "")
+            existing = self.con.execute(
+                "SELECT * FROM norm_claims WHERE opn=? AND doc_sha=? AND "
+                "field=? AND page=? AND COALESCE(value_role,'')=? AND "
+                "COALESCE(condition_verbatim,'')=?", key).fetchone()
+            self.con.rollback()
+            if existing is None:
+                raise
+            diffs = [c for c in schema_mod.SUBSTANTIVE_COLS
+                     if existing[c] != row.get(c)]
+            if diffs:
+                raise Rejection(
+                    "conflicting observation on existing key "
+                    f"(opn={key[0]!r} field={key[2]!r} page={key[3]}): "
+                    f"differing columns {diffs} — refused loudly, never "
+                    "silently ignored")
+            return "duplicate"
 
     def claims_for_opn(self, opn: str):
         return [dict(r) for r in self.con.execute(
@@ -80,7 +147,17 @@ class LoadReport:
 def load_rows(store, rows, vault_root=None, dry_run=False,
               adapter=None, opn_default=None):
     """Validate + store rows. Returns LoadReport. Dry-run validates and
-    vault-verifies but writes nothing."""
+    vault-verifies but writes nothing.
+
+    Vault re-verification is MANDATORY on persist (NEO source review,
+    merge 47cac640): a persist load without a vault root raises — the
+    old `if vault_root:` silently skipped verification. Dry-run also
+    verifies when a vault root is supplied.
+    """
+    if not dry_run and not vault_root:
+        raise ValueError(
+            "vault_root is mandatory for persist loads; verification "
+            "cannot be skipped (fail-closed, merge 47cac640 review)")
     adapter = adapter or _default_adapter
     report = LoadReport()
     for i, raw in enumerate(rows):
@@ -96,12 +173,8 @@ def load_rows(store, rows, vault_root=None, dry_run=False,
                 if not ok:
                     raise Rejection(f"vault: {detail}")
             if not dry_run:
-                before = store.con.execute(
-                    "SELECT COUNT(*) AS n FROM norm_claims").fetchone()["n"]
-                store.insert(typed)
-                after = store.con.execute(
-                    "SELECT COUNT(*) AS n FROM norm_claims").fetchone()["n"]
-                if after == before:
+                status = store.insert(typed)
+                if status == "duplicate":
                     report.duplicates += 1
                 else:
                     report.loaded += 1
