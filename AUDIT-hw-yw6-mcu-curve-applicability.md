@@ -324,34 +324,36 @@ conflict = same exact part_number token with diverging pin maps
 not merged into conflicts). Script + raw output archived with this commit
 (`scripts/yw6-repro/yw6_pin_census.py`, `yw6_pin_census.out.json`).
 
-| corpus | supported-exact | package-only | unresolved | conflicting |
+| corpus | metadata-presence: pkg-keyword + pin-pages | metadata-presence: package-only | unresolved | inventory: divergent-file groups |
 |---|---|---|---|---|
 | MCU_Pinout_Extractions (n=299 main) | 6 (2.0%) | 11 | 290 (97.0%) | 10 |
 | MCU_Pinout_Validated (n=1,889 main) | 5 (0.3%) | 1,338 (70.8%) | 399 (21.1%) | 178 (9.4%) |
 | canonical training rows (n=9,505) | 9,505 (100%) | 0 | 0 | 0 |
 
-Cross-file same-OPN pin-map conflicts: **18** (Extractions — mostly
-vision-vs-datasheet extractions of the same part diverging, e.g.
-`nxp_IMXRT1050_datasheet_extraction` vs `nxp_IMXRT1050_vision_extraction`;
-plus quarantine copies) and **101** (Validated — largely validated-vs-
-unvalidated duplicate pairs of the same sheet, e.g. `microchip_PIC12F.json`
-vs `microchip_PIC12F_validated.json`).
+**REV3.2 RELABELING (NEO classification finding — WORKER ACK, binding):** the
+§8c classifier (`yw6_pin_census.py`, committed blob sha
+`8d67cfbb…`; parent-reviewed snapshot `1516891f…`) is a
+**metadata-presence/inventory heuristic, NOT a provenance conclusion**. The
+table header above is relabeled accordingly and the §8c counts are hereby
+demoted from "supported-exact/conflicting" to the honest labels:
+- "supported-exact" = *any* `overview.part_number` string + *any* package
+  keyword anywhere in the serialized record + nonempty pin-table pages —
+  **no exact ordering/source binding is checked**, and canonical rows become
+  it from `alignment.package` + `page_1based` alone with no OPN — which
+  **repeats the exact family/package→OPN inference this audit exists to
+  flag**. Exact applicability stays **UNRESOLVED** for every class until the
+  printed-evidence verification in §9.
+- duplicate `pin_no` ≠ "conflicting": a conflict requires **contradictory
+  claims at the same evidenced scope** (§9b record 4 shows the IMXRT1050
+  pair labeled "conflicting" by §8c is actually a missing observation —
+  the vision file has **0** pin rows).
+- the script scanned all globbed files (output bound at 8/class); the
+  denominator is inspected files, **not unique records** — extraction/
+  validated/training copies of the same sheet are not deduplicated.
 
-Honest caveats on the classifier (structural, not semantic):
-- "supported-exact" requires package-scoped structure + pin-table pages; the
-  Extractions' 6 include a family-token pn (`KL26`), so *exact-OPN* support
-  is **rarer than 2.0%** — the classifier cannot verify the pn is a complete
-  ordering string, only that the binding structure is present.
-- The Validated corpus is dominantly **package-scoped family records**
-  (70.8% package-only, e.g. `PIC12F508/509/16F505` as one part_number) —
-  exactly the family-not-exact-OPN grain this audit warns about (§2/§4).
-- Incidence linkage kept honest per the standing rule: this census measures
-  the **retained-pin corpus**, not norm_claims/production serving; the
-  norm-serve/curve-API census (§6) still requires store access — impact there
-  remains **UNKNOWN**.
-- Duplicated-file sources (`_superseded_local`, `_quarantine_package_merge`)
-  diverge from their main copies — any future load lane over this corpus
-  must pin one canonical copy per record before classification is trusted.
+Cross-file same-OPN pin-map divergences (inventory groups, NOT proven
+conflicts): **18** (Extractions) and **101** (Validated) — see §9b for the
+spot-checked counterexample.
 
 ### 8d. PDF-grounded fixture facts integrated (mayor-supplied)
 
@@ -377,7 +379,74 @@ when the artifact is locatable.
 
 ---
 
-### Appendix — evidence receipt (REV3/REV3.1)
+## 9. REV3.2 addendum — printed-evidence-verified bounded sample + served-chain end
+
+### 9a. Scope
+
+Same bead, investigation/test design only. Delivers the pending census
+continuation: (a) the classification relabeling above (§8c), (b) a bounded
+sample verified against **printed** source evidence, and (c) the served
+record as the chain end. Boundaries unchanged: no extraction, no
+implementation, no production writes, no load unfreeze.
+
+### 9b. Bounded sample (**TESTED** this addendum, read-only via
+`ssh samsonkim@100.69.201.109`, targeted `cat`, soft-mount respected)
+
+**Selection method (purposeful, NOT random; denominator disclosed):** the
+only chain with an existing printed-evidence receipt is STM32C051C6 (DS14721
+Rev2 asset, Table 12 p30 crop verified), so the st/C051 chain is sampled
+exhaustively (3 files) plus one cross-vendor divergence group spot-check
+(IMXRT1050). This sample supports per-record classification only — **no
+corpus-wide incidence claims**; full-corpus classes remain the §8c inventory
+labels. File sha256s independently re-fetched this addendum and matching the
+parent's cited receipts exactly:
+
+| record | sha256 (verified this addendum) | class | evidence |
+|---|---|---|---|
+| `Extractions/st/st_stm32c051c6_datasheet_extraction_2026-W30.json` (raw, 64 pins) | `7ab0ed25…` | **INCORRECT** (hallucinated variant: pin 1 = PA0/GPIO+TIM2_CH1) | contradicts printed DS14721 Rev2 Table 12 p30 (PC13 = pin 1, LQFP48/UFQFPN48 only; other packages dash) — matches parent's independent finding |
+| `Validated/st/st_stm32c051c6.json` (48 pins) | `c00d5985…` | **package-verified for the 48-pin layout**; per-pin package binding **UNRESOLVED** | row 1 PC13 pin 1 matches the printed crop; but its own `pinout.packages` lists all 7 packages **UNQUALIFIED** — the validated file itself does not bind pins→package |
+| `Validated/st/st_stm32c051c6_validated.json` (48 pins) | `049d1fb4…` | same as above; `pin_functions_summary` **byte-identical** to `c00d5985` (**TESTED**: Python list equality, this addendum) | twin validated copies agree |
+| `Extractions/nxp/nxp_IMXRT1050_datasheet_extraction_2026-W30.json` (196 rows) | fetched, not re-hashed vs receipt | **UNRESOLVED** (not verified against any printed source; pin 1 = PA0 — the same row-shape as the known-hallucinated C051 raw variant, flagged as a **suspect pattern**, not a finding) | no source PDF receipt in this lane |
+| `Extractions/nxp/nxp_IMXRT1050_vision_extraction_2026-W30.json` | fetched | **missing observation (0 pin rows)** — §8c's "conflicting" label for this pair was **WRONG**: no contradictory claims exist at any scope | direct read: `pinout.pin_functions_summary = []` |
+
+### 9c. Served-chain end (private release; parent-supplied receipts adopted)
+
+- **Served STM32C051C6** (facade HTTP200, release
+  `dw-microcontrollers-20261007T153515Z` approval=**private** — receipt
+  `served-stm32c051c6.json` sha `ca6b855d…`): 48 pins **exactly equal** the
+  validated rows (parent's comparison receipt `retained-served-pin-
+  comparison.json`). Classification: **propagation positive** — the
+  validation pipeline's 64→48 hallucination repair reached the served
+  record end-to-end once. NOT proven: W29 lineage of the served source
+  (`st_STM32C051C6_datasheet_extraction_2026-W29.json` vs the retained W30),
+  nor that all 48 rows are individually correct.
+- **Observed ambiguity in the served record**: base part
+  `STM32C051C6` labeled `exact_orderable_mpn`; unqualified 7-package list
+  with no per-pin package binding (source Table 12 EXCLUDES PC13 from the
+  smaller packages). The private-release exposure is recorded as a
+  **per-part** observed ambiguity: STM32C051F6 on the same release serves
+  **no pinout** (parent's counterevidence) — per-part, NOT proven
+  whole-family fanout.
+- **Chain classification (adopted)**: package-level correspondence PROVEN
+  (printed Table 12 vs retained pins); provenance chain
+  (JSON↔this-SHA) **UNRESOLVED**; full OPN set **UNRESOLVED** (ordering
+  grammar gives families, not complete orderables — and per the binding
+  plan correction, grammar-complete strings are **necessary, not
+  sufficient** for orderability/applicability without printed-evidence
+  identity); served chain **EXISTS** (private) with the recorded ambiguity.
+
+### 9d. Design requirement recap (feeds do-iur ledger + the hw-x9g gate)
+
+The admission gate's applicability condition (4) — OPN only via printed
+ordering/device-summary/package STRUCTURES, cell-value-exact — is precisely
+the check whose absence produced every finding above (factory links with
+NULL evidence_ids; validated files with unqualified package lists; a base
+part served as `exact_orderable_mpn`). Rebind path (DESIGNED, not run):
+asset sha + printed table crop + per-package pin check → evidence-backed
+applicability rows; never a blind sha JOIN, never `supported_exact` without
+the printed check.
+
+
 
 Carried from REV2 (verified again this revision):
 - **TESTED** at 61e95297, `scripts/yw6-repro/yw6_repro.py` + raw
