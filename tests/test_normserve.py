@@ -912,7 +912,10 @@ def test_role_not_in_header_held(store, vault):
                      "Operating input voltage range", page=2)
     report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.holds) == 1
-    assert report.holds[0]["reason_code"] == "role_not_in_header"
+    # Round-6 failure 2 hardening: 'Operating input voltage range' is a
+    # substring of the printed header line, not a printed line itself —
+    # header resolution requires the printed line.
+    assert report.holds[0]["reason_code"] == "header_not_in_source"
 
 
 def test_column_unit_cannot_override_printed_unit(store, vault):
@@ -1165,3 +1168,115 @@ def test_v2_store_refused_fail_closed(tmp_path):
     con.close()
     with pytest.raises(Rejection, match="predates norm-serve.v3"):
         Store(db)
+
+
+# --- round 7 (hw-x9g continuation): the five remaining round-6 review
+# --- failures, each source-resolved or HELD ---
+
+def test_wrong_cited_column_held(store, vault):
+    """Failure 1: a numeric value that lives in column 2 is not admitted
+    by citing column 0 or the description column 1 — the gate resolves
+    the CITED cell, not the row tail."""
+    root, sha = vault
+    for col in (0, 1):
+        row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin",
+                         "min", VIN_HEADER, page=2, column=col)
+        report = load_rows(store, [row], vault_root=root,
+                           opn_default="ST1S15")
+        assert report.loaded == 0 and len(report.holds) == 1, col
+        assert report.holds[0]["reason_code"] == \
+            "structure_not_in_source", (col, report.holds[0])
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_header_substring_not_cell_resolution(store, tmp_path):
+    """Failure 2: actual header 'VIN Min Unit mV', supplied page-present
+    header substring 'VIN Min' + metadata V — a header substring is not
+    cell resolution -> HELD header_not_in_source."""
+    pages = [
+        ["ST1S15",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        ["VIN Min Unit mV",
+         "VIN | min | 9"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    row = structured(
+        dict(SAMPLE_ROWS[0], field="vin_min_v", unit="V", value=9.0,
+             value_role="min", verbatim="VIN | min | 9"),
+        sha, "9", "vin", "min", "VIN Min", page=2, column_unit="V")
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1, report.summary()
+    assert report.holds[0]["reason_code"] == "header_not_in_source"
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_title_positive_body_negated_resolves_negated(store, tmp_path):
+    """Failure 3: page title ST1S15 plus body 'Not applicable to
+    ST1S15' — the title-positive + body-negated page resolves to the
+    NEGATED outcome -> HELD applicability_negated."""
+    pages = [
+        ["ST1S15",
+         "Not applicable to ST1S15"],
+        ["VOUT Min Typ Max Unit",
+         "VOUT | Output voltage | 9 | V"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    row = structured(make_rows(sha)[2], sha, "9 | V", "vout", "value",
+                     "VOUT Min Typ Max Unit", page=2,
+                     applicability={"structure": "device_summary",
+                                    "structure_page": 1,
+                                    "cell_text": "ST1S15"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1, report.summary()
+    assert report.holds[0]["reason_code"] == "applicability_negated"
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_prefix_opn_substring_identity_refused(store, tmp_path):
+    """Failure 4: the source only names ST1S150 — the requested ST1S15
+    is not admitted by SUBSTRING; identity requires an exact token
+    match against the printed identity structure."""
+    pages = [
+        ["Applicable device: ST1S150",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        ["VOUT Min Typ Max Unit",
+         "VOUT | Output voltage | 9 | V"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    row = structured(make_rows(sha)[2], sha, "9 | V", "vout", "value",
+                     "VOUT Min Typ Max Unit", page=2,
+                     applicability={"structure": "device_summary",
+                                    "structure_page": 1,
+                                    "cell_text": "ST1S15"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1, report.summary()
+    assert report.holds[0]["reason_code"] == "applicability_not_in_source"
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_metadata_unit_fallback_retired(store, tmp_path):
+    """Failure 5: no unit printed in the cited cell or header, declared
+    column_unit V — a metadata-unit fallback is not source evidence ->
+    HELD unit_unbound."""
+    pages = [
+        ["ST1S15",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        ["VIN Min",
+         "VIN | min | 9"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    row = structured(
+        dict(SAMPLE_ROWS[0], field="vin_min_v", unit="V", value=9.0,
+             value_role="min", verbatim="VIN | min | 9"),
+        sha, "9", "vin", "min", "VIN Min", page=2, column_unit="V")
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1, report.summary()
+    assert report.holds[0]["reason_code"] == "unit_unbound"
+    assert store.claims_for_opn("st1s15") == []

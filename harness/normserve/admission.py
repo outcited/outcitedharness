@@ -101,6 +101,13 @@ _UNIT_PRINT_RE = re.compile(
 
 
 
+def _token_in_text(token, text):
+    """Exact-token match (round 6 failure 4): 'ST1S15' is not printed in
+    a line naming 'ST1S150' — a substring hit is not identity."""
+    return re.search(r"(?<![A-Za-z0-9])" + re.escape(token) +
+                     r"(?![A-Za-z0-9])", text, re.IGNORECASE) is not None
+
+
 def _norm(s):
     return re.sub(r"\s+", " ", s or "").strip()
 
@@ -225,6 +232,11 @@ def _resolve_source(typed, raw, cell, vault_root):
         return (("header_not_in_source",
                  f"column header {header!r} not present in current bytes "
                  f"of page {page}"), None)
+    if header not in lines_by_page.get(page, []):
+        return (("header_not_in_source",
+                 f"column header {header!r} is not a printed line of page "
+                 f"{page} — a substring of a printed header line is not "
+                 "cell resolution (round 6 failure 2)"), None)
     role = binding.get("column_role")
     if role in ("min", "typ", "max"):
         if not re.search(r"(?<![A-Za-z])" + role + r"(?![A-Za-z])",
@@ -267,11 +279,12 @@ def _value_in_text(value, text):
 
 def _resolve_applicability_source(raw, text_of, lines_by_page, page_count):
     """The applicability cell's OPN text must be printed on the cited
-    structure page of the CURRENT bytes — and never only in a NEGATED
-    context: if every printed occurrence of the cited cell text on that
-    page sits in a negation ('Not applicable to ST1S15'), the
-    applicability is refused (round 6: negation is not positive
-    printed evidence)."""
+    structure page of the CURRENT bytes — as an EXACT TOKEN (round 6
+    failure 4: a source that names only ST1S150 does not admit ST1S15;
+    substring presence is not identity) — and never inside a NEGATED
+    sentence (round 6 failure 3: a title-positive + body-negated page
+    resolves NEGATED — any printed occurrence of the OPN in a negation
+    sentence on the structure page refuses the applicability)."""
     app = raw.get("applicability")
     if not isinstance(app, dict):
         return None  # shape checked later (opn_unbound)
@@ -287,15 +300,22 @@ def _resolve_applicability_source(raw, text_of, lines_by_page, page_count):
                 f"applicability cell {cell_text!r} not present in "
                 f"current bytes of structure page {spage}")
     if cell_text:
-        occurrences = [ln for ln in lines_by_page.get(spage, [])
-                       if cell_text in ln]
-        if occurrences and all(_NEGATION_RE.search(ln)
-                               for ln in occurrences):
+        lines = lines_by_page.get(spage, [])
+        occurrences = [ln for ln in lines
+                       if _token_in_text(cell_text, ln)]
+        if not occurrences:
+            return ("applicability_not_in_source",
+                    f"applicability cell {cell_text!r} is not printed as "
+                    f"an exact token on structure page {spage} — a "
+                    "substring of another OPN's printed identity is not "
+                    "applicability")
+        negated = [ln for ln in occurrences if _NEGATION_RE.search(ln)]
+        if negated:
             return ("applicability_negated",
-                    f"every printed occurrence of {cell_text!r} on "
-                    f"structure page {spage} is negated in the source "
-                    "(e.g. 'Not applicable to ...') — negation is not "
-                    "positive printed evidence")
+                    f"{cell_text!r} is printed inside a negated sentence "
+                    f"on structure page {spage} (e.g. 'Not applicable "
+                    "to ...') — negation is not positive printed "
+                    "evidence; the NEGATED outcome resolves")
     return None
 
 
@@ -378,30 +398,31 @@ def _check_unit_bound(typed, raw, cell):
     printed = _printed_units(cell_text)
     source = "cell text"
     if not printed:
-        # PRINTED-FIRST, extended (round 6 failure 2): if the cell
-        # prints no unit of its own, the printed COLUMN HEADER is the
-        # unit evidence — a declared column_unit never overrides a unit
-        # printed in the header (counterexample: cell prints '9', header
-        # prints 'Unit mV', column_unit declared 'V' -> the printed mV
-        # wins; admitting 9 as 9V is over-claim).
+        # PRINTED-FIRST (round 6 failure 2): if the cell prints no unit
+        # of its own, the printed COLUMN HEADER is the unit evidence —
+        # a declared column_unit never overrides a unit printed in the
+        # header (counterexample: cell prints '9', header prints
+        # 'Unit mV', column_unit declared 'V' -> the printed mV wins;
+        # admitting 9 as 9V is over-claim).
         printed = _printed_units(
             (raw.get("field_binding") or {}).get("header_verbatim"))
         source = "cited header"
-    if printed:
-        if unit not in printed:
-            return (f"{source} prints units {sorted(printed)} "
-                    f"conflicting with claim unit {unit!r} — printed "
-                    "unit wins over declared column_unit")
-        return None
-    column_unit = _norm_unit(
-        (raw.get("field_binding") or {}).get("column_unit"))
-    if column_unit == unit:
-        return None
-    if column_unit:
-        return (f"no unit printed in the cited cell/header and declared "
-                f"column_unit {column_unit!r} conflicts with claim "
-                f"unit {unit!r}")
-    return "no unit in cell/header text and no declared column unit"
+    if not printed:
+        # Round 6 failure 5: with NO unit printed anywhere in the cited
+        # cell or header there is no source-resolved unit evidence — the
+        # declared column_unit is extractor metadata, not the source;
+        # the metadata-unit fallback path is retired (a row citing a
+        # bare printed value and a metadata unit HELDs).
+        column_unit = _norm_unit(
+            (raw.get("field_binding") or {}).get("column_unit"))
+        return (f"no unit printed in the cited cell or header — "
+                f"declared column_unit {column_unit!r} is metadata, "
+                "not printed evidence")
+    if unit not in printed:
+        return (f"{source} prints units {sorted(printed)} "
+                f"conflicting with claim unit {unit!r} — printed "
+                "unit wins over declared column_unit")
+    return None
 
 
 def _resolve_coordinates(typed, raw, cell, lines_by_page):
@@ -477,13 +498,30 @@ def _resolve_coordinates(typed, raw, cell, lines_by_page):
         return ("structure_not_in_source",
                 f"column_index {col} outside the {len(cells)} printed "
                 "cell(s) of the cited row — invented column refused")
+    # Round 6 failure 1: the check must resolve the CITED cell, not the
+    # row tail — a numeric value living in column 2 is not admitted by
+    # citing column 0 or the description column 1. The cited cell
+    # resolves when the claimed value prints IN the cell at
+    # column_index, or when the quoted cell span provably starts at
+    # column_index (the quote is the tail of the row's cells from the
+    # cited column, or the whole row).
+    cited_cell = cells[col]
     tail = " | ".join(cells[col:])
+    whole = " | ".join(cells)
     for key in ("value", "value_min", "value_max"):
         v = typed.get(key)
-        if v is not None and not _value_in_text(v, tail):
+        if v is None:
+            continue
+        value_at_col = _value_in_text(v, cited_cell)
+        span_anchored = (_norm(tail) == _norm(cell.get("quoted_text") or "")
+                         or _norm(whole) ==
+                         _norm(cell.get("quoted_text") or ""))
+        if not value_at_col and not span_anchored:
             return ("structure_not_in_source",
-                    f"{key}={v!r} not printed at/after cited "
-                    f"column_index {col} in the cited row's cells")
+                    f"{key}={v!r} does not resolve in the cell cited at "
+                    f"column_index {col} ({cited_cell!r}) and the quoted "
+                    "cell span does not start at the cited column — the "
+                    "cited cell must be resolved, not the row tail")
     return None
 
 
