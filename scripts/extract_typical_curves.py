@@ -38,6 +38,7 @@ from harness.electronics.typical_curves import (  # noqa: E402
     plot_regions_for_page,
     validate_curve_payload,
 )
+from harness.pipeline.extraction_health import ExtractionFailures, summarize  # noqa: E402
 
 RENDER_DPI = 600
 
@@ -62,26 +63,31 @@ def _queue_pages(path: Path) -> list[dict]:
     return out
 
 
-def _table_facts(pdf: Path) -> list[dict]:
-    """EC-table + mode-current facts for the cross-substrate anchor.
+def _table_facts(pdf: Path) -> tuple[list[dict], list[dict]]:
+    """EC-table + mode-current facts for the cross-substrate anchor, plus a
+    failure-event list (page + where + reason) so dropped facts are never
+    indistinguishable from a genuine empty (hw-wk9 fail-closed).
 
     Mode-current rows (the deterministic Wave B reader) are the primary
     source for current-vs-voltage curves: same document, same printed rows,
     different substrate — that is the agreement the lane measures.
     """
     facts: list[dict] = []
+    failures = ExtractionFailures()
     doc = pymupdf.open(pdf)
     try:
         for page_index in range(doc.page_count):
             page = doc[page_index]
             try:
                 tables = page.find_tables().tables
-            except Exception:  # pragma: no cover - PyMuPDF internals
+            except Exception as exc:
+                failures.record(page_index + 1, "find_tables", exc)
                 continue
             for table_index, table in enumerate(tables):
                 try:
                     grid = table.extract()
-                except Exception:  # pragma: no cover - PyMuPDF internals
+                except Exception as exc:
+                    failures.record(page_index + 1, "table.extract", exc)
                     continue
                 for row in mode_current_rows(
                     {"table_index": table_index, "rows": grid},
@@ -100,8 +106,6 @@ def _table_facts(pdf: Path) -> list[dict]:
                             "condition_verbatim": condition,
                         }
                     )
-    except Exception:
-        pass
     finally:
         doc.close()
     try:
@@ -109,12 +113,12 @@ def _table_facts(pdf: Path) -> list[dict]:
 
         doc = pymupdf.open(pdf)
         try:
-            facts.extend(read_characteristic_tables(doc))
+            facts.extend(read_characteristic_tables(doc, failures=failures))
         finally:
             doc.close()
-    except Exception:
-        pass
-    return facts
+    except Exception as exc:
+        failures.record(None, "characteristic_tables", exc)
+    return facts, failures.events
 
 
 def _render_region(page, bbox, out_png: Path) -> None:
@@ -129,13 +133,16 @@ _FACTS_CACHE: dict[str, list[dict]] = {}
 _FACTS_CACHE_LIMIT = 6
 
 
-def _facts_cached(pdf: Path, doc_sha: str | None) -> list[dict]:
+def _facts_cached(pdf: Path, doc_sha: str | None) -> dict:
     """Anchor facts per DOCUMENT, not per page — the queue repeats each
     doc's pages and a full-document rescan per item made the burn
     CPU-bound (measured: workers pinned at 99% in _table_facts). A shared
     on-disk cache makes the scan happen once per document across all
     workers and all restarts (measured: 6/12 workers buried in 3,000-page
-    RM rescans before this)."""
+    RM rescans before this).
+
+    Returns {"facts": [...], "failures": summary} — the failure summary
+    rides along so cached drops still surface in the artifact (hw-wk9)."""
 
     key = doc_sha or str(pdf)
     cached = _FACTS_CACHE.get(key)
@@ -145,24 +152,27 @@ def _facts_cached(pdf: Path, doc_sha: str | None) -> list[dict]:
     cache_file = Path(cache_dir) / f"{key}.json" if cache_dir else None
     if cache_file and cache_file.exists():
         try:
-            facts = json.loads(cache_file.read_text())
-            _FACTS_CACHE[key] = facts
-            return facts
+            payload = json.loads(cache_file.read_text())
+            if isinstance(payload, list):  # pre-hw-wk9 cache: facts only
+                payload = {"facts": payload, "failures": summarize([])}
+            _FACTS_CACHE[key] = payload
+            return payload
         except Exception:
             pass
-    facts = _table_facts(pdf)
+    facts, events = _table_facts(pdf)
+    payload = {"facts": facts, "failures": summarize(events)}
     if cache_file:
         try:
             cache_file.parent.mkdir(parents=True, exist_ok=True)
             tmp = cache_file.with_suffix(".tmp")
-            tmp.write_text(json.dumps(facts, ensure_ascii=False, default=str))
+            tmp.write_text(json.dumps(payload, ensure_ascii=False, default=str))
             tmp.replace(cache_file)
         except Exception:
             pass
     if len(_FACTS_CACHE) >= _FACTS_CACHE_LIMIT:
         _FACTS_CACHE.pop(next(iter(_FACTS_CACHE)))
-    _FACTS_CACHE[key] = facts
-    return facts
+    _FACTS_CACHE[key] = payload
+    return payload
 
 
 def extract_page(
@@ -188,7 +198,9 @@ def extract_page(
     finally:
         doc.close()
     rows = []
-    facts = _facts_cached(pdf, item.get("document_sha256"))
+    facts_payload = _facts_cached(pdf, item.get("document_sha256"))
+    facts = facts_payload["facts"]
+    facts_health = facts_payload["failures"]
     for figure_index, region, bbox, png in outputs:
         result = client.extract(
             capability="typical_characteristics",
@@ -225,6 +237,7 @@ def extract_page(
                 "problems": problems,
                 "ungrounded_labels": missing,
                 "anchor_check": anchors,
+                "facts_extraction": facts_health,
             }
         )
     return rows

@@ -37,6 +37,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from harness.pipeline.extraction_health import ExtractionFailures
+
 SCHEMA = "harness.electronics-key-features-grid.v1"
 READER = "power_datasheet.v1"
 
@@ -600,13 +602,17 @@ def _parse_number(text: str) -> float | list[float] | None:
     return None
 
 
-def read_characteristic_tables(document: Any) -> list[dict[str, Any]]:
+def read_characteristic_tables(
+    document: Any, *, failures: ExtractionFailures | None = None
+) -> list[dict[str, Any]]:
     facts: list[dict[str, Any]] = []
     for pno in range(document.page_count):
         page = document[pno]
         try:
             tables = page.find_tables().tables
-        except Exception:  # pragma: no cover - PyMuPDF internals
+        except Exception as exc:  # PyMuPDF internals — recorded, not silent
+            if failures is not None:
+                failures.record(pno + 1, "find_tables", exc)
             continue
         if not tables:
             continue
@@ -1239,7 +1245,8 @@ def build_power_grid(path: Path, *, vendor: str | None = None, part_numbers: lis
     data = path.read_bytes()
     sha = sha256 or hashlib.sha256(data).hexdigest()
     document = pymupdf.open(stream=data, filetype="pdf")
-    facts = read_characteristic_tables(document)
+    failures = ExtractionFailures()
+    facts = read_characteristic_tables(document, failures=failures)
     facts.extend(read_front_page_facts(document))
     base = {"vendor": vendor, "vendor_basis": "manifest" if vendor else None, "grain": "part", "scope_as_printed": ", ".join(part_numbers or []) or None, "source_artifact": path.name, "document_sha256": sha}
     rows: list[dict[str, Any]] = []
@@ -1248,7 +1255,7 @@ def build_power_grid(path: Path, *, vendor: str | None = None, part_numbers: lis
     populated = {r["group"] for r in rows}
     return {
         "schema": SCHEMA,
-        "_meta": {**base, "aisle": aisle, "page_count": document.page_count, "reader": READER, "extracted_at": datetime.now(timezone.utc).isoformat(), "models_used": [], "tables_read": len({(f["page"], f["table_title"]) for f in facts}), "facts": len(facts)},
+        "_meta": {**base, "aisle": aisle, "page_count": document.page_count, "reader": READER, "extracted_at": datetime.now(timezone.utc).isoformat(), "models_used": [], "tables_read": len({(f["page"], f["table_title"]) for f in facts}), "facts": len(facts), **failures.summary()},
         "groups": [{"key": k, "label": l} for k, l in GROUPS],
         "groups_populated": len(populated),
         "rows": rows,

@@ -169,10 +169,14 @@ def asus2_free():
 
 
 def incoming_count(host=None):
+    """None means the count is UNKNOWN (ssh failure) — never a fabricated
+    number (hw-wk9: the old 999 read as 'a lot queued')."""
     if host is None:
         return len(glob.glob(os.path.expanduser("~/extract-jobs/incoming/*.pdf")))
     rc, out = sh(f"ssh -o BatchMode=yes -o ConnectTimeout=8 {host} 'ls ~/extract-jobs/incoming/*.pdf 2>/dev/null | wc -l'")
-    return int(out) if rc == 0 and out.strip().isdigit() else 999
+    if rc != 0 or not out.strip().isdigit():
+        return None
+    return int(out)
 
 
 def push_batch(host, jobs):
@@ -192,6 +196,7 @@ def push_batch_local(jobs):
     from concurrent.futures import ThreadPoolExecutor
 
     rr = _alternator()
+    failed: list[str] = []
 
     def _copy(j):
         use_alt = rr() == 1
@@ -201,11 +206,14 @@ def push_batch_local(jobs):
         except OSError:
             try:
                 shutil.copy2(j["source_path"], os.path.expanduser(f"~/extract-jobs/incoming/{os.path.basename(j['source_path'])}"))
-            except OSError:
-                pass
+            except OSError as exc:
+                # hw-wk9: a dropped job gets a receipt, not silence
+                failed.append(j["source_path"])
+                print(f"COPY FAILED: {j['source_path']}: {exc}", flush=True)
 
     with ThreadPoolExecutor(32) as pool:
         list(pool.map(_copy, jobs))
+    return failed
 
 
 def remote_list(host, which):
@@ -311,7 +319,12 @@ def main():
                 acked += a
                 failed += f
             for name, host in targets:
-                if incoming_count(host) > BATCH:
+                pending = incoming_count(host)
+                if pending is None:
+                    # fail closed: unknown queue depth -> no claim this round
+                    print(f"incoming count UNKNOWN for {name} ({host}) — not claiming this round", flush=True)
+                    continue
+                if pending > BATCH:
                     continue
                 jobs = store.claim(con, f"dispatch-{name}", kinds=("substrate",), limit=BATCH)
                 if jobs:

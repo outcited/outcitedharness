@@ -27,6 +27,7 @@ from harness.electronics.power_datasheet import (  # noqa: E402
     read_characteristic_tables,
     read_front_page_facts,
 )
+from harness.pipeline.extraction_health import ExtractionFailures  # noqa: E402
 
 AXES = {
     "mosfet": {"vds_v": ["VDS"], "id_a": ["ID"], "rds_on_mohm": ["RDS(ON"]},
@@ -149,10 +150,13 @@ def _outputs_from_prose(facts: list[dict]) -> tuple[int | None, str]:
 
 def extract_part(pdf: Path, part: str, device_class: str) -> list[dict]:
     doc = pymupdf.open(pdf)
+    failures = ExtractionFailures()
     try:
-        facts = read_characteristic_tables(doc) + read_front_page_facts(doc)
+        facts = read_characteristic_tables(doc, failures=failures) + read_front_page_facts(doc)
     finally:
         doc.close()
+    if failures:
+        print(f"EXTRACTION FAILURES ({part}): {failures.summary()}", file=sys.stderr, flush=True)
     rows = []
     best: dict[str, dict] = {}
     for fact in facts:

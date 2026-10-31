@@ -29,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from harness.pipeline.extraction_health import ExtractionFailures  # noqa: E402
+
 from harness.electronics.power_axes_v2 import (  # noqa: E402
     bounded_axis_rows,
     collapse_rows,
@@ -98,7 +100,10 @@ def _scan(item: dict, pdf_root: str) -> dict:
         else:
             doc = pymupdf.open(pdf)
         try:
-            facts = read_characteristic_tables(doc)
+            failures = ExtractionFailures()
+            facts = read_characteristic_tables(doc, failures=failures)
+            if failures:
+                print(f"EXTRACTION FAILURES: {failures.summary()}", file=sys.stderr, flush=True)
             front = [doc[index].get_text() for index in range(min(3, doc.page_count))]
         finally:
             doc.close()
