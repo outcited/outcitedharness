@@ -49,7 +49,8 @@ class Store:
         cols = ("opn", "doc_sha", "field", "value", "value_min", "value_max",
                 "unit", "unit_as_printed", "value_role", "condition_verbatim",
                 "verdict", "table_kind", "page", "verbatim", "span",
-                "verified_by", "rule_version", "evidence_ref", "source_url",
+                "verified_by", "rule_version", "extractor_method",
+                "evidence_ref", "source_url",
                 "schema", "schema_version", "loaded_at")
         row = dict(row, loaded_at=time.time())
         placeholders = ",".join("?" for _ in cols)
@@ -80,7 +81,17 @@ class LoadReport:
 def load_rows(store, rows, vault_root=None, dry_run=False,
               adapter=None, opn_default=None):
     """Validate + store rows. Returns LoadReport. Dry-run validates and
-    vault-verifies but writes nothing."""
+    vault-verifies but writes nothing.
+
+    Vault re-verification is MANDATORY on persist (NEO source review,
+    merge 47cac640): a persist load without a vault root raises — the
+    old `if vault_root:` silently skipped verification. Dry-run also
+    verifies when a vault root is supplied.
+    """
+    if not dry_run and not vault_root:
+        raise ValueError(
+            "vault_root is mandatory for persist loads; verification "
+            "cannot be skipped (fail-closed, merge 47cac640 review)")
     adapter = adapter or _default_adapter
     report = LoadReport()
     for i, raw in enumerate(rows):

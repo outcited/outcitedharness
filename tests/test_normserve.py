@@ -42,14 +42,30 @@ SAMPLE_ROWS = [
      "verbatim": "VIN | Operating input voltage range | 2.3 | 5.5 | V",
      "verdict": "printed_row"},
     {"condition_verbatim": None, "field": "vout",
-     "method": "deterministic_power_axes_v2_v1", "page_1based": 2,
+     "method": "deterministic_power_axes_v2_v1", "page_1based": 5,
      "part_number": ST1S15_SHA, "pdf_sha": "",
      "schema": "harness.electronics-power-axes-v2.v1",
      "source_url": "https://www.st.com/resource/en/datasheet/st1s15.pdf",
-     "table_kind": "characteristics", "unit": "V", "value_role": "fixed",
-     "verbatim": "Different output voltage versions of the ST1S15 available on | 9",
+     "table_kind": "output_voltage", "unit": "V", "value_role": "fixed",
+     "verbatim": "VOUT | Output voltage | 9 | V",
      "verdict": "printed_row", "vout_max_v": 9.0, "vout_min_v": 9.0},
 ]
+
+# Non-entailing row (NEO review, merge 47cac640): the old positive sample
+# asserted vout=9.0 from the versions-availability line
+# "…versions of the ST1S15 available on | 9" — an over-claim the substring
+# check cannot fully police. This fixture (claim value absent from the
+# quoted row) is the canonical negative for the entailment gate.
+NON_ENTAILING_ROW = {
+    "condition_verbatim": None, "field": "vout",
+    "method": "deterministic_power_axes_v2_v1", "page_1based": 2,
+    "part_number": ST1S15_SHA, "pdf_sha": "",
+    "schema": "harness.electronics-power-axes-v2.v1",
+    "source_url": "https://www.st.com/resource/en/datasheet/st1s15.pdf",
+    "table_kind": "characteristics", "unit": "V", "value_role": "fixed",
+    "verbatim": "VIN | Operating input voltage range | 2.3 | 5.5 | V",
+    "verdict": "printed_row", "vout_max_v": 9.0, "vout_min_v": 9.0,
+}
 
 
 @pytest.fixture()
@@ -133,27 +149,46 @@ def test_serve_endpoint(store, vault):
         server.shutdown()
 
 
-# --- negative tests (mandatory, issue #64) ---
+# --- negative tests (mandatory, issue #64 + merge-47cac640 review) ---
 
-def test_reject_missing_verbatim(store):
-    rows = [dict(SAMPLE_ROWS[0], verbatim="")]
-    report = load_rows(store, rows, opn_default="ST1S15")
+def test_persist_without_vault_root_raises(store):
+    with pytest.raises(ValueError, match="vault_root is mandatory"):
+        load_rows(store, make_rows("a" * 64), opn_default="ST1S15")
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_non_entailing_verbatim_rejected(store, vault):
+    root, sha = vault
+    rows = json.loads(json.dumps([NON_ENTAILING_ROW]).replace(ST1S15_SHA, sha))
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "entail" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_reject_missing_verbatim(store, vault):
+    root, sha = vault
+    rows = json.loads(json.dumps(
+        [dict(SAMPLE_ROWS[0], verbatim="")]).replace(ST1S15_SHA, sha))
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0
     assert len(report.rejections) == 1
     assert "verbatim" in report.rejections[0]["reason"]
     assert store.claims_for_opn("st1s15") == []
 
 
-def test_reject_missing_page(store):
-    rows = [dict(SAMPLE_ROWS[0])]
+def test_reject_missing_page(store, vault):
+    root, sha = vault
+    rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
     del rows[0]["page_1based"]
-    report = load_rows(store, rows, opn_default="ST1S15")
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.rejections) == 1
 
 
-def test_reject_bad_sha(store):
+def test_reject_bad_sha(store, vault):
+    root, sha = vault
     rows = [dict(SAMPLE_ROWS[0], part_number="deadbeef")]
-    report = load_rows(store, rows, opn_default="ST1S15")
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.rejections) == 1
     assert "64-hex" in report.rejections[0]["reason"]
 
@@ -172,28 +207,74 @@ def test_reject_vault_hash_mismatch(store, vault):
     assert all("mismatch" in r["reason"] for r in report.rejections)
 
 
-def test_reject_missing_rule_version_and_verified_by(store):
-    rows = [dict(SAMPLE_ROWS[0])]
+def test_reject_missing_rule_version_and_verified_by(store, vault):
+    root, sha = vault
+    rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
     del rows[0]["schema"]
-    report = load_rows(store, rows, opn_default="ST1S15")
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0
     assert "rule_version" in report.rejections[0]["reason"]
-    rows = [dict(SAMPLE_ROWS[0])]
-    del rows[0]["method"]
-    report = load_rows(store, rows, opn_default="ST1S15")
+    # verified_by is the evidence-backed verdict — a row with no verdict
+    # has nothing vouching for it and is rejected (method alone is NOT
+    # verification; it is kept separately as extractor_method).
+    rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
+    del rows[0]["verdict"]
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0
     assert "verified_by" in report.rejections[0]["reason"]
 
 
-def test_reject_no_opn_and_no_default(store):
-    report = load_rows(store, [dict(SAMPLE_ROWS[0])])
+def test_extractor_method_recorded_separately(store, vault):
+    root, sha = vault
+    report = load_rows(store, make_rows(sha), vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 3
+    claims = store.claims_for_opn("st1s15")
+    for c in claims:
+        assert c["verified_by"] == "printed_row"
+        assert c["extractor_method"] == "deterministic_power_axes_v2_v1"
+
+
+def test_replay_loads_zero_new_rows(store, vault):
+    root, sha = vault
+    rows = make_rows(sha)
+    first = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
+    assert first.loaded == 3 and first.duplicates == 0
+    replay = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
+    assert replay.loaded == 0, "replay must not create new rows"
+    assert replay.duplicates == 3
+    assert replay.rejections == []
+    assert len(store.claims_for_opn("st1s15")) == 3
+
+
+def test_unique_key_null_safe(store, vault):
+    root, sha = vault
+    rows = [json.loads(json.dumps(
+        SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))]
+    rows[0].pop("value_role", None)
+    rows[0].pop("condition_verbatim", None)
+    first = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
+    assert first.loaded == 1
+    replay = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
+    assert replay.loaded == 0 and replay.duplicates == 1, \
+        "NULL value_role/condition_verbatim must dedupe (null-safe UNIQUE)"
+    assert len(store.claims_for_opn("st1s15")) == 1
+
+
+def test_reject_no_opn_and_no_default(store, vault):
+    root, sha = vault
+    rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
+    report = load_rows(store, rows, vault_root=root)
     assert report.loaded == 0 and len(report.rejections) == 1
     assert "opn" in report.rejections[0]["reason"]
 
 
-def test_rejections_never_swallowed(store):
-    rows = [dict(SAMPLE_ROWS[0], verbatim=""), dict(SAMPLE_ROWS[1])]
-    report = load_rows(store, rows, opn_default="ST1S15")
+def test_rejections_never_swallowed(store, vault):
+    root, sha = vault
+    rows = json.loads(json.dumps(
+        [dict(SAMPLE_ROWS[0], verbatim=""),
+         SAMPLE_ROWS[1]]).replace(ST1S15_SHA, sha))
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 1
     assert len(report.rejections) == 1
     assert report.rejections[0]["index"] == 0
