@@ -1,9 +1,9 @@
-# NEO status — {'running': 0, 'suspended': False, 'uptime_sec': 2028, 'version': '1.5.1', 'agents': {'total': 5, 'running': 0, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 0, 'ready': 21, 'open': 22}, 'partial': True, 'partial_errors': ['sessions: loading session snapshot timed out after 1s', 'mail: count timed out after 1s', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-31T02:57:48Z
+# NEO status — {'running': 0, 'suspended': False, 'uptime_sec': 2630, 'version': '1.5.1', 'agents': {'total': 5, 'running': 0, 'suspended': 0, 'quarantined': 0}, 'work': {'in_progress': 0, 'ready': 21, 'open': 23}, 'partial': True, 'partial_errors': ['sessions: loading session snapshot timed out after 1s', 'store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded']} @ 2026-10-31T03:07:51Z
 - supervisor: ok v1.5.1 uptime 0h
-- city running=0 suspended=False agents={'total': 5, 'running': 0, 'suspended': 0, 'quarantined': 0} work={'in_progress': 0, 'ready': 21, 'open': 22}
+- city running=0 suspended=False agents={'total': 5, 'running': 0, 'suspended': 0, 'quarantined': 0} work={'in_progress': 0, 'ready': 21, 'open': 23}
 - sessions: 0 active; pending human interactions: 0
 - NEO findings tracked: 5; duplicate groups: 0
-- event index: None last_seq=129855
+- event index: None last_seq=130015
 
 ## Agents
 - idle bd.dog-1 scaled (min=0, max=2)
@@ -14,4 +14,4 @@
 
 ## Continuity alerts
 - **orchestrator-idle-with-ready-work** {"ready": 21, "running_agents": 0}
-- **city-status-partial** {"errors": ["sessions: loading session snapshot timed out after 1s", "mail: count timed out after 1s", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
+- **city-status-partial** {"errors": ["sessions: loading session snapshot timed out after 1s", "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"]}
