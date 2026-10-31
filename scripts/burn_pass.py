@@ -56,6 +56,7 @@ from harness.electronics.thermal_metrics import (  # noqa: E402
     collapse_thermal,
     thermal_rows,
 )
+from harness.pipeline.extraction_health import ExtractionFailures  # noqa: E402
 
 MODE_PAGE_HINT = re.compile(
     r"power\s+(?:consumption|mode|current)|current\s+consumption|"
@@ -195,7 +196,10 @@ class _GatedPage:
 def _reader_thermal(doc: CachedDoc) -> list[dict]:
     from harness.electronics.power_datasheet import read_characteristic_tables
 
-    facts = read_characteristic_tables(GatedDoc(doc, THERMAL_PAGE_GATE))
+    failures = ExtractionFailures()
+    facts = read_characteristic_tables(GatedDoc(doc, THERMAL_PAGE_GATE), failures=failures)
+    if failures:
+        print(f"EXTRACTION FAILURES (thermal reader): {failures.summary()}", file=sys.stderr, flush=True)
     return list(collapse_thermal(thermal_rows(facts)).values())
 
 

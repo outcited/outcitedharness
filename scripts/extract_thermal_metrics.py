@@ -27,6 +27,7 @@ from harness.electronics.thermal_metrics import (  # noqa: E402
     collapse_thermal,
     thermal_rows,
 )
+from harness.pipeline.extraction_health import ExtractionFailures  # noqa: E402
 
 
 def _queue_parts(path: Path) -> list[dict]:
@@ -61,12 +62,13 @@ def _scan(item: dict, pdf_root: str) -> dict:
         from harness.electronics.power_datasheet import read_characteristic_tables
 
         doc = pymupdf.open(pdf)
+        failures = ExtractionFailures()
         try:
-            facts = read_characteristic_tables(doc)
+            facts = read_characteristic_tables(doc, failures=failures)
         finally:
             doc.close()
         winner = collapse_thermal(thermal_rows(facts))
-        return {"rows": list(winner.values()), "error": None}
+        return {"rows": list(winner.values()), "error": None, "extraction_failures": failures.summary()}
     except Exception as exc:
         return {"rows": [], "error": type(exc).__name__}
 

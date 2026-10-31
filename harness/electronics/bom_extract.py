@@ -18,6 +18,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from harness.pipeline.extraction_health import ExtractionFailures
+
 BOM_SCHEMA = "harness.electronics-eval-bom.v1"
 
 _DESIGN_ID = re.compile(
@@ -143,10 +145,12 @@ def bom_from_document(doc) -> dict[str, Any]:
     items: list[dict] = []
     method = None
     page_hits: list[int] = []
+    failures = ExtractionFailures()
     for i in range(min(doc.page_count, 40)):
         try:
             page = doc[i]
-        except Exception:
+        except Exception as exc:
+            failures.record(i + 1, "page_load", exc)
             continue
         if i == 0:
             first_text = page.get_text() or ""
@@ -158,8 +162,8 @@ def bom_from_document(doc) -> dict[str, Any]:
                 if t_items and len(t_items) > len(items):
                     items, method = t_items, f"find_tables:p{i + 1}"
                     page_hits.append(i + 1)
-        except Exception:
-            pass
+        except Exception as exc:
+            failures.record(i + 1, "find_tables", exc)
         # 2. column-flow fallback (standalone BOM sheets)
         if not items:
             text = page.get_text() or ""
@@ -187,6 +191,7 @@ def bom_from_document(doc) -> dict[str, Any]:
         "item_count": len(items),
         "parse_method": method,
         "bom_pages": sorted(set(page_hits)),
+        **failures.summary(),
     }
 
 

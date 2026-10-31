@@ -13,17 +13,21 @@ from pathlib import Path
 
 import pymupdf
 
+from harness.pipeline.extraction_health import ExtractionFailures
+
 PAD = 20
 MIN_REGION_H = 60
 MIN_REGION_W = 120
 
 
-def regions_for_page(page, page_text=""):
+def regions_for_page(page, page_text="", failures: ExtractionFailures | None = None):
     """Return [{bbox: (x0,y0,x1,y1), source: 'tables'|'layout'|'fullpage'}]."""
     try:
         finder = page.find_tables()
         tables = list(finder.tables) if finder else []
-    except Exception:
+    except Exception as exc:
+        if failures is not None:
+            failures.record(getattr(page, "number", -1) + 1, "region_detect", exc)
         tables = []
     out = []
     for t in tables:
@@ -72,7 +76,8 @@ def layout_regions(page, page_text, min_gap=30):
     return out or [{"bbox": (0, 0, page.rect.width, page.rect.height), "source": "fullpage"}]
 
 
-def render_regions(pdf_path, page_numbers, dpi=200, max_regions_per_page=3):
+def render_regions(pdf_path, page_numbers, dpi=200, max_regions_per_page=3,
+                   failures: ExtractionFailures | None = None):
     """Render table regions as PNG bytes dict: {page: [(bbox, png_bytes)]}."""
     doc = pymupdf.open(pdf_path)
     out = {}
@@ -82,9 +87,11 @@ def render_regions(pdf_path, page_numbers, dpi=200, max_regions_per_page=3):
         page = doc[pn - 1]
         try:
             text = page.get_text("text")
-        except Exception:
+        except Exception as exc:
+            if failures is not None:
+                failures.record(pn, "page_text", exc)
             text = ""
-        regions = regions_for_page(page, text)[:max_regions_per_page]
+        regions = regions_for_page(page, text, failures=failures)[:max_regions_per_page]
         page_out = []
         for r in regions:
             clip = pymupdf.Rect(r["bbox"])
