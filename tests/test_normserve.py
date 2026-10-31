@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from harness.normserve.loader import Store, load_rows
+from harness.normserve.loader import Rejection, Store, load_rows
 from harness.normserve.serve import make_handler
 from harness.normserve.vault import verify_sha256
 
@@ -231,7 +231,7 @@ def test_extractor_method_recorded_separately(store, vault):
     assert report.loaded == 3
     claims = store.claims_for_opn("st1s15")
     for c in claims:
-        assert c["verified_by"] == "printed_row"
+        assert c["verified_by"] == "quote_pass"
         assert c["extractor_method"] == "deterministic_power_axes_v2_v1"
 
 
@@ -279,3 +279,160 @@ def test_rejections_never_swallowed(store, vault):
     assert len(report.rejections) == 1
     assert report.rejections[0]["index"] == 0
     assert report.summary()["rejected"] == 1
+
+
+# --- round-2 corrections (hw-x9g, NEO review at head 61e95297) ---
+
+def _vout_row(sha, verbatim, value_kwargs=None):
+    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
+    row["verbatim"] = verbatim
+    row.update(value_kwargs or {})
+    return row
+
+
+def test_original_available_on_quote_rejected(store, vault):
+    """The ORIGINAL failing quote: 'available on | 9' accepted vout 9.0
+    under digit-boundary matching. Field binding rejects it: the row
+    never labels vout."""
+    root, sha = vault
+    row = _vout_row(
+        sha,
+        "Different output voltage versions of the ST1S15 available on | 9",
+        {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "entail" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_near_miss_numbers_rejected(store, vault):
+    """Decimal / signed near-misses: 9 inside 0.9 / 9.5 / -9 is token
+    presence, not entailment."""
+    root, sha = vault
+    for printed in ("0.9", "9.5", "-9"):
+        row = _vout_row(sha, f"VOUT | Output voltage | {printed} | V",
+                        {"vout_max_v": 9.0, "vout_min_v": 9.0})
+        report = load_rows(store, [row], vault_root=root,
+                           opn_default="ST1S15")
+        assert report.loaded == 0, printed
+        assert "entail" in report.rejections[0]["reason"], printed
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_wrong_field_binding_rejected(store, vault):
+    """9 printed after ANOTHER field's label does not entail vout."""
+    root, sha = vault
+    row = _vout_row(sha, "IQ | Quiescent current | 9 | mA",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "entail" in report.rejections[0]["reason"]
+
+
+def test_verified_by_vocabulary_enforced(store, vault):
+    """verified_by is a receipt from an evidence-backed vocabulary; an
+    arbitrary raw verdict ('REJECTED') must be refused, never loaded."""
+    root, sha = vault
+    row = json.loads(json.dumps(SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))
+    row["verdict"] = "REJECTED"
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "vocabulary" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def _make_v1_store(path):
+    """A PR65-era store: v1 table WITHOUT extractor_method, inline
+    UNIQUE, schema_version norm-serve.v1."""
+    import sqlite3
+    con = sqlite3.connect(path)
+    con.executescript("""
+    CREATE TABLE IF NOT EXISTS norm_claims (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        opn TEXT NOT NULL, doc_sha TEXT NOT NULL, field TEXT NOT NULL,
+        value REAL, value_min REAL, value_max REAL, unit TEXT,
+        unit_as_printed TEXT, value_role TEXT, condition_verbatim TEXT,
+        verdict TEXT, table_kind TEXT, page INTEGER NOT NULL,
+        verbatim TEXT NOT NULL, span TEXT, verified_by TEXT NOT NULL,
+        rule_version TEXT NOT NULL, evidence_ref TEXT, source_url TEXT,
+        schema TEXT, schema_version TEXT NOT NULL,
+        loaded_at REAL NOT NULL,
+        UNIQUE (opn, doc_sha, field, value_role, condition_verbatim)
+    );""")
+    con.commit()
+    con.close()
+
+
+def test_v1_store_refused_fail_closed(tmp_path):
+    """NEO round-2 (3): opening a PR65 store with the new loader raised
+    OperationalError (missing extractor_method). Now: fail-closed
+    refusal with instruction — never auto-migrate."""
+    db = str(tmp_path / "v1.db")
+    _make_v1_store(db)
+    with pytest.raises(Rejection, match="predates norm-serve.v2"):
+        Store(db)
+
+
+def test_duplicate_existing_rows_refused_fail_closed(tmp_path):
+    """NEO round-2 (3): creating uq_norm_claims_key over existing
+    duplicates raised raw IntegrityError. Now: fail-closed refusal
+    naming the problem and the required operator action."""
+    import sqlite3
+    db = str(tmp_path / "dups.db")
+    store = Store(db)
+    store.con.execute("DROP INDEX IF EXISTS uq_norm_claims_key")
+    store.con.commit()
+    store.con.close()
+    con = sqlite3.connect(db)
+    base = ("ST1S15", "a" * 64, "vout", 9.0, None, None, "V", "V", "fixed",
+            None, "printed_row", "output_voltage", 5, "VOUT | Out | 9 | V",
+            None, "quote_pass", "rv", "m")
+    from harness.normserve.schema import SCHEMA_VERSION
+    base = base + (SCHEMA_VERSION, 0.0)
+    for _ in range(2):
+        con.execute(
+            "INSERT INTO norm_claims (opn, doc_sha, field, value, value_min,"
+            " value_max, unit, unit_as_printed, value_role,"
+            " condition_verbatim, verdict, table_kind, page, verbatim,"
+            " span, verified_by, rule_version, extractor_method,"
+            " schema_version, loaded_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", base)
+    con.commit()
+    con.close()
+    with pytest.raises(Rejection, match="duplicate key group"):
+        Store(db)
+
+
+def test_distinct_page_observations_both_retained(store, vault):
+    """NEO round-2 (5): 2.3@page8 then 4.7@page9 collided on the old key
+    and the second was silently IGNORED. page is in the v2 key: both are
+    legitimate distinct observations and both are retained."""
+    root, sha = vault
+    r1 = json.loads(json.dumps(SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))
+    r2 = dict(r1, value=4.7, page_1based=9,
+              verbatim="VIN | Operating input voltage range | 4.7 | 5.5 | V")
+    report = load_rows(store, [r1, r2], vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 2, report.summary()
+    assert report.duplicates == 0 and report.rejections == []
+    claims = [c for c in store.claims_for_opn("st1s15")
+              if c["field"] == "vin_min_v"]
+    assert sorted(c["page"] for c in claims) == [8, 9]
+    assert sorted(c["value"] for c in claims) == [2.3, 4.7]
+
+
+def test_conflicting_same_key_observation_refused_loudly(store, vault):
+    """Same key, different value: refused loudly as a conflict — never
+    silently ignored, never mislabeled as a duplicate."""
+    root, sha = vault
+    r1 = json.loads(json.dumps(SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))
+    r2 = dict(r1, value=4.7,
+              verbatim="VIN | Operating input voltage range | 4.7 | 5.5 | V")
+    load_rows(store, [r1], vault_root=root, opn_default="ST1S15")
+    report = load_rows(store, [r2], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and report.duplicates == 0
+    assert len(report.rejections) == 1
+    assert "conflicting observation" in report.rejections[0]["reason"]
+    claims = [c for c in store.claims_for_opn("st1s15")
+              if c["field"] == "vin_min_v"]
+    assert len(claims) == 1 and claims[0]["value"] == 2.3

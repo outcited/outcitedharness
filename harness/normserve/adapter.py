@@ -51,6 +51,13 @@ def adapt_power_axes_row(raw: dict, opn_default: str = None):
         return None, f"no numeric value for field {field}"
 
     from . import schema as schema_mod
+    verdict = (raw.get("verdict") or "").strip()
+    verified_by = schema_mod.VERDICT_TO_VERIFIED_BY.get(verdict)
+    if verified_by is None:
+        return None, (
+            f"verdict {verdict!r} does not map to an evidence-backed "
+            f"verified_by vocabulary {sorted(schema_mod.VERIFIED_BY_VOCAB)} "
+            "— arbitrary verdict strings are refused (hw-x9g)")
     return {
         "opn": opn,
         "doc_sha": doc_sha,
@@ -67,7 +74,7 @@ def adapt_power_axes_row(raw: dict, opn_default: str = None):
         "page": raw.get("page_1based"),
         "verbatim": raw.get("verbatim"),
         "span": raw.get("span"),
-        "verified_by": raw.get("verdict"),
+        "verified_by": verified_by,
         "rule_version": raw.get("schema"),
         "extractor_method": raw.get("method"),
         "evidence_ref": raw.get("evidence_ref"),
