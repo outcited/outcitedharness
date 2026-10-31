@@ -408,14 +408,21 @@ def _check_unit_bound(typed, raw, cell):
             (raw.get("field_binding") or {}).get("header_verbatim"))
         source = "cited header"
     if not printed:
+        # The claim's own verbatim row line is source-verified (check
+        # 2a); a unit PRINTED in that row's unit column is source
+        # evidence too (e.g. '... | 2.3 | 5.5 | V' citing the bare
+        # '2.3' cell).
+        printed = _printed_units(typed.get("verbatim"))
+        source = "cited row"
+    if not printed:
         # Round 6 failure 5: with NO unit printed anywhere in the cited
-        # cell or header there is no source-resolved unit evidence — the
-        # declared column_unit is extractor metadata, not the source;
-        # the metadata-unit fallback path is retired (a row citing a
-        # bare printed value and a metadata unit HELDs).
+        # cell, header, or row line there is no source-resolved unit
+        # evidence — the declared column_unit is extractor metadata,
+        # not the source; the metadata-unit fallback path is retired
+        # (a row citing a bare printed value and a metadata unit HELDs).
         column_unit = _norm_unit(
             (raw.get("field_binding") or {}).get("column_unit"))
-        return (f"no unit printed in the cited cell or header — "
+        return (f"no unit printed in the cited cell, header, or row — "
                 f"declared column_unit {column_unit!r} is metadata, "
                 "not printed evidence")
     if unit not in printed:
