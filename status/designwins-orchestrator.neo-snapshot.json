@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 4437,
+    "uptime_sec": 5039,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,7 +14,7 @@
     "work": {
       "in_progress": 0,
       "ready": 24,
-      "open": 28
+      "open": 29
     },
     "partial": true,
     "partial_errors": [
@@ -23,13 +23,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-31T03:48:01Z",
+  "captured_at": "2026-10-31T03:58:03Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 5647,
+    "uptime_sec": 6249,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -104,7 +104,7 @@
   "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 31,
+  "beads_total_reported": 30,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -130,57 +130,57 @@
       ]
     }
   ],
-  "last_event_seq": 127534,
+  "last_event_seq": 127639,
   "recent_events": [
     {
-      "seq": 127524,
-      "type": "order.fired",
-      "subject": "dolt-health"
-    },
-    {
-      "seq": 127523,
-      "type": "order.fired",
-      "subject": "nudge-mail-sweep"
-    },
-    {
-      "seq": 127522,
+      "seq": 127629,
       "type": "order.completed",
       "subject": "order-tracking-sweep"
     },
     {
-      "seq": 127521,
-      "type": "bead.closed",
-      "subject": "do-wisp-g13u3l3"
-    },
-    {
-      "seq": 127520,
+      "seq": 127628,
       "type": "order.completed",
-      "subject": "jsonl-export"
+      "subject": "dolt-remotes-patrol"
     },
     {
-      "seq": 127519,
+      "seq": 127627,
+      "type": "order.fired",
+      "subject": "dolt-remotes-patrol"
+    },
+    {
+      "seq": 127626,
+      "type": "order.fired",
+      "subject": "order-tracking-sweep"
+    },
+    {
+      "seq": 127625,
       "type": "order.completed",
       "subject": "gate-sweep"
     },
     {
-      "seq": 127518,
-      "type": "order.completed",
-      "subject": "cross-rig-deps"
+      "seq": 127624,
+      "type": "order.fired",
+      "subject": "gate-sweep"
     },
     {
-      "seq": 127517,
+      "seq": 127623,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 127516,
-      "type": "order.fired",
-      "subject": "gate-sweep"
+      "seq": 127622,
+      "type": "order.completed",
+      "subject": "dolt-health"
     },
     {
-      "seq": 127515,
+      "seq": 127621,
       "type": "order.fired",
-      "subject": "cross-rig-deps"
+      "subject": "beads-health"
+    },
+    {
+      "seq": 127620,
+      "type": "order.fired",
+      "subject": "dolt-health"
     }
   ]
 }
