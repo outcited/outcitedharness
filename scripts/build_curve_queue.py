@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 """curve-queue: collect typical-characteristics pages across a document queue.
 
-Deterministic TOC scan: every page under a section heading that classifies
-into the ``typical_characteristics`` lane becomes a work item (one per page,
-sha-pinned). Documents whose plots live only in figure captions (no TOC
-entry) are skipped for now — fill-only, the lane never guesses a page.
+Two input modes, both deterministic, both sha-pinned, one work-item schema:
+
+``--queue``     Document queue: TOC scan — every page under a section heading
+                that classifies into the ``typical_characteristics`` lane
+                becomes a work item (one per page). Documents whose plots
+                live only in figure captions (no TOC entry) are skipped
+                unless ``--caption-fallback`` — fill-only, never guess a page.
+
+``--page-evidence``  Page-evidence bundle root (``page-evidence.jsonl`` from
+                ``extract_datasheet_page_evidence.py``): every row whose
+                ``lanes`` contain ``typical_characteristics`` becomes a work
+                item. No PDF access, no re-scan — the page selection was
+                already decided when the evidence was extracted; this mode
+                only re-plays the recorded lane decision.
 """
 
 from __future__ import annotations
@@ -89,6 +99,38 @@ def _queue_documents(path: Path) -> list[dict]:
     return out
 
 
+def _jsonl(path: Path) -> list[dict]:
+    rows = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line:
+            rows.append(json.loads(line))
+    return rows
+
+
+def _evidence_curve_pages(root: Path) -> list[dict]:
+    """Curve work items replayed from a page-evidence bundle.
+
+    Fill-only: a page enters the queue only if its recorded ``lanes``
+    already contain ``typical_characteristics``. Rows that fail integrity
+    checks are tallied, never guessed into the queue.
+    """
+
+    rows = _jsonl(root / "page-evidence.jsonl")
+    out = []
+    for row in rows:
+        if "typical_characteristics" not in (row.get("lanes") or []):
+            continue
+        out.append(
+            {
+                "source_path": str(row["source_path"]),
+                "document_sha256": str(row["document_sha256"]),
+                "page_1based": int(row["page_1based"]),
+            }
+        )
+    return out
+
+
 def _toc_curve_pages(item: dict, caption_fallback: bool) -> dict:
     pdf = Path(item["source_path"])
     try:
@@ -111,7 +153,20 @@ def _toc_curve_pages(item: dict, caption_fallback: bool) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--queue", type=Path, required=True)
+    group = ap.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--queue",
+        type=Path,
+        help="Document queue JSON ({documents|work|parts: [...]})",
+    )
+    group.add_argument(
+        "--page-evidence",
+        type=Path,
+        help=(
+            "Page-evidence bundle root containing page-evidence.jsonl; "
+            "selects rows whose lanes include typical_characteristics"
+        ),
+    )
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument(
@@ -120,45 +175,71 @@ def main() -> int:
         help="TOC-less docs: qualify pages via plot-content figure captions",
     )
     args = ap.parse_args()
+    if args.page_evidence and (args.caption_fallback or args.workers != 8):
+        ap.error(
+            "--caption-fallback/--workers apply only to --queue mode "
+            "(evidence mode re-plays recorded lane decisions, no scan)"
+        )
 
-    documents = _queue_documents(args.queue)
     work = []
     tally: Counter[str] = Counter()
-    with ProcessPoolExecutor(max_workers=args.workers) as pool:
-        for item, result in zip(
-            documents,
-            pool.map(
-                _toc_curve_pages,
+    if args.page_evidence:
+        root = args.page_evidence.expanduser().resolve(strict=True)
+        items = _evidence_curve_pages(root)
+        tally["evidence_rows_typical_characteristics"] = len(items)
+    else:
+        documents = _queue_documents(args.queue)
+        with ProcessPoolExecutor(max_workers=args.workers) as pool:
+            for item, result in zip(
                 documents,
-                [args.caption_fallback] * len(documents),
-            ),
-        ):
-            if result["error"]:
-                tally[f"error:{result['error']}"] += 1
-                continue
-            if not result["pages"]:
-                tally["docs_without_curve_toc"] += 1
-                continue
-            tally["docs_with_curve_pages"] += 1
+                pool.map(
+                    _toc_curve_pages,
+                    documents,
+                    [args.caption_fallback] * len(documents),
+                ),
+            ):
+                if result["error"]:
+                    tally[f"error:{result['error']}"] += 1
+                    continue
+                if not result["pages"]:
+                    tally["docs_without_curve_toc"] += 1
+                    continue
+                tally["docs_with_curve_pages"] += 1
+                for page in result["pages"]:
+                    work.append((item, page))
+        items = []
+        for item, page in work:
+            items.append(
+                {
+                    "source_path": item["source_path"],
+                    "document_sha256": item["document_sha256"],
+                    "page_1based": page,
+                }
+            )
+
+    sha_cache: dict[str, str] = {}
+    for item in items:
+        sha = item["document_sha256"]
+        if not sha:
             pdf = Path(item["source_path"])
-            sha = item["document_sha256"] or hashlib.sha256(pdf.read_bytes()).hexdigest()
-            for page in result["pages"]:
-                work.append(
-                    {
-                        "schema": "harness.electronics-local-model-work.v1",
-                        "work_id": "curve-" + hashlib.sha256(
-                            f"{sha}:{page}".encode()
-                        ).hexdigest()[:32],
-                        "document_sha256": sha,
-                        "source_path": item["source_path"],
-                        "page_1based": page,
-                        "capability": "typical_characteristics",
-                        "partition": "factory_candidate",
-                    }
-                )
+            if pdf not in sha_cache:
+                sha_cache[pdf] = hashlib.sha256(pdf.read_bytes()).hexdigest()
+            sha = sha_cache[pdf]
+        work.append(
+            {
+                "schema": "harness.electronics-local-model-work.v1",
+                "work_id": "curve-"
+                + hashlib.sha256(f"{sha}:{item['page_1based']}".encode()).hexdigest()[:32],
+                "document_sha256": sha,
+                "source_path": item["source_path"],
+                "page_1based": item["page_1based"],
+                "capability": "typical_characteristics",
+                "partition": "factory_candidate",
+            }
+        )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({"work": work}, ensure_ascii=False, sort_keys=True))
-    print(json.dumps({"documents": len(documents), "work": len(work), **dict(sorted(tally.items()))}, indent=1))
+    print(json.dumps({"work": len(work), **dict(sorted(tally.items()))}, indent=1))
     return 0
 
 
