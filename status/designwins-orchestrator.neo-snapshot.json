@@ -3,7 +3,7 @@
   "city": {
     "running": 0,
     "suspended": false,
-    "uptime_sec": 100,
+    "uptime_sec": 215,
     "version": "1.5.1",
     "agents": {
       "total": 9,
@@ -14,22 +14,21 @@
     "work": {
       "in_progress": 0,
       "ready": 24,
-      "open": 29
+      "open": 30
     },
     "partial": true,
     "partial_errors": [
-      "sessions: loading session snapshot timed out after 1s",
       "rig pilot-rig work ready: reading complete ready projection from cache: bead cache unavailable",
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-31T02:17:28Z",
+  "captured_at": "2026-10-31T02:27:38Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 214,
+    "uptime_sec": 823,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -104,7 +103,7 @@
   "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 30,
+  "beads_total_reported": 32,
   "findings": [],
   "blocked": [],
   "duplicates": [
@@ -130,57 +129,57 @@
       ]
     }
   ],
-  "last_event_seq": 126434,
+  "last_event_seq": 126546,
   "recent_events": [
     {
-      "seq": 126424,
+      "seq": 126536,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 126535,
       "type": "order.completed",
       "subject": "beads-health"
     },
     {
-      "seq": 126423,
+      "seq": 126534,
       "type": "order.fired",
       "subject": "gate-sweep"
     },
     {
-      "seq": 126422,
+      "seq": 126533,
       "type": "order.fired",
       "subject": "beads-health"
     },
     {
-      "seq": 126421,
+      "seq": 126532,
+      "type": "order.completed",
+      "subject": "renudge-stale-human-gates"
+    },
+    {
+      "seq": 126531,
+      "type": "order.completed",
+      "subject": "orphan-sweep"
+    },
+    {
+      "seq": 126530,
+      "type": "order.completed",
+      "subject": "spawn-storm-detect"
+    },
+    {
+      "seq": 126529,
       "type": "order.completed",
       "subject": "dolt-health"
     },
     {
-      "seq": 126420,
+      "seq": 126528,
       "type": "order.fired",
       "subject": "dolt-health"
     },
     {
-      "seq": 126419,
-      "type": "controller.started",
-      "subject": null
-    },
-    {
-      "seq": 126418,
-      "type": "storage.binding.not_configured",
-      "subject": null
-    },
-    {
-      "seq": 126417,
-      "type": "order.failed",
-      "subject": "jsonl-export"
-    },
-    {
-      "seq": 126416,
-      "type": "order.failed",
-      "subject": "order-tracking-sweep"
-    },
-    {
-      "seq": 126415,
-      "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
+      "seq": 126527,
+      "type": "order.fired",
+      "subject": "spawn-storm-detect"
     }
   ]
 }

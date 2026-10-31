@@ -22,13 +22,13 @@
       "store health: counting retained bead rows: hydrating list fallback: list timed out: context deadline exceeded"
     ]
   },
-  "captured_at": "2026-10-31T02:17:29Z",
+  "captured_at": "2026-10-31T02:27:40Z",
   "source": "gas-city-supervisor",
   "supervisor": {
     "status": "ok",
     "version": "1.5.1",
     "build_id": "unknown",
-    "uptime_sec": 214,
+    "uptime_sec": 825,
     "cities_total": 2,
     "cities_running": 2,
     "packs_lock_sha256": "1af7124cd74cee616c11a59b83c080959bbc6b441b57833775ae668013956488",
@@ -76,27 +76,10 @@
       "scale": ""
     }
   ],
-  "sessions": [
-    {
-      "id": "ds-wisp-7ny7y3t",
-      "state": "active"
-    },
-    {
-      "id": "ds-wisp-pbe1ykz",
-      "state": "active"
-    },
-    {
-      "id": "ds-wisp-sm2rw3",
-      "state": "active"
-    },
-    {
-      "id": "ds-wisp-ii74l7",
-      "state": "active"
-    }
-  ],
+  "sessions": [],
   "pending_interactions": [],
   "event_index": null,
-  "beads_total_reported": 32,
+  "beads_total_reported": 22,
   "findings": [
     {
       "id": "ds-8ha",
@@ -186,57 +169,57 @@
   ],
   "blocked": [],
   "duplicates": [],
-  "last_event_seq": 129307,
+  "last_event_seq": 129517,
   "recent_events": [
     {
-      "seq": 129297,
+      "seq": 129507,
+      "type": "order.fired",
+      "subject": "nudge-mail-sweep"
+    },
+    {
+      "seq": 129506,
+      "type": "order.fired",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 129505,
       "type": "order.completed",
-      "subject": "spawn-storm-detect"
+      "subject": "jsonl-export"
     },
     {
-      "seq": 129296,
+      "seq": 129504,
       "type": "order.completed",
-      "subject": "renudge-stale-human-gates"
+      "subject": "beads-health"
     },
     {
-      "seq": 129295,
+      "seq": 129503,
       "type": "order.fired",
-      "subject": "spawn-storm-detect"
+      "subject": "beads-health"
     },
     {
-      "seq": 129294,
+      "seq": 129502,
       "type": "order.fired",
-      "subject": "renudge-stale-human-gates"
+      "subject": "jsonl-export"
     },
     {
-      "seq": 129293,
+      "seq": 129501,
+      "type": "order.completed",
+      "subject": "reaper"
+    },
+    {
+      "seq": 129500,
+      "type": "order.completed",
+      "subject": "gate-sweep"
+    },
+    {
+      "seq": 129499,
       "type": "order.fired",
-      "subject": "order-tracking-sweep"
+      "subject": "gate-sweep"
     },
     {
-      "seq": 129292,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 129291,
-      "type": "bead.updated",
-      "subject": "ds-wisp-pbe1ykz"
-    },
-    {
-      "seq": 129290,
-      "type": "bead.updated",
-      "subject": "ds-wisp-7ny7y3t"
-    },
-    {
-      "seq": 129289,
-      "type": "bead.updated",
-      "subject": "ds-wisp-sm2rw3"
-    },
-    {
-      "seq": 129288,
-      "type": "bead.updated",
-      "subject": "ds-wisp-pbe1ykz"
+      "seq": 129498,
+      "type": "order.completed",
+      "subject": "dolt-health"
     }
   ]
 }
