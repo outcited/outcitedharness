@@ -69,18 +69,26 @@ class LoadReport:
     def __init__(self):
         self.loaded = 0
         self.rejections = []   # {index, reason, row_snippet}
+        self.holds = []        # {index, reason_code, detail, row_snippet}
         self.duplicates = 0
 
     def summary(self):
         return {"loaded": self.loaded, "rejected": len(self.rejections),
-                "duplicates": self.duplicates,
-                "rejections": self.rejections}
+                "held": len(self.holds), "duplicates": self.duplicates,
+                "rejections": self.rejections, "holds": self.holds}
 
 
 def load_rows(store, rows, vault_root=None, dry_run=False,
-              adapter=None, opn_default=None):
-    """Validate + store rows. Returns LoadReport. Dry-run validates and
-    vault-verifies but writes nothing."""
+              adapter=None, opn_default=None, ratified_rules=None):
+    """Validate + admit + store rows. Returns LoadReport. Dry-run validates,
+    vault-verifies and admits but writes nothing.
+
+    Admission gate (hw-x9g round 4) runs BEFORE store: rows that pass
+    schema/vault checks but lack structured observation, structure-bound
+    field/unit/role, printed-structure applicability, bound conditions or
+    a re-verifying receipt are HELD with a reason code — recorded, never
+    swallowed, never stored."""
+    from . import admission as admission_mod
     adapter = adapter or _default_adapter
     report = LoadReport()
     for i, raw in enumerate(rows):
@@ -95,6 +103,15 @@ def load_rows(store, rows, vault_root=None, dry_run=False,
                 ok, detail = vault_mod.verify_sha256(vault_root, typed["doc_sha"])
                 if not ok:
                     raise Rejection(f"vault: {detail}")
+            decision = admission_mod.evaluate(
+                typed, raw, vault_root=vault_root,
+                ratified_rules=ratified_rules)
+            if not decision.served:
+                report.holds.append({
+                    "index": i, "reason_code": decision.reason_code,
+                    "detail": decision.detail,
+                    "row_snippet": json.dumps(raw, default=str)[:200]})
+                continue
             if not dry_run:
                 before = store.con.execute(
                     "SELECT COUNT(*) AS n FROM norm_claims").fetchone()["n"]
@@ -124,7 +141,7 @@ def _default_adapter(raw, opn_default=None):
 
 
 def load_jsonl(store, jsonl_path, vault_root=None, dry_run=False,
-               opn_default=None):
+               opn_default=None, ratified_rules=None):
     rows = []
     with open(jsonl_path) as f:
         for line in f:
@@ -132,4 +149,4 @@ def load_jsonl(store, jsonl_path, vault_root=None, dry_run=False,
             if line:
                 rows.append(json.loads(line))
     return load_rows(store, rows, vault_root=vault_root, dry_run=dry_run,
-                     opn_default=opn_default)
+                     opn_default=opn_default, ratified_rules=ratified_rules)
