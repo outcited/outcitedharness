@@ -160,24 +160,26 @@ class LoadReport:
     def __init__(self):
         self.loaded = 0
         self.rejections = []   # {index, reason, row_snippet}
+        self.holds = []        # {index, reason_code, detail, row_snippet}
         self.duplicates = 0
 
     def summary(self):
         return {"loaded": self.loaded, "rejected": len(self.rejections),
-                "duplicates": self.duplicates,
-                "rejections": self.rejections}
+                "held": len(self.holds), "duplicates": self.duplicates,
+                "rejections": self.rejections, "holds": self.holds}
 
 
 def load_rows(store, rows, vault_root=None, dry_run=False,
-              adapter=None, opn_default=None):
-    """Validate + store rows. Returns LoadReport. Dry-run validates and
-    vault-verifies but writes nothing.
+              adapter=None, opn_default=None, ratified_rules=None):
+    """Validate → vault-verify → ADMIT → store rows. Returns LoadReport.
 
-    Vault re-verification is MANDATORY on persist (NEO source review,
-    merge 47cac640): a persist load without a vault root raises — the
-    old `if vault_root:` silently skipped verification. Dry-run also
-    verifies when a vault root is supplied.
-    """
+    Admission gate (hw-x9g round 5) runs BEFORE store: rows that pass
+    schema/vault checks but cannot be source-resolved — no structured
+    observation, unbound field/role/unit, unprinted cell/header/OPN/
+    condition, unverifiable receipt — are HELD with a reason code,
+    recorded, never swallowed, never stored. Persist loads REQUIRE a
+    vault root (mandatory re-verification + source re-resolution)."""
+    from . import admission as admission_mod
     if not dry_run and not vault_root:
         raise ValueError(
             "vault_root is mandatory for persist loads; verification "
@@ -196,6 +198,15 @@ def load_rows(store, rows, vault_root=None, dry_run=False,
                 ok, detail = vault_mod.verify_sha256(vault_root, typed["doc_sha"])
                 if not ok:
                     raise Rejection(f"vault: {detail}")
+            decision = admission_mod.evaluate(
+                typed, raw, vault_root=vault_root,
+                ratified_rules=ratified_rules)
+            if not decision.served:
+                report.holds.append({
+                    "index": i, "reason_code": decision.reason_code,
+                    "detail": decision.detail,
+                    "row_snippet": json.dumps(raw, default=str)[:200]})
+                continue
             if not dry_run:
                 status = store.insert(typed)
                 if status == "duplicate":
@@ -221,7 +232,7 @@ def _default_adapter(raw, opn_default=None):
 
 
 def load_jsonl(store, jsonl_path, vault_root=None, dry_run=False,
-               opn_default=None):
+               opn_default=None, ratified_rules=None):
     rows = []
     with open(jsonl_path) as f:
         for line in f:
@@ -229,4 +240,4 @@ def load_jsonl(store, jsonl_path, vault_root=None, dry_run=False,
             if line:
                 rows.append(json.loads(line))
     return load_rows(store, rows, vault_root=vault_root, dry_run=dry_run,
-                     opn_default=opn_default)
+                     opn_default=opn_default, ratified_rules=ratified_rules)

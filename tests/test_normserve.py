@@ -1,23 +1,89 @@
-"""NORM-SERVE-01 tests (issue #64 contract).
+"""NORM-SERVE-01 tests (issue #64 contract) + hw-x9g round-5 admission gate.
 
-Positive: ST1S15 proving sample (e2e-st1s15-raw.jsonl) loads, API serves
-it with page-level provenance. Negative: missing provenance, failed vault
-re-verification, missing rule_version/verified_by — all rejected, never
-served.
+Round 5 (repair of the f3df0c2d rejection): the admission gate
+RE-READS the source PDF from the vault and verifies cited CELL content,
+field/header/unit/role binding, applicability, and conditions against
+CURRENT BYTES. The positive control (ST1S15 / TA25C / VIN 2.3-5.5 V,
+real fitz-generated PDF) loads ONLY with a complete source-resolvable
+receipt; every f3df bypass (invented quoted_text '999V', unrelated OPN,
+invented conditions, page 999, negative coordinates, vault-only values,
+declared column_unit overriding a printed unit) is HELD with a reason
+code. Store safeguards (PR66) stay: replay-zero, null-safe uniqueness,
+distinct-page retention, same-page conflict refusal, old-store
+preflight refusals — all executed here.
 """
 
+import hashlib
 import json
-import shutil
-import tempfile
+import sqlite3
 from pathlib import Path
 
 import pytest
 
 from harness.normserve.loader import Rejection, Store, load_rows
 from harness.normserve.serve import make_handler
+from harness.normserve.schema import SCHEMA_VERSION
 from harness.normserve.vault import verify_sha256
 
 ST1S15_SHA = "82d2ee0cc7dd7c7aa47fed41ab13e9593d37f49d858470b56d50e648a104c222"
+
+VIN_VERBATIM = "VIN | Operating input voltage range | 2.3 | 5.5 | V"
+VIN_HEADER = "VIN Min Typ Max Unit"
+
+# Real-PDF vault pages (fitz-generated; get_text must reproduce these
+# lines). Page 1: applicability + condition sources (Table 25 style).
+# Page 2: the VIN characteristics table. Page 3: VOUT + second VIN.
+VAULT_PAGES = [
+    ["ST1S15",
+     "VDD = 3.6 V (local table condition)",
+     "TA = 25 C (section 6.1.2 default, inherited)",
+     "TA = 105 C (column condition)"],
+    [VIN_HEADER,
+     VIN_VERBATIM,
+     "VIN | Operating input voltage range | 2.3 to 5.5 | V",
+     "VIN | Operating input voltage range | 4.7 | 5.5 | V",
+     "IQ Min Typ Max Unit",
+     "IQ | Supply current | typ | 22.0 | 23.8 | mA"],
+    ["VOUT Min Typ Max Unit",
+     "VOUT | Output voltage | 9 | V",
+     "VOUT | Output voltage | typ | 9 | V",
+     "VOUT | Output voltage | 9mV",
+     "VIN Min Typ Max Unit",
+     "VIN | Operating input voltage range | 4.7 | 5.5 | V"],
+]
+
+CONDITION_LOCAL_VDD = {"verbatim": "VDD = 3.6 V (local table condition)",
+                       "precedence": "local", "source_page": 1}
+COND_TA25_INHERITED = {
+    "verbatim": "TA = 25 C (section 6.1.2 default, inherited)",
+    "precedence": "inherited", "source_page": 1}
+COND_TA105_COLUMN = {"verbatim": "TA = 105 C (column condition)",
+                     "precedence": "column", "source_page": 1}
+DEFAULT_CONDITIONS = [dict(CONDITION_LOCAL_VDD), dict(COND_TA25_INHERITED)]
+
+
+def make_pdf_bytes(pages_lines):
+    """Build a real PDF whose pages carry exactly pages_lines."""
+    import fitz
+    doc = fitz.open()
+    for lines in pages_lines:
+        page = doc.new_page()
+        y = 72
+        for ln in lines:
+            page.insert_text((72, y), ln)
+            y += 14
+    return doc.tobytes()
+
+
+def make_real_vault(tmp_path, pages_lines=None):
+    root = tmp_path / "vault"
+    data = make_pdf_bytes(pages_lines or VAULT_PAGES)
+    sha = hashlib.sha256(data).hexdigest()
+    blob = root / "blobs" / sha[0:2] / sha[2:4] / f"{sha}.pdf"
+    blob.parent.mkdir(parents=True)
+    blob.write_bytes(data)
+    return str(root), sha
+
 
 def make_rows(sha):
     rows = json.loads(json.dumps(SAMPLE_ROWS).replace(ST1S15_SHA, sha))
@@ -26,52 +92,56 @@ def make_rows(sha):
 
 SAMPLE_ROWS = [
     {"field": "vin_min_v", "method": "deterministic_power_axes_v2_v1",
-     "page_1based": 8, "part_number": ST1S15_SHA, "pdf_sha": "",
+     "page_1based": 2, "part_number": ST1S15_SHA, "pdf_sha": "",
      "schema": "harness.electronics-power-axes-v2.v1",
      "source_url": "https://www.st.com/resource/en/datasheet/st1s15.pdf",
      "table_kind": "characteristics", "unit": "V", "unit_as_printed": "V",
-     "value": 2.3, "value_role": "range",
-     "verbatim": "VIN | Operating input voltage range | 2.3 | 5.5 | V",
+     "value": 2.3, "value_role": "range", "verbatim": VIN_VERBATIM,
      "verdict": "printed_row"},
     {"field": "vin_max_v", "method": "deterministic_power_axes_v2_v1",
-     "page_1based": 8, "part_number": ST1S15_SHA, "pdf_sha": "",
+     "page_1based": 2, "part_number": ST1S15_SHA, "pdf_sha": "",
      "schema": "harness.electronics-power-axes-v2.v1",
      "source_url": "https://www.st.com/resource/en/datasheet/st1s15.pdf",
      "table_kind": "characteristics", "unit": "V", "unit_as_printed": "V",
-     "value": 5.5, "value_role": "range",
-     "verbatim": "VIN | Operating input voltage range | 2.3 | 5.5 | V",
+     "value": 5.5, "value_role": "range", "verbatim": VIN_VERBATIM,
      "verdict": "printed_row"},
     {"condition_verbatim": None, "field": "vout",
-     "method": "deterministic_power_axes_v2_v1", "page_1based": 5,
+     "method": "deterministic_power_axes_v2_v1", "page_1based": 3,
      "part_number": ST1S15_SHA, "pdf_sha": "",
      "schema": "harness.electronics-power-axes-v2.v1",
      "source_url": "https://www.st.com/resource/en/datasheet/st1s15.pdf",
-     "table_kind": "output_voltage", "unit": "V", "value_role": "fixed",
+     "table_kind": "output_voltage", "unit": "V", "unit_as_printed": "V",
+     "value": 9.0, "value_role": "fixed",
      "verbatim": "VOUT | Output voltage | 9 | V",
-     "verdict": "printed_row", "vout_max_v": 9.0, "vout_min_v": 9.0},
+     "verdict": "printed_row"},
 ]
 
-# Non-entailing row (NEO review, merge 47cac640): the old positive sample
-# asserted vout=9.0 from the versions-availability line
-# "…versions of the ST1S15 available on | 9" — an over-claim the substring
-# check cannot fully police. This fixture (claim value absent from the
-# quoted row) is the canonical negative for the entailment gate.
+# Non-entailing row (NEO review, merge 47cac640): claim value absent
+# from the quoted row — the canonical negative for the entailment gate.
 NON_ENTAILING_ROW = {
     "condition_verbatim": None, "field": "vout",
-    "method": "deterministic_power_axes_v2_v1", "page_1based": 2,
+    "method": "deterministic_power_axes_v2_v1", "page_1based": 3,
     "part_number": ST1S15_SHA, "pdf_sha": "",
     "schema": "harness.electronics-power-axes-v2.v1",
     "source_url": "https://www.st.com/resource/en/datasheet/st1s15.pdf",
     "table_kind": "characteristics", "unit": "V", "value_role": "fixed",
-    "verbatim": "VIN | Operating input voltage range | 2.3 | 5.5 | V",
+    "verbatim": VIN_VERBATIM,
     "verdict": "printed_row", "vout_max_v": 9.0, "vout_min_v": 9.0,
 }
 
 
 @pytest.fixture()
 def vault(tmp_path):
-    import hashlib
-    root = tmp_path / "vault"
+    """Real-PDF vault (round 5): the admission gate re-reads these bytes."""
+    return make_real_vault(tmp_path)
+
+
+@pytest.fixture()
+def fake_vault(tmp_path):
+    """Byte blob only (hash-check fixture); source re-resolution cannot
+    open it, so anything needing admission HELDs — used by schema-negative
+    tests that reject BEFORE the gate."""
+    root = tmp_path / "fakevault"
     data = b"%PDF-1.7 ST1S15 fixture"
     sha = hashlib.sha256(data).hexdigest()
     blob = root / "blobs" / sha[0:2] / sha[2:4] / f"{sha}.pdf"
@@ -85,6 +155,49 @@ def store(tmp_path):
     return Store(str(tmp_path / "norm.db"))
 
 
+def structured(raw, sha, quoted_text, column_key, column_role, header,
+               column_unit="V", page=2, table=0, row_idx=1, column=2,
+               applicability=None, conditions=None, verified_by="quote_pass"):
+    """Attach the structured receipt a table-aware extractor emits,
+    including the source-quoted column header."""
+    row = dict(raw)
+    row["part_number"] = sha
+    row["pdf_sha"] = ""
+    row["page_1based"] = page
+    row["evidence"] = [{
+        "kind": "table_cell", "document_sha256": sha,
+        "source_uri": f"file://vault/{sha}.pdf",
+        "page_1based": page, "table_index": table, "row_index": row_idx,
+        "column_index": column, "quoted_text": quoted_text,
+    }]
+    row["field_binding"] = {"table": table, "column_key": column_key,
+                            "column_role": column_role,
+                            "column_unit": column_unit,
+                            "header_verbatim": header}
+    row["applicability"] = applicability if applicability is not None else {
+        "structure": "device_summary", "structure_page": 1,
+        "cell_text": "ST1S15"}
+    row["conditions"] = conditions if conditions is not None else [
+        dict(c) for c in DEFAULT_CONDITIONS]
+    if verified_by:
+        row["verdict"] = {"quote_pass": "printed_row",
+                          "applicability_rule": "applicability_rule",
+                          "vault_sha_recompute": "vault_sha_recompute"}[
+                              verified_by]
+    return row
+
+
+def sample_structured_rows(sha):
+    return [
+        structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                   VIN_HEADER, page=2),
+        structured(make_rows(sha)[1], sha, "2.3 | 5.5 | V", "vin", "max",
+                   VIN_HEADER, page=2),
+        structured(make_rows(sha)[2], sha, "9 | V", "vout", "value",
+                   "VOUT Min Typ Max Unit", page=3, row_idx=1),
+    ]
+
+
 def test_vault_reverification(vault):
     root, sha = vault
     ok, detail = verify_sha256(root, sha)
@@ -93,33 +206,46 @@ def test_vault_reverification(vault):
     assert not ok
 
 
-def test_st1s15_sample_loads_with_vault(store, vault):
+def test_st1s15_structured_sample_loads(store, vault):
+    """Positive control: ST1S15 / TA25C / VIN 2.3-5.5V prints in the PDF
+    and the receipt resolves against the current bytes -> loads."""
     root, sha = vault
-    report = load_rows(store, make_rows(sha), vault_root=root,
-                       opn_default="ST1S15")
-    assert report.rejections == [], report.rejections
+    report = load_rows(store, sample_structured_rows(sha),
+                       vault_root=root, opn_default="ST1S15")
+    assert report.holds == [], report.summary()
     assert report.loaded == 3
     claims = store.claims_for_opn("st1s15")
     fields = {c["field"]: c for c in claims}
     assert fields["vin_min_v"]["value"] == 2.3
     assert fields["vout"]["value"] == 9.0
-    assert fields["vout"]["value_min"] is None and \
-        fields["vout"]["value_max"] is None
-    assert fields["vin_min_v"]["page"] == 8
-    assert "2.3 | 5.5" in fields["vin_min_v"]["verbatim"]
+    assert fields["vin_min_v"]["page"] == 2
+
+
+def test_unstructured_sample_rows_held(store, vault):
+    """CONDITIONAL control: the same OPN without a structured receipt is
+    HELD — never force-served to satisfy a serve requirement."""
+    root, sha = vault
+    report = load_rows(store, make_rows(sha), vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 0
+    assert len(report.holds) == 3
+    assert {h["reason_code"] for h in report.holds} == \
+        {"no_structured_observation"}
+    assert store.claims_for_opn("st1s15") == []
 
 
 def test_dry_run_writes_nothing(store, vault):
     root, sha = vault
-    report = load_rows(store, make_rows(sha), vault_root=root,
+    report = load_rows(store, sample_structured_rows(sha), vault_root=root,
                        dry_run=True, opn_default="ST1S15")
-    assert report.loaded == 3 and report.rejections == []
+    assert report.loaded == 3 and report.holds == []
     assert store.claims_for_opn("st1s15") == []
 
 
 def test_serve_endpoint(store, vault):
     root, sha = vault
-    load_rows(store, make_rows(sha), vault_root=root, opn_default="ST1S15")
+    load_rows(store, sample_structured_rows(sha), vault_root=root,
+              opn_default="ST1S15")
     import io
     from http.server import ThreadingHTTPServer
     import threading
@@ -150,6 +276,8 @@ def test_serve_endpoint(store, vault):
 
 
 # --- negative tests (mandatory, issue #64 + merge-47cac640 review) ---
+# These reject at the SCHEMA layer, before the gate, so the byte-only
+# vault fixture suffices.
 
 def test_persist_without_vault_root_raises(store):
     with pytest.raises(ValueError, match="vault_root is mandatory"):
@@ -157,8 +285,8 @@ def test_persist_without_vault_root_raises(store):
     assert store.claims_for_opn("st1s15") == []
 
 
-def test_non_entailing_verbatim_rejected(store, vault):
-    root, sha = vault
+def test_non_entailing_verbatim_rejected(store, fake_vault):
+    root, sha = fake_vault
     rows = json.loads(json.dumps([NON_ENTAILING_ROW]).replace(ST1S15_SHA, sha))
     report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.rejections) == 1
@@ -166,8 +294,8 @@ def test_non_entailing_verbatim_rejected(store, vault):
     assert store.claims_for_opn("st1s15") == []
 
 
-def test_reject_missing_verbatim(store, vault):
-    root, sha = vault
+def test_reject_missing_verbatim(store, fake_vault):
+    root, sha = fake_vault
     rows = json.loads(json.dumps(
         [dict(SAMPLE_ROWS[0], verbatim="")]).replace(ST1S15_SHA, sha))
     report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
@@ -177,24 +305,24 @@ def test_reject_missing_verbatim(store, vault):
     assert store.claims_for_opn("st1s15") == []
 
 
-def test_reject_missing_page(store, vault):
-    root, sha = vault
+def test_reject_missing_page(store, fake_vault):
+    root, sha = fake_vault
     rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
     del rows[0]["page_1based"]
     report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.rejections) == 1
 
 
-def test_reject_bad_sha(store, vault):
-    root, sha = vault
+def test_reject_bad_sha(store, fake_vault):
+    root, sha = fake_vault
     rows = [dict(SAMPLE_ROWS[0], part_number="deadbeef")]
     report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0 and len(report.rejections) == 1
     assert "64-hex" in report.rejections[0]["reason"]
 
 
-def test_reject_vault_hash_mismatch(store, vault):
-    root, real_sha = vault
+def test_reject_vault_hash_mismatch(store, fake_vault):
+    root, real_sha = fake_vault
     sha = "a" * 64
     rows = make_rows(real_sha)
     for r in rows:
@@ -207,16 +335,13 @@ def test_reject_vault_hash_mismatch(store, vault):
     assert all("mismatch" in r["reason"] for r in report.rejections)
 
 
-def test_reject_missing_rule_version_and_verified_by(store, vault):
-    root, sha = vault
+def test_reject_missing_rule_version_and_verified_by(store, fake_vault):
+    root, sha = fake_vault
     rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
     del rows[0]["schema"]
     report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert report.loaded == 0
     assert "rule_version" in report.rejections[0]["reason"]
-    # verified_by is the evidence-backed verdict — a row with no verdict
-    # has nothing vouching for it and is rejected (method alone is NOT
-    # verification; it is kept separately as extractor_method).
     rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
     del rows[0]["verdict"]
     report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
@@ -226,7 +351,7 @@ def test_reject_missing_rule_version_and_verified_by(store, vault):
 
 def test_extractor_method_recorded_separately(store, vault):
     root, sha = vault
-    report = load_rows(store, make_rows(sha), vault_root=root,
+    report = load_rows(store, sample_structured_rows(sha), vault_root=root,
                        opn_default="ST1S15")
     assert report.loaded == 3
     claims = store.claims_for_opn("st1s15")
@@ -235,9 +360,15 @@ def test_extractor_method_recorded_separately(store, vault):
         assert c["extractor_method"] == "deterministic_power_axes_v2_v1"
 
 
+# --- store safeguards (PR66 restoration; regression retention) ---
+
 def test_replay_loads_zero_new_rows(store, vault):
+    """Replay of the identical load adds ZERO new rows; duplicates are
+    reported. Includes NULL condition_verbatim keys (null-safe)."""
     root, sha = vault
-    rows = make_rows(sha)
+    rows = sample_structured_rows(sha)
+    for r in rows:
+        r["condition_verbatim"] = None
     first = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert first.loaded == 3 and first.duplicates == 0
     replay = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
@@ -248,103 +379,74 @@ def test_replay_loads_zero_new_rows(store, vault):
 
 
 def test_unique_key_null_safe(store, vault):
+    """NULL condition_verbatim must dedupe (null-safe COALESCE UNIQUE
+    index), not double-load; NULL value_role/condition dedupe is
+    additionally checked at the store layer (the gate binds roles)."""
     root, sha = vault
-    rows = [json.loads(json.dumps(
-        SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))]
-    rows[0].pop("value_role", None)
+    rows = [structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin",
+                       "min", VIN_HEADER, page=2)]
     rows[0].pop("condition_verbatim", None)
     first = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
-    assert first.loaded == 1
+    assert first.loaded == 1, first.summary()
     replay = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
     assert replay.loaded == 0 and replay.duplicates == 1, \
-        "NULL value_role/condition_verbatim must dedupe (null-safe UNIQUE)"
+        "NULL condition_verbatim must dedupe (null-safe UNIQUE)"
     assert len(store.claims_for_opn("st1s15")) == 1
+    # store layer: NULL value_role AND condition_verbatim dedupe
+    row = json.loads(json.dumps(store.claims_for_opn("st1s15")[0]))
+    row["value_role"] = None
+    row["condition_verbatim"] = None
+    assert store.insert(row) == "loaded"
+    assert store.insert(row) == "duplicate"
+    claims = store.claims_for_opn("st1s15")
+    assert len(claims) == 2
+    assert sum(1 for c in claims if c["value_role"] is None) == 1
 
 
-def test_reject_no_opn_and_no_default(store, vault):
+def test_distinct_page_observations_both_retained(store, vault):
+    """2.3@page2 and 4.7@page3 share the pre-v2 key; page is in the v2
+    key: both are retained, neither silently deduped away."""
     root, sha = vault
-    rows = json.loads(json.dumps([SAMPLE_ROWS[0]]).replace(ST1S15_SHA, sha))
-    report = load_rows(store, rows, vault_root=root)
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "opn" in report.rejections[0]["reason"]
+    r1 = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                    VIN_HEADER, page=2)
+    r2 = structured(dict(make_rows(sha)[0], value=4.7,
+                         verbatim="VIN | Operating input voltage range | "
+                                  "4.7 | 5.5 | V"),
+                    sha, "4.7 | 5.5 | V", "vin", "min", VIN_HEADER, page=3)
+    report = load_rows(store, [r1, r2], vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 2, report.summary()
+    assert report.duplicates == 0 and report.rejections == []
+    claims = [c for c in store.claims_for_opn("st1s15")
+              if c["field"] == "vin_min_v"]
+    assert sorted(c["page"] for c in claims) == [2, 3]
+    assert sorted(c["value"] for c in claims) == [2.3, 4.7]
 
 
-def test_rejections_never_swallowed(store, vault):
+def test_conflicting_same_key_observation_refused_loudly(store, vault):
+    """Same key (opn+sha+field+page+role+condition), different value:
+    refused loudly as a conflict — never silently ignored, never
+    mislabeled as a duplicate (2.3 -> 5.5-class defect)."""
     root, sha = vault
-    rows = json.loads(json.dumps(
-        [dict(SAMPLE_ROWS[0], verbatim=""),
-         SAMPLE_ROWS[1]]).replace(ST1S15_SHA, sha))
-    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 1
+    r1 = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                    VIN_HEADER, page=2)
+    r2 = structured(dict(make_rows(sha)[0], value=4.7,
+                         verbatim="VIN | Operating input voltage range | "
+                                  "4.7 | 5.5 | V"),
+                    sha, "4.7 | 5.5 | V", "vin", "min", VIN_HEADER, page=2)
+    load_rows(store, [r1], vault_root=root, opn_default="ST1S15")
+    report = load_rows(store, [r2], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and report.duplicates == 0
     assert len(report.rejections) == 1
-    assert report.rejections[0]["index"] == 0
-    assert report.summary()["rejected"] == 1
-
-
-# --- round-2 corrections (hw-x9g, NEO review at head 61e95297) ---
-
-def _vout_row(sha, verbatim, value_kwargs=None):
-    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
-    row["verbatim"] = verbatim
-    row.update(value_kwargs or {})
-    return row
-
-
-def test_original_available_on_quote_rejected(store, vault):
-    """The ORIGINAL failing quote: 'available on | 9' accepted vout 9.0
-    under digit-boundary matching. Field binding rejects it: the row
-    never labels vout."""
-    root, sha = vault
-    row = _vout_row(
-        sha,
-        "Different output voltage versions of the ST1S15 available on | 9",
-        {"vout_max_v": 9.0, "vout_min_v": 9.0})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "entail" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("st1s15") == []
-
-
-def test_near_miss_numbers_rejected(store, vault):
-    """Decimal / signed near-misses: 9 inside 0.9 / 9.5 / -9 is token
-    presence, not entailment."""
-    root, sha = vault
-    for printed in ("0.9", "9.5", "-9"):
-        row = _vout_row(sha, f"VOUT | Output voltage | {printed} | V",
-                        {"vout_max_v": 9.0, "vout_min_v": 9.0})
-        report = load_rows(store, [row], vault_root=root,
-                           opn_default="ST1S15")
-        assert report.loaded == 0, printed
-        assert "entail" in report.rejections[0]["reason"], printed
-    assert store.claims_for_opn("st1s15") == []
-
-
-def test_wrong_field_binding_rejected(store, vault):
-    """9 printed after ANOTHER field's label does not entail vout."""
-    root, sha = vault
-    row = _vout_row(sha, "IQ | Quiescent current | 9 | mA",
-                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "entail" in report.rejections[0]["reason"]
-
-
-def test_verified_by_vocabulary_enforced(store, vault):
-    """verified_by is a receipt from an evidence-backed vocabulary; an
-    arbitrary raw verdict ('REJECTED') must be refused, never loaded."""
-    root, sha = vault
-    row = json.loads(json.dumps(SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))
-    row["verdict"] = "REJECTED"
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "vocabulary" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("st1s15") == []
+    assert "conflicting observation" in report.rejections[0]["reason"]
+    claims = [c for c in store.claims_for_opn("st1s15")
+              if c["field"] == "vin_min_v"]
+    assert len(claims) == 1 and claims[0]["value"] == 2.3
 
 
 def _make_v1_store(path):
     """A PR65-era store: v1 table WITHOUT extractor_method, inline
     UNIQUE, schema_version norm-serve.v1."""
-    import sqlite3
     con = sqlite3.connect(path)
     con.executescript("""
     CREATE TABLE IF NOT EXISTS norm_claims (
@@ -363,21 +465,40 @@ def _make_v1_store(path):
     con.close()
 
 
-def test_v1_store_refused_fail_closed(tmp_path):
-    """NEO round-2 (3): opening a PR65 store with the new loader raised
-    OperationalError (missing extractor_method). Now: fail-closed
-    refusal with instruction — never auto-migrate."""
-    db = str(tmp_path / "v1.db")
+def test_v1_store_refused_fail_closed_empty(tmp_path):
+    db = str(tmp_path / "v1-empty.db")
     _make_v1_store(db)
     with pytest.raises(Rejection, match="predates norm-serve.v2"):
         Store(db)
 
 
+def test_v1_store_refused_fail_closed_populated(tmp_path):
+    """Populated PR65 store: same refusal — and the populated rows are
+    never touched (no auto-migration)."""
+    db = str(tmp_path / "v1-populated.db")
+    _make_v1_store(db)
+    con = sqlite3.connect(db)
+    con.execute(
+        "INSERT INTO norm_claims (opn, doc_sha, field, value, unit,"
+        " value_role, condition_verbatim, verdict, table_kind, page,"
+        " verbatim, verified_by, rule_version, schema_version, loaded_at)"
+        " VALUES ('ST1S15', ?, 'vout', 9.0, 'V', 'fixed', NULL,"
+        " 'printed_row', 't', 5, 'VOUT | 9 | V', 'quote_pass', 'rv',"
+        " 'norm-serve.v1', 0.0)", ("b" * 64,))
+    con.commit()
+    before = con.execute("SELECT COUNT(*) FROM norm_claims").fetchone()[0]
+    con.close()
+    with pytest.raises(Rejection, match="predates norm-serve.v2"):
+        Store(db)
+    con = sqlite3.connect(db)
+    assert con.execute("SELECT COUNT(*) FROM norm_claims").fetchone()[0] \
+        == before
+    con.close()
+
+
 def test_duplicate_existing_rows_refused_fail_closed(tmp_path):
-    """NEO round-2 (3): creating uq_norm_claims_key over existing
-    duplicates raised raw IntegrityError. Now: fail-closed refusal
-    naming the problem and the required operator action."""
-    import sqlite3
+    """Creating uq_norm_claims_key over existing duplicates is refused
+    fail-closed, naming the required operator action."""
     db = str(tmp_path / "dups.db")
     store = Store(db)
     store.con.execute("DROP INDEX IF EXISTS uq_norm_claims_key")
@@ -387,7 +508,6 @@ def test_duplicate_existing_rows_refused_fail_closed(tmp_path):
     base = ("ST1S15", "a" * 64, "vout", 9.0, None, None, "V", "V", "fixed",
             None, "printed_row", "output_voltage", 5, "VOUT | Out | 9 | V",
             None, "quote_pass", "rv", "m")
-    from harness.normserve.schema import SCHEMA_VERSION
     base = base + (SCHEMA_VERSION, 0.0)
     for _ in range(2):
         con.execute(
@@ -403,170 +523,9 @@ def test_duplicate_existing_rows_refused_fail_closed(tmp_path):
         Store(db)
 
 
-def test_distinct_page_observations_both_retained(store, vault):
-    """NEO round-2 (5): 2.3@page8 then 4.7@page9 collided on the old key
-    and the second was silently IGNORED. page is in the v2 key: both are
-    legitimate distinct observations and both are retained."""
-    root, sha = vault
-    r1 = json.loads(json.dumps(SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))
-    r2 = dict(r1, value=4.7, page_1based=9,
-              verbatim="VIN | Operating input voltage range | 4.7 | 5.5 | V")
-    report = load_rows(store, [r1, r2], vault_root=root,
-                       opn_default="ST1S15")
-    assert report.loaded == 2, report.summary()
-    assert report.duplicates == 0 and report.rejections == []
-    claims = [c for c in store.claims_for_opn("st1s15")
-              if c["field"] == "vin_min_v"]
-    assert sorted(c["page"] for c in claims) == [8, 9]
-    assert sorted(c["value"] for c in claims) == [2.3, 4.7]
-
-
-def test_conflicting_same_key_observation_refused_loudly(store, vault):
-    """Same key, different value: refused loudly as a conflict — never
-    silently ignored, never mislabeled as a duplicate."""
-    root, sha = vault
-    r1 = json.loads(json.dumps(SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))
-    r2 = dict(r1, value=4.7,
-              verbatim="VIN | Operating input voltage range | 4.7 | 5.5 | V")
-    load_rows(store, [r1], vault_root=root, opn_default="ST1S15")
-    report = load_rows(store, [r2], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and report.duplicates == 0
-    assert len(report.rejections) == 1
-    assert "conflicting observation" in report.rejections[0]["reason"]
-    claims = [c for c in store.claims_for_opn("st1s15")
-              if c["field"] == "vin_min_v"]
-    assert len(claims) == 1 and claims[0]["value"] == 2.3
-
-
-# --- round-3 corrections (hw-x9g, NEO consolidated review of f41c18eb):
-# semantic binding — value + unit + role + range + page context + OPN
-# applicability must ALL bind to the printed row, or the row is held. ---
-
-def test_unit_not_bound_rejected(store, vault):
-    """(1) '9mV' printed but 9 V claimed: the value token matches, the
-    printed unit does not — the row is held, never served as 9 V."""
-    root, sha = vault
-    row = _vout_row(sha, "VOUT | Output voltage | 9mV",
-                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "unit" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("st1s15") == []
-
-
-def test_printed_unit_served_with_claim_loads(store, vault):
-    """Positive control for (1): 9 V printed and 9 V claimed binds."""
-    root, sha = vault
-    row = _vout_row(sha, "VOUT | Output voltage | 9mV",
-                    {"vout_max_v": 9.0, "vout_min_v": 9.0, "unit": "mV"})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 1, report.summary()
-    assert store.claims_for_opn("st1s15")[0]["unit"] == "mV"
-
-
-def test_cross_field_current_voltage_rejected(store, vault):
-    """(2) VOUT 1.2 V row then IQ 9 mA row: the CURRENT value must not
-    be served as the VOLTAGE field — binding is line-scoped to the
-    field's own label row."""
-    root, sha = vault
-    row = _vout_row(
-        sha, "VOUT | Output voltage | 1.2 | V\nIQ | Quiescent current | 9 | mA",
-        {"vout_max_v": 9.0, "vout_min_v": 9.0})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "entail" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("st1s15") == []
-
-
-def test_page_reference_number_rejected(store, vault):
-    """(3) 'VOUT | See page | 9': the 9 is a page number, not a value —
-    held, never served as 9 V."""
-    root, sha = vault
-    row = _vout_row(sha, "VOUT | See page | 9",
-                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "page reference" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("st1s15") == []
-
-
-def test_min_taken_from_range_upper_bound_rejected(store, vault):
-    """(4) VIN min 5.5 against a printed 2.3 to 5.5 range: the min must
-    bind to the range's LOWER endpoint."""
-    root, sha = vault
-    row = _vout_row(sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
-                    {"field": "vin_min_v", "value": 5.5, "unit": "V",
-                     "value_role": "range"})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "lower bound" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("st1s15") == []
-    # positive control: the correct endpoint binds
-    row_ok = _vout_row(
-        sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
-        {"field": "vin_min_v", "value": 2.3, "unit": "V",
-         "value_role": "range"})
-    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 1, report.summary()
-
-
-def test_typ_mislabeled_max_rejected(store, vault):
-    """(5) 'typ 9' printed but max claimed: the role must bind to the
-    printed role."""
-    root, sha = vault
-    row = _vout_row(sha, "VOUT | Output voltage | typ | 9 | V",
-                    {"vout_max_v": 9.0, "vout_min_v": 9.0,
-                     "value_role": "max"})
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "role" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("st1s15") == []
-    # positive control: claiming the printed role binds
-    row_ok = _vout_row(sha, "VOUT | Output voltage | typ | 9 | V",
-                       {"value": 9.0, "value_role": "typ"})
-    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 1, report.summary()
-
-
-def test_unrelated_opn_held(store, vault):
-    """(6) UNRELATED-OPN: the OPN appears nowhere in the quote,
-    condition, source URL, or evidence_ref — applicability is not
-    evidenced, the row is held."""
-    root, sha = vault
-    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
-    report = load_rows(store, [row], vault_root=root, opn_default="LM9999X")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    assert "applicability" in report.rejections[0]["reason"]
-    assert store.claims_for_opn("LM9999X") == []
-    # positive control: the real OPN is evidenced via source_url and loads
-    report = load_rows(store, [json.loads(json.dumps(SAMPLE_ROWS[2])
-                              .replace(ST1S15_SHA, sha))],
-                       vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 1, report.summary()
-
-
-def test_applicability_rule_self_assertion_rejected(store, vault):
-    """(7) raw applicability_rule verdict WITHOUT a rule receipt
-    (evidence_ref + span naming the OPN) is self-assertion — refused."""
-    root, sha = vault
-    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
-    row["verdict"] = "applicability_rule"
-    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 0 and len(report.rejections) == 1
-    reason = report.rejections[0]["reason"]
-    assert "self-assertion" in reason
-    assert store.claims_for_opn("st1s15") == []
-    # with an actual receipt (evidence_ref + span naming the OPN) it loads
-    row_ok = dict(row, evidence_ref=f"applicability:ST1S15@p1",
-                  span="ST1S15: device applicable to 2A buck")
-    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
-    assert report.loaded == 1, report.summary()
-
-
 def _make_empty_old_index_store(path):
-    """A PR66-era store: v2 columns (extractor_method present) but the
-    OLD no-page unique index — empty, so every row-level check passes."""
-    import sqlite3
+    """A PR66-era store: v2 columns but the OLD no-page unique index —
+    empty, so every row-level check passes."""
     con = sqlite3.connect(path)
     con.executescript("""
     CREATE TABLE IF NOT EXISTS norm_claims (
@@ -589,11 +548,463 @@ def _make_empty_old_index_store(path):
 
 
 def test_empty_old_index_store_refused_fail_closed(tmp_path):
-    """(8) an EMPTY old-schema store passes row-level checks but its
-    no-page unique key makes the first second-page insert raise raw
-    IntegrityError. The preflight must detect the old index and refuse
-    BEFORE any load — fail-closed, never auto-migrate."""
+    """Empty old-index store: the no-page unique key would corrupt the
+    first second-page insert. Preflight refuses BEFORE any load."""
     db = str(tmp_path / "old-index.db")
     _make_empty_old_index_store(db)
     with pytest.raises(Rejection, match="OLD no-page"):
         Store(db)
+
+
+def test_populated_old_index_store_refused_fail_closed(tmp_path):
+    """Populated old-index store: same refusal, rows untouched."""
+    db = str(tmp_path / "old-index-populated.db")
+    _make_empty_old_index_store(db)
+    con = sqlite3.connect(db)
+    con.execute(
+        "INSERT INTO norm_claims (opn, doc_sha, field, value, unit,"
+        " value_role, condition_verbatim, verdict, table_kind, page,"
+        " verbatim, verified_by, rule_version, extractor_method,"
+        " schema_version, loaded_at)"
+        " VALUES ('ST1S15', ?, 'vout', 9.0, 'V', 'fixed', NULL,"
+        " 'printed_row', 't', 5, 'VOUT | 9 | V', 'quote_pass', 'rv', 'm',"
+        " ?, 0.0)", ("c" * 64, SCHEMA_VERSION))
+    con.commit()
+    con.close()
+    with pytest.raises(Rejection, match="OLD no-page"):
+        Store(db)
+
+
+def test_rejections_never_swallowed(store, vault):
+    root, sha = vault
+    rows = [dict(SAMPLE_ROWS[0], verbatim="")] + sample_structured_rows(sha)[1:]
+    rows[1] = json.loads(json.dumps(rows[1]).replace(ST1S15_SHA, sha))
+    report = load_rows(store, rows, vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 2
+    assert len(report.rejections) == 1
+    assert report.rejections[0]["index"] == 0
+    assert report.summary()["rejected"] == 1
+
+
+# --- round-2/3 semantic negatives (schema layer; byte-only vault) ---
+
+def _vout_row(sha, verbatim, value_kwargs=None):
+    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
+    row["verbatim"] = verbatim
+    row.update(value_kwargs or {})
+    return row
+
+
+def test_original_available_on_quote_rejected(store, fake_vault):
+    """The ORIGINAL failing quote: 'available on | 9' accepted vout 9.0
+    under digit-boundary matching. Field binding rejects it: the row
+    never labels vout."""
+    root, sha = fake_vault
+    row = _vout_row(
+        sha,
+        "Different output voltage versions of the ST1S15 available on | 9",
+        {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "entail" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_near_miss_numbers_rejected(store, fake_vault):
+    """Decimal / signed near-misses: 9 inside 0.9 / 9.5 / -9 is token
+    presence, not entailment."""
+    root, sha = fake_vault
+    for printed in ("0.9", "9.5", "-9"):
+        row = _vout_row(sha, f"VOUT | Output voltage | {printed} | V",
+                        {"vout_max_v": 9.0, "vout_min_v": 9.0})
+        report = load_rows(store, [row], vault_root=root,
+                           opn_default="ST1S15")
+        assert report.loaded == 0, printed
+        assert "entail" in report.rejections[0]["reason"], printed
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_wrong_field_binding_rejected(store, fake_vault):
+    """9 printed after ANOTHER field's label does not entail vout."""
+    root, sha = fake_vault
+    row = _vout_row(sha, "IQ | Quiescent current | 9 | mA",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "entail" in report.rejections[0]["reason"]
+
+
+def test_verified_by_vocabulary_enforced(store, fake_vault):
+    """verified_by is a receipt from an evidence-backed vocabulary; an
+    arbitrary raw verdict ('REJECTED') must be refused, never loaded."""
+    root, sha = fake_vault
+    row = json.loads(json.dumps(SAMPLE_ROWS[0]).replace(ST1S15_SHA, sha))
+    row["verdict"] = "REJECTED"
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "vocabulary" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_unit_not_bound_rejected(store, fake_vault):
+    """'9mV' printed but 9 V claimed: the printed unit does not bind."""
+    root, sha = fake_vault
+    row = _vout_row(sha, "VOUT | Output voltage | 9mV",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "unit" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_cross_field_current_voltage_rejected(store, fake_vault):
+    """VOUT row then IQ 9 mA row: the CURRENT value must not be served
+    as the VOLTAGE field."""
+    root, sha = fake_vault
+    row = _vout_row(
+        sha, "VOUT | Output voltage | 1.2 | V\nIQ | Quiescent current | 9 | mA",
+        {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "entail" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_page_reference_number_rejected(store, fake_vault):
+    """'VOUT | See page | 9': the 9 is a page number, not a value."""
+    root, sha = fake_vault
+    row = _vout_row(sha, "VOUT | See page | 9",
+                    {"vout_max_v": 9.0, "vout_min_v": 9.0})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "page reference" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_min_taken_from_range_upper_bound_rejected(store, vault):
+    """VIN min 5.5 against a printed 2.3 to 5.5 range: min must bind to
+    the LOWER endpoint; the correct endpoint loads (source-backed)."""
+    root, sha = vault
+    row = structured(
+        _vout_row(sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
+                  {"field": "vin_min_v", "value": 5.5, "unit": "V",
+                   "value_role": "range"}),
+        sha, "2.3 to 5.5 | V", "vin", "min", VIN_HEADER, page=2)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "lower bound" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+    row_ok = structured(
+        _vout_row(sha, "VIN | Operating input voltage range | 2.3 to 5.5 | V",
+                  {"field": "vin_min_v", "value": 2.3, "unit": "V",
+                   "value_role": "range"}),
+        sha, "2.3 to 5.5 | V", "vin", "min", VIN_HEADER, page=2)
+    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+
+
+def test_typ_mislabeled_max_rejected(store, vault):
+    """'typ 9' printed but max claimed: refused; claiming the printed
+    role with a source-resolvable receipt loads."""
+    root, sha = vault
+    row = structured(
+        _vout_row(sha, "VOUT | Output voltage | typ | 9 | V",
+                  {"vout_max_v": 9.0, "vout_min_v": 9.0,
+                   "value_role": "max"}),
+        sha, "typ | 9 | V", "vout", "max", "VOUT Min Typ Max Unit", page=3,
+        row_idx=2)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "role" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+    row_ok = structured(
+        _vout_row(sha, "VOUT | Output voltage | typ | 9 | V",
+                  {"value": 9.0, "value_role": "typ"}),
+        sha, "typ | 9 | V", "vout", "typ", "VOUT Min Typ Max Unit", page=3,
+        row_idx=2)
+    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+
+
+def test_unrelated_opn_rejected_and_structured_opn_loads(store, vault):
+    """Unrelated OPN: refused at the schema layer (not evidenced in the
+    row); the printed OPN with a source-resolvable applicability loads."""
+    root, sha = vault
+    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
+    report = load_rows(store, [row], vault_root=root, opn_default="LM9999X")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "applicability" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("LM9999X") == []
+    row_ok = structured(make_rows(sha)[2], sha, "9 | V", "vout", "value",
+                        "VOUT Min Typ Max Unit", page=3)
+    report = load_rows(store, [row_ok], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1, report.summary()
+
+
+def test_applicability_rule_requires_receipt(store, vault):
+    """Raw applicability_rule verdict WITHOUT a rule receipt is refused
+    at the schema layer; WITH evidence_ref + span naming the OPN plus a
+    ratified rule at the claimed version it loads."""
+    root, sha = vault
+    row = json.loads(json.dumps(SAMPLE_ROWS[2]).replace(ST1S15_SHA, sha))
+    row["verdict"] = "applicability_rule"
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.rejections) == 1
+    assert "self-assertion" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+
+
+# --- round 5: source-coordinate resolution (f3df0c2d repairs) ---
+
+def test_table25_local_over_inherited_conditions(store, vault):
+    """Canonical Table 25 case (sha 80848a22 pattern): typ 22.0 carries
+    VDD 3.6 V as the LOCAL table override + TA 25 C INHERITED; max 23.8
+    carries TA 105 C from its column. Local beats the section default —
+    and the section-default VDD 3.3 V is never inherited over 3.6 V."""
+    root, sha = vault
+    typ_row = structured(
+        dict(SAMPLE_ROWS[0], field="iq", value=22.0, unit="mA",
+             unit_as_printed="mA", value_role="typ",
+             verbatim="IQ | Supply current | typ | 22.0 | 23.8 | mA"),
+        sha, "typ | 22.0 | 23.8 | mA", "iq", "typ", "IQ Min Typ Max Unit",
+        page=2, conditions=[dict(CONDITION_LOCAL_VDD),
+                            dict(COND_TA25_INHERITED)])
+    max_row = structured(
+        dict(SAMPLE_ROWS[0], field="iq", value=23.8, unit="mA",
+             unit_as_printed="mA", value_role="max",
+             verbatim="IQ | Supply current | typ | 22.0 | 23.8 | mA"),
+        sha, "typ | 22.0 | 23.8 | mA", "iq", "max", "IQ Min Typ Max Unit",
+        page=2, conditions=[dict(CONDITION_LOCAL_VDD),
+                            dict(COND_TA105_COLUMN)])
+    report = load_rows(store, [typ_row, max_row], vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 2 and report.holds == [], report.summary()
+    claims = sorted(store.claims_for_opn("st1s15"),
+                    key=lambda c: c["value"])
+    roles = {c["value"]: c["value_role"] for c in claims}
+    assert roles == {22.0: "typ", 23.8: "max"}
+
+
+def test_invented_quoted_cell_held(store, vault):
+    """f3df bypass 5: an INVENTED quoted_text '999V' — the PDF prints
+    only 2.3/5.5, so the cited cell does not resolve against the
+    current bytes -> HELD cell_not_in_source, never loaded."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "999V", "vin", "min",
+                     VIN_HEADER, page=2)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "cell_not_in_source"
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_value_not_printed_in_cited_cell_held(store, vault):
+    """Cell text is real and printed in the source, but does not
+    contain the claimed value (5.5 claimed against the 2.3 cell)."""
+    root, sha = vault
+    row = structured(make_rows(sha)[1], sha, "2.3", "vin", "max",
+                     VIN_HEADER, page=2, column=1)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "value_not_in_cell"
+
+
+def test_page_999_out_of_range_held(store, vault):
+    """f3df bypass 6: cited page 999 beyond the document's real page
+    count -> HELD, never resolved from self-declared metadata."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     VIN_HEADER, page=999)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "no_structured_observation"
+    assert "out of range" in report.holds[0]["detail"]
+
+
+def test_negative_coordinates_held(store, vault):
+    """f3df bypass 7: negative table/row/column coordinates accepted
+    solely from self-declared structure -> now HELD."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     VIN_HEADER, page=2, row_idx=-1)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "no_structured_observation"
+
+
+def test_unrelated_opn_applicability_page_held(store, vault):
+    """f3df bypass 6 (cont.): an applicability cell naming the OPN on a
+    page where it is NOT printed -> HELD applicability_not_in_source."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     VIN_HEADER, page=2,
+                     applicability={"structure": "device_summary",
+                                    "structure_page": 3,
+                                    "cell_text": "ST1S15"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "applicability_not_in_source"
+
+
+def test_opn_not_printed_cell_value_held(store, vault):
+    """Applicability cell text that is printed in the source but is NOT
+    the OPN itself -> HELD opn_unbound (prose/condition mentions are
+    not applicability)."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     VIN_HEADER, page=2,
+                     applicability={
+                         "structure": "device_summary",
+                         "structure_page": 1,
+                         "cell_text": "TA = 25 C (section 6.1.2 default, "
+                                      "inherited)"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "opn_unbound"
+
+
+def test_invented_condition_held(store, vault):
+    """Invented condition (TA 999) whose verbatim is not printed on its
+    source page -> HELD condition_not_in_source."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     VIN_HEADER, page=2,
+                     conditions=[{"verbatim": "TA = 999 C (invented)",
+                                  "precedence": "inherited",
+                                  "source_page": 1}])
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "condition_not_in_source"
+    assert store.claims_for_opn("st1s15") == []
+
+
+def test_condition_source_page_out_of_range_held(store, vault):
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     VIN_HEADER, page=2,
+                     conditions=[dict(CONDITION_LOCAL_VDD,
+                                      source_page=999)])
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "condition_not_in_source"
+
+
+def test_header_not_in_source_held(store, vault):
+    """A column header that is not printed on the cited page cannot
+    bind the field -> HELD header_not_in_source."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     "VIN Value Min Unit", page=2)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "header_not_in_source"
+
+
+def test_role_not_in_header_held(store, vault):
+    """Min/Typ/Max header mislabel: column_role 'min' but the printed
+    header carries no role word -> HELD role_not_in_header."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     "Operating input voltage range", page=2)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "role_not_in_header"
+
+
+def test_column_unit_cannot_override_printed_unit(store, vault):
+    """f3df appendix unit-conflict counterexample: the PDF prints
+    '9mV' but the extractor declares column_unit V and claims 9 V.
+    The schema layer refuses (printed mV != claimed V); at the GATE,
+    the printed-first rule holds the row (unit_unbound) even when the
+    declared column_unit matches the claim. Claiming the printed mV
+    loads."""
+    root, sha = vault
+    row = structured(
+        dict(SAMPLE_ROWS[2], verbatim="VOUT | Output voltage | 9mV",
+             unit="V", unit_as_printed="mV", value=9.0),
+        sha, "VOUT | Output voltage | 9mV", "vout", "value",
+        "VOUT Min Typ Max Unit", page=3, column_unit="V", row_idx=3)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0
+    assert len(report.rejections) == 1
+    assert "unit" in report.rejections[0]["reason"]
+    assert store.claims_for_opn("st1s15") == []
+    # gate level: the printed unit wins even over a matching column_unit
+    from harness.normserve import admission as admission_mod
+    typed = {"opn": "ST1S15", "doc_sha": sha, "field": "vout", "value": 9.0,
+             "value_min": None, "value_max": None, "unit": "V",
+             "value_role": "fixed", "page": 3, "verbatim": "x",
+             "verified_by": "quote_pass", "rule_version": "rv"}
+    raw = {"evidence": [{"kind": "table_cell", "document_sha256": sha,
+                         "page_1based": 3, "table_index": 0,
+                         "row_index": 3, "column_index": 2,
+                         "quoted_text": "9mV"}],
+           "field_binding": {"table": 0, "column_key": "vout",
+                             "column_role": "value", "column_unit": "V",
+                             "header_verbatim": "VOUT Min Typ Max Unit"},
+           "applicability": {"structure": "device_summary",
+                             "structure_page": 1, "cell_text": "ST1S15"},
+           "conditions": [dict(c) for c in DEFAULT_CONDITIONS]}
+    decision = admission_mod.evaluate(typed, raw, vault_root=root)
+    assert not decision.served
+    assert decision.reason_code == "unit_unbound"
+    row_ok = structured(
+        dict(SAMPLE_ROWS[2], verbatim="VOUT | Output voltage | 9mV",
+             unit="mV", unit_as_printed="mV", value=9.0),
+        sha, "VOUT | Output voltage | 9mV", "vout", "value",
+        "VOUT Min Typ Max Unit", page=3, column_unit="V", row_idx=3)
+    report = load_rows(store, [row_ok], vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 1 and report.holds == [], report.summary()
+
+
+def test_vault_sha_recompute_gets_no_metadata_bypass(store, vault):
+    """f3df bypass 7: vault_sha_recompute accepted invented coordinates
+    solely from self-declared structure. Round 5: source re-resolution
+    runs for EVERY receipt — a vault_sha_recompute row citing a cell
+    that is not printed is HELD."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "invented 999 cell", "vin",
+                     "min", VIN_HEADER, page=2,
+                     verified_by="vault_sha_recompute")
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "cell_not_in_source"
+
+
+def test_rule_version_alone_is_not_applicability_proof(store, vault):
+    """A caller-supplied version-only registry entry does not ratify a
+    rule -> HELD rule_unresolved."""
+    root, sha = vault
+    raw = make_rows(sha)[2]
+    raw["verdict"] = "applicability_rule"
+    raw["evidence_ref"] = "applicability:ST1S15@p1"
+    raw["span"] = "ST1S15: device applicable to 2A buck"
+    row = structured(raw, sha, "9 | V", "vout", "value",
+                     "VOUT Min Typ Max Unit", page=3,
+                     verified_by="applicability_rule",
+                     applicability={"structure": "device_summary",
+                                    "structure_page": 1,
+                                    "cell_text": "ST1S15",
+                                    "rule_id": "rule-42"})
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "rule_unresolved"
+    # ratified at the claimed version -> loads
+    report = load_rows(store, [json.loads(json.dumps(row))], vault_root=root,
+                       opn_default="ST1S15",
+                       ratified_rules={"rule-42": {
+                           "rule_version": raw["schema"]}})
+    assert report.loaded == 1 and report.holds == [], report.summary()
+
+
+def test_missing_verbatim_span_in_source_held(store, vault):
+    """A verbatim that is not printed on the CITED page cannot be
+    resolved (here: the VIN span exists only on page 2, cited 3)
+    -> HELD span_not_in_source."""
+    root, sha = vault
+    row = structured(make_rows(sha)[0], sha, "2.3 | 5.5 | V", "vin", "min",
+                     VIN_HEADER, page=3)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1
+    assert report.holds[0]["reason_code"] == "span_not_in_source"
