@@ -408,12 +408,22 @@ def _check_unit_bound(typed, raw, cell):
             (raw.get("field_binding") or {}).get("header_verbatim"))
         source = "cited header"
     if not printed:
-        # The claim's own verbatim row line is source-verified (check
-        # 2a); a unit PRINTED in that row's unit column is source
-        # evidence too (e.g. '... | 2.3 | 5.5 | V' citing the bare
-        # '2.3' cell).
+        # PRINTED-FIRST (round 7 fixup): if the cell prints no unit of
+        # its own and neither does the header, a unit PRINTED in the
+        # claim's own verbatim row line (source-verified at check 2a)
+        # is source evidence (e.g. '... | 2.3 | 5.5 | V' citing the
+        # bare '2.3' cell).
         printed = _printed_units(typed.get("verbatim"))
         source = "cited row"
+    if len(printed) > 1:
+        # Round 8 hole 2: a printed line naming MULTIPLE distinct units
+        # (e.g. an 'mV/V' header) does not source-resolve WHICH unit
+        # applies — the claim unit trivially matching one of the
+        # alternatives is not resolution. HOLD unless a LESS ambiguous
+        # source resolves the unit.
+        return (f"{source} prints ambiguous units {sorted(printed)} — the "
+                "printed line does not disambiguate the unit; ambiguous "
+                "printed evidence is not unit resolution")
     if not printed:
         # Round 6 failure 5: with NO unit printed anywhere in the cited
         # cell, header, or row line there is no source-resolved unit
@@ -509,20 +519,20 @@ def _resolve_coordinates(typed, raw, cell, lines_by_page):
     # row tail — a numeric value living in column 2 is not admitted by
     # citing column 0 or the description column 1. The cited cell
     # resolves when the claimed value prints IN the cell at
-    # column_index, or when the quoted cell span provably starts at
+    # column_index, or when the quoted cell span provably STARTS at
     # column_index (the quote is the tail of the row's cells from the
-    # cited column, or the whole row).
+    # cited column). A WHOLE-ROW quote never anchors a column (round 8
+    # hole 1): the whole row contains every column's text, so matching
+    # it proves nothing about column_index — the cited cell must
+    # resolve or the row HELDs.
     cited_cell = cells[col]
     tail = " | ".join(cells[col:])
-    whole = " | ".join(cells)
     for key in ("value", "value_min", "value_max"):
         v = typed.get(key)
         if v is None:
             continue
         value_at_col = _value_in_text(v, cited_cell)
-        span_anchored = (_norm(tail) == _norm(cell.get("quoted_text") or "")
-                         or _norm(whole) ==
-                         _norm(cell.get("quoted_text") or ""))
+        span_anchored = _norm(tail) == _norm(cell.get("quoted_text") or "")
         if not value_at_col and not span_anchored:
             return ("structure_not_in_source",
                     f"{key}={v!r} does not resolve in the cell cited at "
