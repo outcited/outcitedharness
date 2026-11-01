@@ -1280,3 +1280,110 @@ def test_metadata_unit_fallback_retired(store, tmp_path):
     assert report.loaded == 0 and len(report.holds) == 1, report.summary()
     assert report.holds[0]["reason_code"] == "unit_unbound"
     assert store.claims_for_opn("st1s15") == []
+
+
+def test_whole_row_quote_bypass_held(store, tmp_path):
+    """Round-8 hole 1: a WHOLE-ROW quoted_text never anchors the cited
+    column — the whole row contains every column's text, so citing
+    column 0 with the full row 'VIN | min | 9' must not admit the 9
+    printed in column 2 -> HELD structure_not_in_source. The positive
+    control cites the real column and loads."""
+    pages = [
+        ["ST1S15",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        ["VIN Min Typ Max Unit",
+         "VIN | min | 9 | V"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    verbatim = "VIN | min | 9 | V"
+    row = structured(
+        dict(SAMPLE_ROWS[0], field="vin_min_v", unit="V", value=9.0,
+             value_role="min", verbatim=verbatim),
+        sha, verbatim, "vin", "min", "VIN Min Typ Max Unit",
+        page=2, column_unit="V", row_idx=1, column=1)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 0 and len(report.holds) == 1, report.summary()
+    assert report.holds[0]["reason_code"] == "structure_not_in_source"
+    assert store.claims_for_opn("st1s15") == []
+    positive = structured(
+        dict(SAMPLE_ROWS[0], field="vin_min_v", unit="V", value=9.0,
+             value_role="min", verbatim=verbatim),
+        sha, "9", "vin", "min", "VIN Min Typ Max Unit",
+        page=2, column_unit="V", row_idx=1, column=2)
+    report = load_rows(store, [positive], vault_root=root,
+                       opn_default="ST1S15")
+    assert report.loaded == 1 and not report.holds, report.summary()
+    assert store.claims_for_opn("st1s15")
+
+
+def test_ambiguous_header_unit_held(store, tmp_path):
+    """Round-8 hole 2: a printed 'mV/V' header prints BOTH units and
+    disambiguates neither — header_verbatim being a printed line is not
+    enough; claiming 9 V (or 9 mV) against an ambiguous header HELDs
+    (unit_unbound). An unambiguous header 'Unit mV' with the matching
+    claim still loads."""
+    pages = [
+        ["ST1S15",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        ["VIN Min Unit mV/V",
+         "VIN | min | 9"],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    for claim_unit in ("V", "mV"):
+        row = structured(
+            dict(SAMPLE_ROWS[0], field="vin_min_v",
+                 unit=claim_unit, unit_as_printed=claim_unit, value=9.0,
+                 value_role="min", verbatim="VIN | min | 9"),
+            sha, "9", "vin", "min", "VIN Min Unit mV/V",
+            page=2, column_unit=claim_unit, row_idx=1, column=2)
+        report = load_rows(store, [row], vault_root=root,
+                           opn_default="ST1S15")
+        assert report.loaded == 0 and len(report.holds) == 1, \
+            (claim_unit, report.summary())
+        assert report.holds[0]["reason_code"] == "unit_unbound"
+        assert "ambiguous" in report.holds[0]["detail"]
+    assert store.claims_for_opn("st1s15") == []
+    unambiguous_pages = [
+        ["ST1S15",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        ["VIN Min Unit mV",
+         "VIN | min | 9"],
+    ]
+    root2, sha2 = make_real_vault(tmp_path, unambiguous_pages)
+    store2 = Store(str(tmp_path / "norm2.db"))
+    row = structured(
+        dict(SAMPLE_ROWS[0], field="vin_min_v", unit="mV",
+             unit_as_printed="mV", value=9.0, value_role="min",
+             verbatim="VIN | min | 9"),
+        sha2, "9", "vin", "min", "VIN Min Unit mV",
+        page=2, column_unit="V", row_idx=1, column=2)
+    report = load_rows(store2, [row], vault_root=root2,
+                       opn_default="ST1S15")
+    assert report.loaded == 1 and not report.holds, report.summary()
+
+
+def test_printed_row_unit_positive_loads(store, tmp_path):
+    """Round-7 fixup positive: the bare '2.3' cell under a unit-less
+    header — the 'V' printed in the source-verified row line
+    'VIN | Operating input voltage range | 2.3 | 5.5 | V' is printed
+    unit evidence and the row loads."""
+    pages = [
+        ["ST1S15",
+         "VDD = 3.6 V (local table condition)",
+         "TA = 25 C (section 6.1.2 default, inherited)"],
+        [VIN_HEADER,
+         VIN_VERBATIM],
+    ]
+    root, sha = make_real_vault(tmp_path, pages)
+    store = Store(str(tmp_path / "norm.db"))
+    row = structured(make_rows(sha)[0], sha, "2.3", "vin", "min",
+                     VIN_HEADER, page=2, column_unit="V", row_idx=1,
+                     column=2)
+    report = load_rows(store, [row], vault_root=root, opn_default="ST1S15")
+    assert report.loaded == 1 and not report.holds, report.summary()
+    assert store.claims_for_opn("st1s15")
